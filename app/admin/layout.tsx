@@ -5,13 +5,35 @@ import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 
+function getPathname() {
+  const list = headers()
+  const headerNames = [
+    'next-url',
+    'x-url',
+    'x-pathname',
+    'x-original-url',
+    'x-rewrite-url',
+    'referer',
+  ]
+  for (const name of headerNames) {
+    const value = list.get(name)
+    if (!value) continue
+    try {
+      const url = new URL(value, 'http://n')
+      return url.pathname
+    } catch {
+      if (value.startsWith('/')) return value.split('?')[0]
+    }
+  }
+  return ''
+}
+
 interface LayoutProps {
   children: React.ReactNode
 }
 
 export default async function AdminLayout({ children }: LayoutProps) {
-  const headerList = await headers()
-  const pathname = headerList.get('next-url') || ''
+  const pathname = getPathname()
   const isLoginPage = pathname.startsWith('/admin/login')
 
   const session = await auth()
