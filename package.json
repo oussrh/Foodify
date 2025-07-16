@@ -14,11 +14,24 @@
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "@prisma/client": "latest"
+    "@prisma/client": "latest",
+    "next-themes": "latest",
+    "lucide-react": "latest",
+    "framer-motion": "latest",
+    "react-hook-form": "latest",
+    "@hookform/resolvers": "latest",
+    "zod": "latest",
+    "clsx": "latest",
+    "tailwind-merge": "latest",
+    "class-variance-authority": "latest",
+    "tailwindcss-animate": "latest"
   },
   "devDependencies": {
     "typescript": "^5.0.0",
-    "prisma": "latest"
+    "prisma": "latest",
+    "tailwindcss": "latest",
+    "postcss": "latest",
+    "autoprefixer": "latest"
   },
   "license": "MIT",
   "type": "module",
