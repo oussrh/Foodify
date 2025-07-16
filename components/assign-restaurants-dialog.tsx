@@ -11,6 +11,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface Restaurant {
   id: string
@@ -27,6 +28,7 @@ export default function AssignRestaurantsDialog({
   const [open, setOpen] = useState(false)
   const [restaurants, setRestaurants] = useState<Restaurant[]>([])
   const [selected, setSelected] = useState<string[]>(defaultRestaurantIds)
+  const [query, setQuery] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -36,6 +38,10 @@ export default function AssignRestaurantsDialog({
       .then((res) => res.json())
       .then((data: Restaurant[]) => setRestaurants(data))
   }, [open])
+
+  const filteredRestaurants = restaurants.filter((r) =>
+    r.name.toLowerCase().includes(query.toLowerCase())
+  )
 
   const toggle = (id: string) => {
     setSelected((prev) =>
@@ -64,8 +70,14 @@ export default function AssignRestaurantsDialog({
         <DialogHeader>
           <DialogTitle>Assign Restaurants</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-1 max-h-60 overflow-auto">
-          {restaurants.map((r) => (
+        <Input
+          placeholder="Search restaurants..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="mt-2"
+        />
+        <div className="flex flex-col gap-1 max-h-60 overflow-auto mt-2">
+          {filteredRestaurants.map((r) => (
             <label key={r.id} className="flex items-center gap-2">
               <input
                 type="checkbox"

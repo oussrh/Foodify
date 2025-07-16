@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
 interface User {
@@ -31,6 +32,7 @@ export default function AssignUsersDialog({
   const [open, setOpen] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
   const [selected, setSelected] = useState<string[]>(defaultUserIds);
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -40,6 +42,10 @@ export default function AssignUsersDialog({
       .then((res) => res.json())
       .then((data: User[]) => setUsers(data));
   }, [open]);
+
+  const filteredUsers = users.filter((u) =>
+    u.email.toLowerCase().includes(query.toLowerCase())
+  );
 
   const toggle = (id: string) => {
     setSelected((prev) =>
@@ -68,8 +74,14 @@ export default function AssignUsersDialog({
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Assign Users</DialogTitle>
         </DialogHeader>
+        <Input
+          placeholder="Search users..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="mt-2"
+        />
         <div className="max-h-64 overflow-y-auto flex flex-col gap-2 mt-2">
-          {users.map((u) => (
+          {filteredUsers.map((u) => (
             <div
               key={u.id}
               className="flex items-center space-x-3 px-2 py-2 rounded hover:bg-muted cursor-pointer"
