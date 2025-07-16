@@ -1,4 +1,5 @@
-import CreateClientDialog from '@/components/create-client-dialog'
+import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/button'
 import ResetPasswordButton from '@/components/reset-password-button'
 import prisma from '@/lib/prisma'
 
@@ -12,7 +13,7 @@ export default async function UsersPage() {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Clients</h2>
-      <CreateClientDialog />
+      <Link href="/admin/users/create" className={buttonVariants()}>Create User</Link>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>
