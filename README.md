@@ -23,4 +23,23 @@ pnpm dev
 
 The project uses Tailwind CSS with class-based dark mode. Toggle the theme using the sun/moon button on the home page.
 
+## UI Components
+Foodify uses reusable UI components from [shadcn/ui]. The following pieces are prepared in `components/ui`:
+
+| UI Piece | Shadcn Component(s) |
+| --- | --- |
+| Buttons | `Button` |
+| Cards | `Card` |
+| Modals / Drawers | `Dialog`, `Sheet` |
+| Inputs | `Input`, `Textarea`, `Select` |
+| Alerts | `Alert`, `AlertDialog` |
+| Menus | `DropdownMenu` |
+| Notifications | `Toast` |
+| Loading states | `Skeleton`, `Spinner` |
+| Tooltips | `Tooltip` |
+| Tabs | `Tabs` |
+| Forms | `Input` + `Label` + `Button` |
+| Avatars | `Avatar` |
+| Badges | `Badge` |
+
 This repository currently contains minimal scaffolding. More features will be added over time.
