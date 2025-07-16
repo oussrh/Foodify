@@ -12,10 +12,11 @@ interface LayoutProps {
 export default async function ManagerLayout({ children }: LayoutProps) {
   const headerList = await headers()
   const pathname = headerList.get('next-url') || ''
+  const isLoginPage = pathname.startsWith('/manager/login')
   const session = await auth()
 
   if (!session) {
-    if (pathname === '/manager/login') {
+    if (isLoginPage) {
       return (
         <div className="flex min-h-screen flex-col">
           <main className="flex-1 p-6">{children}</main>
@@ -34,7 +35,7 @@ export default async function ManagerLayout({ children }: LayoutProps) {
     redirect('/')
   }
 
-  const hideLayout = pathname.startsWith('/manager/login')
+  const hideLayout = isLoginPage
 
   return (
     <div className="flex min-h-screen flex-col">
