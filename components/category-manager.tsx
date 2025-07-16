@@ -46,6 +46,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Transition } from "@headlessui/react";
 
 type Subcategory = {
   id: string;
@@ -126,10 +127,7 @@ export default function CategoryManager({
     names: { en: string; fr: string }
   ) => {
     if (!names.en || !names.fr) return;
-    const sub = await createSubcategory(catId, {
-      nameEn: names.en,
-      nameFr: names.fr,
-    });
+    const sub = await createSubcategory(catId, names);
     setCategories((prev) =>
       prev.map((c) =>
         c.id === catId ? { ...c, subcategories: [...c.subcategories, sub] } : c
@@ -145,10 +143,7 @@ export default function CategoryManager({
     id: string,
     names: { en: string; fr: string }
   ) => {
-    await updateSubcategory(id, {
-      nameEn: names.en,
-      nameFr: names.fr,
-    });
+    await updateSubcategory(id, names);
   };
 
   const handleDeleteSub = async (catId: string, id: string) => {
@@ -381,75 +376,83 @@ function SortableCategory({
 
         {!collapsed && (
           <CardContent className="space-y-3">
-            {/* Subcategories */}
             {category.subcategories.map((sub, i) => (
-              <div
+              <Transition
                 key={sub.id}
-                className="flex items-center gap-2 border border-border rounded p-2"
+                appear
+                show
+                enter="transition-all duration-300 ease-in-out"
+                enterFrom="opacity-0 translate-y-2"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition-all duration-300 ease-in-out"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 -translate-y-2"
               >
-                <Input
-                  defaultValue={sub.nameEn}
-                  onBlur={(e) =>
-                    onRenameSub(sub.id, {
-                      en: e.target.value,
-                      fr: sub.nameFr,
-                    })
-                  }
-                />
-                <Input
-                  defaultValue={sub.nameFr}
-                  onBlur={(e) =>
-                    onRenameSub(sub.id, {
-                      en: sub.nameEn,
-                      fr: e.target.value,
-                    })
-                  }
-                />
-                <div className="flex gap-1">
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-8 h-8"
-                    onClick={() => onMoveSub(category.id, i, "up")}
-                    disabled={i === 0}
-                  >
-                    <ArrowUp className="w-3 h-3" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    className="w-8 h-8"
-                    onClick={() => onMoveSub(category.id, i, "down")}
-                    disabled={i === category.subcategories.length - 1}
-                  >
-                    <ArrowDown className="w-3 h-3" />
-                  </Button>
-                </div>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
+                <div className="flex items-center gap-2 border border-border rounded p-2">
+                  <Input
+                    defaultValue={sub.nameEn}
+                    onBlur={(e) =>
+                      onRenameSub(sub.id, {
+                        en: e.target.value,
+                        fr: sub.nameFr,
+                      })
+                    }
+                  />
+                  <Input
+                    defaultValue={sub.nameFr}
+                    onBlur={(e) =>
+                      onRenameSub(sub.id, {
+                        en: sub.nameEn,
+                        fr: e.target.value,
+                      })
+                    }
+                  />
+                  <div className="flex gap-1">
                     <Button
-                      variant="destructive"
+                      variant="outline"
                       size="icon"
                       className="w-8 h-8"
+                      onClick={() => onMoveSub(category.id, i, "up")}
+                      disabled={i === 0}
                     >
-                      ×
+                      <ArrowUp className="w-3 h-3" />
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete subcategory?</AlertDialogTitle>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => onDeleteSub(category.id, sub.id)}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="w-8 h-8"
+                      onClick={() => onMoveSub(category.id, i, "down")}
+                      disabled={i === category.subcategories.length - 1}
+                    >
+                      <ArrowDown className="w-3 h-3" />
+                    </Button>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        size="icon"
+                        className="w-8 h-8"
                       >
-                        Confirm
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
+                        ×
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete subcategory?</AlertDialogTitle>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={() => onDeleteSub(category.id, sub.id)}
+                        >
+                          Confirm
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </Transition>
             ))}
 
             {/* Add subcategory */}
