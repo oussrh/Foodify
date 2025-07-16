@@ -1,8 +1,21 @@
 import CategoryManager from '@/components/category-manager'
 import { getMenu } from '@/app/actions/menu-actions'
+import { auth } from '@/auth'
+import prisma from '@/lib/prisma'
+import { redirect } from 'next/navigation'
 
 export default async function MenuPage({ params }: { params: { id: string } }) {
-  const { id } = await params
+  const { id } = params
+  const session = await auth()
+  const restaurant = await prisma.restaurant.findFirst({
+    where: { id, users: { some: { id: session!.user.id } } },
+    select: { id: true },
+  })
+
+  if (!restaurant) {
+    redirect('/manager/restaurants')
+  }
+
   const data = await getMenu(id)
   return (
     <div className="space-y-4">
