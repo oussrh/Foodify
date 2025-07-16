@@ -105,24 +105,24 @@ export default async function RestaurantsPage({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="end"
-                          className="bg-background rounded-md shadow-lg border border-border"
+                          className="bg-white border border-border rounded-md shadow-lg p-1 min-w-[10rem]"
                         >
-                          <DropdownMenuItem
-                            asChild
-                            className="cursor-pointer hover:bg-muted"
-                          >
+                          <DropdownMenuItem asChild className="p-0">
                             <Link
                               href={`/admin/restaurants/${r.id}/edit`}
-                              title="Edit this restaurant"
+                              className="block w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 focus:bg-gray-100"
                             >
                               Edit
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            asChild
-                            className="cursor-pointer hover:bg-muted text-destructive"
-                          >
-                            <DeleteRestaurantButton id={r.id} />
+
+                          <DropdownMenuItem asChild className="p-0">
+                            <div className="w-full">
+                              <DeleteRestaurantButton
+                                id={r.id}
+                                className="block w-full px-4 py-2 text-left text-sm text-red-600 font-semibold hover:bg-red-50 focus:bg-red-50"
+                              />
+                            </div>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
