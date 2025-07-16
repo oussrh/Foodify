@@ -8,50 +8,77 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical, Pencil, UserX, ArrowLeft } from "lucide-react";
 import AssignUsersDialog from "@/components/assign-users-dialog";
 import RemoveRestaurantUserButton from "@/components/remove-restaurant-user-button";
 
-export default async function RestaurantUsersPage({ params }: { params: { id: string } }) {
-  const { id } = await params
+export default async function RestaurantUsersPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { id } = params;
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
     include: { users: true },
   });
 
   if (!restaurant) {
-    return <div className="py-12 text-center text-muted-foreground">Restaurant not found</div>;
+    return (
+      <div className="py-12 text-center text-muted-foreground">
+        Restaurant not found
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold tracking-tight">Users for {restaurant.name}</h2>
+        <div className="flex items-center gap-4">
+          <Link
+            href={`/admin/restaurants/${restaurant.id}/edit`}
+            className={buttonVariants({ variant: "outline", size: "sm" })}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Restaurant
+          </Link>
+          <h2 className="text-2xl font-semibold tracking-tight">
+            Users for{" "}
+            <span className="text-primary font-bold">{restaurant.name}</span>
+          </h2>
+        </div>
         <AssignUsersDialog
           restaurantId={restaurant.id}
           defaultUserIds={restaurant.users.map((u) => u.id)}
         />
       </div>
+
+      {/* Users Table */}
       <Card>
         <CardHeader>
           <CardTitle>Managers</CardTitle>
         </CardHeader>
         <CardContent className="overflow-x-auto">
           {restaurant.users.length === 0 ? (
-            <p className="text-muted-foreground text-center py-8">No users assigned.</p>
+            <p className="text-muted-foreground text-center py-8">
+              No users assigned.
+            </p>
           ) : (
             <table className="min-w-full text-sm border-collapse">
               <thead className="bg-muted text-xs uppercase text-muted-foreground">
                 <tr>
                   <th className="px-4 py-3 text-left">Email</th>
-                  <th className="px-4 py-3 text-left">Actions</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {restaurant.users.map((u, i) => (
                   <tr
                     key={u.id}
-                    className={`border-b hover:bg-muted/50 ${i % 2 === 0 ? "bg-muted/30" : ""}`}
+                    className={`border-b hover:bg-muted/50 ${
+                      i % 2 === 0 ? "bg-muted/30" : ""
+                    }`}
                   >
                     <td className="px-4 py-3 font-medium">{u.email}</td>
                     <td className="px-4 py-3 text-right">
@@ -61,16 +88,34 @@ export default async function RestaurantUsersPage({ params }: { params: { id: st
                             <MoreVertical className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="bg-background rounded-md shadow-lg border border-border">
-                          <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted">
-                            <Link href={`/admin/users/${u.id}/edit`}>Edit</Link>
+                        <DropdownMenuContent
+                          align="end"
+                          className="bg-white border border-border rounded-md shadow-lg p-1 min-w-[10rem] space-y-1"
+                        >
+                          {/* EDIT ITEM */}
+                          <DropdownMenuItem asChild className="p-0">
+                            <Link
+                              href={`/admin/users/${u.id}/edit`}
+                              className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 rounded"
+                            >
+                              <Pencil className="h-4 w-4" />
+                              Edit
+                            </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <RemoveRestaurantUserButton
-                              restaurantId={restaurant.id}
-                              userIds={restaurant.users.map((r) => r.id)}
-                              userId={u.id}
-                            />
+
+                          {/* REMOVE ITEM */}
+                          <DropdownMenuItem asChild className="p-0">
+                            <button
+                              type="button"
+                              className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-destructive hover:bg-red-50 rounded"
+                            >
+                              <UserX className="h-4 w-4" />
+                              <RemoveRestaurantUserButton
+                                restaurantId={restaurant.id}
+                                userIds={restaurant.users.map((r) => r.id)}
+                                userId={u.id}
+                              />
+                            </button>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
