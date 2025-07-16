@@ -8,7 +8,7 @@ export default async function MenuPage({ params }: { params: { id: string } }) {
   const { id } = params
   const session = await auth()
   const restaurant = await prisma.restaurant.findFirst({
-    where: { id, users: { some: { id: session!.user.id } } },
+    where: { id, users: { some: { email: session!.user.email } } },
     select: { id: true },
   })
 

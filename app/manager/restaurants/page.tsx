@@ -19,7 +19,7 @@ import { MoreVertical } from 'lucide-react'
 export default async function ManagerRestaurantsPage() {
   const session = await auth()
   const restaurants = await prisma.restaurant.findMany({
-    where: { users: { some: { id: session!.user.id } } },
+    where: { users: { some: { email: session!.user.email } } },
     orderBy: { createdAt: 'desc' },
   })
 
