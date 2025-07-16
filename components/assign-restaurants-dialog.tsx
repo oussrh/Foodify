@@ -12,6 +12,8 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Label } from '@/components/ui/label'
 
 interface Restaurant {
   id: string
@@ -76,17 +78,19 @@ export default function AssignRestaurantsDialog({
           onChange={(e) => setQuery(e.target.value)}
           className="mt-2"
         />
-        <div className="flex flex-col gap-1 max-h-60 overflow-auto mt-2">
+        <div className="max-h-60 overflow-y-auto flex flex-col gap-2 mt-2">
           {filteredRestaurants.map((r) => (
-            <label key={r.id} className="flex items-center gap-2">
-              <input
-                type="checkbox"
+            <div
+              key={r.id}
+              className="flex items-center space-x-3 px-2 py-2 rounded hover:bg-muted cursor-pointer"
+              onClick={() => toggle(r.id)}
+            >
+              <Checkbox
                 checked={selected.includes(r.id)}
-                onChange={() => toggle(r.id)}
-                className="border"
+                onCheckedChange={() => toggle(r.id)}
               />
-              <span>{r.name}</span>
-            </label>
+              <Label className="text-sm">{r.name}</Label>
+            </div>
           ))}
         </div>
         <DialogFooter>
