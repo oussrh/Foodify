@@ -43,3 +43,7 @@ Foodify uses reusable UI components from [shadcn/ui]. The following pieces are p
 | Badges | `Badge` |
 
 This repository currently contains minimal scaffolding. More features will be added over time.
+
+## Menu Management
+
+Restaurant admins can manage menu categories and subcategories from `/admin/restaurants/[id]/menu`. Categories support inline editing, deletion with confirmation and drag-and-drop reordering using the built-in HTML5 API.
