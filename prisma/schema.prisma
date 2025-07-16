@@ -1,0 +1,110 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Locale {
+  en
+  fr
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  RESTAURANT_ADMIN
+}
+
+enum DeviceType {
+  iOS
+  Android
+  Other
+}
+
+model Restaurant {
+  id            String         @id @default(uuid())
+  name          String
+  slug          String         @unique
+  email         String?
+  phone         String?
+  defaultLocale Locale
+  createdAt     DateTime       @default(now())
+  users         User[]
+  categories    MenuCategory[]
+  dishes        Dish[]
+}
+
+model User {
+  id              String     @id @default(uuid())
+  email           String     @unique
+  emailVerified   DateTime?
+  passwordHash    String
+  totpSecret      String?
+  emailOtpCode    String?
+  emailOtpExpires DateTime?
+  role            UserRole
+  restaurantId    String?
+  restaurant      Restaurant? @relation(fields: [restaurantId], references: [id])
+  createdAt       DateTime   @default(now())
+}
+
+model MenuCategory {
+  id           String          @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant      @relation(fields: [restaurantId], references: [id])
+  nameEn       String
+  nameFr       String
+  sortOrder    Int
+  subcategories MenuSubcategory[]
+}
+
+model MenuSubcategory {
+  id          String       @id @default(uuid())
+  categoryId  String
+  category    MenuCategory @relation(fields: [categoryId], references: [id])
+  nameEn      String
+  nameFr      String
+  sortOrder   Int
+  dishes      Dish[]
+}
+
+model Dish {
+  id              String            @id @default(uuid())
+  restaurantId    String
+  restaurant      Restaurant        @relation(fields: [restaurantId], references: [id])
+  subcategoryId   String?
+  subcategory     MenuSubcategory?  @relation(fields: [subcategoryId], references: [id])
+  nameEn          String
+  nameFr          String
+  descriptionEn   String
+  descriptionFr   String
+  price           Decimal           @db.Decimal(10,2)
+  imageUrl        String
+  usdzUrl         String
+  glbUrl          String
+  isActive        Boolean           @default(true)
+  calories        Int?
+  isMostPurchased Boolean           @default(false)
+  sortOrder       Int
+  ingredients     Ingredient[]
+  views           DishView[]
+}
+
+model Ingredient {
+  id      String @id @default(uuid())
+  dishId  String
+  dish    Dish   @relation(fields: [dishId], references: [id])
+  nameEn  String
+  nameFr  String
+}
+
+model DishView {
+  id         String     @id @default(uuid())
+  dishId     String
+  dish       Dish       @relation(fields: [dishId], references: [id])
+  viewedAt   DateTime   @default(now())
+  deviceType DeviceType
+  arViewed   Boolean
+}
