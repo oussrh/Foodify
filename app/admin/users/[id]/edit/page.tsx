@@ -1,5 +1,7 @@
+import Link from 'next/link'
 import prisma from '@/lib/prisma'
 import EditClientForm, { EditClientValues } from '@/components/edit-client-form'
+import { buttonVariants } from '@/components/ui/button'
 
 export default async function EditUserPage({ params }: { params: { id: string } }) {
   const user = await prisma.user.findUnique({
@@ -16,8 +18,20 @@ export default async function EditUserPage({ params }: { params: { id: string } 
   }
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-bold">Edit User</h2>
-      <EditClientForm id={user.id} defaultValues={defaultValues} restaurants={restaurants} />
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold">Edit User</h2>
+        <Link
+          href={`/admin/users/${user.id}/restaurants`}
+          className={buttonVariants({ variant: 'outline' })}
+        >
+          Manage Restaurants
+        </Link>
+      </div>
+      <EditClientForm
+        id={user.id}
+        defaultValues={defaultValues}
+        restaurants={restaurants}
+      />
     </div>
   )
 }
