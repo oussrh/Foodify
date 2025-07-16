@@ -1,15 +1,20 @@
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import EditRestaurantForm, { EditRestaurantValues } from '@/components/edit-restaurant-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 
 export default async function EditRestaurantPage({ params }: { params: { id: string } }) {
-  const { id } = await params
-  const restaurant = await prisma.restaurant.findUnique({ where: { id } })
+  const { id } = params
+  const session = await auth()
+  const restaurant = await prisma.restaurant.findFirst({
+    where: { id, users: { some: { id: session!.user.id } } },
+  })
 
   if (!restaurant) {
-    return <div className="py-12 text-center text-muted-foreground">Restaurant not found</div>
+    redirect('/manager/restaurants')
   }
 
   const defaultValues: EditRestaurantValues = {
