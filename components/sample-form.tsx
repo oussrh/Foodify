@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { motion } from 'framer-motion'
 import { Button } from './ui/button'
+import { Input } from './ui/input'
+import { Label } from './ui/label'
 
 const schema = z.object({
   name: z.string().min(1, 'Required'),
@@ -31,11 +33,8 @@ export default function SampleForm() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
-      <input
-        className="border rounded px-2 py-1 text-black dark:text-white"
-        placeholder="Your name"
-        {...register('name')}
-      />
+      <Label htmlFor="name">Your name</Label>
+      <Input id="name" placeholder="Your name" {...register('name')} />
       {errors.name && (
         <span className="text-sm text-red-500">{errors.name.message}</span>
       )}
