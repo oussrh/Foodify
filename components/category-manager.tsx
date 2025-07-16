@@ -9,7 +9,6 @@ import {
   updateSubcategory,
   deleteSubcategory,
   reorderCategories,
-  reorderSubcategories,
 } from "@/app/actions/menu-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,14 +23,21 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { GripVertical, Plus } from "lucide-react";
-
-function arrayMove<T>(arr: T[], from: number, to: number) {
-  const copy = [...arr];
-  const [item] = copy.splice(from, 1);
-  copy.splice(to, 0, item);
-  return copy;
-}
+import { GripVertical, Plus, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  useSortable,
+  arrayMove,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Subcategory = {
   id: string;
@@ -60,6 +66,15 @@ export default function CategoryManager({
   const [subDrafts, setSubDrafts] = useState<
     Record<string, { en: string; fr: string }>
   >({});
+  const [collapsedStates, setCollapsedStates] = useState<
+    Record<string, boolean>
+  >({});
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: { distance: 5 },
+    })
+  );
 
   const handleAddCategory = async () => {
     if (!newCat.en || !newCat.fr) return;
@@ -83,15 +98,27 @@ export default function CategoryManager({
     setCategories(categories.filter((c) => c.id !== id));
   };
 
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = categories.findIndex((c) => c.id === active.id);
+    const newIndex = categories.findIndex((c) => c.id === over.id);
+
+    const reordered = arrayMove(categories, oldIndex, newIndex);
+    setCategories(reordered);
+    await reorderCategories(
+      restaurantId,
+      reordered.map((c) => c.id)
+    );
+  };
+
   const handleAddSub = async (
     catId: string,
     names: { en: string; fr: string }
   ) => {
     if (!names.en || !names.fr) return;
-    const sub = await createSubcategory(catId, {
-      nameEn: names.en,
-      nameFr: names.fr,
-    });
+    const sub = await createSubcategory(catId, names);
     setCategories((prev) =>
       prev.map((c) =>
         c.id === catId ? { ...c, subcategories: [...c.subcategories, sub] } : c
@@ -107,7 +134,7 @@ export default function CategoryManager({
     id: string,
     names: { en: string; fr: string }
   ) => {
-    await updateSubcategory(id, { nameEn: names.en, nameFr: names.fr });
+    await updateSubcategory(id, names);
   };
 
   const handleDeleteSub = async (catId: string, id: string) => {
@@ -124,41 +151,23 @@ export default function CategoryManager({
     );
   };
 
-  const [dragCat, setDragCat] = useState<string | null>(null);
-  const [dragSub, setDragSub] = useState<{
-    catId: string;
-    id: string;
-  } | null>(null);
-
-  const onCatDrop = async (targetId: string) => {
-    if (!dragCat || dragCat === targetId) return;
-    const from = categories.findIndex((c) => c.id === dragCat);
-    const to = categories.findIndex((c) => c.id === targetId);
-    const newCats = arrayMove(categories, from, to);
-    setCategories(newCats);
-    await reorderCategories(
-      restaurantId,
-      newCats.map((c) => c.id)
-    );
-    setDragCat(null);
+  const toggleCollapse = (id: string) => {
+    setCollapsedStates((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
-  const onSubDrop = async (catId: string, targetId: string) => {
-    if (!dragSub || dragSub.id === targetId || dragSub.catId !== catId) return;
-    const cat = categories.find((c) => c.id === catId);
-    if (!cat) return;
-    const from = cat.subcategories.findIndex((s) => s.id === dragSub.id);
-    const to = cat.subcategories.findIndex((s) => s.id === targetId);
-    const newSubs = arrayMove(cat.subcategories, from, to);
-    const newCats = categories.map((c) =>
-      c.id === catId ? { ...c, subcategories: newSubs } : c
-    );
-    setCategories(newCats);
-    await reorderSubcategories(
-      catId,
-      newSubs.map((s) => s.id)
-    );
-    setDragSub(null);
+  const collapseAll = () => {
+    const collapsed: Record<string, boolean> = {};
+    categories.forEach((c) => (collapsed[c.id] = true));
+    setCollapsedStates(collapsed);
+  };
+
+  const expandAll = () => {
+    const expanded: Record<string, boolean> = {};
+    categories.forEach((c) => (expanded[c.id] = false));
+    setCollapsedStates(expanded);
   };
 
   return (
@@ -185,95 +194,178 @@ export default function CategoryManager({
         </CardContent>
       </Card>
 
-      {/* Existing Categories */}
-      {categories.map((cat) => (
-        <Card
-          key={cat.id}
-          draggable
-          onDragStart={() => setDragCat(cat.id)}
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={() => onCatDrop(cat.id)}
-          className="border border-muted"
-        >
-          <CardHeader className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-2 w-full">
-              <GripVertical className="text-muted-foreground flex-shrink-0 cursor-grab" />
-              <Input
-                className="w-full"
-                defaultValue={cat.nameEn}
-                onBlur={(e) =>
-                  handleRenameCategory(cat.id, {
-                    en: e.target.value,
-                    fr: cat.nameFr,
-                  })
-                }
-                onChange={(e) => (cat.nameEn = e.target.value)}
-              />
-              <Input
-                className="w-full"
-                defaultValue={cat.nameFr}
-                onBlur={(e) =>
-                  handleRenameCategory(cat.id, {
-                    en: cat.nameEn,
-                    fr: e.target.value,
-                  })
-                }
-                onChange={(e) => (cat.nameFr = e.target.value)}
-              />
-            </div>
-            <AlertDialog>
-              <AlertDialogTrigger asChild>
-                <Button variant="destructive" size="sm">
-                  Delete
-                </Button>
-              </AlertDialogTrigger>
-              <AlertDialogContent>
-                <AlertDialogHeader>
-                  <AlertDialogTitle>Delete category?</AlertDialogTitle>
-                </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <AlertDialogAction
-                    onClick={() => handleDeleteCategory(cat.id)}
-                  >
-                    Confirm
-                  </AlertDialogAction>
-                </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
-          </CardHeader>
+      {/* Collapse/Expand All Buttons */}
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={collapseAll}>
+          Collapse All
+        </Button>
+        <Button variant="outline" onClick={expandAll}>
+          Expand All
+        </Button>
+      </div>
 
-          <CardContent className="space-y-4">
-            {/* Existing subcategories */}
-            {cat.subcategories.map((sub) => (
+      {/* Draggable Categories */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={handleDragEnd}
+      >
+        <SortableContext
+          items={categories.map((c) => c.id)}
+          strategy={verticalListSortingStrategy}
+        >
+          {categories.map((cat) => (
+            <SortableCategory
+              key={cat.id}
+              category={cat}
+              onRename={handleRenameCategory}
+              onDelete={handleDeleteCategory}
+              onAddSub={handleAddSub}
+              onRenameSub={handleRenameSub}
+              onDeleteSub={handleDeleteSub}
+              subDrafts={subDrafts}
+              setSubDrafts={setSubDrafts}
+              collapsed={collapsedStates[cat.id] ?? false}
+              toggleCollapsed={() => toggleCollapse(cat.id)}
+            />
+          ))}
+        </SortableContext>
+      </DndContext>
+    </div>
+  );
+}
+
+function SortableCategory({
+  category,
+  onRename,
+  onDelete,
+  onAddSub,
+  onRenameSub,
+  onDeleteSub,
+  subDrafts,
+  setSubDrafts,
+  collapsed,
+  toggleCollapsed,
+}: {
+  category: Category;
+  onRename: (id: string, names: { en: string; fr: string }) => void;
+  onDelete: (id: string) => void;
+  onAddSub: (catId: string, names: { en: string; fr: string }) => void;
+  onRenameSub: (id: string, names: { en: string; fr: string }) => void;
+  onDeleteSub: (catId: string, id: string) => void;
+  subDrafts: Record<string, { en: string; fr: string }>;
+  setSubDrafts: React.Dispatch<
+    React.SetStateAction<Record<string, { en: string; fr: string }>>
+  >;
+  collapsed: boolean;
+  toggleCollapsed: () => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: category.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.6 : 1,
+    zIndex: isDragging ? 50 : "auto",
+  };
+
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Card
+        className={`border border-muted bg-white ${
+          isDragging ? "ring-2 ring-primary" : ""
+        }`}
+      >
+        <CardHeader className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+          <div className="flex items-center gap-2 w-full">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleCollapsed}
+              className="flex-shrink-0"
+            >
+              {collapsed ? (
+                <ChevronRight className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </Button>
+            <GripVertical
+              className="text-muted-foreground flex-shrink-0 cursor-grab"
+              {...attributes}
+              {...listeners}
+            />
+            <Input
+              defaultValue={category.nameEn}
+              onBlur={(e) =>
+                onRename(category.id, {
+                  en: e.target.value,
+                  fr: category.nameFr,
+                })
+              }
+            />
+            <Input
+              defaultValue={category.nameFr}
+              onBlur={(e) =>
+                onRename(category.id, {
+                  en: category.nameEn,
+                  fr: e.target.value,
+                })
+              }
+            />
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete category?</AlertDialogTitle>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => onDelete(category.id)}>
+                  Confirm
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </CardHeader>
+
+        {!collapsed && (
+          <CardContent className="space-y-3">
+            {/* Subcategories */}
+            {category.subcategories.map((sub) => (
               <div
                 key={sub.id}
                 className="flex items-center gap-2 border border-border rounded p-2"
-                draggable
-                onDragStart={() => setDragSub({ catId: cat.id, id: sub.id })}
-                onDragOver={(e) => e.preventDefault()}
-                onDrop={() => onSubDrop(cat.id, sub.id)}
               >
-                <GripVertical className="text-muted-foreground cursor-grab flex-shrink-0" />
                 <Input
                   defaultValue={sub.nameEn}
                   onBlur={(e) =>
-                    handleRenameSub(sub.id, {
+                    onRenameSub(sub.id, {
                       en: e.target.value,
                       fr: sub.nameFr,
                     })
                   }
-                  onChange={(e) => (sub.nameEn = e.target.value)}
                 />
                 <Input
                   defaultValue={sub.nameFr}
                   onBlur={(e) =>
-                    handleRenameSub(sub.id, {
+                    onRenameSub(sub.id, {
                       en: sub.nameEn,
                       fr: e.target.value,
                     })
                   }
-                  onChange={(e) => (sub.nameFr = e.target.value)}
                 />
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
@@ -292,7 +384,7 @@ export default function CategoryManager({
                     <AlertDialogFooter>
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction
-                        onClick={() => handleDeleteSub(cat.id, sub.id)}
+                        onClick={() => onDeleteSub(category.id, sub.id)}
                       >
                         Confirm
                       </AlertDialogAction>
@@ -306,25 +398,25 @@ export default function CategoryManager({
             <div className="flex flex-col md:flex-row gap-2">
               <Input
                 placeholder="Subcategory EN"
-                value={subDrafts[cat.id]?.en || ""}
+                value={subDrafts[category.id]?.en || ""}
                 onChange={(e) =>
                   setSubDrafts((drafts) => ({
                     ...drafts,
-                    [cat.id]: {
+                    [category.id]: {
                       en: e.target.value,
-                      fr: drafts[cat.id]?.fr || "",
+                      fr: drafts[category.id]?.fr || "",
                     },
                   }))
                 }
               />
               <Input
                 placeholder="Subcategory FR"
-                value={subDrafts[cat.id]?.fr || ""}
+                value={subDrafts[category.id]?.fr || ""}
                 onChange={(e) =>
                   setSubDrafts((drafts) => ({
                     ...drafts,
-                    [cat.id]: {
-                      en: drafts[cat.id]?.en || "",
+                    [category.id]: {
+                      en: drafts[category.id]?.en || "",
                       fr: e.target.value,
                     },
                   }))
@@ -333,9 +425,9 @@ export default function CategoryManager({
               <Button
                 size="sm"
                 onClick={() =>
-                  handleAddSub(cat.id, {
-                    en: subDrafts[cat.id]?.en || "",
-                    fr: subDrafts[cat.id]?.fr || "",
+                  onAddSub(category.id, {
+                    en: subDrafts[category.id]?.en || "",
+                    fr: subDrafts[category.id]?.fr || "",
                   })
                 }
               >
@@ -343,8 +435,8 @@ export default function CategoryManager({
               </Button>
             </div>
           </CardContent>
-        </Card>
-      ))}
+        )}
+      </Card>
     </div>
   );
 }
