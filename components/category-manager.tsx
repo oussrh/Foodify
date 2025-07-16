@@ -9,6 +9,7 @@ import {
   updateSubcategory,
   deleteSubcategory,
   reorderCategories,
+  reorderSubcategories,
 } from "@/app/actions/menu-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,7 +24,14 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { GripVertical, Plus, ChevronDown, ChevronRight } from "lucide-react";
+import {
+  GripVertical,
+  Plus,
+  ChevronDown,
+  ChevronRight,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -151,6 +159,27 @@ export default function CategoryManager({
     );
   };
 
+  const handleMoveSub = async (
+    catId: string,
+    index: number,
+    direction: "up" | "down"
+  ) => {
+    const cat = categories.find((c) => c.id === catId);
+    if (!cat) return;
+    const subs = [...cat.subcategories];
+    const newIndex = direction === "up" ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= subs.length) return;
+    const [item] = subs.splice(index, 1);
+    subs.splice(newIndex, 0, item);
+    setCategories((prev) =>
+      prev.map((c) => (c.id === catId ? { ...c, subcategories: subs } : c))
+    );
+    await reorderSubcategories(
+      catId,
+      subs.map((s) => s.id)
+    );
+  };
+
   const toggleCollapse = (id: string) => {
     setCollapsedStates((prev) => ({
       ...prev,
@@ -223,6 +252,7 @@ export default function CategoryManager({
               onAddSub={handleAddSub}
               onRenameSub={handleRenameSub}
               onDeleteSub={handleDeleteSub}
+              onMoveSub={handleMoveSub}
               subDrafts={subDrafts}
               setSubDrafts={setSubDrafts}
               collapsed={collapsedStates[cat.id] ?? false}
@@ -242,6 +272,7 @@ function SortableCategory({
   onAddSub,
   onRenameSub,
   onDeleteSub,
+  onMoveSub,
   subDrafts,
   setSubDrafts,
   collapsed,
@@ -253,6 +284,7 @@ function SortableCategory({
   onAddSub: (catId: string, names: { en: string; fr: string }) => void;
   onRenameSub: (id: string, names: { en: string; fr: string }) => void;
   onDeleteSub: (catId: string, id: string) => void;
+  onMoveSub: (catId: string, index: number, dir: "up" | "down") => void;
   subDrafts: Record<string, { en: string; fr: string }>;
   setSubDrafts: React.Dispatch<
     React.SetStateAction<Record<string, { en: string; fr: string }>>
@@ -344,7 +376,7 @@ function SortableCategory({
         {!collapsed && (
           <CardContent className="space-y-3">
             {/* Subcategories */}
-            {category.subcategories.map((sub) => (
+            {category.subcategories.map((sub, i) => (
               <div
                 key={sub.id}
                 className="flex items-center gap-2 border border-border rounded p-2"
@@ -367,6 +399,26 @@ function SortableCategory({
                     })
                   }
                 />
+                <div className="flex gap-1">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="w-8 h-8"
+                    onClick={() => onMoveSub(category.id, i, "up")}
+                    disabled={i === 0}
+                  >
+                    <ArrowUp className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="w-8 h-8"
+                    onClick={() => onMoveSub(category.id, i, "down")}
+                    disabled={i === category.subcategories.length - 1}
+                  >
+                    <ArrowDown className="w-3 h-3" />
+                  </Button>
+                </div>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button

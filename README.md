@@ -46,4 +46,4 @@ This repository currently contains minimal scaffolding. More features will be ad
 
 ## Menu Management
 
-Restaurant admins can manage menu categories and subcategories from `/admin/restaurants/[id]/menu`. Categories support inline editing, deletion with confirmation and drag-and-drop reordering using the built-in HTML5 API.
+Restaurant admins can manage menu categories and subcategories from `/admin/restaurants/[id]/menu`. Categories support inline editing, deletion with confirmation and drag-and-drop reordering using the built-in HTML5 API. Subcategories can be reordered using Up/Down buttons.
