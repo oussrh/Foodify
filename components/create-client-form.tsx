@@ -8,15 +8,18 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { createClient } from '@/app/actions/client-actions'
 
+type Restaurant = { id: string; name: string }
+
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
+  restaurantIds: z.array(z.string()).optional(),
   restaurantName: z.string().optional(),
 })
 
 type FormValues = z.infer<typeof schema>
 
-export default function CreateClientForm() {
+export default function CreateClientForm({ restaurants }: { restaurants: Restaurant[] }) {
   const {
     register,
     handleSubmit,
@@ -43,7 +46,16 @@ export default function CreateClientForm() {
         <span className="text-sm text-red-500">{errors.password.message}</span>
       )}
 
-      <Label htmlFor="restaurantName">Restaurant Name</Label>
+      <Label htmlFor="restaurantIds">Restaurants</Label>
+      <select multiple id="restaurantIds" {...register('restaurantIds')} className="border rounded px-2 py-1">
+        {restaurants.map((r) => (
+          <option key={r.id} value={r.id}>
+            {r.name}
+          </option>
+        ))}
+      </select>
+
+      <Label htmlFor="restaurantName">New Restaurant Name</Label>
       <Input id="restaurantName" {...register('restaurantName')} />
 
       <Button type="submit">Create</Button>
