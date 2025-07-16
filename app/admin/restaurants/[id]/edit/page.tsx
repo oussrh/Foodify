@@ -17,6 +17,12 @@ export default async function EditRestaurantPage({ params }: { params: { id: str
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Edit Restaurant</h2>
       <EditRestaurantForm id={restaurant.id} defaultValues={defaultValues} />
+      <a
+        href={`/admin/restaurants/${restaurant.id}/menu`}
+        className="text-primary underline"
+      >
+        Manage Menu
+      </a>
     </div>
   )
 }
