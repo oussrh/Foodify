@@ -119,10 +119,10 @@ async function main() {
 
   // 6. Upsert Super Admin
   await prisma.user.upsert({
-    where: { email: "admin@foodify.test" },
+    where: { email: "ousrh7@gmail.com" },
     update: {},
     create: {
-      email: "admin@foodify.test",
+      email: "ousrh7@gmail.com",
       passwordHash: hashedPassword,
       role: "SUPER_ADMIN",
     },
