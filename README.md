@@ -9,9 +9,10 @@ Foodify is a prototype web platform that helps restaurants present their menus i
 
 ## Tech Stack
 - Next.js 15 with React 19 and TypeScript
-- Tailwind CSS for styling
+- Tailwind CSS with shadcn/ui components
 - PostgreSQL via Prisma ORM
 - NextAuth for authentication
+- Framer Motion, React Hook Form, Zod, and Lucide icons
 
 ## Development
 Install dependencies and run the development server:
@@ -19,5 +20,7 @@ Install dependencies and run the development server:
 pnpm install
 pnpm dev
 ```
+
+The project uses Tailwind CSS with class-based dark mode. Toggle the theme using the sun/moon button on the home page.
 
 This repository currently contains minimal scaffolding. More features will be added over time.
