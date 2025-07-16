@@ -25,10 +25,24 @@ export const {
         if (!user) return null
         const valid = await bcrypt.compare(password, user.passwordHash)
         if (!valid) return null
-        if (user.totpSecret) {
+        if (user.emailOtpCode) {
+          const expired =
+            user.emailOtpExpires && user.emailOtpExpires < new Date()
+          if (!code || code !== user.emailOtpCode || expired) {
+            throw new Error('Invalid two-factor code')
+          }
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { emailOtpCode: null, emailOtpExpires: null, lastLogin: new Date() },
+          })
+        } else if (user.totpSecret) {
           if (!code || !verifyTOTP(code, user.totpSecret)) {
             throw new Error('Invalid two-factor code')
           }
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { lastLogin: new Date() },
+          })
         }
         return { id: user.id, email: user.email }
       },
