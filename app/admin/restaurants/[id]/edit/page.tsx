@@ -5,6 +5,7 @@ import EditRestaurantForm, {
 } from "@/components/edit-restaurant-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
+import { ArrowLeft, Utensils, Users, ChefHat } from 'lucide-react'
 
 export default async function EditRestaurantPage({
   params,
@@ -35,27 +36,33 @@ export default async function EditRestaurantPage({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold tracking-tight">
-          Edit Restaurant
-        </h2>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/admin/restaurants"
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" /> Back
+          </Link>
+          <h2 className="text-2xl font-semibold tracking-tight">Edit Restaurant</h2>
+        </div>
         <div className="flex gap-2">
           <Link
             href={`/admin/restaurants/${restaurant.id}/menu`}
-            className={buttonVariants({ variant: "outline" })}
+            className={buttonVariants({ variant: 'outline' })}
           >
-            Manage Menu
+            <Utensils className="w-4 h-4 mr-2" /> Manage Menu
           </Link>
           <Link
             href={`/admin/restaurants/${restaurant.id}/users`}
-            className={buttonVariants({ variant: "outline" })}
+            className={buttonVariants({ variant: 'outline' })}
           >
-            Manage Users
+            <Users className="w-4 h-4 mr-2" /> Manage Users
           </Link>
           <Link
             href={`/admin/restaurants/${restaurant.id}/dishes`}
-            className={buttonVariants({ variant: "outline" })}
+            className={buttonVariants({ variant: 'outline' })}
           >
-            Manage Dishes
+            <ChefHat className="w-4 h-4 mr-2" /> Manage Dishes
           </Link>
         </div>
       </div>
