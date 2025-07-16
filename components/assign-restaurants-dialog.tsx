@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogTrigger,
@@ -9,66 +9,66 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Label } from '@/components/ui/label'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface Restaurant {
-  id: string
-  name: string
+  id: string;
+  name: string;
 }
 
 export default function AssignRestaurantsDialog({
   userId,
   defaultRestaurantIds,
 }: {
-  userId: string
-  defaultRestaurantIds: string[]
+  userId: string;
+  defaultRestaurantIds: string[];
 }) {
-  const [open, setOpen] = useState(false)
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([])
-  const [selected, setSelected] = useState<string[]>(defaultRestaurantIds)
-  const [query, setQuery] = useState('')
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [open, setOpen] = useState(false);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [selected, setSelected] = useState<string[]>(defaultRestaurantIds);
+  const [query, setQuery] = useState("");
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    if (!open) return
-    fetch('/api/restaurants')
+    if (!open) return;
+    fetch("/api/restaurants")
       .then((res) => res.json())
-      .then((data: Restaurant[]) => setRestaurants(data))
-  }, [open])
+      .then((data: Restaurant[]) => setRestaurants(data));
+  }, [open]);
 
   const filteredRestaurants = restaurants.filter((r) =>
     r.name.toLowerCase().includes(query.toLowerCase())
-  )
+  );
 
   const toggle = (id: string) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((rid) => rid !== id) : [...prev, id]
-    )
-  }
+    );
+  };
 
   const handleSave = async () => {
-    setLoading(true)
+    setLoading(true);
     await fetch(`/api/users/${userId}/restaurants`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ restaurantIds: selected }),
-    })
-    setLoading(false)
-    setOpen(false)
-    router.refresh()
-  }
+    });
+    setLoading(false);
+    setOpen(false);
+    router.refresh();
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button>Add Restaurant</Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="bg-white">
         <DialogHeader>
           <DialogTitle>Assign Restaurants</DialogTitle>
         </DialogHeader>
@@ -100,5 +100,5 @@ export default function AssignRestaurantsDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
