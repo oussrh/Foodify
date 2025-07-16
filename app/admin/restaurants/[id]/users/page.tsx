@@ -2,8 +2,15 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { buttonVariants, Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
+import AssignUsersDialog from "@/components/assign-users-dialog";
+import RemoveRestaurantUserButton from "@/components/remove-restaurant-user-button";
 
 export default async function RestaurantUsersPage({ params }: { params: { id: string } }) {
   const restaurant = await prisma.restaurant.findUnique({
@@ -19,9 +26,10 @@ export default async function RestaurantUsersPage({ params }: { params: { id: st
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold tracking-tight">Users for {restaurant.name}</h2>
-        <Link href="/admin/users/create" className={buttonVariants({ variant: "default" })}>
-          Add User
-        </Link>
+        <AssignUsersDialog
+          restaurantId={restaurant.id}
+          defaultUserIds={restaurant.users.map((u) => u.id)}
+        />
       </div>
       <Card>
         <CardHeader>
@@ -55,6 +63,13 @@ export default async function RestaurantUsersPage({ params }: { params: { id: st
                         <DropdownMenuContent align="end" className="bg-background rounded-md shadow-lg border border-border">
                           <DropdownMenuItem asChild className="cursor-pointer hover:bg-muted">
                             <Link href={`/admin/users/${u.id}/edit`}>Edit</Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild>
+                            <RemoveRestaurantUserButton
+                              restaurantId={restaurant.id}
+                              userIds={restaurant.users.map((r) => r.id)}
+                              userId={u.id}
+                            />
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
