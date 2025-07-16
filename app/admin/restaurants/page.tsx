@@ -9,15 +9,33 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreVertical } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { MoreVertical, Search } from "lucide-react";
+import { Suspense } from "react";
 
-export default async function RestaurantsPage() {
-  const restaurants = await prisma.restaurant.findMany({
+async function getRestaurants(searchQuery: string) {
+  return await prisma.restaurant.findMany({
+    where: {
+      name: {
+        contains: searchQuery,
+        mode: "insensitive",
+      },
+    },
     orderBy: { createdAt: "desc" },
   });
+}
+
+export default async function RestaurantsPage({
+  searchParams,
+}: {
+  searchParams?: { search?: string };
+}) {
+  const searchQuery = searchParams?.search || "";
+  const restaurants = await getRestaurants(searchQuery);
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold tracking-tight">Restaurants</h2>
         <Link
@@ -28,6 +46,24 @@ export default async function RestaurantsPage() {
         </Link>
       </div>
 
+      {/* Search bar */}
+      <form
+        className="flex max-w-sm items-center gap-2"
+        action="/admin/restaurants"
+      >
+        <Input
+          name="search"
+          placeholder="Search restaurants..."
+          defaultValue={searchQuery}
+          className="w-full"
+        />
+        <Button variant="outline" type="submit">
+          <Search className="w-4 h-4 mr-2" />
+          Search
+        </Button>
+      </form>
+
+      {/* Restaurants List */}
       <Card>
         <CardHeader>
           <CardTitle>All Restaurants</CardTitle>
@@ -35,7 +71,9 @@ export default async function RestaurantsPage() {
         <CardContent className="overflow-x-auto">
           {restaurants.length === 0 ? (
             <p className="text-muted-foreground text-center py-8">
-              No restaurants found.
+              {searchQuery
+                ? `No restaurants found for "${searchQuery}".`
+                : "No restaurants found."}
             </p>
           ) : (
             <table className="min-w-full text-sm border-collapse">
@@ -50,11 +88,9 @@ export default async function RestaurantsPage() {
                 {restaurants.map((r, i) => (
                   <tr
                     key={r.id}
-                    className={
-                      i % 2 === 0
-                        ? "border-b bg-muted/30 hover:bg-muted/50"
-                        : "border-b hover:bg-muted/50"
-                    }
+                    className={`border-b hover:bg-muted/50 ${
+                      i % 2 === 0 ? "bg-muted/30" : ""
+                    }`}
                   >
                     <td className="px-4 py-3 font-medium">{r.name}</td>
                     <td className="px-4 py-3 text-muted-foreground">
@@ -69,14 +105,23 @@ export default async function RestaurantsPage() {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent
                           align="end"
-                          className="bg-background shadow-lg border border-border"
+                          className="bg-background rounded-md shadow-lg border border-border"
                         >
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/restaurants/${r.id}/edit`}>
+                          <DropdownMenuItem
+                            asChild
+                            className="cursor-pointer hover:bg-muted"
+                          >
+                            <Link
+                              href={`/admin/restaurants/${r.id}/edit`}
+                              title="Edit this restaurant"
+                            >
                               Edit
                             </Link>
                           </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
+                          <DropdownMenuItem
+                            asChild
+                            className="cursor-pointer hover:bg-muted text-destructive"
+                          >
                             <DeleteRestaurantButton id={r.id} />
                           </DropdownMenuItem>
                         </DropdownMenuContent>

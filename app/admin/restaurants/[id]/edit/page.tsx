@@ -1,28 +1,61 @@
-import prisma from '@/lib/prisma'
-import EditRestaurantForm, { EditRestaurantValues } from '@/components/edit-restaurant-form'
+import Link from "next/link";
+import prisma from "@/lib/prisma";
+import EditRestaurantForm, {
+  EditRestaurantValues,
+} from "@/components/edit-restaurant-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 
-export default async function EditRestaurantPage({ params }: { params: { id: string } }) {
-  const restaurant = await prisma.restaurant.findUnique({ where: { id: params.id } })
+export default async function EditRestaurantPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { id: params.id },
+  });
+
   if (!restaurant) {
-    return <div>Restaurant not found</div>
+    return (
+      <div className="py-12 text-center text-muted-foreground">
+        Restaurant not found
+      </div>
+    );
   }
+
   const defaultValues: EditRestaurantValues = {
     name: restaurant.name,
     slug: restaurant.slug,
-    email: restaurant.email ?? '',
-    phone: restaurant.phone ?? '',
+    email: restaurant.email ?? "",
+    phone: restaurant.phone ?? "",
     defaultLocale: restaurant.defaultLocale,
-  }
+  };
+
   return (
-    <div className="space-y-4">
-      <h2 className="text-xl font-bold">Edit Restaurant</h2>
-      <EditRestaurantForm id={restaurant.id} defaultValues={defaultValues} />
-      <a
-        href={`/admin/restaurants/${restaurant.id}/menu`}
-        className="text-primary underline"
-      >
-        Manage Menu
-      </a>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-2xl font-semibold tracking-tight">
+          Edit Restaurant
+        </h2>
+        <Link
+          href={`/admin/restaurants/${restaurant.id}/menu`}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          Manage Menu
+        </Link>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{restaurant.name}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <EditRestaurantForm
+            id={restaurant.id}
+            defaultValues={defaultValues}
+          />
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }
