@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { Home, Utensils, Users, Settings } from 'lucide-react'
+import { Home, Utensils, Users, Settings, Shield } from 'lucide-react'
 
 const links = [
   { href: '/admin', label: 'Dashboard', icon: Home },
   { href: '/admin/restaurants', label: 'Restaurants', icon: Utensils },
   { href: '/admin/users', label: 'Users', icon: Users },
+  { href: '/admin/admins', label: 'Admins', icon: Shield },
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
