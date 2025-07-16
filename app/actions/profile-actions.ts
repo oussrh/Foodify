@@ -10,7 +10,7 @@ export async function updateEmail(email: string) {
     throw new Error('Not authenticated')
   }
   return prisma.user.update({
-    where: { id: session.user.id },
+    where: { email: session.user.email },
     data: { email },
   })
 }
@@ -22,7 +22,7 @@ export async function updatePassword(password: string) {
   }
   const passwordHash = await bcrypt.hash(password, 10)
   return prisma.user.update({
-    where: { id: session.user.id },
+    where: { email: session.user.email },
     data: { passwordHash },
   })
 }

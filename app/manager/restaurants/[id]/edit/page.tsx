@@ -10,7 +10,7 @@ export default async function EditRestaurantPage({ params }: { params: { id: str
   const { id } = params
   const session = await auth()
   const restaurant = await prisma.restaurant.findFirst({
-    where: { id, users: { some: { id: session!.user.id } } },
+    where: { id, users: { some: { email: session!.user.email } } },
   })
 
   if (!restaurant) {

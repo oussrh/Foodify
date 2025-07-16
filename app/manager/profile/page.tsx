@@ -6,7 +6,7 @@ import UpdatePasswordForm from '@/components/update-password-form'
 export default async function ProfilePage() {
   const session = await auth()
   const user = await prisma.user.findUnique({
-    where: { id: session!.user.id },
+    where: { email: session!.user.email },
     select: { email: true, createdAt: true },
   })
 

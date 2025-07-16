@@ -11,7 +11,7 @@ import { Utensils } from 'lucide-react'
 export default async function ManagerDashboard() {
   const session = await auth()
   const restaurantCount = await prisma.restaurant.count({
-    where: { users: { some: { id: session!.user.id } } },
+    where: { users: { some: { email: session!.user.email } } },
   })
   const tiles = [{ icon: Utensils, label: 'Restaurants', value: restaurantCount }]
 
