@@ -1,3 +1,4 @@
+// components/create-client-form.tsx
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -6,6 +7,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { createClient } from "@/app/actions/client-actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
@@ -40,7 +42,7 @@ export default function CreateClientForm({
   };
 
   return (
-    <Card>
+    <Card className="w-full max-w-md mx-auto">
       <CardHeader>
         <CardTitle>Create New Client</CardTitle>
       </CardHeader>
@@ -71,15 +73,16 @@ export default function CreateClientForm({
             <Label>Select Existing Restaurants</Label>
             <div className="flex flex-col gap-1">
               {restaurants.map((r) => (
-                <label key={r.id} className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
+                <div key={r.id} className="flex items-center gap-2">
+                  <Checkbox
+                    id={`restaurant-${r.id}`}
                     value={r.id}
                     {...register('restaurantIds')}
-                    className="border"
                   />
-                  {r.name}
-                </label>
+                  <Label htmlFor={`restaurant-${r.id}`} className="font-normal">
+                    {r.name}
+                  </Label>
+                </div>
               ))}
             </div>
           </div>
