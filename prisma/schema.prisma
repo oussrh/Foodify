@@ -45,8 +45,7 @@ model User {
   emailOtpCode          String?
   emailOtpExpires       DateTime?
   role                  UserRole
-  restaurantId          String?      // FK for RESTAURANT_ADMIN
-  restaurant            Restaurant?  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurants           Restaurant[]
   createdAt             DateTime   @default(now())
   lastLogin             DateTime?
   passwordResetToken    String?

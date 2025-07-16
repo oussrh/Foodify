@@ -8,20 +8,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/app/actions/client-actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Select } from "@/components/ui/select";
-import {
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 type Restaurant = { id: string; name: string };
 
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  restaurantId: z.string().optional(),
+  restaurantIds: z.array(z.string()).optional(),
   restaurantName: z.string().optional(),
 });
 
@@ -35,8 +28,6 @@ export default function CreateClientForm({
   const {
     register,
     handleSubmit,
-    setValue,
-    watch,
     formState: { errors },
     reset,
   } = useForm<FormValues>({
@@ -44,7 +35,7 @@ export default function CreateClientForm({
   });
 
   const onSubmit = async (data: FormValues) => {
-    await createClient(data);
+    await createClient({ ...data, restaurantIds: data.restaurantIds || [] });
     reset();
   };
 
@@ -75,21 +66,22 @@ export default function CreateClientForm({
             )}
           </div>
 
-          {/* Existing Restaurant */}
+          {/* Existing Restaurants */}
           <div className="space-y-1">
-            <Label>Assign to Existing Restaurant</Label>
-            <Select onValueChange={(value) => setValue("restaurantId", value)}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a restaurant" />
-              </SelectTrigger>
-              <SelectContent>
-                {restaurants.map((r) => (
-                  <SelectItem key={r.id} value={r.id}>
-                    {r.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Select Existing Restaurants</Label>
+            <div className="flex flex-col gap-1">
+              {restaurants.map((r) => (
+                <label key={r.id} className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    value={r.id}
+                    {...register('restaurantIds')}
+                    className="border"
+                  />
+                  {r.name}
+                </label>
+              ))}
+            </div>
           </div>
 
           <div className="text-sm text-muted-foreground">OR</div>
