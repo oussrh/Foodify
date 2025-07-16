@@ -6,7 +6,7 @@ import prisma from '@/lib/prisma'
 export default async function UsersPage() {
   const users = await prisma.user.findMany({
     where: { role: 'RESTAURANT_ADMIN' },
-    include: { restaurant: true },
+    include: { restaurants: true },
     orderBy: { createdAt: 'desc' },
   })
 
@@ -19,7 +19,7 @@ export default async function UsersPage() {
           <thead>
             <tr className="border-b text-left">
               <th className="px-2 py-1">Email</th>
-              <th className="px-2 py-1">Restaurant</th>
+              <th className="px-2 py-1">Restaurants</th>
               <th className="px-2 py-1">Created</th>
               <th className="px-2 py-1">Actions</th>
             </tr>
@@ -28,7 +28,7 @@ export default async function UsersPage() {
             {users.map((u) => (
               <tr key={u.id} className="border-b hover:bg-muted/50">
                 <td className="px-2 py-1">{u.email}</td>
-                <td className="px-2 py-1">{u.restaurant?.name ?? '-'}</td>
+                <td className="px-2 py-1">{u.restaurants.map(r => r.name).join(', ') || '-'}</td>
                 <td className="px-2 py-1">{u.createdAt.toDateString()}</td>
                 <td className="flex gap-2 px-2 py-1">
                   <a href={`/admin/users/${u.id}/edit`} className="text-primary underline">
