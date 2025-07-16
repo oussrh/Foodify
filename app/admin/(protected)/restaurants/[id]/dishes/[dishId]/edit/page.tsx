@@ -28,6 +28,9 @@ export default async function EditDishPage({
     descriptionEn: dish.descriptionEn,
     descriptionFr: dish.descriptionFr,
     price: Number(dish.price),
+    imageUrl: dish.imageUrl,
+    usdzUrl: dish.usdzUrl,
+    glbUrl: dish.glbUrl,
     subcategoryId: dish.subcategoryId || '',
   }
 

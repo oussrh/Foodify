@@ -18,6 +18,9 @@ export async function createDish(
     descriptionEn?: string
     descriptionFr?: string
     price: number
+    imageUrl: string
+    usdzUrl: string
+    glbUrl: string
     subcategoryId?: string | null
   }
 ) {
@@ -35,6 +38,9 @@ export async function updateDish(
     descriptionEn?: string
     descriptionFr?: string
     price?: number
+    imageUrl?: string
+    usdzUrl?: string
+    glbUrl?: string
     subcategoryId?: string | null
     isActive?: boolean
     calories?: number | null
