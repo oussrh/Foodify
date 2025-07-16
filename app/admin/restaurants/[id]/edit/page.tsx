@@ -50,6 +50,12 @@ export default async function EditRestaurantPage({
           >
             Manage Users
           </Link>
+          <Link
+            href={`/admin/restaurants/${restaurant.id}/dishes`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Manage Dishes
+          </Link>
         </div>
       </div>
 
