@@ -48,6 +48,9 @@ model User {
   restaurantId    String?
   restaurant      Restaurant? @relation(fields: [restaurantId], references: [id])
   createdAt       DateTime   @default(now())
+  lastLogin       DateTime?
+  passwordResetToken   String?
+  passwordResetExpires DateTime?
 }
 
 model MenuCategory {
