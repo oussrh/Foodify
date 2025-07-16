@@ -11,7 +11,7 @@ Foodify is a prototype web platform that helps restaurants present their menus i
 - Next.js 15 with React 19 and TypeScript
 - Tailwind CSS with shadcn/ui components
 - PostgreSQL via Prisma ORM
-- NextAuth for authentication
+- NextAuth v5 with Resend email provider and MFA
 - Framer Motion, React Hook Form, Zod, and Lucide icons
 
 ## Development

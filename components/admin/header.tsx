@@ -1,6 +1,8 @@
 'use client'
 
 import { ThemeToggle } from '@/components/theme-toggle'
+import { signOut } from 'next-auth/react'
+import { Button } from '@/components/ui/button'
 
 export default function AdminHeader() {
 
@@ -9,6 +11,9 @@ export default function AdminHeader() {
       <h1 className="text-lg font-bold">Foodify Admin</h1>
       <div className="flex items-center gap-2">
         <ThemeToggle />
+        <Button variant="outline" onClick={() => signOut({ redirect: true, callbackUrl: '/login' })}>
+          Sign Out
+        </Button>
       </div>
     </header>
   )
