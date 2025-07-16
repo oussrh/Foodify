@@ -10,7 +10,8 @@ interface LayoutProps {
 }
 
 export default async function ManagerLayout({ children }: LayoutProps) {
-  const pathname = headers().get('next-url') || ''
+  const headerList = await headers()
+  const pathname = headerList.get('next-url') || ''
   const session = await auth()
 
   if (!session) {
