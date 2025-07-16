@@ -1,16 +1,17 @@
-// prisma/seed.ts
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Hash the password
+  // Hash the default password
   const hashedPassword = await bcrypt.hash("changeme", 10);
 
-  // 1. Créer le restaurant
-  const restaurant = await prisma.restaurant.create({
-    data: {
+  // 1. Upsert the restaurant
+  const restaurant = await prisma.restaurant.upsert({
+    where: { slug: "foodify-test-kitchen" },
+    update: {}, // add fields to update if desired
+    create: {
       name: "Foodify Test Kitchen",
       slug: "foodify-test-kitchen",
       email: "contact@foodify.test",
@@ -18,9 +19,23 @@ async function main() {
     },
   });
 
-  // 2. Créer une catégorie liée au restaurant
-  const category = await prisma.menuCategory.create({
-    data: {
+  // 2. Upsert the category
+  const category = await prisma.menuCategory.upsert({
+    where: {
+      // composite unique workaround: no composite unique constraint exists,
+      // so we find the first matching manually:
+      id:
+        (
+          await prisma.menuCategory.findFirst({
+            where: {
+              restaurantId: restaurant.id,
+              nameEn: "Starters",
+            },
+          })
+        )?.id || "",
+    },
+    update: {},
+    create: {
       restaurantId: restaurant.id,
       nameEn: "Starters",
       nameFr: "Entrées",
@@ -28,9 +43,21 @@ async function main() {
     },
   });
 
-  // 3. Créer une sous-catégorie liée à la catégorie
-  const subcategory = await prisma.menuSubcategory.create({
-    data: {
+  // 3. Upsert the subcategory
+  const subcategory = await prisma.menuSubcategory.upsert({
+    where: {
+      id:
+        (
+          await prisma.menuSubcategory.findFirst({
+            where: {
+              categoryId: category.id,
+              nameEn: "Salads",
+            },
+          })
+        )?.id || "",
+    },
+    update: {},
+    create: {
       categoryId: category.id,
       nameEn: "Salads",
       nameFr: "Salades",
@@ -38,9 +65,21 @@ async function main() {
     },
   });
 
-  // 4. Créer un plat lié au restaurant et à la sous-catégorie
-  const dish = await prisma.dish.create({
-    data: {
+  // 4. Upsert the dish
+  const dish = await prisma.dish.upsert({
+    where: {
+      id:
+        (
+          await prisma.dish.findFirst({
+            where: {
+              restaurantId: restaurant.id,
+              nameEn: "Grilled Chicken",
+            },
+          })
+        )?.id || "",
+    },
+    update: {},
+    create: {
       restaurantId: restaurant.id,
       subcategoryId: subcategory.id,
       nameEn: "Grilled Chicken",
@@ -57,32 +96,47 @@ async function main() {
     },
   });
 
-  // 5. Créer un ingrédient lié au plat
-  await prisma.ingredient.create({
-    data: {
+  // 5. Upsert the ingredient
+  await prisma.ingredient.upsert({
+    where: {
+      id:
+        (
+          await prisma.ingredient.findFirst({
+            where: {
+              dishId: dish.id,
+              nameEn: "Salt",
+            },
+          })
+        )?.id || "",
+    },
+    update: {},
+    create: {
       dishId: dish.id,
       nameEn: "Salt",
       nameFr: "Sel",
     },
   });
 
-  // 6. Créer des utilisateurs
-  await prisma.user.create({
-    data: {
+  // 6. Upsert Super Admin
+  await prisma.user.upsert({
+    where: { email: "admin@foodify.test" },
+    update: {},
+    create: {
       email: "admin@foodify.test",
       passwordHash: hashedPassword,
       role: "SUPER_ADMIN",
     },
   });
 
-  await prisma.user.create({
-    data: {
+  // 7. Upsert Restaurant Admin
+  await prisma.user.upsert({
+    where: { email: "owner@foodify.test" },
+    update: {},
+    create: {
       email: "owner@foodify.test",
       passwordHash: hashedPassword,
       role: "RESTAURANT_ADMIN",
-      restaurants: {
-        connect: { id: restaurant.id },
-      },
+      restaurantId: restaurant.id,
     },
   });
 
