@@ -17,6 +17,9 @@ const schema = z.object({
   descriptionEn: z.string().optional(),
   descriptionFr: z.string().optional(),
   price: z.coerce.number().min(0),
+  imageUrl: z.string().min(1),
+  usdzUrl: z.string().min(1),
+  glbUrl: z.string().min(1),
   subcategoryId: z.string().optional(),
 })
 
@@ -71,6 +74,24 @@ export default function EditDishForm({
       <Input id="price" type="number" step="0.01" {...register('price')} />
       {errors.price && (
         <span className="text-sm text-red-500">{errors.price.message}</span>
+      )}
+
+      <Label htmlFor="imageUrl">Image URL</Label>
+      <Input id="imageUrl" {...register('imageUrl')} />
+      {errors.imageUrl && (
+        <span className="text-sm text-red-500">{errors.imageUrl.message}</span>
+      )}
+
+      <Label htmlFor="usdzUrl">USDZ URL</Label>
+      <Input id="usdzUrl" {...register('usdzUrl')} />
+      {errors.usdzUrl && (
+        <span className="text-sm text-red-500">{errors.usdzUrl.message}</span>
+      )}
+
+      <Label htmlFor="glbUrl">GLB URL</Label>
+      <Input id="glbUrl" {...register('glbUrl')} />
+      {errors.glbUrl && (
+        <span className="text-sm text-red-500">{errors.glbUrl.message}</span>
       )}
 
       <Label htmlFor="subcategory">Subcategory</Label>
