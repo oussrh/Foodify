@@ -32,3 +32,10 @@ export async function updateRestaurant(
 export async function deleteRestaurant(id: string) {
   return prisma.restaurant.delete({ where: { id } })
 }
+
+export async function listRestaurantsForUser(userId: string) {
+  return prisma.restaurant.findMany({
+    where: { users: { some: { id: userId } } },
+    orderBy: { createdAt: 'desc' },
+  })
+}
