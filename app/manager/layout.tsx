@@ -5,8 +5,8 @@ import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 
-function getPathname() {
-  const list = headers()
+async function getPathname() {
+  const list = await headers()
   const headerNames = [
     'next-url',
     'x-url',
@@ -33,7 +33,7 @@ interface LayoutProps {
 }
 
 export default async function ManagerLayout({ children }: LayoutProps) {
-  const pathname = getPathname()
+  const pathname = await getPathname()
   const isLoginPage = pathname.startsWith('/manager/login')
   const session = await auth()
 
