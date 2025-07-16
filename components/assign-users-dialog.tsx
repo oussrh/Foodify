@@ -1,7 +1,7 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Dialog,
   DialogTrigger,
@@ -9,81 +9,96 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
 interface User {
-  id: string
-  email: string
+  id: string;
+  email: string;
 }
 
 export default function AssignUsersDialog({
   restaurantId,
   defaultUserIds,
 }: {
-  restaurantId: string
-  defaultUserIds: string[]
+  restaurantId: string;
+  defaultUserIds: string[];
 }) {
-  const [open, setOpen] = useState(false)
-  const [users, setUsers] = useState<User[]>([])
-  const [selected, setSelected] = useState<string[]>(defaultUserIds)
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [open, setOpen] = useState(false);
+  const [users, setUsers] = useState<User[]>([]);
+  const [selected, setSelected] = useState<string[]>(defaultUserIds);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
-    if (!open) return
-    fetch('/api/users?role=RESTAURANT_ADMIN')
+    if (!open) return;
+    fetch("/api/users?role=RESTAURANT_ADMIN")
       .then((res) => res.json())
-      .then((data: User[]) => setUsers(data))
-  }, [open])
+      .then((data: User[]) => setUsers(data));
+  }, [open]);
 
   const toggle = (id: string) => {
     setSelected((prev) =>
       prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
-    )
-  }
+    );
+  };
 
   const handleSave = async () => {
-    setLoading(true)
+    setLoading(true);
     await fetch(`/api/restaurants/${restaurantId}/users`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userIds: selected }),
-    })
-    setLoading(false)
-    setOpen(false)
-    router.refresh()
-  }
+    });
+    setLoading(false);
+    setOpen(false);
+    router.refresh();
+  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Add User</Button>
+        <Button variant="default">Add User</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Assign Users</DialogTitle>
+          <DialogTitle className="text-lg font-bold">Assign Users</DialogTitle>
         </DialogHeader>
-        <div className="flex flex-col gap-1 max-h-60 overflow-auto">
+        <div className="max-h-64 overflow-y-auto flex flex-col gap-2 mt-2">
           {users.map((u) => (
-            <label key={u.id} className="flex items-center gap-2">
-              <input
-                type="checkbox"
+            <div
+              key={u.id}
+              className="flex items-center space-x-3 px-2 py-2 rounded hover:bg-muted cursor-pointer"
+              onClick={() => toggle(u.id)}
+            >
+              <Checkbox
                 checked={selected.includes(u.id)}
-                onChange={() => toggle(u.id)}
-                className="border"
+                onCheckedChange={() => toggle(u.id)}
               />
-              <span>{u.email}</span>
-            </label>
+              <Label className="text-sm">{u.email}</Label>
+            </div>
           ))}
         </div>
-        <DialogFooter>
-          <Button onClick={handleSave} disabled={loading}>
+        <DialogFooter className="mt-4">
+          <DialogClose asChild>
+            <Button variant="outline" type="button">
+              Cancel
+            </Button>
+          </DialogClose>
+          <Button
+            onClick={handleSave}
+            disabled={loading}
+            className="flex items-center gap-2"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             Save
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
