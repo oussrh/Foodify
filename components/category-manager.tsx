@@ -126,7 +126,10 @@ export default function CategoryManager({
     names: { en: string; fr: string }
   ) => {
     if (!names.en || !names.fr) return;
-    const sub = await createSubcategory(catId, names);
+    const sub = await createSubcategory(catId, {
+      nameEn: names.en,
+      nameFr: names.fr,
+    });
     setCategories((prev) =>
       prev.map((c) =>
         c.id === catId ? { ...c, subcategories: [...c.subcategories, sub] } : c
@@ -142,7 +145,10 @@ export default function CategoryManager({
     id: string,
     names: { en: string; fr: string }
   ) => {
-    await updateSubcategory(id, names);
+    await updateSubcategory(id, {
+      nameEn: names.en,
+      nameFr: names.fr,
+    });
   };
 
   const handleDeleteSub = async (catId: string, id: string) => {
