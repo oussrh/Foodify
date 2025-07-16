@@ -12,7 +12,7 @@ type Restaurant = { id: string; name: string }
 
 const schema = z.object({
   email: z.string().email(),
-  restaurantIds: z.array(z.string()).optional(),
+  restaurantId: z.string().optional(),
 })
 
 export type EditClientValues = z.infer<typeof schema>
@@ -44,8 +44,8 @@ export default function EditClientForm({
         <span className="text-sm text-red-500">{errors.email.message}</span>
       )}
 
-      <Label htmlFor="restaurantIds">Restaurants</Label>
-      <select multiple id="restaurantIds" {...register('restaurantIds')} className="border rounded px-2 py-1">
+      <Label htmlFor="restaurantId">Restaurant</Label>
+      <select id="restaurantId" {...register('restaurantId')} className="border rounded px-2 py-1">
         {restaurants.map((r) => (
           <option key={r.id} value={r.id}>
             {r.name}
