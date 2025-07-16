@@ -1,4 +1,5 @@
-import CreateClientForm from '@/components/create-client-form'
+import CreateClientDialog from '@/components/create-client-dialog'
+import ResetPasswordButton from '@/components/reset-password-button'
 import prisma from '@/lib/prisma'
 
 export default async function UsersPage() {
@@ -11,7 +12,7 @@ export default async function UsersPage() {
   return (
     <div className="space-y-4">
       <h2 className="text-xl font-bold">Clients</h2>
-      <CreateClientForm />
+      <CreateClientDialog />
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead>
@@ -19,6 +20,7 @@ export default async function UsersPage() {
               <th className="px-2 py-1">Email</th>
               <th className="px-2 py-1">Restaurant</th>
               <th className="px-2 py-1">Created</th>
+              <th className="px-2 py-1">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -27,6 +29,12 @@ export default async function UsersPage() {
                 <td className="px-2 py-1">{u.email}</td>
                 <td className="px-2 py-1">{u.restaurant?.name ?? '-'}</td>
                 <td className="px-2 py-1">{u.createdAt.toDateString()}</td>
+                <td className="flex gap-2 px-2 py-1">
+                  <a href={`/admin/users/${u.id}/edit`} className="text-primary underline">
+                    Edit
+                  </a>
+                  <ResetPasswordButton id={u.id} />
+                </td>
               </tr>
             ))}
           </tbody>
