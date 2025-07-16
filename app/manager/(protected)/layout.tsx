@@ -20,7 +20,11 @@ export default async function ManagerLayout({ children }: LayoutProps) {
     select: { role: true },
   })
 
-  if (user?.role !== 'RESTAURANT_ADMIN') {
+  if (!user) {
+    redirect('/manager/login')
+  }
+
+  if (user.role !== 'RESTAURANT_ADMIN') {
     redirect('/')
   }
 
