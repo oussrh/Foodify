@@ -136,7 +136,7 @@ async function main() {
       email: "owner@foodify.test",
       passwordHash: hashedPassword,
       role: "RESTAURANT_ADMIN",
-      restaurantId: restaurant.id,
+      restaurants: { connect: { id: restaurant.id } },
     },
   });
 

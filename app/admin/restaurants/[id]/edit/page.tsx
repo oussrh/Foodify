@@ -37,12 +37,20 @@ export default async function EditRestaurantPage({
         <h2 className="text-2xl font-semibold tracking-tight">
           Edit Restaurant
         </h2>
-        <Link
-          href={`/admin/restaurants/${restaurant.id}/menu`}
-          className={buttonVariants({ variant: "outline" })}
-        >
-          Manage Menu
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href={`/admin/restaurants/${restaurant.id}/menu`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Manage Menu
+          </Link>
+          <Link
+            href={`/admin/restaurants/${restaurant.id}/users`}
+            className={buttonVariants({ variant: "outline" })}
+          >
+            Manage Users
+          </Link>
+        </div>
       </div>
 
       <Card>

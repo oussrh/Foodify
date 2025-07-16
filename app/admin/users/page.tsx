@@ -14,7 +14,7 @@ import { MoreVertical } from "lucide-react";
 export default async function UsersPage() {
   const users = await prisma.user.findMany({
     where: { role: "RESTAURANT_ADMIN" },
-    include: { restaurant: true },
+    include: { restaurants: true },
     orderBy: { createdAt: "desc" },
   });
 
@@ -61,7 +61,7 @@ export default async function UsersPage() {
                   >
                     <td className="px-4 py-3 font-medium">{u.email}</td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {u.restaurant?.name || "-"}
+                      {u.restaurants.map((r) => r.name).join(', ') || '-'}
                     </td>
                     <td className="px-4 py-3">
                       {u.createdAt.toLocaleDateString()}

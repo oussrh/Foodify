@@ -9,7 +9,7 @@ export async function listClients(search?: string) {
       role: 'RESTAURANT_ADMIN',
       email: search ? { contains: search } : undefined,
     },
-    include: { restaurant: true },
+    include: { restaurants: true },
     orderBy: { createdAt: 'desc' },
   })
 }
@@ -17,12 +17,12 @@ export async function listClients(search?: string) {
 export async function createClient(data: {
   email: string
   password: string
-  restaurantId?: string
+  restaurantIds: string[]
   restaurantName?: string
 }) {
   const passwordHash = await bcrypt.hash(data.password, 10)
 
-  let restaurantId = data.restaurantId
+  const restaurantIds = [...data.restaurantIds]
   if (data.restaurantName) {
     const restaurant = await prisma.restaurant.create({
       data: {
@@ -31,7 +31,7 @@ export async function createClient(data: {
         defaultLocale: 'en',
       },
     })
-    restaurantId = restaurant.id
+    restaurantIds.push(restaurant.id)
   }
 
   return prisma.user.create({
@@ -39,21 +39,23 @@ export async function createClient(data: {
       email: data.email,
       passwordHash,
       role: 'RESTAURANT_ADMIN',
-      restaurantId,
+      restaurants: { connect: restaurantIds.map((id) => ({ id })) },
     },
   })
 }
 
 export async function updateClient(
   id: string,
-  data: { email?: string; restaurantId?: string | null }
+  data: { email?: string; restaurantIds?: string[] }
 ) {
-  const { restaurantId, ...rest } = data
+  const { restaurantIds, ...rest } = data
   return prisma.user.update({
     where: { id },
     data: {
       ...rest,
-      restaurantId,
+      restaurants: restaurantIds
+        ? { set: restaurantIds.map((id) => ({ id })) }
+        : undefined,
     },
   })
 }
