@@ -11,27 +11,28 @@
     "db:seed": "node prisma/seed.js"
   },
   "dependencies": {
+    "@hookform/resolvers": "latest",
+    "@prisma/client": "latest",
+    "bcryptjs": "^3.0.2",
+    "class-variance-authority": "latest",
+    "clsx": "latest",
+    "framer-motion": "latest",
+    "lucide-react": "latest",
     "next": "latest",
+    "next-themes": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "@prisma/client": "latest",
-    "next-themes": "latest",
-    "lucide-react": "latest",
-    "framer-motion": "latest",
     "react-hook-form": "latest",
-    "@hookform/resolvers": "latest",
-    "zod": "latest",
-    "clsx": "latest",
     "tailwind-merge": "latest",
-    "class-variance-authority": "latest",
-    "tailwindcss-animate": "latest"
+    "tailwindcss-animate": "latest",
+    "zod": "latest"
   },
   "devDependencies": {
-    "typescript": "^5.0.0",
+    "autoprefixer": "latest",
+    "postcss": "latest",
     "prisma": "latest",
     "tailwindcss": "latest",
-    "postcss": "latest",
-    "autoprefixer": "latest"
+    "typescript": "^5.0.0"
   },
   "license": "MIT",
   "type": "module",
