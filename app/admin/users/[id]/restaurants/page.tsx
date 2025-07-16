@@ -13,8 +13,9 @@ import AssignRestaurantsDialog from '@/components/assign-restaurants-dialog'
 import RemoveUserRestaurantButton from '@/components/remove-user-restaurant-button'
 
 export default async function UserRestaurantsPage({ params }: { params: { id: string } }) {
+  const { id } = await params
   const user = await prisma.user.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { restaurants: true },
   })
 

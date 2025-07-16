@@ -4,7 +4,8 @@ import EditAdminForm, { EditAdminValues } from '@/components/edit-admin-form'
 import { buttonVariants } from '@/components/ui/button'
 
 export default async function EditAdminPage({ params }: { params: { id: string } }) {
-  const admin = await prisma.user.findUnique({ where: { id: params.id } })
+  const { id } = await params
+  const admin = await prisma.user.findUnique({ where: { id } })
   if (!admin) {
     return <div>Admin not found</div>
   }

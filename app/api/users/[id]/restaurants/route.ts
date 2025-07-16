@@ -3,12 +3,13 @@ import { NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const { restaurantIds } = await req.json()
+  const { id } = await params
   if (!Array.isArray(restaurantIds)) {
     return new Response('Invalid restaurantIds', { status: 400 })
   }
 
   await prisma.user.update({
-    where: { id: params.id },
+    where: { id },
     data: {
       restaurants: {
         set: restaurantIds.map((id: string) => ({ id })),
