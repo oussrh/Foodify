@@ -11,8 +11,9 @@ export default async function EditRestaurantPage({
 }: {
   params: { id: string };
 }) {
+  const { id } = await params
   const restaurant = await prisma.restaurant.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!restaurant) {

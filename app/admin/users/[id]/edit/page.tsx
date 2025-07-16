@@ -4,8 +4,9 @@ import EditClientForm, { EditClientValues } from '@/components/edit-client-form'
 import { buttonVariants } from '@/components/ui/button'
 
 export default async function EditUserPage({ params }: { params: { id: string } }) {
+  const { id } = await params
   const user = await prisma.user.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: { restaurants: true },
   })
   if (!user) {

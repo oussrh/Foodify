@@ -5,7 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 
 export default async function EditRestaurantPage({ params }: { params: { id: string } }) {
-  const restaurant = await prisma.restaurant.findUnique({ where: { id: params.id } })
+  const { id } = await params
+  const restaurant = await prisma.restaurant.findUnique({ where: { id } })
 
   if (!restaurant) {
     return <div className="py-12 text-center text-muted-foreground">Restaurant not found</div>
