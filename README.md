@@ -1,3 +1,4 @@
+README.md
 # Foodify - AR Menu Platform
 
 Foodify is a prototype web platform that helps restaurants present their menus in Augmented Reality. Guests can scan a QR code to view 3D dishes while restaurant administrators manage content through a dashboard.

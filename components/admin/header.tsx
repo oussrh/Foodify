@@ -1,3 +1,4 @@
+// components/admin/header.tsx
 'use client'
 
 import { ThemeToggle } from '@/components/theme-toggle'
