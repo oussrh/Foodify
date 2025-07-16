@@ -53,3 +53,11 @@ export async function updateClient(
 export async function deleteClient(id: string) {
   return prisma.user.delete({ where: { id } })
 }
+
+export async function resetClientPassword(id: string, newPassword: string) {
+  const passwordHash = await bcrypt.hash(newPassword, 10)
+  return prisma.user.update({
+    where: { id },
+    data: { passwordHash, passwordResetToken: null, passwordResetExpires: null },
+  })
+}
