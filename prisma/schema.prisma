@@ -46,7 +46,7 @@ model User {
   emailOtpExpires       DateTime?
   role                  UserRole
   restaurantId          String?      // FK for RESTAURANT_ADMIN
-  restaurant            Restaurant?  @relation(fields: [restaurantId], references: [id])
+  restaurant            Restaurant?  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   createdAt             DateTime   @default(now())
   lastLogin             DateTime?
   passwordResetToken    String?
@@ -56,7 +56,7 @@ model User {
 model MenuCategory {
   id            String          @id @default(uuid())
   restaurantId  String
-  restaurant    Restaurant      @relation(fields: [restaurantId], references: [id])
+  restaurant    Restaurant      @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   nameEn        String
   nameFr        String
   sortOrder     Int
@@ -66,7 +66,7 @@ model MenuCategory {
 model MenuSubcategory {
   id          String       @id @default(uuid())
   categoryId  String
-  category    MenuCategory @relation(fields: [categoryId], references: [id])
+  category    MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   nameEn      String
   nameFr      String
   sortOrder   Int
@@ -76,9 +76,9 @@ model MenuSubcategory {
 model Dish {
   id              String            @id @default(uuid())
   restaurantId    String
-  restaurant      Restaurant        @relation(fields: [restaurantId], references: [id])
+  restaurant      Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   subcategoryId   String?
-  subcategory     MenuSubcategory?  @relation(fields: [subcategoryId], references: [id])
+  subcategory     MenuSubcategory?  @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
   nameEn          String
   nameFr          String
   descriptionEn   String

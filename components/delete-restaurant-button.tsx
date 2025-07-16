@@ -1,23 +1,49 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogFooter,
+  AlertDialogCancel,
+  AlertDialogAction,
+} from '@/components/ui/alert-dialog'
 import { deleteRestaurant } from '@/app/actions/restaurant-actions'
 
 export default function DeleteRestaurantButton({ id }: { id: string }) {
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
-  const handleClick = async () => {
+  const handleDelete = async () => {
     setLoading(true)
     await deleteRestaurant(id)
     setLoading(false)
-    // refresh the page to show updated list
-    window.location.reload()
+    router.refresh()
   }
 
   return (
-    <Button variant="destructive" size="sm" onClick={handleClick} disabled={loading}>
-      Delete
-    </Button>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button variant="destructive" size="sm" disabled={loading}>
+          Delete
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete restaurant?</AlertDialogTitle>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction onClick={handleDelete} disabled={loading}>
+            Confirm
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
