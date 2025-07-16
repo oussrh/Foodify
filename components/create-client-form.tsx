@@ -13,7 +13,7 @@ type Restaurant = { id: string; name: string }
 const schema = z.object({
   email: z.string().email(),
   password: z.string().min(6),
-  restaurantIds: z.array(z.string()).optional(),
+  restaurantId: z.string().optional(),
   restaurantName: z.string().optional(),
 })
 
@@ -46,8 +46,8 @@ export default function CreateClientForm({ restaurants }: { restaurants: Restaur
         <span className="text-sm text-red-500">{errors.password.message}</span>
       )}
 
-      <Label htmlFor="restaurantIds">Restaurants</Label>
-      <select multiple id="restaurantIds" {...register('restaurantIds')} className="border rounded px-2 py-1">
+      <Label htmlFor="restaurantId">Restaurant</Label>
+      <select id="restaurantId" {...register('restaurantId')} className="border rounded px-2 py-1">
         {restaurants.map((r) => (
           <option key={r.id} value={r.id}>
             {r.name}
