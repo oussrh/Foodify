@@ -11,11 +11,16 @@ export default function ManagerLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [code, setCode] = useState('')
+  const [error, setError] = useState('')
   const router = useRouter()
 
   const onCredentials = async (e: React.FormEvent) => {
     e.preventDefault()
-    await signIn('credentials', { email, password, code, redirect: false })
+    const res = await signIn('credentials', { email, password, code, redirect: false })
+    if (res?.error) {
+      setError(res.error)
+      return
+    }
     router.push('/manager')
   }
 
@@ -40,6 +45,9 @@ export default function ManagerLoginPage() {
         </div>
         <Button type="submit" className="w-full">Sign in with Password</Button>
       </form>
+      {error && (
+        <div className="text-red-600 text-sm text-center">{error}</div>
+      )}
       <div className="text-center">or</div>
       <Button variant="outline" className="w-full" onClick={onEmail}>
         Send Sign-In Email
