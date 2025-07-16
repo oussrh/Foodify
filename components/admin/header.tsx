@@ -11,7 +11,7 @@ export default function AdminHeader() {
       <h1 className="text-lg font-bold">Foodify Admin</h1>
       <div className="flex items-center gap-2">
         <ThemeToggle />
-        <Button variant="outline" onClick={() => signOut({ redirect: true, callbackUrl: '/login' })}>
+        <Button variant="outline" onClick={() => signOut({ redirect: true, callbackUrl: '/admin/login' })}>
           Sign Out
         </Button>
       </div>
