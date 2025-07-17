@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { PageProps } from "next";
+import type { PageProps } from "@/types/page";
 import CategoryManager from "@/components/category-manager";
 import { getMenu } from "@/app/actions/menu-actions";
 import prisma from "@/lib/prisma";

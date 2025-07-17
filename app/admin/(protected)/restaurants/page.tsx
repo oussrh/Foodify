@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { PageProps } from "next";
+import type { PageProps } from "@/types/page";
 import prisma from "@/lib/prisma";
 import { buttonVariants, Button } from "@/components/ui/button";
 import DeleteRestaurantButton from "@/components/delete-restaurant-button";
