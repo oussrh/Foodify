@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { TypedPageProps } from '@/types/page';
 import prisma from "@/lib/prisma";
 import { buttonVariants, Button } from "@/components/ui/button";
 import DeleteRestaurantButton from "@/components/delete-restaurant-button";
@@ -28,7 +27,7 @@ async function getRestaurants(searchQuery: string) {
 
 export default async function RestaurantsPage({
   searchParams,
-}: TypedPageProps<{}, { search?: string }>) {
+}: { searchParams?: { search?: string } }) {
   const searchQuery = searchParams?.search || "";
   const restaurants = await getRestaurants(searchQuery);
 

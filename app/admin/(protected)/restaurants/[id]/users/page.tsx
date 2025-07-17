@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { TypedPageProps } from '@/types/page';
 import prisma from "@/lib/prisma";
 import { buttonVariants, Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -15,7 +14,7 @@ import RemoveRestaurantUserButton from "@/components/remove-restaurant-user-butt
 
 export default async function RestaurantUsersPage({
   params,
-}: TypedPageProps<{ id: string }>) {
+}: { params: { id: string } }) {
   const { id } = params;
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
