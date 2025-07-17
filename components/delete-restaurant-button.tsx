@@ -15,7 +15,13 @@ import {
 } from '@/components/ui/alert-dialog'
 import { deleteRestaurant } from '@/app/actions/restaurant-actions'
 
-export default function DeleteRestaurantButton({ id }: { id: string }) {
+export default function DeleteRestaurantButton({
+  id,
+  className
+}: {
+  id: string
+  className?: string
+}) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()
 
@@ -29,7 +35,12 @@ export default function DeleteRestaurantButton({ id }: { id: string }) {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="destructive" size="sm" disabled={loading}>
+        <Button
+          variant="destructive"
+          size="sm"
+          disabled={loading}
+          className={className}
+        >
           Delete
         </Button>
       </AlertDialogTrigger>
