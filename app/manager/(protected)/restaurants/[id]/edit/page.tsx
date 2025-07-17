@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { PageProps } from '@/types/page'
+import type { AppPageProps } from '@/types/page'
 import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
@@ -7,7 +7,7 @@ import EditRestaurantForm, { EditRestaurantValues } from '@/components/edit-rest
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 
-export default async function EditRestaurantPage({ params }: PageProps<{ id: string }>) {
+export default async function EditRestaurantPage({ params }: AppPageProps<{ id: string }>) {
   const { id } = params
   const session = await auth()
   if (!session?.user?.email) {
