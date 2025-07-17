@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { createDish } from '@/app/actions/dish-actions'
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { createDish } from "@/app/actions/dish-actions";
 
-type Subcategory = { id: string; nameEn: string }
+type Subcategory = { id: string; nameEn: string };
 
 const schema = z.object({
   nameEn: z.string().min(1),
@@ -21,72 +21,76 @@ const schema = z.object({
   usdzUrl: z.string().min(1),
   glbUrl: z.string().min(1),
   subcategoryId: z.string().optional(),
-})
+});
 
-type FormValues = z.infer<typeof schema>
+// Use z.infer to get the correct type from the schema
+type FormValues = z.infer<typeof schema>;
 
 export default function CreateDishForm({
   restaurantId,
   subcategories,
 }: {
-  restaurantId: string
-  subcategories: Subcategory[]
+  restaurantId: string;
+  subcategories: Subcategory[];
 }) {
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormValues>({ resolver: zodResolver(schema) })
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    mode: "onChange", // Optional: enables validation on change
+  });
 
   const onSubmit = async (data: FormValues) => {
     await createDish(restaurantId, {
       ...data,
       subcategoryId: data.subcategoryId || null,
-    })
-    reset()
-  }
+    });
+    reset();
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-2">
       <Label htmlFor="nameEn">Name EN</Label>
-      <Input id="nameEn" {...register('nameEn')} />
+      <Input id="nameEn" {...register("nameEn")} />
       {errors.nameEn && (
         <span className="text-sm text-red-500">{errors.nameEn.message}</span>
       )}
 
       <Label htmlFor="nameFr">Name FR</Label>
-      <Input id="nameFr" {...register('nameFr')} />
+      <Input id="nameFr" {...register("nameFr")} />
       {errors.nameFr && (
         <span className="text-sm text-red-500">{errors.nameFr.message}</span>
       )}
 
       <Label htmlFor="descriptionEn">Description EN</Label>
-      <Textarea id="descriptionEn" {...register('descriptionEn')} />
+      <Textarea id="descriptionEn" {...register("descriptionEn")} />
 
       <Label htmlFor="descriptionFr">Description FR</Label>
-      <Textarea id="descriptionFr" {...register('descriptionFr')} />
+      <Textarea id="descriptionFr" {...register("descriptionFr")} />
 
       <Label htmlFor="price">Price</Label>
-      <Input id="price" type="number" step="0.01" {...register('price')} />
+      <Input id="price" type="number" step="0.01" {...register("price")} />
       {errors.price && (
         <span className="text-sm text-red-500">{errors.price.message}</span>
       )}
 
       <Label htmlFor="imageUrl">Image URL</Label>
-      <Input id="imageUrl" {...register('imageUrl')} />
+      <Input id="imageUrl" {...register("imageUrl")} />
       {errors.imageUrl && (
         <span className="text-sm text-red-500">{errors.imageUrl.message}</span>
       )}
 
       <Label htmlFor="usdzUrl">USDZ URL</Label>
-      <Input id="usdzUrl" {...register('usdzUrl')} />
+      <Input id="usdzUrl" {...register("usdzUrl")} />
       {errors.usdzUrl && (
         <span className="text-sm text-red-500">{errors.usdzUrl.message}</span>
       )}
 
       <Label htmlFor="glbUrl">GLB URL</Label>
-      <Input id="glbUrl" {...register('glbUrl')} />
+      <Input id="glbUrl" {...register("glbUrl")} />
       {errors.glbUrl && (
         <span className="text-sm text-red-500">{errors.glbUrl.message}</span>
       )}
@@ -94,7 +98,7 @@ export default function CreateDishForm({
       <Label htmlFor="subcategory">Subcategory</Label>
       <select
         id="subcategory"
-        {...register('subcategoryId')}
+        {...register("subcategoryId")}
         className="border rounded px-2 py-1"
       >
         <option value="">None</option>
@@ -107,5 +111,5 @@ export default function CreateDishForm({
 
       <Button type="submit">Create</Button>
     </form>
-  )
+  );
 }
