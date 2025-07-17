@@ -11,7 +11,6 @@ import {
 import { MoreVertical } from 'lucide-react'
 import AssignRestaurantsDialog from '@/components/assign-restaurants-dialog'
 import RemoveUserRestaurantButton from '@/components/remove-user-restaurant-button'
-import type { Restaurant } from '@prisma/client'
 
 export default async function UserRestaurantsPage({
   params,
@@ -38,7 +37,7 @@ export default async function UserRestaurantsPage({
         </h2>
         <AssignRestaurantsDialog
           userId={user.id}
-          defaultRestaurantIds={user.restaurants.map((r: Restaurant) => r.id)}
+          defaultRestaurantIds={user.restaurants.map((r) => r.id)}
         />
       </div>
       <Card>
@@ -59,7 +58,7 @@ export default async function UserRestaurantsPage({
                 </tr>
               </thead>
               <tbody>
-                {user.restaurants.map((r: Restaurant, i: number) => (
+                {user.restaurants.map((r, i) => (
                   <tr
                     key={r.id}
                     className={`border-b hover:bg-muted/50 ${i % 2 === 0 ? 'bg-muted/30' : ''}`}
@@ -82,7 +81,7 @@ export default async function UserRestaurantsPage({
                           <DropdownMenuItem asChild>
                             <RemoveUserRestaurantButton
                               userId={user.id}
-                              restaurantIds={user.restaurants.map((res: Restaurant) => res.id)}
+                              restaurantIds={user.restaurants.map((res) => res.id)}
                               restaurantId={r.id}
                             />
                           </DropdownMenuItem>
