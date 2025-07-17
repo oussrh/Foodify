@@ -10,7 +10,6 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical } from "lucide-react";
-import type { User, Restaurant } from "@prisma/client";
 
 export default async function UsersPage() {
   const users = await prisma.user.findMany({
@@ -53,7 +52,7 @@ export default async function UsersPage() {
                 </tr>
               </thead>
               <tbody>
-                {users.map((u: User, i: number) => (
+                {users.map((u, i) => (
                   <tr
                     key={u.id}
                     className={`border-b hover:bg-muted/50 ${
@@ -62,7 +61,7 @@ export default async function UsersPage() {
                   >
                     <td className="px-4 py-3 font-medium">{u.email}</td>
                     <td className="px-4 py-3 text-muted-foreground">
-                      {u.restaurants.map((r: Restaurant) => r.name).join(', ') || '-'}
+                      {u.restaurants.map((r) => r.name).join(', ') || '-'}
                     </td>
                     <td className="px-4 py-3">
                       {u.createdAt.toLocaleDateString()}

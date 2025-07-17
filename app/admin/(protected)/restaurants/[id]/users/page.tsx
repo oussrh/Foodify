@@ -13,7 +13,6 @@ import {
 import { MoreVertical, Pencil, UserX, ArrowLeft } from "lucide-react";
 import AssignUsersDialog from "@/components/assign-users-dialog";
 import RemoveRestaurantUserButton from "@/components/remove-restaurant-user-button";
-import type { User } from "@prisma/client";
 
 export default async function RestaurantUsersPage({
   params,
@@ -53,7 +52,7 @@ export default async function RestaurantUsersPage({
         </div>
         <AssignUsersDialog
           restaurantId={restaurant.id}
-          defaultUserIds={restaurant.users.map((u: User) => u.id)}
+          defaultUserIds={restaurant.users.map((u) => u.id)}
         />
       </div>
 
@@ -76,7 +75,7 @@ export default async function RestaurantUsersPage({
                 </tr>
               </thead>
               <tbody>
-                {restaurant.users.map((u: User, i: number) => (
+                {restaurant.users.map((u, i) => (
                   <tr
                     key={u.id}
                     className={`border-b hover:bg-muted/50 ${
@@ -115,7 +114,7 @@ export default async function RestaurantUsersPage({
                               <UserX className="h-4 w-4" />
                               <RemoveRestaurantUserButton
                                 restaurantId={restaurant.id}
-                                userIds={restaurant.users.map((r: User) => r.id)}
+                                userIds={restaurant.users.map((r) => r.id)}
                                 userId={u.id}
                               />
                             </button>

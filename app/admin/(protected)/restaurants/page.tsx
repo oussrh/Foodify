@@ -12,7 +12,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { MoreVertical, Search } from "lucide-react";
 import { Suspense } from "react";
-import type { Restaurant } from "@prisma/client";
 
 async function getRestaurants(searchQuery: string) {
   return await prisma.restaurant.findMany({
@@ -87,7 +86,7 @@ export default async function RestaurantsPage({
                 </tr>
               </thead>
               <tbody>
-                {restaurants.map((r: Restaurant, i: number) => (
+                {restaurants.map((r, i) => (
                   <tr
                     key={r.id}
                     className={`border-b hover:bg-muted/50 ${
