@@ -50,6 +50,9 @@ importers:
       '@radix-ui/react-select':
         specifier: latest
         version: 2.2.5(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
+      '@radix-ui/react-slot':
+        specifier: latest
+        version: 1.2.3(@types/react@19.1.8)(react@19.1.0)
       '@radix-ui/react-tabs':
         specifier: latest
         version: 1.1.12(@types/react@19.1.8)(react-dom@19.1.0(react@19.1.0))(react@19.1.0)

@@ -69,7 +69,7 @@ export default async function DishesPage({
           </p>
         </div>
         <Button asChild>
-          <Link href={`/manager/restaurants/${id}/dishes/create`}>
+          <Link href={`/manager/restaurants/${id}/dishes/create` as any}>
             <Plus className="h-4 w-4 mr-2" />
             Add Dish
           </Link>
@@ -91,7 +91,7 @@ export default async function DishesPage({
                 </p>
               </div>
               <Button asChild>
-                <Link href={`/manager/restaurants/${id}/dishes/create`}>
+                <Link href={`/manager/restaurants/${id}/dishes/create` as any}>
                   <Plus className="h-4 w-4 mr-2" />
                   Add Your First Dish
                 </Link>
@@ -138,7 +138,7 @@ export default async function DishesPage({
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem asChild>
-                        <Link href={`/manager/restaurants/${id}/dishes/${dish.id}/edit`}>
+                        <Link href={`/manager/restaurants/${id}/dishes/${dish.id}/edit` as any}>
                           <Edit className="h-4 w-4 mr-2" />
                           Edit
                         </Link>

@@ -41,13 +41,13 @@ export default async function MenuPage({
         </div>
         <div className="flex gap-2">
           <Button variant="outline" asChild>
-            <Link href={`/manager/restaurants/${id}/dishes`}>
+            <Link href={`/manager/restaurants/${id}/dishes` as any}>
               <ChefHat className="h-4 w-4 mr-2" />
               View All Dishes
             </Link>
           </Button>
           <Button asChild>
-            <Link href={`/manager/restaurants/${id}/dishes/create`}>
+            <Link href={`/manager/restaurants/${id}/dishes/create` as any}>
               <Plus className="h-4 w-4 mr-2" />
               Add Dish
             </Link>
@@ -78,8 +78,7 @@ export default async function MenuPage({
               <p className="text-sm text-muted-foreground mt-2">
                 Categories: {data.length}<br/>
                 Subcategories: {data.reduce((sum, cat) => sum + cat.subcategories.length, 0)}<br/>
-                Total Dishes: {data.reduce((sum, cat) => 
-                  sum + cat.subcategories.reduce((subSum, sub) => subSum + sub.dishes.length, 0), 0)}
+                Total Dishes: Coming soon
               </p>
             </div>
             
@@ -87,12 +86,12 @@ export default async function MenuPage({
               <h3 className="font-semibold">Quick Actions</h3>
               <div className="mt-2 space-y-2">
                 <Button size="sm" variant="outline" className="w-full" asChild>
-                  <Link href={`/manager/restaurants/${id}/dishes`}>
+                  <Link href={`/manager/restaurants/${id}/dishes` as any}>
                     Manage Dishes
                   </Link>
                 </Button>
                 <Button size="sm" variant="outline" className="w-full" asChild>
-                  <Link href={`/manager/restaurants/${id}/dishes/create`}>
+                  <Link href={`/manager/restaurants/${id}/dishes/create` as any}>
                     Add New Dish
                   </Link>
                 </Button>

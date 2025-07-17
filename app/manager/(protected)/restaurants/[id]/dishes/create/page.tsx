@@ -54,7 +54,7 @@ export default async function CreateDishPage({
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="sm" asChild>
-          <Link href={`/manager/restaurants/${id}/dishes`}>
+          <Link href={`/manager/restaurants/${id}/dishes` as any}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Dishes
           </Link>
