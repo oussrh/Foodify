@@ -13,9 +13,12 @@ import { MoreVertical, ArrowLeft, PlusCircle } from "lucide-react";
 
 export default async function DishesPage({
   params,
-}: { params: { id: string } }) {
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
   const restaurant = await prisma.restaurant.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
 
   if (!restaurant) {

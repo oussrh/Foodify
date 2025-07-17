@@ -6,8 +6,12 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Utensils } from "lucide-react";
 
-export default async function MenuPage({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function MenuPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params;
 
   // Fetch the restaurant info
   const restaurant = await prisma.restaurant.findUnique({

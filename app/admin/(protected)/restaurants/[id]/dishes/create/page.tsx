@@ -4,8 +4,13 @@ import CreateDishForm from '@/components/create-dish-form'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 
-export default async function CreateDishPage({ params }: { params: { id: string } }) {
-  const restaurant = await prisma.restaurant.findUnique({ where: { id: params.id } })
+export default async function CreateDishPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
+  const restaurant = await prisma.restaurant.findUnique({ where: { id } })
   if (!restaurant) {
     return <div className="py-12 text-center text-muted-foreground">Restaurant not found</div>
   }

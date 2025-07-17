@@ -14,8 +14,10 @@ import RemoveRestaurantUserButton from "@/components/remove-restaurant-user-butt
 
 export default async function RestaurantUsersPage({
   params,
-}: { params: { id: string } }) {
-  const { id } = params;
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params;
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
     include: { users: true },
