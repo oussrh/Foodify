@@ -20,11 +20,14 @@ export const {
     }),
     Credentials({
       async authorize(credentials) {
-        const { email, password, code } = credentials as Record<string, string>
+        const { email, password, code, role } = credentials as Record<string, string>
         const user = await prisma.user.findUnique({ where: { email } })
         if (!user) return null
         const valid = await bcrypt.compare(password, user.passwordHash)
         if (!valid) return null
+        if (role && user.role !== role) {
+          throw new Error('Unknown user')
+        }
         if (user.emailOtpCode) {
           const expired =
             user.emailOtpExpires && user.emailOtpExpires < new Date()
@@ -50,6 +53,7 @@ export const {
         email: {},
         password: {},
         code: { label: 'Two-factor code', type: 'text', optional: true },
+        role: { type: 'text', optional: true },
       },
     }),
   ],

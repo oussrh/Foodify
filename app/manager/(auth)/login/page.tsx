@@ -16,7 +16,13 @@ export default function ManagerLoginPage() {
 
   const onCredentials = async (e: React.FormEvent) => {
     e.preventDefault()
-    const res = await signIn('credentials', { email, password, code, redirect: false })
+    const res = await signIn('credentials', {
+      email,
+      password,
+      code,
+      role: 'RESTAURANT_ADMIN',
+      redirect: false,
+    })
     if (res?.error) {
       setError(res.error)
       return

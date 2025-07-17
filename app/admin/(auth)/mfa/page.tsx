@@ -20,7 +20,13 @@ export default function AdminMFAPage() {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const res = await signIn('credentials', { email, password, code, redirect: false })
+    const res = await signIn('credentials', {
+      email,
+      password,
+      code,
+      role: 'SUPER_ADMIN',
+      redirect: false,
+    })
     if (res?.error) {
       alert(res.error)
       return
