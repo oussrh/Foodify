@@ -6,8 +6,11 @@ import bcrypt from 'bcryptjs'
 
 export async function requestAdminOtp(email: string, password: string) {
   const user = await prisma.user.findUnique({ where: { email } })
-  if (!user || user.role !== 'SUPER_ADMIN') {
+  if (!user) {
     return { error: 'Invalid credentials' }
+  }
+  if (user.role !== 'SUPER_ADMIN') {
+    return { error: 'Unknown user' }
   }
   const valid = await bcrypt.compare(password, user.passwordHash)
   if (!valid) {
