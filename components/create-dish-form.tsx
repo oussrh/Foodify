@@ -47,7 +47,7 @@ export default function CreateDishForm({
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormValues>({ resolver: zodResolver<FormValues>(schema) })
+  } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   const onSubmit = async (data: FormValues) => {
     await createDish(restaurantId, {

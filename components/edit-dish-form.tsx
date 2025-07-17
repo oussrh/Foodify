@@ -41,7 +41,7 @@ export default function EditDishForm({
     handleSubmit,
     formState: { errors },
   } = useForm<EditDishValues>({
-    resolver: zodResolver<EditDishValues>(schema),
+    resolver: zodResolver(schema),
     defaultValues,
   })
 

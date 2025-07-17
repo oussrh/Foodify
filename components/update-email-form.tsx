@@ -26,7 +26,7 @@ export default function UpdateEmailForm({
     handleSubmit,
     formState: { errors },
   } = useForm<FormValues>({
-    resolver: zodResolver<FormValues>(schema),
+    resolver: zodResolver(schema),
     defaultValues: { email: defaultEmail },
   })
   const [loading, setLoading] = useState(false)
