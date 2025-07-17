@@ -4,8 +4,12 @@ import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 
-export default async function MenuPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default async function MenuPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.email) {
     throw new Error('Not authenticated')

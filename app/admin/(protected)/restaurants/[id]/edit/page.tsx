@@ -15,8 +15,10 @@ import { ArrowLeft, Utensils, Users, ChefHat, Building2 } from "lucide-react";
 
 export default async function EditRestaurantPage({
   params,
-}: { params: { id: string } }) {
-  const { id } = params;
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params;
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
   });

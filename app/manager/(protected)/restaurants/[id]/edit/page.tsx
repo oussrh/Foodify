@@ -6,8 +6,12 @@ import EditRestaurantForm, { EditRestaurantValues } from '@/components/edit-rest
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 
-export default async function EditRestaurantPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default async function EditRestaurantPage({
+  params,
+}: {
+  params: Promise<{ id: string }>
+}) {
+  const { id } = await params
   const session = await auth()
   if (!session?.user?.email) {
     throw new Error('Not authenticated')

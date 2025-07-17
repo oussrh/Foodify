@@ -27,8 +27,11 @@ async function getRestaurants(searchQuery: string) {
 
 export default async function RestaurantsPage({
   searchParams,
-}: { searchParams?: { search?: string } }) {
-  const searchQuery = searchParams?.search || "";
+}: {
+  searchParams?: Promise<{ search?: string }>
+}) {
+  const sp = searchParams ? await searchParams : undefined
+  const searchQuery = sp?.search || "";
   const restaurants = await getRestaurants(searchQuery);
 
   return (
