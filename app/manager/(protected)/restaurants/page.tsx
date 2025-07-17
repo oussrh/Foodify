@@ -46,7 +46,7 @@ export default async function ManagerRestaurantsPage() {
                 </tr>
               </thead>
               <tbody>
-                {restaurants.map((r, i) => (
+                {restaurants.map((r: any, i: number) => (
                   <tr
                     key={r.id}
                     className={`border-b hover:bg-muted/50 ${i % 2 === 0 ? 'bg-muted/30' : ''}`}

@@ -42,7 +42,7 @@ export default async function AdminsPage() {
                 </tr>
               </thead>
               <tbody>
-                {admins.map((u, i) => (
+                {admins.map((u: any, i: number) => (
                   <tr
                     key={u.id}
                     className={`border-b hover:bg-muted/50 ${i % 2 === 0 ? 'bg-muted/30' : ''}`}

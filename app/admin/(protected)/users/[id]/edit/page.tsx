@@ -19,7 +19,7 @@ export default async function EditUserPage({
   const restaurants = await prisma.restaurant.findMany({ orderBy: { name: 'asc' } })
   const defaultValues: EditClientValues = {
     email: user.email,
-    restaurantIds: user.restaurants.map((r) => r.id),
+    restaurantIds: user.restaurants.map((r: any) => r.id),
   }
   return (
     <div className="space-y-4">
