@@ -1,9 +1,12 @@
 import prisma from '@/lib/prisma'
 import { NextRequest } from 'next/server'
 
-export async function POST(req: NextRequest, { params }) {
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { restaurantIds } = await req.json()
-  const { id } = params
+  const { id } = await params
   if (!Array.isArray(restaurantIds)) {
     return new Response('Invalid restaurantIds', { status: 400 })
   }

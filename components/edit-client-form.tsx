@@ -51,7 +51,7 @@ export default function EditClientForm({
 
       <Label>Restaurants</Label>
       <div className="flex flex-col gap-1">
-        {restaurants.map((r) => (
+        {restaurants.map((r: Restaurant) => (
           <div key={r.id} className="flex items-center gap-2">
             <Checkbox
               id={`restaurant-${r.id}`}

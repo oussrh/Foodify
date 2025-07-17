@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 import { MoreVertical, ArrowLeft, PlusCircle } from "lucide-react";
+import type { Dish } from "@prisma/client";
 
 export default async function DishesPage({
   params,
@@ -82,7 +83,7 @@ export default async function DishesPage({
                 </tr>
               </thead>
               <tbody>
-                {dishes.map((d: any, i: number) => (
+                {dishes.map((d: Dish, i: number) => (
                   <tr
                     key={d.id}
                     className={`border-b hover:bg-muted/50 ${

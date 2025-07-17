@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { buttonVariants, Button } from '@/components/ui/button'
 import ResetAdminPasswordButton from '@/components/reset-admin-password-button'
 import prisma from '@/lib/prisma'
+import type { User } from '@prisma/client'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import {
   DropdownMenu,
@@ -42,7 +43,7 @@ export default async function AdminsPage() {
                 </tr>
               </thead>
               <tbody>
-                {admins.map((u: any, i: number) => (
+                {admins.map((u: User, i: number) => (
                   <tr
                     key={u.id}
                     className={`border-b hover:bg-muted/50 ${i % 2 === 0 ? 'bg-muted/30' : ''}`}

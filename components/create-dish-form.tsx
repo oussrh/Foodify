@@ -98,7 +98,7 @@ export default function CreateDishForm({
         className="border rounded px-2 py-1"
       >
         <option value="">None</option>
-        {subcategories.map((s) => (
+        {subcategories.map((s: Subcategory) => (
           <option key={s.id} value={s.id}>
             {s.nameEn}
           </option>

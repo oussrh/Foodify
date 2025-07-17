@@ -81,7 +81,7 @@ export default function AssignUsersDialog({
           className="mt-2"
         />
         <div className="max-h-64 overflow-y-auto flex flex-col gap-2 mt-2">
-          {filteredUsers.map((u) => (
+          {filteredUsers.map((u: User) => (
             <div
               key={u.id}
               className="flex items-center space-x-3 px-2 py-2 rounded hover:bg-muted cursor-pointer"

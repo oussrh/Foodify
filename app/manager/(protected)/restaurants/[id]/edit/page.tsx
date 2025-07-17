@@ -2,7 +2,7 @@ import Link from 'next/link'
 import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import EditRestaurantForm, { EditRestaurantValues } from '@/components/edit-restaurant-form'
+import EditRestaurantForm, { type EditRestaurantValues } from '@/components/edit-restaurant-form'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 
