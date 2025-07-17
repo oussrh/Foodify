@@ -30,6 +30,9 @@ model Restaurant {
   slug          String         @unique
   email         String?
   phone         String?
+  tagline       String?
+  logoUrl       String?
+  colorTheme    String?
   defaultLocale Locale
   createdAt     DateTime       @default(now())
   users         User[]

@@ -11,6 +11,9 @@ export async function createRestaurant(data: {
   slug: string
   email?: string
   phone?: string
+  tagline?: string
+  logoUrl?: string
+  colorTheme?: string
   defaultLocale: 'en' | 'fr'
 }) {
   return prisma.restaurant.create({ data })
@@ -23,6 +26,9 @@ export async function updateRestaurant(
     slug?: string
     email?: string
     phone?: string
+    tagline?: string
+    logoUrl?: string
+    colorTheme?: string
     defaultLocale?: 'en' | 'fr'
   }
 ) {

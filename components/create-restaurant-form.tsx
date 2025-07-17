@@ -13,6 +13,9 @@ const schema = z.object({
   slug: z.string().min(1),
   email: z.string().email().optional(),
   phone: z.string().optional(),
+  tagline: z.string().optional(),
+  logoUrl: z.string().optional(),
+  colorTheme: z.string().optional(),
   defaultLocale: z.enum(['en', 'fr']).default('en'),
 })
 
@@ -47,6 +50,15 @@ export default function CreateRestaurantForm() {
 
       <Label htmlFor="phone">Phone</Label>
       <Input id="phone" {...register('phone')} />
+
+      <Label htmlFor="tagline">Tagline</Label>
+      <Input id="tagline" {...register('tagline')} />
+
+      <Label htmlFor="logoUrl">Logo URL</Label>
+      <Input id="logoUrl" {...register('logoUrl')} />
+
+      <Label htmlFor="colorTheme">Color Theme</Label>
+      <Input id="colorTheme" type="color" {...register('colorTheme')} />
 
       <Label htmlFor="defaultLocale">Default Locale</Label>
       <select id="defaultLocale" {...register('defaultLocale')} className="border rounded px-2 py-1">
