@@ -40,7 +40,6 @@ export default function SuperAdminLoginPage() {
         </div>
         <Button type="submit" className="w-full">Sign In</Button>
       </form>
-      <Link href="/forgot-password" className="block text-center text-sm text-blue-600">Forgot password?</Link>
       {error && <div className="text-red-600 text-sm text-center">{error}</div>}
     </div>
   )
