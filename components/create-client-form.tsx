@@ -33,7 +33,7 @@ export default function CreateClientForm({
     formState: { errors },
     reset,
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver<FormValues>(schema),
   });
 
   const onSubmit = async (data: FormValues) => {

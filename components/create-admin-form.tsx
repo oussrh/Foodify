@@ -21,7 +21,7 @@ export default function CreateAdminForm() {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormValues>({ resolver: zodResolver(schema) })
+  } = useForm<FormValues>({ resolver: zodResolver<FormValues>(schema) })
 
   const onSubmit = async (data: FormValues) => {
     await createAdmin(data)
