@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { AppPageProps } from "@/types/page";
+import type { PageProps } from 'next'
 import prisma from "@/lib/prisma";
 import EditRestaurantForm, {
   EditRestaurantValues,
@@ -16,7 +16,7 @@ import { ArrowLeft, Utensils, Users, ChefHat, Building2 } from "lucide-react";
 
 export default async function EditRestaurantPage({
   params,
-}: AppPageProps<{ id: string }>) {
+}: PageProps<{ id: string }>) {
   const { id } = params;
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
