@@ -78,3 +78,80 @@ export async function updateDish(
 export async function deleteDish(id: string) {
   return prisma.dish.delete({ where: { id } })
 }
+
+// Toggle dish activation status
+export async function toggleDishStatus(id: string) {
+  const dish = await prisma.dish.findUnique({ where: { id }, select: { isActive: true } })
+  if (!dish) throw new Error('Dish not found')
+  
+  return prisma.dish.update({
+    where: { id },
+    data: { isActive: !dish.isActive }
+  })
+}
+
+// Update dish price
+export async function updateDishPrice(id: string, price: number) {
+  return prisma.dish.update({
+    where: { id },
+    data: { price }
+  })
+}
+
+// Toggle most purchased status
+export async function toggleMostPurchased(id: string) {
+  const dish = await prisma.dish.findUnique({ where: { id }, select: { isMostPurchased: true } })
+  if (!dish) throw new Error('Dish not found')
+  
+  return prisma.dish.update({
+    where: { id },
+    data: { isMostPurchased: !dish.isMostPurchased }
+  })
+}
+
+// Add ingredient to dish
+export async function addIngredient(dishId: string, data: { nameEn: string; nameFr: string }) {
+  return prisma.ingredient.create({
+    data: {
+      dishId,
+      nameEn: data.nameEn,
+      nameFr: data.nameFr
+    }
+  })
+}
+
+// Update ingredient
+export async function updateIngredient(id: string, data: { nameEn?: string; nameFr?: string }) {
+  return prisma.ingredient.update({
+    where: { id },
+    data
+  })
+}
+
+// Delete ingredient
+export async function deleteIngredient(id: string) {
+  return prisma.ingredient.delete({ where: { id } })
+}
+
+// Get dish with all details including ingredients
+export async function getDishDetails(id: string) {
+  return prisma.dish.findUnique({
+    where: { id },
+    include: {
+      ingredients: {
+        orderBy: { nameEn: 'asc' }
+      },
+      subcategory: {
+        include: {
+          category: true
+        }
+      },
+      views: true,
+      _count: {
+        select: {
+          views: true
+        }
+      }
+    }
+  })
+}

@@ -29,6 +29,7 @@
     "@radix-ui/react-dropdown-menu": "latest",
     "@radix-ui/react-select": "latest",
     "@radix-ui/react-slot": "latest",
+    "@radix-ui/react-switch": "latest",
     "@radix-ui/react-tabs": "latest",
     "@radix-ui/react-tooltip": "latest",
     "bcryptjs": "^3.0.2",

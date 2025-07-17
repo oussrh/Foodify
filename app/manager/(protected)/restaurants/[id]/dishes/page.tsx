@@ -16,8 +16,9 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
-import { MoreVertical, Plus, Eye, EyeOff, Edit, Trash2 } from 'lucide-react'
+import { MoreVertical, Plus, Edit } from 'lucide-react'
 import Image from 'next/image'
+import { DishStatusToggle, MostPurchasedToggle, PriceEditor } from '@/components/dish-actions'
 
 export default async function DishesPage({
   params,
@@ -140,26 +141,12 @@ export default async function DishesPage({
                       <DropdownMenuItem asChild>
                         <Link href={`/manager/restaurants/${id}/dishes/${dish.id}/edit` as any}>
                           <Edit className="h-4 w-4 mr-2" />
-                          Edit
+                          Edit Details
                         </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem>
-                        {dish.isActive ? (
-                          <>
-                            <EyeOff className="h-4 w-4 mr-2" />
-                            Hide
-                          </>
-                        ) : (
-                          <>
-                            <Eye className="h-4 w-4 mr-2" />
-                            Show
-                          </>
-                        )}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
+                      <DishStatusToggle dishId={dish.id} isActive={dish.isActive} />
+                      <MostPurchasedToggle dishId={dish.id} isMostPurchased={dish.isMostPurchased} />
+                      <PriceEditor dishId={dish.id} currentPrice={Number(dish.price)} />
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
