@@ -1,6 +1,7 @@
+// filePath : app/admin/(protected)/restaurants/[id]/dishes/[dishId]/edit/page.tsx
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
-import EditDishForm, { EditDishValues } from '@/components/edit-dish-form'
+import EditDishForm, { type EditDishValues } from '@/components/edit-dish-form'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 
