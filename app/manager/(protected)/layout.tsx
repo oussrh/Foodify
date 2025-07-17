@@ -35,7 +35,7 @@ export default async function ManagerLayout({ children }: LayoutProps) {
     <div className="flex min-h-screen flex-col">
       <ManagerHeader />
       <div className="flex flex-1">
-        <ManagerSidebar />
+        <ManagerSidebar className="hidden md:block" />
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
