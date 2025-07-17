@@ -86,7 +86,7 @@ export default async function RestaurantsPage({
                 </tr>
               </thead>
               <tbody>
-                {restaurants.map((r, i) => (
+                {restaurants.map((r: any, i: number) => (
                   <tr
                     key={r.id}
                     className={`border-b hover:bg-muted/50 ${

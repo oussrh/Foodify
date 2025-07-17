@@ -52,7 +52,7 @@ export default async function RestaurantUsersPage({
         </div>
         <AssignUsersDialog
           restaurantId={restaurant.id}
-          defaultUserIds={restaurant.users.map((u) => u.id)}
+          defaultUserIds={restaurant.users.map((u: any) => u.id)}
         />
       </div>
 
@@ -75,7 +75,7 @@ export default async function RestaurantUsersPage({
                 </tr>
               </thead>
               <tbody>
-                {restaurant.users.map((u, i) => (
+                {restaurant.users.map((u: any, i: number) => (
                   <tr
                     key={u.id}
                     className={`border-b hover:bg-muted/50 ${
@@ -114,7 +114,7 @@ export default async function RestaurantUsersPage({
                               <UserX className="h-4 w-4" />
                               <RemoveRestaurantUserButton
                                 restaurantId={restaurant.id}
-                                userIds={restaurant.users.map((r) => r.id)}
+                                userIds={restaurant.users.map((r: any) => r.id)}
                                 userId={u.id}
                               />
                             </button>

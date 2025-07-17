@@ -11,7 +11,7 @@ export default function ManagerSidebar({ className = '' }: { className?: string 
   return (
     <aside className={cn('w-64 border-r bg-muted/50', className)}>
       <nav className="flex flex-col gap-1 p-4 text-sm font-medium">
-        {managerLinks.map(({ href, label, icon: Icon }) => (
+        {managerLinks.map(({ href, label, icon: Icon }: any) => (
           <Link
             key={href}
             href={href}

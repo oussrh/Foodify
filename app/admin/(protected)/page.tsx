@@ -16,7 +16,7 @@ const tiles = [
 export default function AdminDashboardPage() {
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      {tiles.map(({ icon: Icon, label, value }) => (
+      {tiles.map(({ icon: Icon, label, value }: any) => (
         <Card key={label}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{label}</CardTitle>

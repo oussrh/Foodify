@@ -14,7 +14,7 @@ export default function AdminSidebar({ className = '' }: { className?: string })
   return (
     <aside className={cn('w-64 border-r bg-muted/50', className)}>
       <nav className="flex flex-col gap-1 p-4 text-sm font-medium">
-        {adminLinks.map(({ href, label, icon: Icon }) => (
+        {adminLinks.map(({ href, label, icon: Icon }: any) => (
           <Link
             key={href}
             href={href}

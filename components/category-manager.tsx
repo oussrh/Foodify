@@ -118,7 +118,7 @@ export default function CategoryManager({
     setCategories(reordered);
     await reorderCategories(
       restaurantId,
-      reordered.map((c) => c.id)
+      reordered.map((c: any) => c.id)
     );
   };
 
@@ -129,7 +129,7 @@ export default function CategoryManager({
     if (!names.en || !names.fr) return;
     const sub = await createSubcategory(catId, names);
     setCategories((prev) =>
-      prev.map((c) =>
+      prev.map((c: any) =>
         c.id === catId ? { ...c, subcategories: [...c.subcategories, sub] } : c
       )
     );
@@ -149,7 +149,7 @@ export default function CategoryManager({
   const handleDeleteSub = async (catId: string, id: string) => {
     await deleteSubcategory(id);
     setCategories((prev) =>
-      prev.map((c) =>
+      prev.map((c: any) =>
         c.id === catId
           ? {
               ...c,
@@ -173,11 +173,11 @@ export default function CategoryManager({
     const [item] = subs.splice(index, 1);
     subs.splice(newIndex, 0, item);
     setCategories((prev) =>
-      prev.map((c) => (c.id === catId ? { ...c, subcategories: subs } : c))
+      prev.map((c: any) => (c.id === catId ? { ...c, subcategories: subs } : c))
     );
     await reorderSubcategories(
       catId,
-      subs.map((s) => s.id)
+      subs.map((s: any) => s.id)
     );
   };
 
@@ -241,10 +241,10 @@ export default function CategoryManager({
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={categories.map((c) => c.id)}
+          items={categories.map((c: any) => c.id)}
           strategy={verticalListSortingStrategy}
         >
-          {categories.map((cat) => (
+          {categories.map((cat: any) => (
             <SortableCategory
               key={cat.id}
               category={cat}
@@ -376,7 +376,7 @@ function SortableCategory({
 
         {!collapsed && (
           <CardContent className="space-y-3">
-            {category.subcategories.map((sub, i) => (
+            {category.subcategories.map((sub: any, i: number) => (
               <Transition
                 key={sub.id}
                 appear

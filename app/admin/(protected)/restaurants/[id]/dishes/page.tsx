@@ -82,7 +82,7 @@ export default async function DishesPage({
                 </tr>
               </thead>
               <tbody>
-                {dishes.map((d, i) => (
+                {dishes.map((d: any, i: number) => (
                   <tr
                     key={d.id}
                     className={`border-b hover:bg-muted/50 ${
