@@ -38,6 +38,7 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -107,7 +108,7 @@ export default function CategoryManager({
     setCategories(categories.filter((c) => c.id !== id));
   };
 
-  const handleDragEnd = async (event: any) => {
+  const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -118,7 +119,7 @@ export default function CategoryManager({
     setCategories(reordered);
     await reorderCategories(
       restaurantId,
-      reordered.map((c: any) => c.id)
+      reordered.map((c: Category) => c.id)
     );
   };
 
@@ -129,7 +130,7 @@ export default function CategoryManager({
     if (!names.en || !names.fr) return;
     const sub = await createSubcategory(catId, names);
     setCategories((prev) =>
-      prev.map((c: any) =>
+      prev.map((c: Category) =>
         c.id === catId ? { ...c, subcategories: [...c.subcategories, sub] } : c
       )
     );
@@ -149,11 +150,13 @@ export default function CategoryManager({
   const handleDeleteSub = async (catId: string, id: string) => {
     await deleteSubcategory(id);
     setCategories((prev) =>
-      prev.map((c: any) =>
+      prev.map((c: Category) =>
         c.id === catId
           ? {
               ...c,
-              subcategories: c.subcategories.filter((s) => s.id !== id),
+              subcategories: c.subcategories.filter(
+                (s: Subcategory) => s.id !== id
+              ),
             }
           : c
       )
@@ -173,11 +176,13 @@ export default function CategoryManager({
     const [item] = subs.splice(index, 1);
     subs.splice(newIndex, 0, item);
     setCategories((prev) =>
-      prev.map((c: any) => (c.id === catId ? { ...c, subcategories: subs } : c))
+      prev.map((c: Category) =>
+        c.id === catId ? { ...c, subcategories: subs } : c
+      )
     );
     await reorderSubcategories(
       catId,
-      subs.map((s: any) => s.id)
+      subs.map((s: Subcategory) => s.id)
     );
   };
 
@@ -241,10 +246,10 @@ export default function CategoryManager({
         onDragEnd={handleDragEnd}
       >
         <SortableContext
-          items={categories.map((c: any) => c.id)}
+          items={categories.map((c: Category) => c.id)}
           strategy={verticalListSortingStrategy}
         >
-          {categories.map((cat: any) => (
+          {categories.map((cat: Category) => (
             <SortableCategory
               key={cat.id}
               category={cat}
@@ -376,7 +381,7 @@ function SortableCategory({
 
         {!collapsed && (
           <CardContent className="space-y-3">
-            {category.subcategories.map((sub: any, i: number) => (
+            {category.subcategories.map((sub: Subcategory, i: number) => (
               <Transition
                 key={sub.id}
                 appear
