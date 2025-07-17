@@ -11,7 +11,19 @@ import { updateDish } from '@/app/actions/dish-actions'
 
 type Subcategory = { id: string; nameEn: string }
 
-const schema = z.object({
+export interface EditDishValues {
+  nameEn: string
+  nameFr: string
+  descriptionEn?: string
+  descriptionFr?: string
+  price: number
+  imageUrl: string
+  usdzUrl: string
+  glbUrl: string
+  subcategoryId?: string
+}
+
+const schema: z.ZodType<EditDishValues> = z.object({
   nameEn: z.string().min(1),
   nameFr: z.string().min(1),
   descriptionEn: z.string().optional(),
@@ -22,8 +34,6 @@ const schema = z.object({
   glbUrl: z.string().min(1),
   subcategoryId: z.string().optional(),
 })
-
-export type EditDishValues = z.infer<typeof schema>
 
 export default function EditDishForm({
   id,
