@@ -105,7 +105,7 @@ export default function CategoryManager({
 
   const handleDeleteCategory = async (id: string) => {
     await deleteCategory(id);
-    setCategories(categories.filter((c) => c.id !== id));
+    setCategories(categories.filter((c: Category) => c.id !== id));
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
