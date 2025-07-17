@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { PageProps } from '@/types/page'
+import type { TypedPageProps } from '@/types/page'
 import prisma from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -13,7 +13,7 @@ import { MoreVertical } from 'lucide-react'
 import AssignRestaurantsDialog from '@/components/assign-restaurants-dialog'
 import RemoveUserRestaurantButton from '@/components/remove-user-restaurant-button'
 
-export default async function UserRestaurantsPage({ params }: PageProps<{ id: string }>) {
+export default async function UserRestaurantsPage({ params }: TypedPageProps<{ id: string }>) {
   const { id } = params
   const user = await prisma.user.findUnique({
     where: { id },

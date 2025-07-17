@@ -1,6 +1,6 @@
-import type { PageProps } from '@/types/page'
+import type { TypedPageProps } from '@/types/page'
 
-export default function RestaurantPage({ params }: PageProps<{ slug: string }>) {
+export default function RestaurantPage({ params }: TypedPageProps<{ slug: string }>) {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-4 p-6">
       <h1 className="text-2xl font-bold">Restaurant: {params.slug}</h1>
