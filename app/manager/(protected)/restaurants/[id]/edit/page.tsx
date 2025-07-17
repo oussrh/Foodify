@@ -22,6 +22,9 @@ export default async function EditRestaurantPage({ params }: { params: { id: str
     slug: restaurant.slug,
     email: restaurant.email ?? '',
     phone: restaurant.phone ?? '',
+    tagline: restaurant.tagline ?? '',
+    logoUrl: restaurant.logoUrl ?? '',
+    colorTheme: restaurant.colorTheme ?? '',
     defaultLocale: restaurant.defaultLocale,
   }
 

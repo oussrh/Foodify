@@ -36,6 +36,9 @@ export default async function EditRestaurantPage({
     slug: restaurant.slug,
     email: restaurant.email ?? "",
     phone: restaurant.phone ?? "",
+    tagline: restaurant.tagline ?? "",
+    logoUrl: restaurant.logoUrl ?? "",
+    colorTheme: restaurant.colorTheme ?? "",
     defaultLocale: restaurant.defaultLocale,
   };
 

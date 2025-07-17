@@ -15,6 +15,9 @@ async function main() {
       name: "Foodify Test Kitchen",
       slug: "foodify-test-kitchen",
       email: "contact@foodify.test",
+      tagline: "AR dining reinvented",
+      logoUrl: "/images/logo.png",
+      colorTheme: "#ff0000",
       defaultLocale: "en",
     },
   });
