@@ -8,8 +8,11 @@ import { redirect } from 'next/navigation'
 export default async function MenuPage({ params }: PageProps<{ id: string }>) {
   const { id } = params
   const session = await auth()
+  if (!session?.user?.email) {
+    throw new Error('Not authenticated')
+  }
   const restaurant = await prisma.restaurant.findFirst({
-    where: { id, users: { some: { email: session!.user.email } } },
+    where: { id, users: { some: { email: session.user.email } } },
     select: { id: true },
   })
 

@@ -11,7 +11,7 @@ interface LayoutProps {
 export default async function AdminLayout({ children }: LayoutProps) {
   const session = await auth()
 
-  if (!session) {
+  if (!session?.user) {
     redirect('/admin/login')
   }
 

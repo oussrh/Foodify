@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 
 export async function updateEmail(email: string) {
   const session = await auth()
-  if (!session) {
+  if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
   return prisma.user.update({
@@ -17,7 +17,7 @@ export async function updateEmail(email: string) {
 
 export async function updatePassword(password: string) {
   const session = await auth()
-  if (!session) {
+  if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
   const passwordHash = await bcrypt.hash(password, 10)
