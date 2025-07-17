@@ -1,5 +1,5 @@
 import Link from "next/link";
-import type { AppPageProps } from "@/types/page";
+import type { PageProps } from "next";
 import CategoryManager from "@/components/category-manager";
 import { getMenu } from "@/app/actions/menu-actions";
 import prisma from "@/lib/prisma";
@@ -7,7 +7,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Utensils } from "lucide-react";
 
-export default async function MenuPage({ params }: AppPageProps<{ id: string }>) {
+export default async function MenuPage({ params }: PageProps<{ id: string }>) {
   const { id } = params;
 
   // Fetch the restaurant info
