@@ -15,10 +15,12 @@ export function middleware(request: NextRequest) {
   }
 
   // Extract subdomain for restaurant sites (e.g., myrestaurant.foodify.com)
-  // Skip if running on localhost or an IP address to avoid false rewrites
+  // Skip if running on localhost, IP address, or Vercel domains
   const isIp = /^\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?$/.test(host)
   const isLocal = host.startsWith('localhost')
-  if (!isIp && !isLocal) {
+  const isVercel = host.includes('.vercel.app') || host.includes('.netlify.app') || host.includes('.herokuapp.com')
+  
+  if (!isIp && !isLocal && !isVercel) {
     const parts = host.split('.')
     if (parts.length >= 3) {
       const subdomain = parts[0]
