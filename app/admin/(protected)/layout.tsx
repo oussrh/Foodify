@@ -21,6 +21,9 @@ export default async function AdminLayout({ children }: LayoutProps) {
   })
 
   if (user?.role !== 'SUPER_ADMIN') {
+    if (user?.role === 'RESTAURANT_ADMIN') {
+      redirect('/manager')
+    }
     redirect('/')
   }
 
