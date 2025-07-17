@@ -48,3 +48,7 @@ This repository currently contains minimal scaffolding. More features will be ad
 ## Menu Management
 
 Restaurant admins can manage menu categories and subcategories from `/admin/restaurants/[id]/menu`. Categories support inline editing, deletion with confirmation and drag-and-drop reordering using the built-in HTML5 API. Subcategories can be reordered using Up/Down buttons.
+
+## AR File Uploads
+
+Dish USDZ and GLB assets are uploaded to Cloudinary. Each restaurant has its own folder which keeps AR files organized. Configure your Cloudinary credentials in `.env` using `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.

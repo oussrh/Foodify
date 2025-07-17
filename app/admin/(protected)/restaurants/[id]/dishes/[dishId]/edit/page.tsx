@@ -52,6 +52,7 @@ export default async function EditDishPage({
         <CardContent>
           <EditDishForm
             id={dish.id}
+            restaurantId={dish.restaurantId}
             defaultValues={defaultValues}
             subcategories={subcategories}
           />
