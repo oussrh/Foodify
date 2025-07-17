@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
-import EditClientForm, { EditClientValues } from '@/components/edit-client-form'
+import EditClientForm, { type EditClientValues } from '@/components/edit-client-form'
 import { buttonVariants } from '@/components/ui/button'
 
 export default async function EditUserPage({

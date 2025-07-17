@@ -15,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { MoreVertical } from 'lucide-react'
+import type { Restaurant } from '@prisma/client'
 
 export default async function ManagerRestaurantsPage() {
   const session = await auth()
@@ -46,7 +47,7 @@ export default async function ManagerRestaurantsPage() {
                 </tr>
               </thead>
               <tbody>
-                {restaurants.map((r, i) => (
+                {restaurants.map((r: Restaurant, i: number) => (
                   <tr
                     key={r.id}
                     className={`border-b hover:bg-muted/50 ${i % 2 === 0 ? 'bg-muted/30' : ''}`}
