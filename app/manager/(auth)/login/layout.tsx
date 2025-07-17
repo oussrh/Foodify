@@ -9,7 +9,7 @@ export default async function ManagerLoginLayout({
 }) {
   const session = await auth()
 
-  if (session) {
+  if (session?.user) {
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: { role: true },

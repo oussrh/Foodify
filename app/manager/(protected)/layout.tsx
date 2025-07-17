@@ -11,7 +11,7 @@ interface LayoutProps {
 export default async function ManagerLayout({ children }: LayoutProps) {
   const session = await auth()
 
-  if (!session) {
+  if (!session?.user) {
     redirect('/manager/login')
   }
 
