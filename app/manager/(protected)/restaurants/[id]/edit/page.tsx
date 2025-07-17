@@ -29,9 +29,19 @@ export default async function EditRestaurantPage({ params }: { params: { id: str
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold tracking-tight">Edit Restaurant</h2>
-        <Link href="/manager/restaurants" className={buttonVariants({ variant: 'outline' })}>
-          Back to Restaurants
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href={`/restaurant/${restaurant.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={buttonVariants({ variant: 'secondary' })}
+          >
+            View Public Page
+          </Link>
+          <Link href="/manager/restaurants" className={buttonVariants({ variant: 'outline' })}>
+            Back to Restaurants
+          </Link>
+        </div>
       </div>
       <Card>
         <CardHeader>
