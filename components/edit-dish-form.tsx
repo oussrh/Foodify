@@ -27,10 +27,12 @@ export type EditDishValues = z.infer<typeof schema>
 
 export default function EditDishForm({
   id,
+  restaurantId,
   defaultValues,
   subcategories,
 }: {
   id: string
+  restaurantId: string
   defaultValues: EditDishValues
   subcategories: Subcategory[]
 }) {
@@ -44,7 +46,7 @@ export default function EditDishForm({
   })
 
   const onSubmit = async (data: EditDishValues) => {
-    await updateDish(id, {
+    await updateDish(id, restaurantId, {
       ...data,
       subcategoryId: data.subcategoryId || null,
     })
