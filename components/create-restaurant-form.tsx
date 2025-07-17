@@ -27,7 +27,7 @@ export default function CreateRestaurantForm() {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormValues>({ resolver: zodResolver(schema), defaultValues: { defaultLocale: 'en' } })
+  } = useForm<FormValues>({ resolver: zodResolver<FormValues>(schema), defaultValues: { defaultLocale: 'en' } })
 
   const onSubmit = async (data: FormValues) => {
     await createRestaurant(data)

@@ -25,7 +25,7 @@ export default function EditAdminForm({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<EditAdminValues>({ resolver: zodResolver(schema), defaultValues })
+  } = useForm<EditAdminValues>({ resolver: zodResolver<EditAdminValues>(schema), defaultValues })
 
   const onSubmit = async (data: EditAdminValues) => {
     await updateAdmin(id, data)

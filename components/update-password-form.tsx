@@ -28,7 +28,7 @@ export default function UpdatePasswordForm() {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<FormValues>({ resolver: zodResolver(schema) })
+  } = useForm<FormValues>({ resolver: zodResolver<FormValues>(schema) })
   const [loading, setLoading] = useState(false)
 
   const onSubmit = async (data: FormValues) => {

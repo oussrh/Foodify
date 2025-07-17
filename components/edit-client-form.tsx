@@ -32,7 +32,7 @@ export default function EditClientForm({
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<EditClientValues>({ resolver: zodResolver(schema), defaultValues })
+  } = useForm<EditClientValues>({ resolver: zodResolver<EditClientValues>(schema), defaultValues })
 
   const onSubmit = async (data: EditClientValues) => {
     await updateClient(id, data)
