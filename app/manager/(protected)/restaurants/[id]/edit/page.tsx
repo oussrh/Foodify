@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { PageProps } from 'next'
+import type { PageProps } from '@/types/page'
 import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'

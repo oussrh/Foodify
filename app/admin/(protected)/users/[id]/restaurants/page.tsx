@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import type { PageProps } from 'next'
+import type { PageProps } from '@/types/page'
 import prisma from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
