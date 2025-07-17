@@ -6,20 +6,24 @@ import { buttonVariants } from '@/components/ui/button'
 
 export default async function EditDishPage({
   params,
-}: { params: { id: string; dishId: string } }) {
+}: { 
+  params: Promise<{ id: string; dishId: string }> 
+}) {
+  const { id, dishId } = await params
+  
   const dish = await prisma.dish.findUnique({
-    where: { id: params.dishId },
+    where: { id: dishId },
   })
-
-  if (!dish || dish.restaurantId !== params.id) {
+  
+  if (!dish || dish.restaurantId !== id) {
     return <div className="py-12 text-center text-muted-foreground">Dish not found</div>
   }
-
+  
   const subcategories = await prisma.menuSubcategory.findMany({
     where: { category: { restaurantId: dish.restaurantId } },
     orderBy: { nameEn: 'asc' },
   })
-
+  
   const defaultValues: EditDishValues = {
     nameEn: dish.nameEn,
     nameFr: dish.nameFr,
@@ -31,7 +35,7 @@ export default async function EditDishPage({
     glbUrl: dish.glbUrl,
     subcategoryId: dish.subcategoryId || '',
   }
-
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
