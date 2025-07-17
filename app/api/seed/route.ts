@@ -4,14 +4,26 @@ import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
-export async function POST(request: NextRequest) {
+async function seedDatabase(request: NextRequest) {
   try {
     // Security check - only allow in development or with a secret key
     const { searchParams } = new URL(request.url)
     const secret = searchParams.get('secret')
     
+    // For debugging
+    console.log('Received secret:', secret)
+    console.log('Expected secret:', process.env.NEXTAUTH_SECRET)
+    console.log('NODE_ENV:', process.env.NODE_ENV)
+    
     if (process.env.NODE_ENV === 'production' && secret !== process.env.NEXTAUTH_SECRET) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        debug: {
+          receivedSecret: secret?.substring(0, 10) + '...',
+          expectedExists: !!process.env.NEXTAUTH_SECRET,
+          nodeEnv: process.env.NODE_ENV
+        }
+      }, { status: 401 })
     }
 
     // Hash the default password
@@ -173,4 +185,13 @@ export async function POST(request: NextRequest) {
   } finally {
     await prisma.$disconnect()
   }
+}
+
+// Support both GET and POST
+export async function GET(request: NextRequest) {
+  return seedDatabase(request)
+}
+
+export async function POST(request: NextRequest) {
+  return seedDatabase(request)
 }
