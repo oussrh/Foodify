@@ -1,10 +1,9 @@
 import Link from 'next/link'
-import type { TypedPageProps } from '@/types/page'
 import prisma from '@/lib/prisma'
 import EditClientForm, { EditClientValues } from '@/components/edit-client-form'
 import { buttonVariants } from '@/components/ui/button'
 
-export default async function EditUserPage({ params }: TypedPageProps<{ id: string }>) {
+export default async function EditUserPage({ params }: { params: { id: string } }) {
   const { id } = params
   const user = await prisma.user.findUnique({
     where: { id },
