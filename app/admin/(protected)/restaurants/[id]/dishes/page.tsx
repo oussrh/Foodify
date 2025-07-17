@@ -1,3 +1,5 @@
+// PathFile: app/admin/(protected)/restaurants/[id]/dishes/page.tsx
+
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { buttonVariants, Button } from "@/components/ui/button";
@@ -80,7 +82,7 @@ export default async function DishesPage({
                 </tr>
               </thead>
               <tbody>
-                {dishes.map((d, i) => (
+                {dishes.map((d: any, i: number) => (
                   <tr
                     key={d.id}
                     className={`border-b hover:bg-muted/50 ${
