@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
-import EditAdminForm, { EditAdminValues } from '@/components/edit-admin-form'
+import EditAdminForm, { type EditAdminValues } from '@/components/edit-admin-form'
 import { buttonVariants } from '@/components/ui/button'
 
 export default async function EditAdminPage({ 
