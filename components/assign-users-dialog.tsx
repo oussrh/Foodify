@@ -43,13 +43,13 @@ export default function AssignUsersDialog({
       .then((data: User[]) => setUsers(data));
   }, [open]);
 
-  const filteredUsers = users.filter((u) =>
+  const filteredUsers = users.filter((u: User) =>
     u.email.toLowerCase().includes(query.toLowerCase())
   );
 
   const toggle = (id: string) => {
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((uid) => uid !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((uid: string) => uid !== id) : [...prev, id]
     );
   };
 

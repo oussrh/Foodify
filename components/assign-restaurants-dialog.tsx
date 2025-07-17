@@ -41,13 +41,13 @@ export default function AssignRestaurantsDialog({
       .then((data: Restaurant[]) => setRestaurants(data));
   }, [open]);
 
-  const filteredRestaurants = restaurants.filter((r) =>
+  const filteredRestaurants = restaurants.filter((r: Restaurant) =>
     r.name.toLowerCase().includes(query.toLowerCase())
   );
 
   const toggle = (id: string) => {
     setSelected((prev) =>
-      prev.includes(id) ? prev.filter((rid) => rid !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((rid: string) => rid !== id) : [...prev, id]
     );
   };
 

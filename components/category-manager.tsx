@@ -112,8 +112,8 @@ export default function CategoryManager({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = categories.findIndex((c) => c.id === active.id);
-    const newIndex = categories.findIndex((c) => c.id === over.id);
+    const oldIndex = categories.findIndex((c: Category) => c.id === active.id);
+    const newIndex = categories.findIndex((c: Category) => c.id === over.id);
 
     const reordered = arrayMove(categories, oldIndex, newIndex);
     setCategories(reordered);
@@ -174,7 +174,7 @@ export default function CategoryManager({
     index: number,
     direction: "up" | "down"
   ) => {
-    const cat = categories.find((c) => c.id === catId);
+    const cat = categories.find((c: Category) => c.id === catId);
     if (!cat) return;
     const subs = [...cat.subcategories];
     const newIndex = direction === "up" ? index - 1 : index + 1;
@@ -201,13 +201,13 @@ export default function CategoryManager({
 
   const collapseAll = () => {
     const collapsed: Record<string, boolean> = {};
-    categories.forEach((c) => (collapsed[c.id] = true));
+    categories.forEach((c: Category) => (collapsed[c.id] = true));
     setCollapsedStates(collapsed);
   };
 
   const expandAll = () => {
     const expanded: Record<string, boolean> = {};
-    categories.forEach((c) => (expanded[c.id] = false));
+    categories.forEach((c: Category) => (expanded[c.id] = false));
     setCollapsedStates(expanded);
   };
 
