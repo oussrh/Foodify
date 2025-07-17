@@ -3,13 +3,20 @@ import prisma from '@/lib/prisma'
 import EditAdminForm, { EditAdminValues } from '@/components/edit-admin-form'
 import { buttonVariants } from '@/components/ui/button'
 
-export default async function EditAdminPage({ params }: { params: { id: string } }) {
-  const { id } = params
+export default async function EditAdminPage({ 
+  params 
+}: { 
+  params: Promise<{ id: string }> 
+}) {
+  const { id } = await params
   const admin = await prisma.user.findUnique({ where: { id } })
+  
   if (!admin) {
     return <div>Admin not found</div>
   }
+  
   const defaultValues: EditAdminValues = { email: admin.email }
+  
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
