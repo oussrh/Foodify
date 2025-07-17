@@ -1,5 +1,10 @@
 import Link from "next/link";
-import type { AppPageProps } from "@/types/page";
+type PageProps = {
+  params: { id: string }
+  searchParams?: {
+    [key: string]: string | string[] | undefined
+  }
+}
 import prisma from "@/lib/prisma";
 import { buttonVariants, Button } from "@/components/ui/button";
 import DeleteDishButton from "@/components/delete-dish-button";
@@ -14,7 +19,7 @@ import { MoreVertical, ArrowLeft, PlusCircle } from "lucide-react";
 
 export default async function DishesPage({
   params,
-}: AppPageProps<{ id: string }>) {
+}: PageProps) {
   const restaurant = await prisma.restaurant.findUnique({
     where: { id: params.id },
   });

@@ -1,5 +1,10 @@
 import Link from "next/link";
-import type { AppPageProps } from "@/types/page";
+type PageProps = {
+  params: {}
+  searchParams?: {
+    [key: string]: string | string[] | undefined
+  }
+}
 import prisma from "@/lib/prisma";
 import { buttonVariants, Button } from "@/components/ui/button";
 import DeleteRestaurantButton from "@/components/delete-restaurant-button";
@@ -28,7 +33,7 @@ async function getRestaurants(searchQuery: string) {
 
 export default async function RestaurantsPage({
   searchParams,
-}: AppPageProps<{}, { search?: string }>) {
+}: PageProps) {
   const searchQuery = searchParams?.search || "";
   const restaurants = await getRestaurants(searchQuery);
 
