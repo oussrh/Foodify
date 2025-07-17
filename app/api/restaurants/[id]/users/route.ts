@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma'
 import { NextRequest } from 'next/server'
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }) {
   const { userIds } = await req.json()
   const { id } = params
   if (!Array.isArray(userIds)) {
