@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { Home, Utensils, Users, Settings, Shield } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-const links = [
+export const adminLinks = [
   { href: '/admin', label: 'Dashboard', icon: Home },
   { href: '/admin/restaurants', label: 'Restaurants', icon: Utensils },
   { href: '/admin/users', label: 'Users', icon: Users },
@@ -9,11 +10,11 @@ const links = [
   { href: '/admin/settings', label: 'Settings', icon: Settings },
 ]
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ className = '' }: { className?: string }) {
   return (
-    <aside className="hidden w-64 border-r bg-muted/50 md:block">
+    <aside className={cn('w-64 border-r bg-muted/50', className)}>
       <nav className="flex flex-col gap-1 p-4 text-sm font-medium">
-        {links.map(({ href, label, icon: Icon }) => (
+        {adminLinks.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
             href={href}

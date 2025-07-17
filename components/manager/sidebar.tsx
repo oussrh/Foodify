@@ -1,16 +1,17 @@
 import Link from 'next/link'
 import { Utensils, User } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
-const links = [
+export const managerLinks = [
   { href: '/manager/restaurants', label: 'Restaurants', icon: Utensils },
   { href: '/manager/profile', label: 'Profile', icon: User },
 ]
 
-export default function ManagerSidebar() {
+export default function ManagerSidebar({ className = '' }: { className?: string }) {
   return (
-    <aside className="hidden w-64 border-r bg-muted/50 md:block">
+    <aside className={cn('w-64 border-r bg-muted/50', className)}>
       <nav className="flex flex-col gap-1 p-4 text-sm font-medium">
-        {links.map(({ href, label, icon: Icon }) => (
+        {managerLinks.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
             href={href}
