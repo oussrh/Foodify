@@ -1,7 +1,6 @@
+import type { PageProps } from 'next'
+
 export interface AppPageProps<
   Params extends Record<string, string> = {},
   SearchParams extends Record<string, string | string[] | undefined> = {}
-> {
-  params: Params
-  searchParams: SearchParams
-}
+> extends PageProps<Params, SearchParams> {}
