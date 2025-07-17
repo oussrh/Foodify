@@ -54,7 +54,7 @@ export async function deleteSubcategory(id: string) {
 
 export async function reorderCategories(restaurantId: string, ids: string[]) {
   await Promise.all(
-    ids.map((id: any, index: number) =>
+    ids.map((id: string, index: number) =>
       prisma.menuCategory.update({ where: { id }, data: { sortOrder: index } })
     )
   )
@@ -62,7 +62,7 @@ export async function reorderCategories(restaurantId: string, ids: string[]) {
 
 export async function reorderSubcategories(categoryId: string, ids: string[]) {
   await Promise.all(
-    ids.map((id: any, index: number) =>
+    ids.map((id: string, index: number) =>
       prisma.menuSubcategory.update({ where: { id }, data: { sortOrder: index } })
     )
   )
