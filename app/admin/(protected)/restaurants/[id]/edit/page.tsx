@@ -1,7 +1,9 @@
+//FilePath : app/admin/(protected)/restaurants/[id]/edit/page.tsx
+
 import Link from "next/link";
 import prisma from "@/lib/prisma";
 import EditRestaurantForm, {
-  EditRestaurantValues,
+  type EditRestaurantValues,
 } from "@/components/edit-restaurant-form";
 import {
   Card,
@@ -22,7 +24,7 @@ export default async function EditRestaurantPage({
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
   });
-
+  
   if (!restaurant) {
     return (
       <div className="py-12 text-center text-muted-foreground">
@@ -30,7 +32,7 @@ export default async function EditRestaurantPage({
       </div>
     );
   }
-
+  
   const defaultValues: EditRestaurantValues = {
     name: restaurant.name,
     slug: restaurant.slug,
@@ -41,7 +43,7 @@ export default async function EditRestaurantPage({
     colorTheme: restaurant.colorTheme ?? "",
     defaultLocale: restaurant.defaultLocale,
   };
-
+  
   return (
     <div className="space-y-8">
       {/* Page header */}
@@ -79,7 +81,6 @@ export default async function EditRestaurantPage({
           </Link>
         </div>
       </div>
-
       {/* Edit Card */}
       <Card className="shadow-lg">
         <CardHeader>
