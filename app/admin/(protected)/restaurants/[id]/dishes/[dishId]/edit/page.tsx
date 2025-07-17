@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { PageProps } from 'next'
 import prisma from '@/lib/prisma'
 import EditDishForm, { EditDishValues } from '@/components/edit-dish-form'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
@@ -6,9 +7,7 @@ import { buttonVariants } from '@/components/ui/button'
 
 export default async function EditDishPage({
   params,
-}: {
-  params: { id: string; dishId: string }
-}) {
+}: PageProps<{ id: string; dishId: string }>) {
   const dish = await prisma.dish.findUnique({
     where: { id: params.dishId },
   })
