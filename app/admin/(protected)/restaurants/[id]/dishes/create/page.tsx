@@ -1,10 +1,11 @@
 import Link from 'next/link'
+import type { PageProps } from 'next'
 import prisma from '@/lib/prisma'
 import CreateDishForm from '@/components/create-dish-form'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 
-export default async function CreateDishPage({ params }: { params: { id: string } }) {
+export default async function CreateDishPage({ params }: PageProps<{ id: string }>) {
   const restaurant = await prisma.restaurant.findUnique({ where: { id: params.id } })
   if (!restaurant) {
     return <div className="py-12 text-center text-muted-foreground">Restaurant not found</div>

@@ -1,10 +1,11 @@
+import type { PageProps } from 'next'
 import CategoryManager from '@/components/category-manager'
 import { getMenu } from '@/app/actions/menu-actions'
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 
-export default async function MenuPage({ params }: { params: { id: string } }) {
+export default async function MenuPage({ params }: PageProps<{ id: string }>) {
   const { id } = params
   const session = await auth()
   const restaurant = await prisma.restaurant.findFirst({

@@ -5,7 +5,7 @@ const nextConfig = {
   reactStrictMode: true,
   // Enable experimental features introduced in Next.js 15
   experimental: {
-    serverActions: true,
+    serverActions: {},
     typedRoutes: true,
   },
   // Internationalization for English and French content
