@@ -1,4 +1,4 @@
-import type { PageProps } from 'next'
+import type { PageProps } from '@/types/page'
 
 export default function RestaurantPage({ params }: PageProps<{ slug: string }>) {
   return (
