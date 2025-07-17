@@ -12,18 +12,31 @@ export default function SuperAdminLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const router = useRouter()
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const res = await requestAdminOtp(email, password)
-    if (res?.error) {
-      setError(res.error)
-      return
+    setLoading(true)
+    setError('')
+    
+    try {
+      const res = await requestAdminOtp(email, password)
+      if (res?.error) {
+        setError(res.error)
+        return
+      }
+      if (res?.success) {
+        sessionStorage.setItem('adminEmail', email)
+        sessionStorage.setItem('adminPassword', password)
+        router.push('/admin/mfa')
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('Something went wrong. Please try again.')
+    } finally {
+      setLoading(false)
     }
-    sessionStorage.setItem('adminEmail', email)
-    sessionStorage.setItem('adminPassword', password)
-    router.push('/admin/mfa')
   }
 
   return (
@@ -38,9 +51,20 @@ export default function SuperAdminLoginPage() {
           <Label htmlFor="password">Password</Label>
           <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </div>
-        <Button type="submit" className="w-full">Sign In</Button>
+        <Button type="submit" className="w-full" disabled={loading}>
+          {loading ? 'Signing In...' : 'Sign In'}
+        </Button>
       </form>
       {error && <div className="text-red-600 text-sm text-center">{error}</div>}
+      
+      <div className="mt-8 p-4 bg-gray-100 rounded text-xs">
+        <h3 className="font-semibold mb-2">Test Credentials:</h3>
+        <p><strong>Email:</strong> ousrh7@gmail.com</p>
+        <p><strong>Password:</strong> changeme</p>
+        <p className="text-gray-600 mt-2">
+          Note: This will send an OTP to the email if RESEND_API_KEY is configured.
+        </p>
+      </div>
     </div>
   )
 }
