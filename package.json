@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prisma": "prisma",
     "db:seed": "node prisma/seed.js"
@@ -49,6 +51,8 @@
     "@types/node": "24.0.14",
     "@types/react": "19.1.8",
     "autoprefixer": "latest",
+    "eslint": "^9.31.0",
+    "eslint-config-next": "^15.4.1",
     "postcss": "latest",
     "prisma": "latest",
     "tailwindcss": "^3.4.17",

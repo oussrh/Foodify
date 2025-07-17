@@ -22,7 +22,7 @@ const schema = z.object({
   tagline: z.string().optional(),
   logoUrl: z.string().url("Invalid URL format").optional().or(z.literal("")),
   colorTheme: z.string().optional(),
-  defaultLocale: z.enum(["en", "fr"]).default("en"),
+  defaultLocale: z.enum(["en", "fr"]),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -79,7 +79,7 @@ export default function CreateRestaurantForm() {
           <span className="text-sm text-red-500">{errors.slug.message}</span>
         )}
         <span className="text-xs text-gray-500">
-          This will be used in your restaurant's URL (e.g.,
+          This will be used in your restaurant&apos;s URL (e.g.,
           yourslug.foodify.com)
         </span>
       </div>

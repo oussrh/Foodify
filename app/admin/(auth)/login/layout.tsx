@@ -11,7 +11,7 @@ export default async function AdminLoginLayout({
 
   if (session?.user) {
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { email: session.user.email || undefined },
       select: { role: true },
     })
 

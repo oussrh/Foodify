@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: LayoutProps) {
   }
 
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
+    where: { email: session.user.email || undefined },
     select: { role: true },
   })
 

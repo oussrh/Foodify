@@ -42,7 +42,7 @@ export default function DeleteRestaurantButton({
 
       // Redirect to a specific path or refresh
       if (redirectTo) {
-        router.push(redirectTo);
+        router.push(redirectTo as any);
       } else {
         router.refresh();
       }

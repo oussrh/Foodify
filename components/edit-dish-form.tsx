@@ -23,17 +23,20 @@ export interface EditDishValues {
   subcategoryId?: string
 }
 
-const schema: z.ZodType<EditDishValues> = z.object({
+const schema = z.object({
   nameEn: z.string().min(1),
   nameFr: z.string().min(1),
   descriptionEn: z.string().optional(),
   descriptionFr: z.string().optional(),
-  price: z.coerce.number().min(0),
+  price: z.number().min(0),
   imageUrl: z.string().min(1),
   usdzUrl: z.string().min(1),
   glbUrl: z.string().min(1),
   subcategoryId: z.string().optional(),
-})
+}).transform((data) => ({
+  ...data,
+  price: Number(data.price),
+}))
 
 export default function EditDishForm({
   id,

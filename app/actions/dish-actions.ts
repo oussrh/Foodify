@@ -32,7 +32,13 @@ export async function createDish(
   ])
   return prisma.dish.create({
     data: {
-      ...data,
+      nameEn: data.nameEn,
+      nameFr: data.nameFr,
+      descriptionEn: data.descriptionEn || '',
+      descriptionFr: data.descriptionFr || '',
+      price: data.price,
+      imageUrl: data.imageUrl,
+      subcategoryId: data.subcategoryId,
       usdzUrl,
       glbUrl,
       restaurantId,
