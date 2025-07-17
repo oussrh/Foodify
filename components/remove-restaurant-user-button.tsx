@@ -21,7 +21,9 @@ export default function RemoveRestaurantUserButton({
     await fetch(`/api/restaurants/${restaurantId}/users`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userIds: userIds.filter((id) => id !== userId) }),
+      body: JSON.stringify({
+        userIds: userIds.filter((id: string) => id !== userId),
+      }),
     })
     setLoading(false)
     router.refresh()

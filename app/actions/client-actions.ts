@@ -39,7 +39,7 @@ export async function createClient(data: {
       email: data.email,
       passwordHash,
       role: 'RESTAURANT_ADMIN',
-      restaurants: { connect: restaurantIds.map((id: any) => ({ id })) },
+      restaurants: { connect: restaurantIds.map((id: string) => ({ id })) },
     },
   })
 }
@@ -54,7 +54,7 @@ export async function updateClient(
     data: {
       ...rest,
       restaurants: restaurantIds
-        ? { set: restaurantIds.map((id: any) => ({ id })) }
+        ? { set: restaurantIds.map((id: string) => ({ id })) }
         : undefined,
     },
   })
