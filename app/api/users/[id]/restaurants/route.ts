@@ -3,7 +3,7 @@ import { NextRequest } from 'next/server'
 
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
   const { restaurantIds } = await req.json()
-  const { id } = await params
+  const { id } = params
   if (!Array.isArray(restaurantIds)) {
     return new Response('Invalid restaurantIds', { status: 400 })
   }
