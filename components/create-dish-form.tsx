@@ -11,19 +11,7 @@ import { createDish } from '@/app/actions/dish-actions'
 
 type Subcategory = { id: string; nameEn: string }
 
-interface FormValues {
-  nameEn: string
-  nameFr: string
-  descriptionEn?: string
-  descriptionFr?: string
-  price: number
-  imageUrl: string
-  usdzUrl: string
-  glbUrl: string
-  subcategoryId?: string
-}
-
-const schema: z.ZodType<FormValues> = z.object({
+const schema = z.object({
   nameEn: z.string().min(1),
   nameFr: z.string().min(1),
   descriptionEn: z.string().optional(),
@@ -34,6 +22,8 @@ const schema: z.ZodType<FormValues> = z.object({
   glbUrl: z.string().min(1),
   subcategoryId: z.string().optional(),
 })
+
+type FormValues = z.infer<typeof schema>
 
 export default function CreateDishForm({
   restaurantId,
