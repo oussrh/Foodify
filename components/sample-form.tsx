@@ -19,7 +19,7 @@ export default function SampleForm() {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<FormValues>({ resolver: zodResolver<FormValues>(schema) })
+  } = useForm<FormValues>({ resolver: zodResolver(schema) })
 
   const onSubmit = (data: FormValues) => {
     console.log(data)
