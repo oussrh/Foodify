@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
-import { Eye, EyeOff, Star, StarOff, DollarSign, Edit2 } from 'lucide-react'
+import { Eye, EyeOff, Star, StarOff, DollarSign, Edit2, Loader2 } from 'lucide-react'
 import { toggleDishStatus, toggleMostPurchased, updateDishPrice } from '@/app/actions/dish-actions'
 import {
   Dialog,
@@ -40,16 +40,21 @@ export function DishStatusToggle({ dishId, isActive }: { dishId: string; isActiv
   }
 
   return (
-    <DropdownMenuItem onClick={handleToggle} disabled={loading}>
-      {isActive ? (
+    <DropdownMenuItem onClick={handleToggle} disabled={loading} className="focus:bg-gray-50">
+      {loading ? (
         <>
-          <EyeOff className="h-4 w-4 mr-2" />
-          Deactivate
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          {isActive ? 'Deactivating...' : 'Activating...'}
+        </>
+      ) : isActive ? (
+        <>
+          <EyeOff className="h-4 w-4 mr-2 text-red-500" />
+          <span>Deactivate</span>
         </>
       ) : (
         <>
-          <Eye className="h-4 w-4 mr-2" />
-          Activate
+          <Eye className="h-4 w-4 mr-2 text-green-500" />
+          <span>Activate</span>
         </>
       )}
     </DropdownMenuItem>
@@ -73,16 +78,21 @@ export function MostPurchasedToggle({ dishId, isMostPurchased }: { dishId: strin
   }
 
   return (
-    <DropdownMenuItem onClick={handleToggle} disabled={loading}>
-      {isMostPurchased ? (
+    <DropdownMenuItem onClick={handleToggle} disabled={loading} className="focus:bg-gray-50">
+      {loading ? (
         <>
-          <StarOff className="h-4 w-4 mr-2" />
-          Remove Popular
+          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          {isMostPurchased ? 'Removing...' : 'Marking...'}
+        </>
+      ) : isMostPurchased ? (
+        <>
+          <StarOff className="h-4 w-4 mr-2 text-gray-500" />
+          <span>Remove Popular</span>
         </>
       ) : (
         <>
-          <Star className="h-4 w-4 mr-2" />
-          Mark Popular
+          <Star className="h-4 w-4 mr-2 text-yellow-500" />
+          <span>Mark Popular</span>
         </>
       )}
     </DropdownMenuItem>
@@ -116,34 +126,50 @@ export function PriceEditor({ dishId, currentPrice }: { dishId: string; currentP
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-          <DollarSign className="h-4 w-4 mr-2" />
-          Edit Price
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="focus:bg-gray-50">
+          <DollarSign className="h-4 w-4 mr-2 text-green-500" />
+          <span>Edit Price</span>
         </DropdownMenuItem>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Edit Price</DialogTitle>
+          <DialogTitle className="text-lg font-semibold">Edit Price</DialogTitle>
         </DialogHeader>
-        <div className="space-y-4">
-          <div>
-            <Label htmlFor="price">Price ($)</Label>
-            <Input
-              id="price"
-              type="number"
-              step="0.01"
-              min="0"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="0.00"
-            />
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="price" className="text-sm font-medium">Price (USD)</Label>
+            <div className="relative">
+              <DollarSign className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                id="price"
+                type="number"
+                step="0.01"
+                min="0"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="0.00"
+                className="pl-10 text-lg font-medium"
+              />
+            </div>
+            <p className="text-xs text-gray-500">Enter the new price for this dish</p>
           </div>
-          <div className="flex gap-2 justify-end">
-            <Button variant="outline" onClick={() => setOpen(false)}>
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={() => setOpen(false)} className="flex-1">
               Cancel
             </Button>
-            <Button onClick={handleSave} disabled={loading}>
-              {loading ? 'Saving...' : 'Save Price'}
+            <Button 
+              onClick={handleSave} 
+              disabled={loading || !price || parseFloat(price) < 0}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Price'
+              )}
             </Button>
           </div>
         </div>
