@@ -1,19 +1,35 @@
-//FilePath : app/admin/(protected)/restaurants/[id]/edit/page.tsx
-
-import Link from "next/link";
-import prisma from "@/lib/prisma";
+import Link from 'next/link'
+import prisma from '@/lib/prisma'
 import EditRestaurantForm, {
   type EditRestaurantValues,
-} from "@/components/edit-restaurant-form";
+} from '@/components/edit-restaurant-form'
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { buttonVariants, Button } from "@/components/ui/button";
-import { ArrowLeft, Utensils, Users, ChefHat, Building2 } from "lucide-react";
+} from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import { 
+  ArrowLeft, 
+  Utensils, 
+  Users, 
+  ChefHat, 
+  Building2, 
+  Shield,
+  Settings,
+  BarChart3,
+  Globe,
+  Mail,
+  Phone,
+  Calendar,
+  Palette,
+  Image as ImageIcon,
+  Trash2
+} from 'lucide-react'
+import { AdminDeleteRestaurantButton } from '@/components/admin-delete-restaurant-button'
+import Image from 'next/image'
 
 export default async function EditRestaurantPage({
   params,
@@ -23,7 +39,29 @@ export default async function EditRestaurantPage({
   const { id } = await params;
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
-  });
+    include: {
+      users: {
+        select: {
+          id: true,
+          email: true,
+          role: true,
+        }
+      },
+      dishes: {
+        select: {
+          id: true,
+          nameEn: true,
+          isActive: true,
+          price: true
+        }
+      },
+      categories: {
+        include: {
+          subcategories: true
+        }
+      }
+    }
+  })
   
   if (!restaurant) {
     return (
@@ -44,62 +82,218 @@ export default async function EditRestaurantPage({
     defaultLocale: restaurant.defaultLocale,
   };
   
+  const activeDishes = restaurant?.dishes?.filter((d: any) => d.isActive).length || 0
+  const totalDishes = restaurant?.dishes?.length || 0
+  const managers = restaurant?.users?.filter((u: any) => u.role === 'RESTAURANT_ADMIN') || []
+  const totalCategories = restaurant?.categories?.length || 0
+  const totalSubcategories = restaurant?.categories?.reduce((acc: number, cat: any) => acc + cat.subcategories.length, 0) || 0
+
   return (
     <div className="space-y-8">
-      {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/admin/restaurants"
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back
-          </Link>
-          <div className="flex items-center gap-2 text-primary">
-            <Building2 className="w-6 h-6 text-primary" />
-            <h1 className="text-3xl font-bold">{restaurant.name}</h1>
+      {/* Header */}
+      <div className="border-b border-gray-200 pb-6">
+        <div className="flex items-center gap-4 mb-4">
+          <Button variant="ghost" size="sm" asChild className="hover:bg-blue-50">
+            <Link href="/admin/restaurants">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Restaurants
+            </Link>
+          </Button>
+        </div>
+        <div className="flex items-start justify-between">
+          <div className="flex items-start gap-4">
+            <div className="relative">
+              {restaurant.logoUrl ? (
+                <div className="w-16 h-16 rounded-xl overflow-hidden border-2 border-gray-200">
+                  <Image
+                    src={restaurant.logoUrl}
+                    alt={restaurant.name}
+                    width={64}
+                    height={64}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl">
+                  <Building2 className="h-8 w-8 text-blue-600" />
+                </div>
+              )}
+              <Badge className="absolute -top-2 -right-2 bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                Admin
+              </Badge>
+            </div>
+            <div className="flex-1">
+              <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">{restaurant.name}</h1>
+              <div className="flex items-center gap-4 text-gray-600 mb-2">
+                <div className="flex items-center gap-1">
+                  <Globe className="h-4 w-4" />
+                  <span className="font-mono text-sm">{restaurant.slug}</span>
+                </div>
+                {restaurant.email && (
+                  <div className="flex items-center gap-1">
+                    <Mail className="h-4 w-4" />
+                    <span className="text-sm">{restaurant.email}</span>
+                  </div>
+                )}
+                {restaurant.phone && (
+                  <div className="flex items-center gap-1">
+                    <Phone className="h-4 w-4" />
+                    <span className="text-sm">{restaurant.phone}</span>
+                  </div>
+                )}
+              </div>
+              {restaurant.tagline && (
+                <p className="text-gray-500 italic">{restaurant.tagline}</p>
+              )}
+              <div className="flex items-center gap-1 text-xs text-gray-500 mt-2">
+                <Calendar className="h-3 w-3" />
+                <span>Created {new Date(restaurant.createdAt).toLocaleDateString()}</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" asChild className="border-orange-200 text-orange-600 hover:bg-orange-50">
+              <Link href={`/admin/restaurants/${restaurant.id}/dishes`}>
+                <ChefHat className="w-4 h-4 mr-2" />
+                Manage Dishes
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild className="border-green-200 text-green-600 hover:bg-green-50">
+              <Link href={`/admin/restaurants/${restaurant.id}/users`}>
+                <Users className="w-4 h-4 mr-2" />
+                Manage Users
+              </Link>
+            </Button>
+            <Button variant="outline" size="sm" asChild className="border-purple-200 text-purple-600 hover:bg-purple-50">
+              <Link href={`/admin/restaurants/${restaurant.id}/menu`}>
+                <Utensils className="w-4 h-4 mr-2" />
+                Manage Menu
+              </Link>
+            </Button>
           </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <Link
-            href={`/admin/restaurants/${restaurant.id}/menu`}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <Utensils className="w-4 h-4 mr-2 text-primary" /> Manage Menu
-          </Link>
-          <Link
-            href={`/admin/restaurants/${restaurant.id}/users`}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <Users className="w-4 h-4 mr-2 text-primary" /> Manage Users
-          </Link>
-          <Link
-            href={`/admin/restaurants/${restaurant.id}/dishes`}
-            className={buttonVariants({ variant: "outline", size: "sm" })}
-          >
-            <ChefHat className="w-4 h-4 mr-2 text-primary" /> Manage Dishes
-          </Link>
+      </div>
+
+      <div className="grid gap-8 xl:grid-cols-3">
+        {/* Left Column - Restaurant Form */}
+        <div className="xl:col-span-2 space-y-8">
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Settings className="h-5 w-5 text-blue-600" />
+                Restaurant Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <EditRestaurantForm
+                id={restaurant.id}
+                defaultValues={defaultValues}
+              />
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column - Stats & Admin Actions */}
+        <div className="space-y-8">
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <BarChart3 className="h-5 w-5 text-green-600" />
+                Restaurant Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
+                  <div className="text-2xl font-bold text-blue-700">{totalDishes}</div>
+                  <div className="text-sm text-blue-600 font-medium">Total Dishes</div>
+                  <div className="text-xs text-blue-500 mt-1">{activeDishes} active</div>
+                </div>
+                <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl border border-green-200">
+                  <div className="text-2xl font-bold text-green-700">{managers.length}</div>
+                  <div className="text-sm text-green-600 font-medium">Managers</div>
+                  <div className="text-xs text-green-500 mt-1">Restaurant admins</div>
+                </div>
+                <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
+                  <div className="text-2xl font-bold text-purple-700">{totalCategories}</div>
+                  <div className="text-sm text-purple-600 font-medium">Categories</div>
+                  <div className="text-xs text-purple-500 mt-1">{totalSubcategories} subcategories</div>
+                </div>
+                <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl border border-orange-200">
+                  <div className="text-2xl font-bold text-orange-700">{restaurant?.users?.length || 0}</div>
+                  <div className="text-sm text-orange-600 font-medium">Total Users</div>
+                  <div className="text-xs text-orange-500 mt-1">All access levels</div>
+                </div>
+              </div>
+              
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900 border-b pb-2">Configuration</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm text-gray-600 flex items-center gap-2">
+                      <Globe className="h-4 w-4" />
+                      Default Locale
+                    </span>
+                    <span className="text-sm font-medium text-gray-900 uppercase">
+                      {restaurant.defaultLocale}
+                    </span>
+                  </div>
+                  {restaurant.colorTheme && (
+                    <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+                      <span className="text-sm text-gray-600 flex items-center gap-2">
+                        <Palette className="h-4 w-4" />
+                        Color Theme
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <div 
+                          className="w-4 h-4 rounded border border-gray-300" 
+                          style={{ backgroundColor: restaurant.colorTheme }}
+                        ></div>
+                        <span className="text-sm font-medium text-gray-900 font-mono">
+                          {restaurant.colorTheme}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
+                    <span className="text-sm text-gray-600 flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4" />
+                      Logo
+                    </span>
+                    <span className="text-sm font-medium text-gray-900">
+                      {restaurant.logoUrl ? 'Configured' : 'Not set'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Admin Actions */}
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="bg-gradient-to-r from-red-50 to-pink-50 border-b">
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Shield className="h-5 w-5 text-red-600" />
+                Admin Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="p-4 bg-red-50 border-2 border-red-100 rounded-xl">
+                <div className="space-y-3">
+                  <p className="text-sm text-red-700 font-medium">Dangerous Zone</p>
+                  <p className="text-xs text-red-600">
+                    These actions are permanent and cannot be undone.
+                  </p>
+                  <AdminDeleteRestaurantButton 
+                    restaurantId={restaurant.id} 
+                    restaurantName={restaurant.name}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
-      {/* Edit Card */}
-      <Card className="shadow-lg">
-        <CardHeader>
-          <CardTitle>Edit Restaurant Details</CardTitle>
-          <CardDescription className="text-muted-foreground">
-            Update the information for{" "}
-            <span className="font-semibold text-primary">
-              {restaurant.name}
-            </span>
-            .
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <EditRestaurantForm
-            id={restaurant.id}
-            defaultValues={defaultValues}
-          />
-        </CardContent>
-      </Card>
     </div>
-  );
+  )
 }
