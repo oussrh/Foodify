@@ -43,10 +43,38 @@ import Image from 'next/image'
 async function getRestaurants(searchQuery: string) {
   return await prisma.restaurant.findMany({
     where: {
-      name: {
-        contains: searchQuery,
-        mode: 'insensitive',
-      },
+      OR: [
+        {
+          name: {
+            contains: searchQuery,
+            mode: 'insensitive',
+          },
+        },
+        {
+          slug: {
+            contains: searchQuery,
+            mode: 'insensitive',
+          },
+        },
+        {
+          email: {
+            contains: searchQuery,
+            mode: 'insensitive',
+          },
+        },
+        {
+          phone: {
+            contains: searchQuery,
+            mode: 'insensitive',
+          },
+        },
+        {
+          tagline: {
+            contains: searchQuery,
+            mode: 'insensitive',
+          },
+        },
+      ],
     },
     include: {
       users: {
