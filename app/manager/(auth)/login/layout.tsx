@@ -23,5 +23,9 @@ export default async function ManagerLoginLayout({
     }
   }
 
-  return <>{children}</>
+  return (
+    <div className="min-h-screen">
+      {children}
+    </div>
+  )
 }
