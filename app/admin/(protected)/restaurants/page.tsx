@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   MoreVertical, 
   Search, 
@@ -23,7 +24,18 @@ import {
   Mail,
   Phone,
   Calendar,
-  Trash2
+  Trash2,
+  BarChart3,
+  Filter,
+  Grid3X3,
+  List,
+  TrendingUp,
+  ExternalLink,
+  Shield,
+  Settings,
+  Star,
+  Activity,
+  Target
 } from 'lucide-react'
 import { AdminRestaurantActions } from '@/components/admin-restaurant-actions'
 import Image from 'next/image'
@@ -47,7 +59,8 @@ async function getRestaurants(searchQuery: string) {
       dishes: {
         select: {
           id: true,
-          isActive: true
+          isActive: true,
+          price: true
         }
       },
       categories: {
@@ -63,11 +76,21 @@ async function getRestaurants(searchQuery: string) {
 export default async function RestaurantsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ search?: string }>
+  searchParams?: Promise<{ search?: string; view?: string }>
 }) {
   const sp = searchParams ? await searchParams : undefined
   const searchQuery = sp?.search || ''
+  const viewMode = sp?.view || 'grid'
   const restaurants = await getRestaurants(searchQuery)
+
+  // Calculate statistics
+  const totalRestaurants = restaurants.length
+  const totalDishes = restaurants.reduce((acc, r) => acc + r.dishes.length, 0)
+  const activeDishes = restaurants.reduce((acc, r) => acc + r.dishes.filter(d => d.isActive).length, 0)
+  const totalManagers = restaurants.reduce((acc, r) => acc + r.users.filter(u => u.role === 'RESTAURANT_ADMIN').length, 0)
+  const totalCategories = restaurants.reduce((acc, r) => acc + r.categories.length, 0)
+  const totalValue = restaurants.reduce((acc, r) => acc + r.dishes.reduce((dishAcc, d) => dishAcc + Number(d.price || 0), 0), 0)
+  const averageDishesPerRestaurant = totalRestaurants > 0 ? (totalDishes / totalRestaurants).toFixed(1) : '0'
 
   return (
     <div className="space-y-8">
@@ -75,13 +98,17 @@ export default async function RestaurantsPage({
       <div className="border-b border-gray-200 pb-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-xl">
+            <div className="p-3 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-xl">
               <Building2 className="h-8 w-8 text-blue-600" />
             </div>
             <div className="flex-1">
               <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Restaurant Management</h1>
               <div className="flex items-center gap-2 text-gray-600">
-                <span className="font-medium">{restaurants.length} restaurant{restaurants.length !== 1 ? 's' : ''}</span>
+                <span className="font-medium">{totalRestaurants} restaurant{totalRestaurants !== 1 ? 's' : ''}</span>
+                <span>•</span>
+                <span>{totalDishes} dishes</span>
+                <span>•</span>
+                <span>{totalManagers} managers</span>
                 {searchQuery && (
                   <>
                     <span>•</span>
@@ -94,61 +121,190 @@ export default async function RestaurantsPage({
               </p>
             </div>
           </div>
-          <Button 
-            asChild 
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 shadow-lg"
-          >
-            <Link href="/admin/restaurants/create">
-              <Plus className="h-5 w-5 mr-2" />
-              Create Restaurant
-            </Link>
-          </Button>
+          <div className="flex items-center gap-2">
+            <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+              <Shield className="h-3 w-3 mr-1" />
+              Admin Portal
+            </Badge>
+            <Button 
+              asChild 
+              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 shadow-lg"
+            >
+              <Link href="/admin/restaurants/create">
+                <Plus className="h-5 w-5 mr-2" />
+                Create Restaurant
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
-      {/* Search bar */}
-      <div className="flex items-center gap-4">
-        <form
-          className="flex max-w-md items-center gap-3 flex-1"
-          action="/admin/restaurants"
-        >
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-            <Input
-              name="search"
-              placeholder="Search restaurants by name..."
-              defaultValue={searchQuery}
-              className="pl-10 h-12 border-gray-200 focus:border-blue-400 focus:ring-blue-400"
-            />
-          </div>
-          <Button 
-            variant="outline" 
-            type="submit"
-            className="h-12 px-6 border-blue-200 text-blue-600 hover:bg-blue-50"
-          >
-            <Search className="w-4 h-4 mr-2" />
-            Search
-          </Button>
-        </form>
-        {searchQuery && (
-          <Button 
-            variant="ghost" 
-            asChild
-            className="text-gray-500 hover:text-gray-700"
-          >
-            <Link href="/admin/restaurants">
-              Clear Filter
-            </Link>
-          </Button>
-        )}
+      {/* Statistics Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-6">
+        <Card className="border-0 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Restaurants</p>
+                <p className="text-3xl font-bold text-gray-900">{totalRestaurants}</p>
+                <p className="text-xs text-blue-600 mt-1">Active venues</p>
+              </div>
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <Building2 className="h-6 w-6 text-blue-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-0 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Dishes</p>
+                <p className="text-3xl font-bold text-gray-900">{totalDishes}</p>
+                <p className="text-xs text-green-600 mt-1">{activeDishes} active</p>
+              </div>
+              <div className="p-2 bg-green-100 rounded-lg">
+                <ChefHat className="h-6 w-6 text-green-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-0 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Managers</p>
+                <p className="text-3xl font-bold text-gray-900">{totalManagers}</p>
+                <p className="text-xs text-purple-600 mt-1">Restaurant admins</p>
+              </div>
+              <div className="p-2 bg-purple-100 rounded-lg">
+                <Users className="h-6 w-6 text-purple-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-0 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Categories</p>
+                <p className="text-3xl font-bold text-gray-900">{totalCategories}</p>
+                <p className="text-xs text-orange-600 mt-1">Menu sections</p>
+              </div>
+              <div className="p-2 bg-orange-100 rounded-lg">
+                <Target className="h-6 w-6 text-orange-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-0 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Avg Dishes</p>
+                <p className="text-3xl font-bold text-gray-900">{averageDishesPerRestaurant}</p>
+                <p className="text-xs text-indigo-600 mt-1">Per restaurant</p>
+              </div>
+              <div className="p-2 bg-indigo-100 rounded-lg">
+                <BarChart3 className="h-6 w-6 text-indigo-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="border-0 shadow-lg">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Total Value</p>
+                <p className="text-3xl font-bold text-gray-900">${totalValue.toFixed(0)}</p>
+                <p className="text-xs text-emerald-600 mt-1">All menus</p>
+              </div>
+              <div className="p-2 bg-emerald-100 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-emerald-600" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Restaurants Grid */}
+      {/* Search and Controls */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100 border-b">
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5 text-gray-600" />
+            Search & Filter Restaurants
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-4">
+            <form
+              className="flex max-w-md items-center gap-3 flex-1"
+              action="/admin/restaurants"
+            >
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  name="search"
+                  placeholder="Search restaurants by name..."
+                  defaultValue={searchQuery}
+                  className="pl-10 border-gray-200 focus:border-blue-400"
+                />
+              </div>
+              <input type="hidden" name="view" value={viewMode} />
+              <Button 
+                variant="outline" 
+                type="submit"
+                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+              >
+                <Search className="w-4 h-4 mr-2" />
+                Search
+              </Button>
+            </form>
+            
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-500">View:</span>
+              <div className="flex items-center border border-gray-200 rounded-lg p-1">
+                <Link 
+                  href={`/admin/restaurants?${new URLSearchParams({ ...(searchQuery && { search: searchQuery }), view: 'grid' }).toString()}`}
+                  className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  <Grid3X3 className="h-4 w-4" />
+                </Link>
+                <Link 
+                  href={`/admin/restaurants?${new URLSearchParams({ ...(searchQuery && { search: searchQuery }), view: 'list' }).toString()}`}
+                  className={`p-2 rounded ${viewMode === 'list' ? 'bg-blue-100 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                >
+                  <List className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+            
+            {searchQuery && (
+              <Button 
+                variant="ghost" 
+                asChild
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <Link href="/admin/restaurants">
+                  Clear Filter
+                </Link>
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Restaurants Display */}
       {restaurants.length === 0 ? (
         <Card className="border-dashed border-2">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <div className="text-center space-y-6">
-              <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+              <div className="mx-auto h-20 w-20 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
                 <Building2 className="h-10 w-10 text-blue-600" />
               </div>
               <div className="space-y-2">
@@ -163,7 +319,7 @@ export default async function RestaurantsPage({
                 </p>
               </div>
               {!searchQuery && (
-                <Button size="lg" className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600" asChild>
+                <Button size="lg" className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600" asChild>
                   <Link href="/admin/restaurants/create">
                     <Plus className="h-5 w-5 mr-2" />
                     Create First Restaurant
@@ -173,12 +329,14 @@ export default async function RestaurantsPage({
             </div>
           </CardContent>
         </Card>
-      ) : (
+      ) : viewMode === 'grid' ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {restaurants.map((restaurant) => {
             const activeDishes = restaurant.dishes.filter(d => d.isActive).length
             const totalDishes = restaurant.dishes.length
             const managers = restaurant.users.filter(u => u.role === 'RESTAURANT_ADMIN')
+            const totalCategories = restaurant.categories.length
+            const restaurantValue = restaurant.dishes.reduce((acc, d) => acc + Number(d.price || 0), 0)
             
             return (
               <Card key={restaurant.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-0 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1">
@@ -194,7 +352,7 @@ export default async function RestaurantsPage({
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300" />
                     </>
                   ) : (
-                    <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-100 to-indigo-100">
+                    <div className="flex items-center justify-center h-full bg-gradient-to-br from-blue-100 to-cyan-100">
                       <div className="text-center space-y-2">
                         <Building2 className="h-12 w-12 text-blue-500 mx-auto" />
                         <span className="text-sm text-blue-600 font-medium">No logo</span>
@@ -205,6 +363,7 @@ export default async function RestaurantsPage({
                   {/* Admin badge */}
                   <div className="absolute top-3 right-3">
                     <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+                      <Shield className="h-3 w-3 mr-1" />
                       Admin
                     </Badge>
                   </div>
@@ -213,10 +372,25 @@ export default async function RestaurantsPage({
                   <div className="absolute top-3 left-3 flex gap-2">
                     {activeDishes > 0 && (
                       <Badge className="bg-green-100 text-green-700 border-green-200">
+                        <Activity className="h-3 w-3 mr-1" />
                         {activeDishes} Active
                       </Badge>
                     )}
+                    {totalCategories > 0 && (
+                      <Badge className="bg-purple-100 text-purple-700 border-purple-200">
+                        {totalCategories} Categories
+                      </Badge>
+                    )}
                   </div>
+                  
+                  {/* Value indicator */}
+                  {restaurantValue > 0 && (
+                    <div className="absolute bottom-3 right-3">
+                      <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">
+                        ${restaurantValue.toFixed(0)}
+                      </Badge>
+                    </div>
+                  )}
                 </div>
                 
                 <CardHeader className="pb-3">
@@ -255,9 +429,25 @@ export default async function RestaurantsPage({
                           </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
+                          <Link href={`/admin/restaurants/${restaurant.id}/menu`}>
+                            <Utensils className="h-4 w-4 mr-2" />
+                            Manage Menu
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
                           <Link href={`/admin/restaurants/${restaurant.id}/users`}>
                             <Users className="h-4 w-4 mr-2" />
                             Manage Users
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link 
+                            href={`/restaurant/${restaurant.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            View Public Page
                           </Link>
                         </DropdownMenuItem>
                         <AdminRestaurantActions restaurantId={restaurant.id} restaurantName={restaurant.name} />
@@ -302,8 +492,8 @@ export default async function RestaurantsPage({
                       size="sm"
                     >
                       <Link href={`/admin/restaurants/${restaurant.id}/edit`}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
+                        <Settings className="h-4 w-4 mr-2" />
+                        Manage
                       </Link>
                     </Button>
                     <Button 
@@ -320,9 +510,26 @@ export default async function RestaurantsPage({
                   </div>
                   
                   <div className="pt-2 border-t border-gray-100">
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
-                      <Calendar className="h-3 w-3" />
-                      <span>Created {new Date(restaurant.createdAt).toLocaleDateString()}</span>
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        <span>Created {new Date(restaurant.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <Button
+                        asChild
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700"
+                      >
+                        <Link 
+                          href={`/restaurant/${restaurant.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <ExternalLink className="h-3 w-3 mr-1" />
+                          View
+                        </Link>
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -330,6 +537,162 @@ export default async function RestaurantsPage({
             )
           })}
         </div>
+      ) : (
+        <Card className="border-0 shadow-lg">
+          <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
+            <CardTitle className="flex items-center gap-2">
+              <List className="h-5 w-5 text-blue-600" />
+              Restaurant List View
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Restaurant</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stats</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {restaurants.map((restaurant) => {
+                    const activeDishes = restaurant.dishes.filter(d => d.isActive).length
+                    const totalDishes = restaurant.dishes.length
+                    const managers = restaurant.users.filter(u => u.role === 'RESTAURANT_ADMIN')
+                    const restaurantValue = restaurant.dishes.reduce((acc, d) => acc + Number(d.price || 0), 0)
+                    
+                    return (
+                      <tr key={restaurant.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-12 w-12">
+                              {restaurant.logoUrl ? (
+                                <Image
+                                  src={restaurant.logoUrl}
+                                  alt={restaurant.name}
+                                  width={48}
+                                  height={48}
+                                  className="h-12 w-12 rounded-lg object-cover"
+                                />
+                              ) : (
+                                <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
+                                  <Building2 className="h-6 w-6 text-blue-600" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-medium text-gray-900">{restaurant.name}</div>
+                              <div className="text-sm text-gray-500 flex items-center gap-1">
+                                <Globe className="h-3 w-3" />
+                                {restaurant.slug}
+                              </div>
+                              {restaurant.tagline && (
+                                <div className="text-xs text-gray-400 italic">{restaurant.tagline}</div>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                                {totalDishes} dishes
+                              </Badge>
+                              <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                                {activeDishes} active
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs">
+                                {managers.length} managers
+                              </Badge>
+                              {restaurantValue > 0 && (
+                                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs">
+                                  ${restaurantValue.toFixed(0)}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="space-y-1">
+                            {restaurant.email && (
+                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                                <Mail className="h-3 w-3" />
+                                <span className="truncate max-w-48">{restaurant.email}</span>
+                              </div>
+                            )}
+                            {restaurant.phone && (
+                              <div className="flex items-center gap-1 text-sm text-gray-600">
+                                <Phone className="h-3 w-3" />
+                                <span>{restaurant.phone}</span>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {new Date(restaurant.createdAt).toLocaleDateString()}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="sm">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem asChild>
+                                <Link href={`/admin/restaurants/${restaurant.id}/edit`}>
+                                  <Edit className="h-4 w-4 mr-2" />
+                                  Edit Restaurant
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href={`/admin/restaurants/${restaurant.id}/dishes`}>
+                                  <ChefHat className="h-4 w-4 mr-2" />
+                                  Manage Dishes
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href={`/admin/restaurants/${restaurant.id}/menu`}>
+                                  <Utensils className="h-4 w-4 mr-2" />
+                                  Manage Menu
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link href={`/admin/restaurants/${restaurant.id}/users`}>
+                                  <Users className="h-4 w-4 mr-2" />
+                                  Manage Users
+                                </Link>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem asChild>
+                                <Link 
+                                  href={`/restaurant/${restaurant.slug}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <ExternalLink className="h-4 w-4 mr-2" />
+                                  View Public Page
+                                </Link>
+                              </DropdownMenuItem>
+                              <AdminRestaurantActions restaurantId={restaurant.id} restaurantName={restaurant.name} />
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
       )}
     </div>
   );

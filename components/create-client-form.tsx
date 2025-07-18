@@ -10,8 +10,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/app/actions/client-actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Mail, Lock, Building2, Plus, UserPlus, Check } from "lucide-react";
+import { Mail, Lock, Building2, Plus, UserPlus, Check, X, Search } from "lucide-react";
 import { useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type Restaurant = { id: string; name: string };
 
@@ -31,6 +38,8 @@ export default function CreateClientForm({
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   
   const {
     register,
@@ -38,6 +47,7 @@ export default function CreateClientForm({
     formState: { errors },
     reset,
     watch,
+    setValue,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
   });
@@ -58,6 +68,9 @@ export default function CreateClientForm({
 
   const selectedRestaurants = watch('restaurantIds') || [];
   const newRestaurantName = watch('restaurantName');
+
+  // Ensure selectedRestaurants is always an array
+  const safeSelectedRestaurants = Array.isArray(selectedRestaurants) ? selectedRestaurants : [];
 
   return (
     <Card className="border-0 shadow-lg">
@@ -128,45 +141,163 @@ export default function CreateClientForm({
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Restaurant Assignment</h3>
             
-            {restaurants.length > 0 && (
-              <div className="space-y-3">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
-                  Assign to Existing Restaurants
+                  Restaurant Assignments
                 </Label>
-                <div className="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-4 space-y-2">
-                  {restaurants.map((r: Restaurant) => (
-                    <div key={r.id} className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded">
-                      <Checkbox
-                        id={`restaurant-${r.id}`}
-                        value={r.id}
-                        {...register('restaurantIds')}
-                        disabled={isSubmitting}
-                      />
-                      <Label htmlFor={`restaurant-${r.id}`} className="font-normal flex-1 cursor-pointer">
-                        {r.name}
-                      </Label>
-                    </div>
-                  ))}
-                </div>
-                
-                {selectedRestaurants.length > 0 && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="text-sm text-blue-700 font-medium mb-2">Selected Restaurants:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedRestaurants.map((id) => {
-                        const restaurant = restaurants.find(r => r.id === id);
-                        return restaurant ? (
-                          <Badge key={id} className="bg-blue-100 text-blue-700 border-blue-200">
-                            {restaurant.name}
-                          </Badge>
-                        ) : null;
-                      })}
-                    </div>
-                  </div>
+                {restaurants.length > 0 && (
+                  <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button type="button" variant="outline" size="sm" className="border-blue-200 text-blue-600 hover:bg-blue-50">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Assign Restaurants
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                          <Building2 className="h-5 w-5 text-blue-600" />
+                          Assign Restaurants to User
+                        </DialogTitle>
+                      </DialogHeader>
+                      
+                      <div className="space-y-4">
+                        {/* Search */}
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                          <Input
+                            placeholder="Search restaurants..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10 border-gray-200 focus:border-blue-400"
+                          />
+                        </div>
+                        
+                        {/* Restaurant List */}
+                        <div className="max-h-96 overflow-y-auto space-y-2">
+                          {restaurants
+                            .filter(r => r.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                            .map((restaurant) => {
+                              const isAssigned = safeSelectedRestaurants.includes(restaurant.id)
+                              
+                              return (
+                                <div 
+                                  key={restaurant.id}
+                                  className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
+                                    isAssigned ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200 hover:bg-gray-50'
+                                  }`}
+                                >
+                                  <div className="flex-1">
+                                    <h4 className="font-medium text-gray-900">{restaurant.name}</h4>
+                                    {isAssigned && (
+                                      <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs mt-1">
+                                        Assigned
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  
+                                  <div className="flex items-center gap-2">
+                                    {isAssigned ? (
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          const currentValues = watch('restaurantIds') || []
+                                          const newValues = currentValues.filter(id => id !== restaurant.id)
+                                          setValue('restaurantIds', newValues)
+                                        }}
+                                        className="border-red-200 text-red-600 hover:bg-red-50"
+                                        disabled={isSubmitting}
+                                      >
+                                        <X className="h-4 w-4 mr-1" />
+                                        Remove
+                                      </Button>
+                                    ) : (
+                                      <Button
+                                        type="button"
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => {
+                                          const currentValues = watch('restaurantIds') || []
+                                          const newValues = [...currentValues, restaurant.id]
+                                          setValue('restaurantIds', newValues)
+                                        }}
+                                        className="border-green-200 text-green-600 hover:bg-green-50"
+                                        disabled={isSubmitting}
+                                      >
+                                        <Plus className="h-4 w-4 mr-1" />
+                                        Assign
+                                      </Button>
+                                    )}
+                                  </div>
+                                </div>
+                              )
+                            })}
+                        </div>
+                        
+                        {restaurants.filter(r => r.name.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
+                          <div className="text-center py-8">
+                            <Building2 className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                            <p className="text-sm text-gray-600">No restaurants found</p>
+                          </div>
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 )}
               </div>
-            )}
+              
+              {/* Current Assignments */}
+              {safeSelectedRestaurants.length === 0 ? (
+                <div className="p-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg text-center">
+                  <Building2 className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600 mb-2">No restaurants assigned</p>
+                  <p className="text-xs text-gray-500">
+                    {restaurants.length > 0 ? 'Click "Assign Restaurants" to select restaurants' : 'No restaurants available to assign'}
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-gray-600">Assigned Restaurants ({safeSelectedRestaurants.length}):</p>
+                  <div className="space-y-2">
+                    {safeSelectedRestaurants.map((id) => {
+                      const restaurant = restaurants.find(r => r.id === id)
+                      return restaurant ? (
+                        <div key={id} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <Building2 className="h-4 w-4 text-blue-600" />
+                            <div>
+                              <h4 className="font-medium text-gray-900">{restaurant.name}</h4>
+                              <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs mt-1">
+                                Assigned
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              const currentValues = watch('restaurantIds') || []
+                              const newValues = currentValues.filter(currentId => currentId !== id)
+                              setValue('restaurantIds', newValues)
+                            }}
+                            className="text-red-600 hover:bg-red-50"
+                            disabled={isSubmitting}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : null
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
 
             <div className="relative flex items-center justify-center">
               <div className="border-t border-gray-200 w-full"></div>
