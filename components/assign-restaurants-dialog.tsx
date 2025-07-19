@@ -14,6 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Plus, 
+  Building2, 
+  Search, 
+  Check, 
+  X,
+  Loader2
+} from "lucide-react";
 
 interface Restaurant {
   id: string;
@@ -66,36 +75,130 @@ export default function AssignRestaurantsDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button>Add Restaurant</Button>
+        <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 shadow-lg">
+          <Plus className="h-4 w-4 mr-2" />
+          Assign Restaurants
+        </Button>
       </DialogTrigger>
-      <DialogContent className="bg-white">
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Assign Restaurants</DialogTitle>
+          <DialogTitle className="flex items-center gap-2">
+            <Building2 className="h-5 w-5 text-purple-600" />
+            Assign Restaurants to User
+          </DialogTitle>
         </DialogHeader>
-        <Input
-          placeholder="Search restaurants..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          className="mt-2"
-        />
-        <div className="max-h-60 overflow-y-auto flex flex-col gap-2 mt-2">
-          {filteredRestaurants.map((r: Restaurant) => (
-            <div
-              key={r.id}
-              className="flex items-center space-x-3 px-2 py-2 rounded hover:bg-muted cursor-pointer"
-              onClick={() => toggle(r.id)}
-            >
-              <Checkbox
-                checked={selected.includes(r.id)}
-                onCheckedChange={() => toggle(r.id)}
-              />
-              <Label className="text-sm">{r.name}</Label>
+        
+        <div className="space-y-4">
+          {/* Search */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              placeholder="Search restaurants by name..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="pl-10 border-gray-200 focus:border-purple-400"
+            />
+          </div>
+          
+          {/* Selected count */}
+          <div className="flex items-center justify-between p-3 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-purple-600" />
+              <span className="text-sm font-medium text-purple-900">
+                {selected.length} restaurant{selected.length !== 1 ? 's' : ''} selected
+              </span>
             </div>
-          ))}
+            {selected.length !== defaultRestaurantIds.length && (
+              <Badge className="bg-amber-100 text-amber-700 border-amber-200">
+                Changes Pending
+              </Badge>
+            )}
+          </div>
+          
+          {/* Restaurant List */}
+          <div className="max-h-96 overflow-y-auto space-y-2">
+            {filteredRestaurants.length === 0 ? (
+              <div className="text-center py-8">
+                <Building2 className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-600">
+                  {query ? `No restaurants found matching "${query}"` : 'No restaurants available'}
+                </p>
+              </div>
+            ) : (
+              filteredRestaurants.map((r: Restaurant) => {
+                const isSelected = selected.includes(r.id)
+                const wasOriginallySelected = defaultRestaurantIds.includes(r.id)
+                const isChanged = isSelected !== wasOriginallySelected
+                
+                return (
+                  <div
+                    key={r.id}
+                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors cursor-pointer ${
+                      isSelected ? 'bg-purple-50 border-purple-200' : 'bg-white border-gray-200 hover:bg-gray-50'
+                    } ${isChanged ? 'ring-2 ring-amber-200' : ''}`}
+                    onClick={() => toggle(r.id)}
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <Checkbox
+                        checked={isSelected}
+                        onCheckedChange={() => toggle(r.id)}
+                        className="data-[state=checked]:bg-purple-600 data-[state=checked]:border-purple-600"
+                      />
+                      <div className="flex-1">
+                        <Label className="text-sm font-medium text-gray-900 cursor-pointer">
+                          {r.name}
+                        </Label>
+                        <div className="flex items-center gap-2 mt-1">
+                          {isSelected && (
+                            <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs">
+                              <Check className="h-3 w-3 mr-1" />
+                              Selected
+                            </Badge>
+                          )}
+                          {isChanged && (
+                            <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
+                              {isSelected ? 'Will be Added' : 'Will be Removed'}
+                            </Badge>
+                          )}
+                          {wasOriginallySelected && !isChanged && (
+                            <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                              Currently Assigned
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })
+            )}
+          </div>
         </div>
-        <DialogFooter>
-          <Button onClick={handleSave} disabled={loading}>
-            Save
+        
+        <DialogFooter className="gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setOpen(false)}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleSave} 
+            disabled={loading || selected.length === 0}
+            className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600"
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving...
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Check className="h-4 w-4" />
+                Save Assignment{selected.length !== 1 ? 's' : ''}
+              </div>
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>
