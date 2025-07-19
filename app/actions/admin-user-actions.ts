@@ -39,6 +39,10 @@ export async function resetAdminPassword(id: string, newPassword: string) {
   const passwordHash = await bcrypt.hash(newPassword, 10)
   return prisma.user.update({
     where: { id },
-    data: { passwordHash, passwordResetToken: null, passwordResetExpires: null },
+    data: { 
+      passwordHash, 
+      passwordResetToken: 'FORCE_CHANGE', // This will force password change on next login
+      passwordResetExpires: null 
+    },
   })
 }
