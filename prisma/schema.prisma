@@ -55,6 +55,7 @@ model User {
   emailVerifyTokenExpires DateTime?
   role                  UserRole
   restaurants           Restaurant[]
+  activityLogs          ActivityLog[]
   createdAt             DateTime   @default(now())
   lastLogin             DateTime?
   passwordResetToken    String?
