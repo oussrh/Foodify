@@ -74,6 +74,7 @@ CREATE TABLE "Dish" (
     "calories" INTEGER,
     "isMostPurchased" BOOLEAN NOT NULL DEFAULT false,
     "sortOrder" INTEGER NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Dish_pkey" PRIMARY KEY ("id")
 );
