@@ -3,6 +3,7 @@
 import prisma from '@/lib/prisma'
 import { Resend } from 'resend'
 import bcrypt from 'bcryptjs'
+import { superAdminOtpEmail } from '@/lib/emails/super-admin-otp-email'
 
 export async function requestAdminOtp(email: string, password: string) {
   try {
@@ -33,7 +34,8 @@ export async function requestAdminOtp(email: string, password: string) {
         from: process.env.RESEND_FROM!,
         to: email,
         subject: 'Your Foodify verification code',
-        text: `Your verification code is ${code}`,
+        html: superAdminOtpEmail(code),
+        text: `Your Foodify verification code is ${code}. This code will expire in 10 minutes.`,
       })
     }
     return { success: true }
