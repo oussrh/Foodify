@@ -26,10 +26,27 @@ export async function createDish(
   }
 ) {
   const count = await prisma.dish.count({ where: { restaurantId } })
-  const [usdzUrl, glbUrl] = await Promise.all([
-    uploadArAsset(data.usdzUrl, restaurantId),
-    uploadArAsset(data.glbUrl, restaurantId),
-  ])
+  
+  // Only process AR URLs if they exist and are not already Cloudinary URLs
+  const usdzUrl = data.usdzUrl && data.usdzUrl.includes('cloudinary.com') 
+    ? data.usdzUrl 
+    : data.usdzUrl 
+      ? await uploadArAsset(data.usdzUrl, restaurantId)
+      : ''
+      
+  const glbUrl = data.glbUrl && data.glbUrl.includes('cloudinary.com')
+    ? data.glbUrl
+    : data.glbUrl
+      ? await uploadArAsset(data.glbUrl, restaurantId)
+      : ''
+  
+  console.log('createDish - Final data being saved to database:', {
+    restaurantId,
+    usdzUrl,
+    glbUrl,
+    imageUrl: data.imageUrl
+  })
+  
   return prisma.dish.create({
     data: {
       nameEn: data.nameEn,
@@ -66,12 +83,35 @@ export async function updateDish(
   }
 ) {
   const updatedData = { ...data }
+  
+  // Only process AR URLs if they are not already Cloudinary URLs
   if (data.usdzUrl) {
-    updatedData.usdzUrl = await uploadArAsset(data.usdzUrl, restaurantId)
+    // If it's already a Cloudinary URL, use it as-is
+    if (data.usdzUrl.includes('cloudinary.com')) {
+      updatedData.usdzUrl = data.usdzUrl
+    } else {
+      updatedData.usdzUrl = await uploadArAsset(data.usdzUrl, restaurantId)
+    }
   }
+  
   if (data.glbUrl) {
-    updatedData.glbUrl = await uploadArAsset(data.glbUrl, restaurantId)
+    // If it's already a Cloudinary URL, use it as-is
+    if (data.glbUrl.includes('cloudinary.com')) {
+      updatedData.glbUrl = data.glbUrl
+    } else {
+      updatedData.glbUrl = await uploadArAsset(data.glbUrl, restaurantId)
+    }
   }
+  
+  console.log('updateDish - Final data being saved to database:', {
+    id,
+    updatedData: {
+      usdzUrl: updatedData.usdzUrl,
+      glbUrl: updatedData.glbUrl,
+      imageUrl: updatedData.imageUrl
+    }
+  })
+  
   return prisma.dish.update({ where: { id }, data: updatedData })
 }
 

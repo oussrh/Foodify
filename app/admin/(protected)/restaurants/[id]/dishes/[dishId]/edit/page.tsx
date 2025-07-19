@@ -120,6 +120,7 @@ export default async function EditDishPage({
                 restaurantId={dish.restaurantId}
                 defaultValues={defaultValues}
                 subcategories={subcategories}
+                restaurantName={restaurant.name}
               />
             </CardContent>
           </Card>

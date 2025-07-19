@@ -35,7 +35,11 @@ export default async function CreateDishPage({
           <CardTitle>New Dish Details</CardTitle>
         </CardHeader>
         <CardContent>
-          <CreateDishForm restaurantId={restaurant.id} subcategories={subcategories} />
+          <CreateDishForm 
+            restaurantId={restaurant.id} 
+            subcategories={subcategories}
+            restaurantName={restaurant.name}
+          />
         </CardContent>
       </Card>
     </div>
