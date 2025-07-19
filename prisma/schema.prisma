@@ -48,6 +48,11 @@ model User {
   totpSecret            String?
   emailOtpCode          String?
   emailOtpExpires       DateTime?
+  newEmail              String?
+  emailChangeToken      String?
+  emailChangeTokenExpires DateTime?
+  emailVerifyToken      String?
+  emailVerifyTokenExpires DateTime?
   role                  UserRole
   restaurants           Restaurant[]
   createdAt             DateTime   @default(now())
@@ -113,4 +118,17 @@ model DishView {
   viewedAt   DateTime   @default(now())
   deviceType DeviceType
   arViewed   Boolean
+}
+
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  oldEmail  String?
+  newEmail  String?
+  status    String
+  createdAt DateTime @default(now())
+  ipAddress String?
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
