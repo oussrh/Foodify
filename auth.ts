@@ -16,7 +16,7 @@ export const {
   providers: [
     ResendProvider({
       apiKey: process.env.RESEND_API_KEY,
-      from: `Foodify <no-reply@${process.env.RESEND_DOMAIN}>`,
+      from: process.env.RESEND_FROM,
     }),
     Credentials({
       async authorize(credentials) {

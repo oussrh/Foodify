@@ -52,3 +52,14 @@ Restaurant admins can manage menu categories and subcategories from `/admin/rest
 ## AR File Uploads
 
 Dish USDZ and GLB assets are uploaded to Cloudinary. Each restaurant has its own folder which keeps AR files organized. Configure your Cloudinary credentials in `.env` using `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
+
+## Email Setup
+
+Foodify sends verification codes using [Resend](https://resend.com). Provide your API key and a verified sender address in `.env`:
+
+```bash
+RESEND_API_KEY="your-resend-api-key"
+RESEND_FROM="Foodify <no-reply@yourdomain.com>"
+```
+
+If the `RESEND_FROM` value is missing Resend will return a `missing_required_field` error.
