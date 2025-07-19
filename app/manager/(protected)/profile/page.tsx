@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
-import UpdateEmailForm from '@/components/update-email-form'
 import UpdatePasswordForm from '@/components/update-password-form'
+import Link from 'next/link'
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -24,9 +24,12 @@ export default async function ProfilePage() {
         <p className="text-sm text-muted-foreground">Account created on {user.createdAt.toLocaleDateString()}</p>
       </div>
       <div className="space-y-4">
-        <div>
-          <h3 className="font-semibold">Update Email</h3>
-          <UpdateEmailForm defaultEmail={user.email} />
+        <div className="space-y-2">
+          <h3 className="font-semibold">Email</h3>
+          <p className="text-sm">{user.email}</p>
+          <Link href="/manager/change-email" className="text-sm underline text-primary">
+            Change Email
+          </Link>
         </div>
         <div>
           <h3 className="font-semibold">Change Password</h3>
