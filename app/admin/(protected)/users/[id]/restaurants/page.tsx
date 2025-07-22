@@ -79,7 +79,7 @@ export default async function UserRestaurantsPage({
               </div>
               <div className="space-y-2">
                 <h3 className="text-xl font-semibold text-gray-900">User Not Found</h3>
-                <p className="text-gray-500">The user you're looking for doesn't exist or has been deleted.</p>
+                <p className="text-gray-500">The user you&apos;re looking for doesn&apos;t exist or has been deleted.</p>
               </div>
               <Button asChild className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600">
                 <Link href="/admin/users">
@@ -255,7 +255,7 @@ export default async function UserRestaurantsPage({
                 <div className="space-y-2">
                   <h3 className="text-xl font-semibold text-gray-900">No Restaurants Assigned</h3>
                   <p className="text-gray-500 max-w-sm">
-                    This user doesn't have access to any restaurants yet. Assign restaurants to grant management permissions.
+                    This user doesn&apos;t have access to any restaurants yet. Assign restaurants to grant management permissions.
                   </p>
                 </div>
                 <AssignRestaurantsDialog
