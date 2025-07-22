@@ -35,35 +35,44 @@ interface Restaurant {
   name: string;
 }
 
-const schema = z.object({
+// Input schema (what the form receives)
+const inputSchema = z.object({
   nameEn: z.string().min(1, "English name is required"),
   nameFr: z.string().min(1, "French name is required"),
   descriptionEn: z.string().optional(),
   descriptionFr: z.string().optional(),
-  price: z.string().min(1, "Price is required").transform((val) => {
-    const num = parseFloat(val);
-    if (isNaN(num) || num < 0) {
-      throw new Error("Price must be a valid number greater than 0");
-    }
-    return num;
-  }),
+  price: z.string().min(1, "Price is required"),
   imageUrl: z.string().min(1, "Image URL is required"),
   usdzUrl: z.string().optional(),
   glbUrl: z.string().optional(),
   subcategoryId: z.string().optional(),
-  calories: z.string().optional().transform((val) => {
-    if (!val || val === "") return undefined;
-    const num = parseInt(val);
+  calories: z.string().optional(),
+  isMostPurchased: z.boolean().optional(),
+});
+
+// Output schema (what gets processed)
+const outputSchema = inputSchema.transform((data) => ({
+  ...data,
+  price: (() => {
+    const num = parseFloat(data.price);
+    if (isNaN(num) || num < 0) {
+      throw new Error("Price must be a valid number greater than 0");
+    }
+    return num;
+  })(),
+  calories: data.calories && data.calories !== "" ? (() => {
+    const num = parseInt(data.calories);
     if (isNaN(num)) {
       throw new Error("Calories must be a valid number");
     }
     return num;
-  }),
-  isMostPurchased: z.boolean().optional(),
-});
+  })() : undefined,
+}));
 
-// Use z.infer to get the correct type from the schema
-type FormValues = z.infer<typeof schema>;
+// Use input schema for form values
+type FormValues = z.infer<typeof inputSchema>;
+// Use output schema for processed data
+type ProcessedFormValues = z.infer<typeof outputSchema>;
 
 export default function CreateDishForm({
   restaurantId,
@@ -90,11 +99,11 @@ export default function CreateDishForm({
     setValue,
     watch,
   } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(outputSchema),
     mode: "onChange",
   });
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: ProcessedFormValues) => {
     setIsSubmitting(true)
     setError(null)
     
