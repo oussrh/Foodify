@@ -21,12 +21,6 @@ declare module 'next-auth' {
   }
 }
 
-declare module 'next-auth/jwt' {
-  interface JWT {
-    role?: string
-  }
-}
-
 export const {
   handlers: { GET, POST },
   auth,
@@ -116,14 +110,14 @@ export const {
   callbacks: {
     async jwt({ token, user }) {
       if (user?.role) {
-        token.role = user.role
+        (token as any).role = user.role
       }
       return token
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.sub || ''
-        session.user.role = token.role
+        session.user.role = (token as any).role
       }
       return session
     },
