@@ -1,5 +1,8 @@
+// FilePath: app/not-found.tsx
+
 import Link from 'next/link'
 import { Home, Search, ArrowLeft, RefreshCw } from 'lucide-react'
+import GoBackButton from '@/components/go-back-button'
 
 export default function NotFound() {
   return (
@@ -62,13 +65,7 @@ export default function NotFound() {
               Return Home
             </Link>
             
-            <button 
-              onClick={() => window.history.back()}
-              className="group inline-flex items-center gap-3 bg-white/80 hover:bg-white text-gray-700 hover:text-gray-900 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 border border-gray-200/50 hover:border-gray-300 shadow-lg hover:shadow-xl backdrop-blur-sm"
-            >
-              <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
-              Go Back
-            </button>
+            <GoBackButton />
           </div>
 
           {/* Help text */}
