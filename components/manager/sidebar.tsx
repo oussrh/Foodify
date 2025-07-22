@@ -1,4 +1,4 @@
-// PathFile: components/manager/sidebar.tsx
+// PathFile: components/manager/sidebar.tsx 
 'use client'
 
 import Link from 'next/link'
