@@ -1,8 +1,10 @@
-// PathFile: components/admin/sidebar.tsx
+// FilePath: components/admin/sidebar.tsx
+
 'use client'
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useState, useEffect } from 'react'
 import { Home, Utensils, Users, Settings, Shield, ChefHat, BarChart3 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Badge } from '@/components/ui/badge'
@@ -42,12 +44,33 @@ export const adminLinks = [
 
 export default function AdminSidebar({ className = '' }: { className?: string }) {
   const pathname = usePathname()
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > 50) // Hide logo from sidebar when scrolled more than 50px
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   return (
     <aside className={cn('w-64 h-screen border-r border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60', className)}>
-      {/* Sidebar Header */}
-      <div className="border-b border-border/40 p-6">
-        <div className="flex items-center gap-3">
+      {/* Sidebar Header with Animated Logo */}
+      <div className={cn(
+        "border-b border-border/40 transition-all duration-500 ease-in-out overflow-hidden",
+        isScrolled 
+          ? "h-0 p-0 opacity-0" 
+          : "h-auto p-6 opacity-100"
+      )}>
+        <div className={cn(
+          "flex items-center gap-3 transition-all duration-500 ease-in-out",
+          isScrolled 
+            ? "transform -translate-y-4 opacity-0" 
+            : "transform translate-y-0 opacity-100"
+        )}>
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-lg">
             <ChefHat className="h-5 w-5" />
           </div>
