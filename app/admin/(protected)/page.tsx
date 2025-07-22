@@ -1,3 +1,5 @@
+// FilePath: app/admin/(protected)/page.tsx
+
 import {
   Card,
   CardContent,
@@ -136,28 +138,28 @@ export default async function AdminDashboardPage() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="border-b border-gray-200 pb-6">
+      <div className="border-b border-border pb-6">
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-gradient-to-br from-red-100 to-pink-100 rounded-xl">
-              <Shield className="h-8 w-8 text-red-600" />
+            <div className="p-3 bg-gradient-to-br from-red-100 to-pink-100 dark:from-red-900/30 dark:to-pink-900/30 rounded-xl">
+              <Shield className="h-8 w-8 text-red-600 dark:text-red-400" />
             </div>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Super Admin Dashboard</h1>
-              <div className="flex items-center gap-2 text-gray-600">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Super Admin Dashboard</h1>
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <span className="font-medium">{data.totalRestaurants} restaurants</span>
                 <span>•</span>
                 <span>{data.totalUsers} total users</span>
                 <span>•</span>
                 <span>{data.totalDishes} dishes</span>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Complete system overview and administrative control center
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className="bg-red-100 text-red-700 border-red-200">
+            <Badge className="bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-700/50">
               <Crown className="h-3 w-3 mr-1" />
               Super Admin Portal
             </Badge>
@@ -176,61 +178,61 @@ export default async function AdminDashboardPage() {
 
       {/* Main Statistics */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Restaurants</p>
-                <p className="text-3xl font-bold text-gray-900">{data.totalRestaurants}</p>
-                <p className="text-xs text-blue-600 mt-1">Active venues</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Restaurants</p>
+                <p className="text-3xl font-bold text-foreground">{data.totalRestaurants}</p>
+                <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">Active venues</p>
               </div>
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Building2 className="h-6 w-6 text-blue-600" />
+              <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                <Building2 className="h-6 w-6 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Users</p>
-                <p className="text-3xl font-bold text-gray-900">{data.totalUsers}</p>
-                <p className="text-xs text-green-600 mt-1">{data.recentUsers} new this week</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                <p className="text-3xl font-bold text-foreground">{data.totalUsers}</p>
+                <p className="text-xs text-green-600 dark:text-green-400 mt-1">{data.recentUsers} new this week</p>
               </div>
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Users className="h-6 w-6 text-green-600" />
+              <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                <Users className="h-6 w-6 text-green-600 dark:text-green-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Dishes</p>
-                <p className="text-3xl font-bold text-gray-900">{data.totalDishes}</p>
-                <p className="text-xs text-purple-600 mt-1">{data.activeDishes} active</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Dishes</p>
+                <p className="text-3xl font-bold text-foreground">{data.totalDishes}</p>
+                <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">{data.activeDishes} active</p>
               </div>
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <ChefHat className="h-6 w-6 text-purple-600" />
+              <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                <ChefHat className="h-6 w-6 text-purple-600 dark:text-purple-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
+        <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Value</p>
-                <p className="text-3xl font-bold text-gray-900">${data.totalValue.toFixed(0)}</p>
-                <p className="text-xs text-emerald-600 mt-1">All menus</p>
+                <p className="text-sm font-medium text-muted-foreground">Total Value</p>
+                <p className="text-3xl font-bold text-foreground">${data.totalValue.toFixed(0)}</p>
+                <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-1">All menus</p>
               </div>
-              <div className="p-2 bg-emerald-100 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-emerald-600" />
+              <div className="p-2 bg-emerald-100 dark:bg-emerald-900/30 rounded-lg">
+                <TrendingUp className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
           </CardContent>
@@ -239,61 +241,61 @@ export default async function AdminDashboardPage() {
 
       {/* Secondary Statistics */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="border-0 shadow-lg">
+        <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Restaurant Admins</p>
-                <p className="text-2xl font-bold text-gray-900">{data.totalRestaurantAdmins}</p>
-                <p className="text-xs text-indigo-600 mt-1">Managing venues</p>
+                <p className="text-sm font-medium text-muted-foreground">Restaurant Admins</p>
+                <p className="text-2xl font-bold text-foreground">{data.totalRestaurantAdmins}</p>
+                <p className="text-xs text-indigo-600 dark:text-indigo-400 mt-1">Managing venues</p>
               </div>
-              <div className="p-2 bg-indigo-100 rounded-lg">
-                <Users className="h-5 w-5 text-indigo-600" />
+              <div className="p-2 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg">
+                <Users className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-0 shadow-lg">
+        <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Super Admins</p>
-                <p className="text-2xl font-bold text-gray-900">{data.totalSuperAdmins}</p>
-                <p className="text-xs text-red-600 mt-1">System administrators</p>
+                <p className="text-sm font-medium text-muted-foreground">Super Admins</p>
+                <p className="text-2xl font-bold text-foreground">{data.totalSuperAdmins}</p>
+                <p className="text-xs text-red-600 dark:text-red-400 mt-1">System administrators</p>
               </div>
-              <div className="p-2 bg-red-100 rounded-lg">
-                <Shield className="h-5 w-5 text-red-600" />
+              <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                <Shield className="h-5 w-5 text-red-600 dark:text-red-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-0 shadow-lg">
+        <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Categories</p>
-                <p className="text-2xl font-bold text-gray-900">{data.totalCategories}</p>
-                <p className="text-xs text-orange-600 mt-1">Menu sections</p>
+                <p className="text-sm font-medium text-muted-foreground">Categories</p>
+                <p className="text-2xl font-bold text-foreground">{data.totalCategories}</p>
+                <p className="text-xs text-orange-600 dark:text-orange-400 mt-1">Menu sections</p>
               </div>
-              <div className="p-2 bg-orange-100 rounded-lg">
-                <Target className="h-5 w-5 text-orange-600" />
+              <div className="p-2 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
+                <Target className="h-5 w-5 text-orange-600 dark:text-orange-400" />
               </div>
             </div>
           </CardContent>
         </Card>
         
-        <Card className="border-0 shadow-lg">
+        <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Avg Dishes</p>
-                <p className="text-2xl font-bold text-gray-900">{data.averageDishesPerRestaurant}</p>
-                <p className="text-xs text-cyan-600 mt-1">Per restaurant</p>
+                <p className="text-sm font-medium text-muted-foreground">Avg Dishes</p>
+                <p className="text-2xl font-bold text-foreground">{data.averageDishesPerRestaurant}</p>
+                <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1">Per restaurant</p>
               </div>
-              <div className="p-2 bg-cyan-100 rounded-lg">
-                <BarChart3 className="h-5 w-5 text-cyan-600" />
+              <div className="p-2 bg-cyan-100 dark:bg-cyan-900/30 rounded-lg">
+                <BarChart3 className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
               </div>
             </div>
           </CardContent>
@@ -302,10 +304,10 @@ export default async function AdminDashboardPage() {
 
       <div className="grid gap-8 lg:grid-cols-3">
         {/* Quick Actions */}
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
+        <Card>
+          <CardHeader className="bg-muted/50 border-b">
             <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5 text-blue-600" />
+              <Zap className="h-5 w-5 text-blue-600 dark:text-blue-400" />
               Quick Actions
             </CardTitle>
           </CardHeader>
@@ -323,7 +325,7 @@ export default async function AdminDashboardPage() {
             <Button 
               asChild 
               variant="outline"
-              className="w-full justify-start border-green-200 text-green-600 hover:bg-green-50"
+              className="w-full justify-start border-green-200 text-green-600 hover:bg-green-50 dark:border-green-700 dark:text-green-400 dark:hover:bg-green-900/20"
             >
               <Link href="/admin/users/create">
                 <UserPlus className="h-4 w-4 mr-3" />
@@ -334,7 +336,7 @@ export default async function AdminDashboardPage() {
             <Button 
               asChild 
               variant="outline"
-              className="w-full justify-start border-red-200 text-red-600 hover:bg-red-50"
+              className="w-full justify-start border-red-200 text-red-600 hover:bg-red-50 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-900/20"
             >
               <Link href="/admin/admins/create">
                 <Shield className="h-4 w-4 mr-3" />
@@ -345,7 +347,7 @@ export default async function AdminDashboardPage() {
             <Button 
               asChild 
               variant="outline"
-              className="w-full justify-start border-purple-200 text-purple-600 hover:bg-purple-50"
+              className="w-full justify-start border-purple-200 text-purple-600 hover:bg-purple-50 dark:border-purple-700 dark:text-purple-400 dark:hover:bg-purple-900/20"
             >
               <Link href="/admin/restaurants">
                 <Settings className="h-4 w-4 mr-3" />
@@ -356,56 +358,56 @@ export default async function AdminDashboardPage() {
         </Card>
 
         {/* Recent Activity */}
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50 border-b">
+        <Card>
+          <CardHeader className="bg-muted/50 border-b">
             <CardTitle className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-green-600" />
+              <Activity className="h-5 w-5 text-green-600 dark:text-green-400" />
               Recent Activity
             </CardTitle>
           </CardHeader>
           <CardContent className="p-6">
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                <div className="p-1 bg-blue-100 rounded">
-                  <ChefHat className="h-4 w-4 text-blue-600" />
+              <div className="flex items-center gap-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700/50 rounded-lg">
+                <div className="p-1 bg-blue-100 dark:bg-blue-900/30 rounded">
+                  <ChefHat className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{data.recentDishes} new dishes</p>
-                  <p className="text-xs text-gray-500">Added this week</p>
+                  <p className="text-sm font-medium text-foreground">{data.recentDishes} new dishes</p>
+                  <p className="text-xs text-muted-foreground">Added this week</p>
                 </div>
-                <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+                <Badge className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50">
                   New
                 </Badge>
               </div>
               
-              <div className="flex items-center gap-3 p-3 bg-green-50 border border-green-200 rounded-lg">
-                <div className="p-1 bg-green-100 rounded">
-                  <Users className="h-4 w-4 text-green-600" />
+              <div className="flex items-center gap-3 p-3 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/50 rounded-lg">
+                <div className="p-1 bg-green-100 dark:bg-green-900/30 rounded">
+                  <Users className="h-4 w-4 text-green-600 dark:text-green-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{data.recentUsers} new users</p>
-                  <p className="text-xs text-gray-500">Joined this week</p>
+                  <p className="text-sm font-medium text-foreground">{data.recentUsers} new users</p>
+                  <p className="text-xs text-muted-foreground">Joined this week</p>
                 </div>
-                <Badge className="bg-green-100 text-green-700 border-green-200">
+                <Badge className="bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700/50">
                   Active
                 </Badge>
               </div>
               
-              <div className="flex items-center gap-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                <div className="p-1 bg-purple-100 rounded">
-                  <TrendingUp className="h-4 w-4 text-purple-600" />
+              <div className="flex items-center gap-3 p-3 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-700/50 rounded-lg">
+                <div className="p-1 bg-purple-100 dark:bg-purple-900/30 rounded">
+                  <TrendingUp className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">System healthy</p>
-                  <p className="text-xs text-gray-500">All services running</p>
+                  <p className="text-sm font-medium text-foreground">System healthy</p>
+                  <p className="text-xs text-muted-foreground">All services running</p>
                 </div>
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4 text-green-500 dark:text-green-400" />
               </div>
               
               <Button 
                 asChild 
                 variant="ghost" 
-                className="w-full justify-center text-gray-600 hover:text-gray-900"
+                className="w-full justify-center text-muted-foreground hover:text-foreground"
               >
                 <Link href="/admin/users">
                   View All Activity
@@ -417,10 +419,10 @@ export default async function AdminDashboardPage() {
         </Card>
 
         {/* Recent Users */}
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b">
+        <Card>
+          <CardHeader className="bg-muted/50 border-b">
             <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5 text-purple-600" />
+              <Users className="h-5 w-5 text-purple-600 dark:text-purple-400" />
               Recent Users
             </CardTitle>
           </CardHeader>
@@ -428,19 +430,19 @@ export default async function AdminDashboardPage() {
             <div className="space-y-3">
               {data.recentUsersList.length === 0 ? (
                 <div className="text-center py-8">
-                  <Users className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600">No recent users</p>
+                  <Users className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                  <p className="text-sm text-muted-foreground">No recent users</p>
                 </div>
               ) : (
                 <>
                   {data.recentUsersList.map((user: any) => (
-                    <div key={user.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center">
-                        <Users className="h-4 w-4 text-purple-600" />
+                    <div key={user.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg hover:bg-muted/70 transition-colors">
+                      <div className="h-8 w-8 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 dark:from-purple-900/30 dark:to-indigo-900/30 flex items-center justify-center">
+                        <Users className="h-4 w-4 text-purple-600 dark:text-purple-400" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{user.email}</p>
-                        <p className="text-xs text-gray-500">{user.restaurants.length} restaurant{user.restaurants.length !== 1 ? 's' : ''}</p>
+                        <p className="text-sm font-medium text-foreground truncate">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">{user.restaurants.length} restaurant{user.restaurants.length !== 1 ? 's' : ''}</p>
                       </div>
                       <Button
                         asChild
@@ -458,7 +460,7 @@ export default async function AdminDashboardPage() {
                   <Button 
                     asChild 
                     variant="ghost" 
-                    className="w-full justify-center text-purple-600 hover:text-purple-700"
+                    className="w-full justify-center text-purple-600 hover:text-purple-700 dark:text-purple-400 dark:hover:text-purple-300"
                   >
                     <Link href="/admin/users">
                       View All Users
@@ -473,18 +475,18 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Recent Restaurants */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-orange-50 to-yellow-50 border-b">
+      <Card>
+        <CardHeader className="bg-muted/50 border-b">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
-              <Building2 className="h-5 w-5 text-orange-600" />
+              <Building2 className="h-5 w-5 text-orange-600 dark:text-orange-400" />
               Recent Restaurants
             </CardTitle>
             <Button 
               asChild 
               variant="outline" 
               size="sm"
-              className="border-orange-200 text-orange-600 hover:bg-orange-50"
+              className="border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-900/20"
             >
               <Link href="/admin/restaurants">
                 View All
@@ -496,8 +498,8 @@ export default async function AdminDashboardPage() {
         <CardContent className="p-6">
           {data.restaurants.length === 0 ? (
             <div className="text-center py-8">
-              <Building2 className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-              <p className="text-sm text-gray-600">No restaurants found</p>
+              <Building2 className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No restaurants found</p>
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -508,11 +510,11 @@ export default async function AdminDashboardPage() {
                 const restaurantValue = restaurant.dishes.reduce((acc: number, d: any) => acc + Number(d.price || 0), 0)
                 
                 return (
-                  <div key={restaurant.id} className="p-4 border border-gray-200 rounded-lg hover:border-orange-300 transition-colors">
+                  <div key={restaurant.id} className="p-4 border rounded-lg hover:border-orange-300 dark:hover:border-orange-700 transition-colors">
                     <div className="flex items-start justify-between mb-3">
                       <div className="flex-1">
-                        <h4 className="font-medium text-gray-900 truncate">{restaurant.name}</h4>
-                        <div className="flex items-center gap-1 text-gray-500 mt-1">
+                        <h4 className="font-medium text-foreground truncate">{restaurant.name}</h4>
+                        <div className="flex items-center gap-1 text-muted-foreground mt-1">
                           <Globe className="h-3 w-3" />
                           <span className="text-xs">{restaurant.slug}</span>
                         </div>
@@ -530,19 +532,19 @@ export default async function AdminDashboardPage() {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex items-center gap-1 text-gray-600">
+                      <div className="flex items-center gap-1 text-muted-foreground">
                         <ChefHat className="h-3 w-3" />
                         <span>{totalDishes} dishes</span>
                       </div>
-                      <div className="flex items-center gap-1 text-gray-600">
+                      <div className="flex items-center gap-1 text-muted-foreground">
                         <Users className="h-3 w-3" />
                         <span>{managers} managers</span>
                       </div>
-                      <div className="flex items-center gap-1 text-gray-600">
+                      <div className="flex items-center gap-1 text-muted-foreground">
                         <Target className="h-3 w-3" />
                         <span>{restaurant.categories.length} categories</span>
                       </div>
-                      <div className="flex items-center gap-1 text-gray-600">
+                      <div className="flex items-center gap-1 text-muted-foreground">
                         <TrendingUp className="h-3 w-3" />
                         <span>${restaurantValue.toFixed(0)}</span>
                       </div>
@@ -550,12 +552,12 @@ export default async function AdminDashboardPage() {
                     
                     <div className="flex items-center gap-2 mt-3">
                       {activeDishes > 0 && (
-                        <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                        <Badge className="bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-700/50 text-xs">
                           {activeDishes} active
                         </Badge>
                       )}
                       {restaurant.categories.length > 0 && (
-                        <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                        <Badge className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-700/50 text-xs">
                           {restaurant.categories.length} categories
                         </Badge>
                       )}
