@@ -1,3 +1,5 @@
+// FilePath: components/create-dish-form.tsx
+
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -38,18 +40,14 @@ const schema = z.object({
   nameFr: z.string().min(1, "French name is required"),
   descriptionEn: z.string().optional(),
   descriptionFr: z.string().optional(),
-  price: z.number().min(0, "Price must be greater than 0"),
+  price: z.coerce.number().min(0, "Price must be greater than 0"),
   imageUrl: z.string().min(1, "Image URL is required"),
   usdzUrl: z.string().optional(),
   glbUrl: z.string().optional(),
   subcategoryId: z.string().optional(),
-  calories: z.number().optional(),
+  calories: z.coerce.number().optional(),
   isMostPurchased: z.boolean().optional(),
-}).transform((data) => ({
-  ...data,
-  price: Number(data.price),
-  calories: data.calories ? Number(data.calories) : undefined,
-}));
+});
 
 // Use z.infer to get the correct type from the schema
 type FormValues = z.infer<typeof schema>;
@@ -234,7 +232,7 @@ export default function CreateDishForm({
                   id="price" 
                   type="number" 
                   step="0.01" 
-                  {...register("price", { valueAsNumber: true })} 
+                  {...register("price")} 
                   className="border-blue-200 focus:border-blue-400"
                   placeholder="0.00"
                   disabled={isSubmitting}
@@ -254,7 +252,7 @@ export default function CreateDishForm({
                 <Input 
                   id="calories" 
                   type="number" 
-                  {...register("calories", { valueAsNumber: true })} 
+                  {...register("calories")} 
                   className="border-blue-200 focus:border-blue-400"
                   placeholder="250"
                   disabled={isSubmitting}
