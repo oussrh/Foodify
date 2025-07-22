@@ -1,5 +1,4 @@
 //PathFile: app/admin/(protected)/users/page.tsx
-
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
