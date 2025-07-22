@@ -8,6 +8,25 @@ import prisma from './lib/prisma'
 import bcrypt from 'bcryptjs'
 import { verifyTOTP } from './lib/totp'
 
+declare module 'next-auth' {
+  interface User {
+    role?: string
+  }
+  interface Session {
+    user: {
+      id: string
+      email: string
+      role?: string
+    }
+  }
+}
+
+declare module 'next-auth/jwt' {
+  interface JWT {
+    role?: string
+  }
+}
+
 export const {
   handlers: { GET, POST },
   auth,
@@ -96,14 +115,14 @@ export const {
   session: { strategy: 'jwt' },
   callbacks: {
     async jwt({ token, user }) {
-      if (user) {
+      if (user?.role) {
         token.role = user.role
       }
       return token
     },
     async session({ session, token }) {
-      if (token) {
-        session.user.id = token.sub
+      if (token && session.user) {
+        session.user.id = token.sub || ''
         session.user.role = token.role
       }
       return session
