@@ -35,8 +35,8 @@ interface Restaurant {
   name: string;
 }
 
-// Input schema (what the form receives)
-const inputSchema = z.object({
+// Simple schema without transforms - handle conversion manually
+const schema = z.object({
   nameEn: z.string().min(1, "English name is required"),
   nameFr: z.string().min(1, "French name is required"),
   descriptionEn: z.string().optional(),
@@ -50,29 +50,7 @@ const inputSchema = z.object({
   isMostPurchased: z.boolean().optional(),
 });
 
-// Output schema (what gets processed)
-const outputSchema = inputSchema.transform((data) => ({
-  ...data,
-  price: (() => {
-    const num = parseFloat(data.price);
-    if (isNaN(num) || num < 0) {
-      throw new Error("Price must be a valid number greater than 0");
-    }
-    return num;
-  })(),
-  calories: data.calories && data.calories !== "" ? (() => {
-    const num = parseInt(data.calories);
-    if (isNaN(num)) {
-      throw new Error("Calories must be a valid number");
-    }
-    return num;
-  })() : undefined,
-}));
-
-// Use input schema for form values
-type FormValues = z.infer<typeof inputSchema>;
-// Use output schema for processed data
-type ProcessedFormValues = z.infer<typeof outputSchema>;
+type FormValues = z.infer<typeof schema>;
 
 export default function CreateDishForm({
   restaurantId,
@@ -98,21 +76,46 @@ export default function CreateDishForm({
     reset,
     setValue,
     watch,
+    setError: setFormError,
   } = useForm<FormValues>({
-    resolver: zodResolver(outputSchema),
+    resolver: zodResolver(schema),
     mode: "onChange",
   });
 
-  const onSubmit = async (data: ProcessedFormValues) => {
+  const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
     setError(null)
     
+    // Manual validation and conversion
+    const price = parseFloat(data.price);
+    if (isNaN(price) || price < 0) {
+      setFormError("price", { message: "Price must be a valid number greater than 0" });
+      setIsSubmitting(false);
+      return;
+    }
+
+    let calories: number | undefined;
+    if (data.calories && data.calories !== "") {
+      calories = parseInt(data.calories);
+      if (isNaN(calories)) {
+        setFormError("calories", { message: "Calories must be a valid number" });
+        setIsSubmitting(false);
+        return;
+      }
+    }
+    
     const finalData = {
-      ...data,
+      nameEn: data.nameEn,
+      nameFr: data.nameFr,
+      descriptionEn: data.descriptionEn,
+      descriptionFr: data.descriptionFr,
+      price: price,
+      calories: calories,
       imageUrl: imageUrl || data.imageUrl,
       subcategoryId: data.subcategoryId || null,
       usdzUrl: usdzUrl || '',
       glbUrl: glbUrl || '',
+      isMostPurchased: data.isMostPurchased || false,
     }
     
     console.log('Create dish form submission data:', {
@@ -279,6 +282,12 @@ export default function CreateDishForm({
                   placeholder="250"
                   disabled={isSubmitting}
                 />
+                {errors.calories && (
+                  <p className="text-xs text-red-600 flex items-center gap-1">
+                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                    {errors.calories.message}
+                  </p>
+                )}
               </div>
               
               <div className="space-y-2">
