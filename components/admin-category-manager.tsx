@@ -1,3 +1,4 @@
+// PathFile: Foodify/components/admin-category-manager.tsx
 "use client";
 
 import { useState } from "react";
