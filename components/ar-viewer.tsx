@@ -336,36 +336,33 @@ export default function ARViewer({ dish, restaurantId, locale }: ARViewerProps) 
                 <Button
                   variant="outline"
                   onClick={() => {
-  if (dish.glbUrl) {
-    window.open(
-      `/3d-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}`,
-      '_blank'
-    )
-  }
-}}
+                    if (dish.glbUrl) {
+                      window.open(
+                        `/3d-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}`,
+                        '_blank'
+                      )
+                    }
+                  }}
                   className="flex items-center gap-2 border-gray-200 hover:bg-gray-50"
                 >
                   <Eye className="h-4 w-4" />
                   <span>3D Viewer</span>
                 </Button>
                 {dish.usdzUrl && (
-                  {dish.usdzUrl && (
-  <Button
-    variant="outline"
-    onClick={() => {
-      if (!dish.usdzUrl) return // 🔐 Double sécurité pour TypeScript
-      const link = document.createElement('a')
-      link.href = dish.usdzUrl
-      link.download = `${dishName.replace(/\s+/g, '_')}.usdz`
-      link.click()
-    }}
-    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50"
-  >
-    <Download className="h-4 w-4" />
-    <span>Download</span>
-  </Button>
-)}
-
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      if (!dish.usdzUrl) return // Double security for TypeScript
+                      const link = document.createElement('a')
+                      link.href = dish.usdzUrl
+                      link.download = `${dishName.replace(/\s+/g, '_')}.usdz`
+                      link.click()
+                    }}
+                    className="flex items-center gap-2 border-gray-200 hover:bg-gray-50"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Download</span>
+                  </Button>
                 )}
               </div>
             </div>
