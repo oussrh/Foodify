@@ -74,7 +74,7 @@ export default function NotFound() {
           {/* Help text */}
           <p className="text-sm text-gray-500 mt-8">
             Still having trouble? 
-            <Link href="/contact" className="text-blue-600 hover:text-blue-700 font-medium ml-1 hover:underline">
+            <Link href="/" className="text-blue-600 hover:text-blue-700 font-medium ml-1 hover:underline">
               Contact our support team
             </Link>
           </p>
