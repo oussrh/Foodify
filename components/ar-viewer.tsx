@@ -335,7 +335,14 @@ export default function ARViewer({ dish, restaurantId, locale }: ARViewerProps) 
               <div className="grid grid-cols-2 gap-3">
                 <Button
                   variant="outline"
-                  onClick={() => window.open(`/3d-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}`, '_blank')}
+                  onClick={() => {
+  if (dish.glbUrl) {
+    window.open(
+      `/3d-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}`,
+      '_blank'
+    )
+  }
+}}
                   className="flex items-center gap-2 border-gray-200 hover:bg-gray-50"
                 >
                   <Eye className="h-4 w-4" />
