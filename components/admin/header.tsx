@@ -1,6 +1,8 @@
-// PathFile: components/admin/header.tsx
+// FilePath: components/admin/header.tsx
+
 'use client'
 
+import { useState, useEffect } from 'react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { signOut } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
@@ -8,8 +10,21 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
 import { Badge } from '@/components/ui/badge'
 import AdminSidebar from './sidebar'
 import { Menu, LogOut, Shield, ChefHat } from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 export default function AdminHeader() {
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.scrollY
+      setIsScrolled(scrollTop > 50) // Show logo in header when scrolled more than 50px
+    }
+
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between px-4">
@@ -31,8 +46,13 @@ export default function AdminHeader() {
             </SheetContent>
           </Sheet>
 
-          {/* Logo and Title */}
-          <div className="flex items-center gap-3">
+          {/* Animated Logo - only shows when scrolled */}
+          <div className={cn(
+            "flex items-center gap-3 transition-all duration-500 ease-in-out",
+            isScrolled 
+              ? "opacity-100 translate-x-0 scale-100" 
+              : "opacity-0 -translate-x-8 scale-95 pointer-events-none"
+          )}>
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-sm">
               <ChefHat className="h-4 w-4" />
             </div>
@@ -49,6 +69,11 @@ export default function AdminHeader() {
               </Badge>
             </div>
           </div>
+
+          {/* Placeholder for consistent spacing when logo is hidden */}
+          {!isScrolled && (
+            <div className="w-4" /> // Small spacer to maintain layout
+          )}
         </div>
 
         {/* Right Side Actions */}
