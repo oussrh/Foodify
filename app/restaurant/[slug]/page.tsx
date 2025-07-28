@@ -3,7 +3,7 @@ import prisma from '@/lib/prisma'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import ARViewer from '@/components/ar-viewer'
+// import ARViewer from '@/components/ar-viewer'
 import SimpleQRDisplay from '@/components/simple-qr-display'
 import FloatingQRButton from '@/components/floating-qr-button'
 import { 
@@ -26,6 +26,7 @@ import {
   Users
 } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import Link from 'next/link'
 
 async function getRestaurantData(slug: string) {
   const restaurant = await prisma.restaurant.findUnique({
@@ -180,35 +181,26 @@ export default async function RestaurantPage({
       {/* Menu Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-12">
-          {/* AR Experience Notice - Mobile Optimized */}
-          <Card className="border-0 shadow-lg bg-gradient-to-r from-purple-50 to-indigo-50 md:from-amber-50 md:to-orange-50">
+          {/* Simple Menu Instructions */}
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50">
             <CardContent className="p-4 md:p-6">
               <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                <div className="p-3 bg-purple-100 md:bg-amber-100 rounded-full flex-shrink-0">
-                  <Camera className="h-6 w-6 md:h-8 md:w-8 text-purple-600 md:text-amber-600" />
+                <div className="p-3 bg-blue-100 rounded-full flex-shrink-0">
+                  <Eye className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
                 </div>
                 <div className="flex-1 space-y-2">
-                  <h3 className="text-lg md:text-xl font-bold text-purple-900 md:text-amber-900">
-                    🚀 AR Menu Experience
+                  <h3 className="text-lg md:text-xl font-bold text-blue-900">
+                    📱 Interactive Menu
                   </h3>
-                  <p className="text-sm md:text-base text-purple-700 md:text-amber-700 leading-relaxed">
-                    Tap the <span className="inline-flex items-center gap-1 bg-purple-100 md:bg-amber-100 px-2 py-1 rounded text-xs font-medium">
-                      <Camera className="h-3 w-3" /> AR
-                    </span> button on dishes to see them in 3D on your table! Perfect for visualizing portion sizes and presentation.
+                  <p className="text-sm md:text-base text-blue-700 leading-relaxed">
+                    Tap any dish to see detailed information, ingredients, calories, and experience it in AR on your table!
                   </p>
-                  
-                  {/* Mobile-specific instructions */}
-                  <div className="md:hidden pt-2 border-t border-purple-200">
-                    <p className="text-xs text-purple-600">
-                      📱 <strong>Mobile Tip:</strong> Works best with your phone&apos;s camera pointing at a flat surface like your table
-                    </p>
-                  </div>
                 </div>
                 
                 {/* QR Code Access for Desktop */}
                 <div className="hidden md:block flex-shrink-0">
                   <div className="text-center space-y-2">
-                    <p className="text-xs text-amber-700 font-medium">Share with customers:</p>
+                    <p className="text-xs text-blue-700 font-medium">Share with customers:</p>
                     <SimpleQRDisplay url={publicUrl} restaurantName={restaurant.name} />
                   </div>
                 </div>
@@ -241,7 +233,7 @@ export default async function RestaurantPage({
                             key={dish.id} 
                             dish={dish} 
                             locale={restaurant.defaultLocale}
-                            restaurantId={restaurant.id}
+                            restaurantSlug={restaurant.slug}
                           />
                         ))}
                       </div>
@@ -266,7 +258,7 @@ export default async function RestaurantPage({
                     key={dish.id} 
                     dish={dish} 
                     locale={restaurant.defaultLocale}
-                    restaurantId={restaurant.id}
+                    restaurantSlug={restaurant.slug}
                   />
                 ))}
               </div>
@@ -283,184 +275,95 @@ export default async function RestaurantPage({
   )
 }
 
-function DishCard({ dish, locale, restaurantId }: { 
+function DishCard({ dish, locale, restaurantSlug }: { 
   dish: any, 
   locale: string,
-  restaurantId: string 
+  restaurantSlug: string 
 }) {
   const hasARModel = dish.usdzUrl || dish.glbUrl
-  const viewCount = dish.views?.length || 0
-  const arViewCount = dish.views?.filter((v: any) => v.arViewed)?.length || 0
   
   // Mock dietary information - you can add these fields to your database schema
   const isVegetarian = dish.name?.toLowerCase().includes('veggie') || dish.name?.toLowerCase().includes('salad')
   const isSpicy = dish.description?.toLowerCase().includes('spicy') || dish.description?.toLowerCase().includes('hot')
-  const isRecommended = dish.isMostPurchased || Math.random() > 0.7 // You can implement actual recommendation logic
   
   return (
-    <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-white shadow-lg hover:-translate-y-1">
-      <div className="relative aspect-video overflow-hidden">
-        <Image
-          src={dish.imageUrl}
-          alt={locale === 'fr' ? dish.nameFr : dish.nameEn}
-          fill
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        
-        {/* Top badges */}
-        <div className="absolute top-3 left-3 flex flex-col gap-2">
-          {dish.isMostPurchased && (
-            <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 shadow-sm">
-              <Star className="h-3 w-3 mr-1" />
-              Popular
-            </Badge>
-          )}
-          {isRecommended && !dish.isMostPurchased && (
-            <Badge className="bg-blue-100 text-blue-700 border-blue-200 shadow-sm">
-              <Award className="h-3 w-3 mr-1" />
-              Recommended
-            </Badge>
-          )}
-          {isVegetarian && (
-            <Badge className="bg-green-100 text-green-700 border-green-200 shadow-sm">
-              <Leaf className="h-3 w-3 mr-1" />
-              Veggie
-            </Badge>
-          )}
-          {isSpicy && (
-            <Badge className="bg-red-100 text-red-700 border-red-200 shadow-sm">
-              <Flame className="h-3 w-3 mr-1" />
-              Spicy
-            </Badge>
-          )}
-        </div>
-        
-        {/* AR Badge */}
-        {hasARModel && (
-          <div className="absolute top-3 right-3">
-            <Badge className="bg-purple-100 text-purple-700 border-purple-200 shadow-sm animate-pulse">
-              <Camera className="h-3 w-3 mr-1" />
-              AR
-            </Badge>
-          </div>
-        )}
-        
-        {/* View Stats */}
-        {viewCount > 0 && (
-          <div className="absolute bottom-3 left-3">
-            <Badge className="bg-black/20 text-white border-white/20 backdrop-blur-sm">
-              <Eye className="h-3 w-3 mr-1" />
-              {viewCount}
-            </Badge>
-          </div>
-        )}
-        
-        {/* AR indicator overlay for mobile */}
-        {hasARModel && (
-          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
-            <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
-              <Camera className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
-        )}
-      </div>
-      
-      <CardHeader className="pb-3">
-        <div className="space-y-2">
-          <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
-            {locale === 'fr' ? dish.nameFr : dish.nameEn}
-          </CardTitle>
-          <p className="text-gray-600 text-sm line-clamp-2">
-            {locale === 'fr' ? dish.descriptionFr : dish.descriptionEn}
-          </p>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="pt-0 space-y-4">
-        {/* Nutrition Info Bar */}
-        {dish.calories && (
-          <div className="bg-gray-50 rounded-lg p-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-                <Zap className="h-4 w-4" />
-                <span>Nutrition</span>
-              </div>
-              <div className="flex items-center gap-1 text-lg font-bold text-green-600">
-                {dish.calories} <span className="text-sm font-normal">cal</span>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Ingredients */}
-        {dish.ingredients && dish.ingredients.length > 0 && (
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <ChefHat className="h-4 w-4 text-gray-600" />
-              <p className="text-sm font-medium text-gray-700">Ingredients</p>
-              <span className="text-xs text-gray-500">({dish.ingredients.length})</span>
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {dish.ingredients.slice(0, 6).map((ingredient: any) => (
-                <Badge key={ingredient.id} variant="outline" className="text-xs hover:bg-gray-50 transition-colors">
-                  {locale === 'fr' ? ingredient.nameFr : ingredient.nameEn}
-                </Badge>
-              ))}
-              {dish.ingredients.length > 6 && (
-                <Badge variant="outline" className="text-xs bg-gray-100">
-                  +{dish.ingredients.length - 6} more
-                </Badge>
-              )}
-            </div>
-          </div>
-        )}
-        
-        {/* Price and Action Row */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="space-y-1">
-            <div className="text-3xl font-bold text-green-600">
-              ${Number(dish.price).toFixed(2)}
-            </div>
-            {dish.calories && (
-              <p className="text-xs text-gray-500">Per serving</p>
+    <Link href={`/restaurant/${restaurantSlug}/dish/${dish.id}`}>
+      <Card className="group overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-white shadow-lg hover:-translate-y-1 cursor-pointer">
+        <div className="relative aspect-video overflow-hidden">
+          <Image
+            src={dish.imageUrl}
+            alt={locale === 'fr' ? dish.nameFr : dish.nameEn}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+          
+          {/* Top badges */}
+          <div className="absolute top-3 left-3 flex flex-col gap-2">
+            {dish.isMostPurchased && (
+              <Badge className="bg-yellow-100 text-yellow-700 border-yellow-200 shadow-sm">
+                <Star className="h-3 w-3 mr-1" />
+                Popular
+              </Badge>
+            )}
+            {isVegetarian && (
+              <Badge className="bg-green-100 text-green-700 border-green-200 shadow-sm">
+                <Leaf className="h-3 w-3 mr-1" />
+                Veggie
+              </Badge>
+            )}
+            {isSpicy && (
+              <Badge className="bg-red-100 text-red-700 border-red-200 shadow-sm">
+                <Flame className="h-3 w-3 mr-1" />
+                Spicy
+              </Badge>
             )}
           </div>
           
+          {/* AR Badge */}
           {hasARModel && (
-            <div className="flex flex-col items-end gap-2">
-              <ARViewer 
-                dish={dish}
-                restaurantId={restaurantId}
-                locale={locale}
-              />
-              <p className="text-xs text-purple-600 font-medium">
-                📱 Tap to see on your table
-              </p>
+            <div className="absolute top-3 right-3">
+              <Badge className="bg-purple-100 text-purple-700 border-purple-200 shadow-sm animate-pulse">
+                <Camera className="h-3 w-3 mr-1" />
+                AR
+              </Badge>
             </div>
           )}
+          
+          {/* Click indicator overlay */}
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+            <div className="bg-white/90 backdrop-blur-sm rounded-full p-3 shadow-lg">
+              <Eye className="h-6 w-6 text-purple-600" />
+            </div>
+          </div>
         </div>
         
-        {/* AR Experience Stats */}
-        {hasARModel && (
-          <div className="pt-3 border-t border-gray-100 bg-purple-50 -mx-6 -mb-6 p-4 mt-4">
-            <div className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-purple-700">
-                <Camera className="h-4 w-4" />
-                <span className="font-medium">AR Experience Available</span>
-              </div>
-              {arViewCount > 0 && (
-                <div className="flex items-center gap-1 text-purple-600">
-                  <Users className="h-3 w-3" />
-                  <span className="text-xs">{arViewCount} AR views</span>
-                </div>
-              )}
-            </div>
-            <p className="text-xs text-purple-600 mt-1">
-              View this dish in 3D on your table before ordering
+        <CardHeader className="pb-3">
+          <div className="space-y-2">
+            <CardTitle className="text-xl font-bold text-gray-900 group-hover:text-purple-600 transition-colors">
+              {locale === 'fr' ? dish.nameFr : dish.nameEn}
+            </CardTitle>
+            <p className="text-gray-600 text-sm line-clamp-2">
+              {locale === 'fr' ? dish.descriptionFr : dish.descriptionEn}
             </p>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </CardHeader>
+        
+        <CardContent className="pt-0">
+          {/* Price */}
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div className="text-2xl font-bold text-green-600">
+              ${Number(dish.price).toFixed(2)}
+            </div>
+            
+            {hasARModel && (
+              <Badge className="bg-purple-50 text-purple-700 border-purple-200">
+                <Camera className="h-3 w-3 mr-1" />
+                AR Available
+              </Badge>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
