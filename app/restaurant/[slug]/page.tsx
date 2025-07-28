@@ -4,8 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 // import ARViewer from '@/components/ar-viewer'
-import SimpleQRDisplay from '@/components/simple-qr-display'
-import FloatingQRButton from '@/components/floating-qr-button'
+// Remove admin QR components for public view
 import { 
   ChefHat, 
   Clock, 
@@ -167,10 +166,6 @@ export default async function RestaurantPage({
                   </Badge>
                 </div>
                 
-                {/* QR Code Access Button */}
-                <div className="pt-4">
-                  <SimpleQRDisplay url={publicUrl} restaurantName={restaurant.name} />
-                </div>
               </div>
               
             </div>
@@ -181,30 +176,15 @@ export default async function RestaurantPage({
       {/* Menu Content */}
       <div className="container mx-auto px-4 py-8">
         <div className="space-y-12">
-          {/* Simple Menu Instructions */}
+          {/* Welcome Message */}
           <Card className="border-0 shadow-lg bg-gradient-to-r from-blue-50 to-indigo-50">
-            <CardContent className="p-4 md:p-6">
-              <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
-                <div className="p-3 bg-blue-100 rounded-full flex-shrink-0">
-                  <Eye className="h-6 w-6 md:h-8 md:w-8 text-blue-600" />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <h3 className="text-lg md:text-xl font-bold text-blue-900">
-                    📱 Interactive Menu
-                  </h3>
-                  <p className="text-sm md:text-base text-blue-700 leading-relaxed">
-                    Tap any dish to see detailed information, ingredients, calories, and experience it in AR on your table!
-                  </p>
-                </div>
-                
-                {/* QR Code Access for Desktop */}
-                <div className="hidden md:block flex-shrink-0">
-                  <div className="text-center space-y-2">
-                    <p className="text-xs text-blue-700 font-medium">Share with customers:</p>
-                    <SimpleQRDisplay url={publicUrl} restaurantName={restaurant.name} />
-                  </div>
-                </div>
-              </div>
+            <CardContent className="p-4 md:p-6 text-center">
+              <h2 className="text-xl md:text-2xl font-bold text-blue-900 mb-2">
+                Welcome to our menu!
+              </h2>
+              <p className="text-blue-700">
+                Tap any dish to see details and experience it in AR
+              </p>
             </CardContent>
           </Card>
 
@@ -267,10 +247,6 @@ export default async function RestaurantPage({
         </div>
       </div>
       
-      {/* Floating QR Code Button for Mobile */}
-      <div className="fixed bottom-6 right-6 md:hidden z-50">
-        <FloatingQRButton url={publicUrl} restaurantName={restaurant.name} />
-      </div>
     </div>
   )
 }
