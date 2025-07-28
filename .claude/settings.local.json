@@ -3,7 +3,17 @@
     "allow": [
       "Bash(pnpm lint:*)",
       "Bash(npm run type-check:*)",
-      "Bash(npm run lint)"
+      "Bash(npm run lint)",
+      "Bash(npm run:*)",
+      "Bash(npx prisma generate:*)",
+      "Bash(npx prisma db push:*)",
+      "Bash(npx prisma db seed:*)",
+      "Bash(find:*)",
+      "Bash(curl:*)",
+      "Bash(psql:*)",
+      "Bash(pkill:*)",
+      "Bash(true)",
+      "Bash(taskkill:*)"
     ],
     "deny": []
   }
