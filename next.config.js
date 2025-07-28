@@ -11,7 +11,7 @@ const nextConfig = {
   // Produce a standalone build for easier deployment
   output: "standalone",
   images: {
-    domains: ['res.cloudinary.com'],
+    domains: ['res.cloudinary.com', 'api.qrserver.com'],
   },
 };
 

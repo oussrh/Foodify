@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { QrCode, Copy, CheckCircle, Share2, Download } from 'lucide-react'
+import Image from 'next/image'
 
 interface FloatingQRButtonProps {
   url: string
@@ -55,11 +56,12 @@ export default function FloatingQRButton({ url, restaurantName }: FloatingQRButt
         
         <div className="flex flex-col items-center space-y-4">
           <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-4 rounded-2xl shadow-lg border-2 border-purple-100">
-            <img
+            <Image
               src={qrCodeUrl}
               alt={`QR Code for ${restaurantName}`}
+              width={160}
+              height={160}
               className="w-40 h-40 mx-auto"
-              loading="lazy"
             />
           </div>
           
@@ -69,7 +71,7 @@ export default function FloatingQRButton({ url, restaurantName }: FloatingQRButt
             </p>
             <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
               <p className="text-xs text-blue-800">
-                They'll see the full AR menu with 3D dish previews!
+                They&apos;ll see the full AR menu with 3D dish previews!
               </p>
             </div>
           </div>

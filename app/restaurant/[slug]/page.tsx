@@ -200,7 +200,7 @@ export default async function RestaurantPage({
                   {/* Mobile-specific instructions */}
                   <div className="md:hidden pt-2 border-t border-purple-200">
                     <p className="text-xs text-purple-600">
-                      📱 <strong>Mobile Tip:</strong> Works best with your phone's camera pointing at a flat surface like your table
+                      📱 <strong>Mobile Tip:</strong> Works best with your phone&apos;s camera pointing at a flat surface like your table
                     </p>
                   </div>
                 </div>

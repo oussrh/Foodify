@@ -148,7 +148,7 @@ export default function ImageUpload({
     return null
   }
 
-  const processFile = async (file: File) => {
+  const processFile = useCallback(async (file: File) => {
     const validationError = validateFile(file)
     if (validationError) {
       setError(validationError)
@@ -194,7 +194,7 @@ export default function ImageUpload({
         setUploadProgress(0)
       }, 1000)
     }
-  }
+  }, [onImageUpload, uploadToCloudinary, validateFile])
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -224,7 +224,7 @@ export default function ImageUpload({
     if (files.length > 0) {
       await processFile(files[0])
     }
-  }, [])
+  }, [processFile])
 
   const handlePreview = () => {
     if (currentImageUrl) {

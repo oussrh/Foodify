@@ -31,6 +31,7 @@ import {
   Target,
   Sparkles
 } from 'lucide-react'
+import Image from 'next/image'
 
 interface ARViewerProps {
   dish: {
@@ -178,9 +179,10 @@ export default function ARViewer({ dish, restaurantId, locale }: ARViewerProps) 
         <div className="space-y-6">
           {/* AR Preview */}
           <div className="relative aspect-square rounded-2xl overflow-hidden bg-gradient-to-br from-purple-100 via-pink-100 to-indigo-100 shadow-inner">
-            <img
+            <Image
               src={dish.imageUrl}
               alt={dishName}
+              fill
               className="w-full h-full object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-purple-600/40 via-transparent to-transparent">

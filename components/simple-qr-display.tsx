@@ -10,6 +10,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { QrCode, Copy, CheckCircle, Share2 } from 'lucide-react'
+import Image from 'next/image'
 
 interface SimpleQRDisplayProps {
   url: string
@@ -61,11 +62,12 @@ export default function SimpleQRDisplay({ url, restaurantName }: SimpleQRDisplay
           {/* QR Code Section */}
           <div className="flex flex-col items-center space-y-4">
             <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-2xl shadow-lg border-2 border-purple-100">
-              <img
+              <Image
                 src={qrCodeUrl}
                 alt={`QR Code for ${restaurantName}`}
+                width={192}
+                height={192}
                 className="w-48 h-48 mx-auto"
-                loading="lazy"
               />
             </div>
             
@@ -77,7 +79,7 @@ export default function SimpleQRDisplay({ url, restaurantName }: SimpleQRDisplay
                 </p>
                 <ul className="text-xs text-blue-700 space-y-1 text-left">
                   <li>• Full digital menu with photos</li>
-                  <li>• AR "View in AR" buttons on each dish</li>
+                  <li>• AR &ldquo;View in AR&rdquo; buttons on each dish</li>
                   <li>• 3D dish visualization on their table</li>
                   <li>• Ingredients, calories, and pricing</li>
                   <li>• Multi-language support</li>
