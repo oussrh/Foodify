@@ -100,9 +100,9 @@ export default function ThreeDViewerClient() {
       modelViewer.setAttribute('loading', 'eager')
       modelViewer.setAttribute('reveal', 'auto')
       modelViewer.setAttribute('tone-mapping', 'aces')
-      modelViewer.setAttribute('camera-orbit', '0deg 75deg 2.5m')
-      modelViewer.setAttribute('min-camera-orbit', 'auto auto 1m')
-      modelViewer.setAttribute('max-camera-orbit', 'auto auto 10m')
+      modelViewer.setAttribute('camera-orbit', '0deg 90deg 2.5m')
+      modelViewer.setAttribute('min-camera-orbit', 'auto 90deg 1m')
+      modelViewer.setAttribute('max-camera-orbit', 'auto 90deg 10m')
       modelViewer.setAttribute('interpolation-decay', '200')
       
       // Set styles
@@ -382,7 +382,7 @@ export default function ThreeDViewerClient() {
                 <div className="w-6 h-6 bg-muted rounded-lg flex items-center justify-center">
                   <Move3D className="h-3 w-3" />
                 </div>
-                <span>Click & drag to rotate</span>
+                <span>Click & drag horizontally to rotate</span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground hover:text-foreground transition-colors">
                 <div className="w-6 h-6 bg-muted rounded-lg flex items-center justify-center">
@@ -427,7 +427,7 @@ export default function ThreeDViewerClient() {
             </div>
             <div className="flex items-center justify-between py-2">
               <span className="text-muted-foreground">Interaction</span>
-              <span className="text-foreground text-xs">360° Viewing</span>
+              <span className="text-foreground text-xs">Horizontal Rotation</span>
             </div>
           </div>
         </div>

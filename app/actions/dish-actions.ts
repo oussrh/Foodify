@@ -27,14 +27,14 @@ export async function createDish(
 ) {
   const count = await prisma.dish.count({ where: { restaurantId } })
   
-  // Only process AR URLs if they exist and are not already Cloudinary URLs
-  const usdzUrl = data.usdzUrl && data.usdzUrl.includes('cloudinary.com') 
+  // Only process AR URLs if they exist and are not already Cloudinary URLs or local paths
+  const usdzUrl = data.usdzUrl && (data.usdzUrl.includes('cloudinary.com') || data.usdzUrl.startsWith('/'))
     ? data.usdzUrl 
     : data.usdzUrl 
       ? await uploadArAsset(data.usdzUrl, restaurantId)
       : ''
       
-  const glbUrl = data.glbUrl && data.glbUrl.includes('cloudinary.com')
+  const glbUrl = data.glbUrl && (data.glbUrl.includes('cloudinary.com') || data.glbUrl.startsWith('/'))
     ? data.glbUrl
     : data.glbUrl
       ? await uploadArAsset(data.glbUrl, restaurantId)
@@ -84,10 +84,10 @@ export async function updateDish(
 ) {
   const updatedData = { ...data }
   
-  // Only process AR URLs if they are not already Cloudinary URLs
+  // Only process AR URLs if they are not already Cloudinary URLs or local paths
   if (data.usdzUrl) {
-    // If it's already a Cloudinary URL, use it as-is
-    if (data.usdzUrl.includes('cloudinary.com')) {
+    // If it's already a Cloudinary URL or local path starting with /, use it as-is
+    if (data.usdzUrl.includes('cloudinary.com') || data.usdzUrl.startsWith('/')) {
       updatedData.usdzUrl = data.usdzUrl
     } else {
       updatedData.usdzUrl = await uploadArAsset(data.usdzUrl, restaurantId)
@@ -95,8 +95,8 @@ export async function updateDish(
   }
   
   if (data.glbUrl) {
-    // If it's already a Cloudinary URL, use it as-is
-    if (data.glbUrl.includes('cloudinary.com')) {
+    // If it's already a Cloudinary URL or local path starting with /, use it as-is
+    if (data.glbUrl.includes('cloudinary.com') || data.glbUrl.startsWith('/')) {
       updatedData.glbUrl = data.glbUrl
     } else {
       updatedData.glbUrl = await uploadArAsset(data.glbUrl, restaurantId)

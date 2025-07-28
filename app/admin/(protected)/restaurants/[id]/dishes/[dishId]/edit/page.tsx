@@ -72,6 +72,8 @@ export default async function EditDishPage({
     usdzUrl: dish.usdzUrl,
     glbUrl: dish.glbUrl,
     subcategoryId: dish.subcategoryId || undefined,
+    calories: dish.calories || undefined,
+    isMostPurchased: dish.isMostPurchased || false,
   }
   
   return (
@@ -116,6 +118,7 @@ export default async function EditDishPage({
             </CardHeader>
             <CardContent className="p-6">
               <EditDishForm 
+                key={`${dish.id}-${dish.imageUrl}-${dish.usdzUrl}-${dish.glbUrl}`}
                 id={dish.id}
                 restaurantId={dish.restaurantId}
                 defaultValues={defaultValues}
@@ -138,6 +141,7 @@ export default async function EditDishPage({
                 isActive={dish.isActive}
                 isMostPurchased={dish.isMostPurchased}
                 calories={dish.calories}
+                restaurantId={dish.restaurantId}
               />
             </CardContent>
           </Card>

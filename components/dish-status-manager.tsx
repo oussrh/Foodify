@@ -25,16 +25,18 @@ interface DishStatusManagerProps {
   isActive: boolean
   isMostPurchased: boolean
   calories?: number | null
+  restaurantId: string
 }
 
 export default function DishStatusManager({ 
   dishId, 
   isActive, 
   isMostPurchased, 
-  calories 
+  calories,
+  restaurantId
 }: DishStatusManagerProps) {
   const [loading, setLoading] = useState(false)
-  const [localCalories, setLocalCalories] = useState(calories?.toString() || '')
+  const [localCalories, setLocalCalories] = useState(calories ? calories.toString() : '')
   const router = useRouter()
 
   const handleStatusToggle = async () => {
@@ -65,7 +67,7 @@ export default function DishStatusManager({
     setLoading(true)
     try {
       const caloriesValue = localCalories.trim() ? parseInt(localCalories) : null
-      await updateDish(dishId, '', { calories: caloriesValue })
+      await updateDish(dishId, restaurantId, { calories: caloriesValue })
       router.refresh()
     } catch (error) {
       console.error('Failed to update calories:', error)

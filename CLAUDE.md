@@ -1,0 +1,143 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Foodify is an AR menu platform that allows restaurants to display dishes in Augmented Reality. The platform consists of:
+- Customer-facing AR viewer accessed via QR codes
+- Multi-tenant restaurant management dashboard (admin/manager portals)
+- Multi-language support (English/French)
+
+## Development Commands
+
+```bash
+# Install dependencies
+pnpm install
+
+# Start development server
+pnpm dev
+
+# Build the application (includes DB setup and seeding)
+pnpm build
+
+# Lint code
+pnpm lint
+
+# Type checking
+pnpm type-check
+
+# Database operations
+pnpm db:setup     # Reset DB, generate schema, and seed data
+pnpm db:seed      # Seed database with sample data
+pnpm prisma       # Access Prisma CLI
+```
+
+## Architecture & Key Concepts
+
+### Multi-Tenant Structure
+- **Super Admins**: Manage all restaurants and users
+- **Restaurant Admins**: Manage their assigned restaurants
+- URL routing: `admin.domain.com` for admin panel, `restaurant-slug.domain.com` for customer views
+
+### Authentication & Security
+- NextAuth v5 with credentials + email OTP/TOTP 2FA
+- Role-based access control via middleware
+- Prisma adapter for session management
+- MFA support for both admin and manager accounts
+
+### Database Schema (Prisma)
+Key models and relationships:
+- `Restaurant` → `MenuCategory` → `MenuSubcategory` → `Dish`
+- `User` (SUPER_ADMIN/RESTAURANT_ADMIN) can manage multiple restaurants
+- `Dish` includes AR assets (USDZ/GLB), images, multilingual content
+- `DishView` tracks analytics (device type, AR usage)
+- `ActivityLog` for audit trail
+
+### AR File Management
+- AR assets (USDZ/GLB files) uploaded to Cloudinary
+- Organized in restaurant-specific folders: `restaurants/{restaurant-slug}/`
+- Upload handling in `lib/cloudinary.ts` and `components/ar-file-upload.tsx`
+
+### Component Architecture
+- shadcn/ui components in `components/ui/`
+- Feature-specific components for forms, management, and AR viewing
+- Separate admin/manager component variations (e.g., `admin-dish-actions.tsx` vs `dish-actions.tsx`)
+
+### Server Actions Pattern
+All data mutations use Next.js server actions in `app/actions/`:
+- `dish-actions.ts` - CRUD operations for dishes
+- `restaurant-actions.ts` - Restaurant management
+- `admin-auth-actions.ts` - Admin authentication flows
+- Actions handle file uploads, database operations, and validation
+
+### Routing Structure
+```
+app/
+├── admin/(auth)/          # Admin login, MFA
+├── admin/(protected)/     # Super admin dashboard
+├── manager/(auth)/        # Manager login, MFA  
+├── manager/(protected)/   # Restaurant manager dashboard
+├── restaurant/[slug]/     # Customer-facing restaurant pages
+├── ar-viewer/            # AR model viewer
+└── api/                  # API routes for external integrations
+```
+
+## Environment Variables Required
+
+```bash
+# Database
+DATABASE_URL="postgresql://..."
+
+# NextAuth
+NEXTAUTH_URL="http://localhost:3000"
+NEXTAUTH_SECRET="..."
+
+# Email (Resend)
+RESEND_API_KEY="..."
+RESEND_FROM="Foodify <no-reply@yourdomain.com>"
+
+# Cloudinary (AR file storage)
+CLOUDINARY_CLOUD_NAME="..."
+CLOUDINARY_API_KEY="..."
+CLOUDINARY_API_SECRET="..."
+```
+
+## Key Development Patterns
+
+### Form Handling
+- React Hook Form with Zod validation
+- Server actions for form submission
+- Consistent error handling and loading states
+
+### File Uploads
+- Image uploads via standard form inputs
+- AR file uploads (USDZ/GLB) via `ar-file-upload.tsx` component
+- Automatic Cloudinary organization by restaurant
+
+### Multi-language Content
+- All user-facing content has `nameEn`/`nameFr` and `descriptionEn`/`descriptionFr` fields
+- Components handle locale switching
+- Default locale set per restaurant
+
+### State Management
+- Server state via server actions and database
+- Client state via React hooks
+- Form state via React Hook Form
+- Theme state via next-themes
+
+## Testing & Quality
+
+Currently no test framework is configured. When adding tests, use the project's existing patterns and ensure compatibility with:
+- TypeScript configuration
+- Prisma database schema
+- NextAuth session handling
+
+## Vercel Build Compatibility
+- All code contributions must be Vercel-compatible. This means:
+- The project must successfully build on Vercel using pnpm build.
+- All code must pass ESLint checks using pnpm lint.
+- All code must pass TypeScript checks using pnpm type-check.
+- Avoid using unsupported Node.js APIs or non-standard features not compatible with Vercel's Edge and Serverless environments.
+- Dynamic code generation, file system operations, or fs access should be limited to supported use cases.
+- Claude-generated code must adhere strictly to these constraints to avoid failed deployments.

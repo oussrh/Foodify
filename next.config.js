@@ -10,6 +10,9 @@ const nextConfig = {
   },
   // Produce a standalone build for easier deployment
   output: "standalone",
+  images: {
+    domains: ['res.cloudinary.com'],
+  },
 };
 
 export default nextConfig;

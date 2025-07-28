@@ -166,6 +166,8 @@ export default function ARViewerClient() {
       modelViewer.setAttribute('auto-rotate', '')
       modelViewer.setAttribute('auto-rotate-delay', '3000')
       modelViewer.setAttribute('rotation-per-second', '30deg')
+      modelViewer.setAttribute('min-camera-orbit', 'auto 90deg auto')
+      modelViewer.setAttribute('max-camera-orbit', 'auto 90deg auto')
       modelViewer.setAttribute('environment-image', 'neutral')
       modelViewer.setAttribute('shadow-intensity', '1')
       modelViewer.setAttribute('exposure', '1')
@@ -488,7 +490,7 @@ export default function ARViewerClient() {
                 <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                   <Move3D className="h-3 w-3" />
                 </div>
-                Drag to rotate model
+                Drag horizontally to rotate model
               </p>
               <p className="flex items-center gap-3">
                 <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">

@@ -86,7 +86,7 @@ export default function ARFileUpload({
     const formData = new FormData()
     formData.append('file', file)
     formData.append('upload_preset', uploadPreset)
-    formData.append('folder', `restaurants/${restaurantName.replace(/\s+/g, '_').toLowerCase()}/ar_models`)
+    formData.append('folder', `restaurants/${restaurantName.replace(/\s+/g, '_').toLowerCase()}/ar`)
     formData.append('resource_type', 'raw')
     formData.append('public_id', `${type}_${Date.now()}`)
 
@@ -330,7 +330,7 @@ export default function ARFileUpload({
                   </div>
                   <div className="mt-4 p-3 bg-blue-100/50 rounded-lg space-y-1 text-sm text-blue-800">
                     <p><strong>File size:</strong> Maximum 50MB per file</p>
-                    <p><strong>Storage:</strong> Files organized in &apos;{restaurantName.replace(/\s+/g, '_').toLowerCase()}/ar_models&apos;</p>
+                    <p><strong>Storage:</strong> Files organized in &apos;{restaurantName.replace(/\s+/g, '_').toLowerCase()}/ar&apos;</p>
                   </div>
                 </div>
               </div>

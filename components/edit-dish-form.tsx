@@ -13,7 +13,8 @@ import { updateDish } from '@/app/actions/dish-actions'
 import ARFileUpload from '@/components/ar-file-upload'
 import ARModelPreview from '@/components/ar-model-preview'
 import ImageUpload from '@/components/image-upload'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { 
   ChefHat, 
   Globe, 
@@ -81,6 +82,7 @@ export default function EditDishForm({
   const [glbUrl, setGlbUrl] = useState(defaultValues.glbUrl || '')
   const [imageUrl, setImageUrl] = useState(defaultValues.imageUrl || '')
   const [previewModel, setPreviewModel] = useState<{url: string, type: 'usdz' | 'glb'} | null>(null)
+  const router = useRouter()
   
   const {
     register,
@@ -88,10 +90,19 @@ export default function EditDishForm({
     formState: { errors, isDirty },
     watch,
     setValue,
+    reset,
   } = useForm<EditDishValues>({
     resolver: zodResolver(schema),
     defaultValues,
   })
+
+  // Update state when defaultValues change (after database updates)
+  useEffect(() => {
+    setUsdzUrl(defaultValues.usdzUrl || '')
+    setGlbUrl(defaultValues.glbUrl || '')
+    setImageUrl(defaultValues.imageUrl || '')
+    reset(defaultValues) // Reset the entire form with new default values
+  }, [defaultValues, reset])
 
   const onSubmit = async (data: EditDishValues) => {
     setIsSubmitting(true)
@@ -116,6 +127,7 @@ export default function EditDishForm({
     try {
       await updateDish(id, restaurantId, finalData)
       setSuccess(true)
+      router.refresh() // Refresh the page to get updated data
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
       setError('Failed to update dish. Please try again.')

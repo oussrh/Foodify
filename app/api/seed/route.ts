@@ -110,7 +110,7 @@ async function seedDatabase(request: NextRequest) {
         descriptionEn: 'Juicy grilled chicken breast.',
         descriptionFr: 'Poitrine de poulet grillée et juteuse.',
         price: 12.99,
-        imageUrl: '/images/chicken.jpg',
+        imageUrl: '/images/chicken.svg',
         usdzUrl: '/ar/chicken.usdz',
         glbUrl: '/ar/chicken.glb',
         isActive: true,
