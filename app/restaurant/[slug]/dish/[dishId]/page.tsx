@@ -12,9 +12,7 @@ import {
   Flame,
   Award,
   Zap,
-  Camera,
-  Clock,
-  Users
+  Camera
 } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -33,13 +31,7 @@ async function getDishData(dishId: string, restaurantSlug: string) {
           }
         }
       },
-      restaurant: true,
-      views: {
-        select: {
-          id: true,
-          arViewed: true
-        }
-      }
+      restaurant: true
     }
   })
 
@@ -70,9 +62,6 @@ export default async function DishPage({
   const isVegetarian = dish.nameEn?.toLowerCase().includes('veggie') || dish.nameEn?.toLowerCase().includes('salad')
   const isSpicy = dish.descriptionEn?.toLowerCase().includes('spicy') || dish.descriptionEn?.toLowerCase().includes('hot')
   const isRecommended = dish.isMostPurchased
-  
-  const viewCount = dish.views?.length || 0
-  const arViewCount = dish.views?.filter((v: any) => v.arViewed)?.length || 0
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-100">
@@ -169,20 +158,11 @@ export default async function DishPage({
                     See this dish in 3D on your table! Perfect for visualizing portion size and presentation.
                   </p>
                   
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <SimpleARCamera 
-                      dish={dish}
-                      restaurantId={restaurant?.id || ''}
-                      locale={locale}
-                    />
-                    
-                    {arViewCount > 0 && (
-                      <div className="flex items-center gap-1 text-sm text-purple-600">
-                        <Users className="h-4 w-4" />
-                        <span>{arViewCount} people viewed in AR</span>
-                      </div>
-                    )}
-                  </div>
+                  <SimpleARCamera 
+                    dish={dish}
+                    restaurantId={restaurant?.id || ''}
+                    locale={locale}
+                  />
                   
                   <div className="bg-purple-100 p-3 rounded-lg">
                     <p className="text-sm text-purple-800">
@@ -262,31 +242,6 @@ export default async function DishPage({
               </Card>
             )}
 
-            {/* Stats */}
-            {viewCount > 0 && (
-              <Card className="border-0 shadow-lg">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-blue-600" />
-                    Popularity
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="text-center p-3 bg-blue-50 rounded-lg">
-                      <div className="text-2xl font-bold text-blue-600">{viewCount}</div>
-                      <div className="text-sm text-blue-700">Total views</div>
-                    </div>
-                    {arViewCount > 0 && (
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <div className="text-2xl font-bold text-purple-600">{arViewCount}</div>
-                        <div className="text-sm text-purple-700">AR views</div>
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
         </div>
       </div>

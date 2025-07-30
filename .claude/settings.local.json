@@ -13,7 +13,13 @@
       "Bash(psql:*)",
       "Bash(pkill:*)",
       "Bash(true)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(pnpm type-check:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx next:*)",
+      "Bash(pnpm prisma generate:*)",
+      "Bash(pnpm prisma:*)",
+      "Bash(pnpm dev:*)"
     ],
     "deny": []
   }

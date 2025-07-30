@@ -51,7 +51,11 @@ export function AdminRestaurantActions({ restaurantId, restaurantName }: AdminRe
     <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
       <AlertDialogTrigger asChild>
         <DropdownMenuItem 
-          onSelect={(e) => e.preventDefault()} 
+          onSelect={(e) => {
+            e.preventDefault()
+            // Small delay to ensure dropdown menu closes before dialog opens
+            setTimeout(() => setDeleteDialogOpen(true), 10)
+          }} 
           className="focus:bg-red-50 text-red-600"
           disabled={loading}
         >
@@ -74,9 +78,11 @@ export function AdminRestaurantActions({ restaurantId, restaurantName }: AdminRe
           </div>
         </AlertDialogHeader>
         
-        <AlertDialogDescription className="text-gray-600 leading-relaxed">
-          Are you sure you want to permanently delete <span className="font-semibold text-gray-900">&ldquo;{restaurantName}&rdquo;</span>?
-          <br /><br />
+        <div className="space-y-4">
+          <AlertDialogDescription className="text-gray-600 leading-relaxed">
+            Are you sure you want to permanently delete <span className="font-semibold text-gray-900">&ldquo;{restaurantName}&rdquo;</span>?
+          </AlertDialogDescription>
+          
           <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
             <div className="flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
@@ -85,7 +91,7 @@ export function AdminRestaurantActions({ restaurantId, restaurantName }: AdminRe
               </div>
             </div>
           </div>
-        </AlertDialogDescription>
+        </div>
         
         <AlertDialogFooter className="gap-3">
           <AlertDialogCancel 

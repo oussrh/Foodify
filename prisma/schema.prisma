@@ -34,6 +34,28 @@ model Restaurant {
   logoUrl       String?
   colorTheme    String?
   defaultLocale Locale
+  // Address Information
+  streetAddress String?
+  city          String?
+  state         String?
+  postalCode    String?
+  country       String?
+  // Additional Business Information
+  website       String?
+  description   String?
+  cuisineType   String?
+  priceRange    String?        // e.g., "$", "$$", "$$$", "$$$$"
+  openingHours  String?        // JSON string with operating hours
+  socialMedia   String?        // JSON string with social media links
+  // Design/Branding
+  coverImageUrl String?
+  coverImageStyle String?      // "cover" or "repeat"
+  secondaryColor String?
+  fontFamily    String?
+  googleFontUrl String?        // Google Fonts URL for easy implementation
+  // Business Settings
+  currency      String?        // e.g., "USD", "EUR", "GBP", "CAD"
+  currencySymbol String?       // e.g., "$", "€", "£", "C$"
   createdAt     DateTime       @default(now())
   users         User[]
   categories    MenuCategory[]

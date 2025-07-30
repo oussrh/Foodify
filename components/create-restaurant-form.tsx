@@ -6,7 +6,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createRestaurant } from "@/app/actions/restaurant-actions";
+import RestaurantLogoUpload from "@/components/restaurant-logo-upload";
+import RestaurantCoverUpload from "@/components/restaurant-cover-upload";
+import GoogleFontsSelector from "@/components/google-fonts-selector";
+import { 
+  Building2, 
+  MapPin, 
+  Phone, 
+  Mail, 
+  Globe, 
+  Palette, 
+  ImageIcon,
+  Clock,
+  DollarSign,
+  ChefHat,
+  Share2,
+  Type,
+  CreditCard,
+  Monitor
+} from "lucide-react";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -20,9 +42,31 @@ const schema = z.object({
   email: z.string().email("Invalid email format").optional().or(z.literal("")),
   phone: z.string().optional(),
   tagline: z.string().optional(),
-  logoUrl: z.string().url("Invalid URL format").optional().or(z.literal("")),
+  logoUrl: z.string().optional(),
   colorTheme: z.string().optional(),
   defaultLocale: z.enum(["en", "fr"]),
+  // Address fields
+  streetAddress: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  postalCode: z.string().optional(),
+  country: z.string().optional(),
+  // Business info fields
+  website: z.string().url("Invalid URL format").optional().or(z.literal("")),
+  description: z.string().optional(),
+  cuisineType: z.string().optional(),
+  priceRange: z.enum(["$", "$$", "$$$", "$$$$"]).optional(),
+  openingHours: z.string().optional(),
+  socialMedia: z.string().optional(),
+  // Design fields
+  coverImageUrl: z.string().url("Invalid URL format").optional().or(z.literal("")),
+  coverImageStyle: z.enum(["cover", "repeat"]).optional(),
+  secondaryColor: z.string().optional(),
+  fontFamily: z.string().optional(),
+  googleFontUrl: z.string().optional(),
+  // Business settings
+  currency: z.string().optional(),
+  currencySymbol: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -32,6 +76,8 @@ export default function CreateRestaurantForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
+    setValue,
+    watch,
     reset,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -39,9 +85,19 @@ export default function CreateRestaurantForm() {
       defaultLocale: "en",
       email: "",
       logoUrl: "",
+      website: "",
+      coverImageUrl: "",
+      coverImageStyle: "cover",
+      priceRange: "$",
+      currency: "USD",
+      currencySymbol: "$",
     },
     mode: "onChange",
   });
+
+  const logoUrl = watch("logoUrl");
+  const coverImageUrl = watch("coverImageUrl");
+  const googleFontUrl = watch("googleFontUrl");
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -54,106 +110,475 @@ export default function CreateRestaurantForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-      <div className="space-y-2">
-        <Label htmlFor="name">Restaurant Name *</Label>
-        <Input
-          id="name"
-          {...register("name")}
-          placeholder="Enter restaurant name"
-        />
-        {errors.name && (
-          <span className="text-sm text-red-500">{errors.name.message}</span>
-        )}
-      </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      {/* Basic Information Section */}
+      <Card className="border-gray-200">
+        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Building2 className="h-5 w-5 text-blue-600" />
+            Basic Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="name" className="flex items-center gap-2">
+                <Building2 className="h-4 w-4" />
+                Restaurant Name *
+              </Label>
+              <Input
+                id="name"
+                {...register("name")}
+                placeholder="Enter restaurant name"
+                className="border-gray-300"
+              />
+              {errors.name && (
+                <span className="text-sm text-red-500">{errors.name.message}</span>
+              )}
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="slug">Slug * (URL identifier)</Label>
-        <Input
-          id="slug"
-          {...register("slug")}
-          placeholder="my-restaurant"
-          className="font-mono"
-        />
-        {errors.slug && (
-          <span className="text-sm text-red-500">{errors.slug.message}</span>
-        )}
-        <span className="text-xs text-gray-500">
-          This will be used in your restaurant&apos;s URL (e.g.,
-          yourslug.foodify.com)
-        </span>
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="slug" className="flex items-center gap-2">
+                <Globe className="h-4 w-4" />
+                URL Slug *
+              </Label>
+              <Input
+                id="slug"
+                {...register("slug")}
+                placeholder="my-restaurant"
+                className="font-mono border-gray-300"
+              />
+              {errors.slug && (
+                <span className="text-sm text-red-500">{errors.slug.message}</span>
+              )}
+              <span className="text-xs text-gray-500">
+                Used in your restaurant's URL (yourslug.foodify.com)
+              </span>
+            </div>
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="email">Contact Email</Label>
-        <Input
-          id="email"
-          type="email"
-          {...register("email")}
-          placeholder="contact@restaurant.com"
-        />
-        {errors.email && (
-          <span className="text-sm text-red-500">{errors.email.message}</span>
-        )}
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="tagline">Tagline</Label>
+            <Input
+              id="tagline"
+              {...register("tagline")}
+              placeholder="Delicious food, unforgettable experience"
+              className="border-gray-300"
+            />
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="phone">Phone Number</Label>
-        <Input
-          id="phone"
-          type="tel"
-          {...register("phone")}
-          placeholder="+1 (555) 123-4567"
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              {...register("description")}
+              placeholder="Tell customers about your restaurant..."
+              className="border-gray-300 min-h-[100px]"
+            />
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="tagline">Tagline</Label>
-        <Input
-          id="tagline"
-          {...register("tagline")}
-          placeholder="Delicious food, unforgettable experience"
-        />
-      </div>
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="cuisineType" className="flex items-center gap-2">
+                <ChefHat className="h-4 w-4" />
+                Cuisine Type
+              </Label>
+              <Input
+                id="cuisineType"
+                {...register("cuisineType")}
+                placeholder="Italian, French, American..."
+                className="border-gray-300"
+              />
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="logoUrl">Logo URL</Label>
-        <Input
-          id="logoUrl"
-          type="url"
-          {...register("logoUrl")}
-          placeholder="https://example.com/logo.png"
-        />
-        {errors.logoUrl && (
-          <span className="text-sm text-red-500">{errors.logoUrl.message}</span>
-        )}
-      </div>
+            <div className="space-y-2">
+              <Label htmlFor="priceRange" className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4" />
+                Price Range
+              </Label>
+              <Select onValueChange={(value) => setValue("priceRange", value as "$" | "$$" | "$$$" | "$$$$")} defaultValue="$">
+                <SelectTrigger className="border-gray-300">
+                  <SelectValue placeholder="Select price range" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="$">$ - Budget Friendly</SelectItem>
+                  <SelectItem value="$$">$$ - Moderate</SelectItem>
+                  <SelectItem value="$$$">$$$ - Upscale</SelectItem>
+                  <SelectItem value="$$$$">$$$$ - Fine Dining</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="colorTheme">Brand Color</Label>
-        <Input
-          id="colorTheme"
-          type="color"
-          {...register("colorTheme")}
-          className="h-12 w-20"
-        />
-      </div>
+          {/* Currency Selection */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="currency" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                Currency
+              </Label>
+              <Select onValueChange={(value) => {
+                setValue("currency", value);
+                // Auto-set currency symbol based on selection
+                const symbols: Record<string, string> = {
+                  "USD": "$", "EUR": "€", "GBP": "£", "CAD": "C$", 
+                  "JPY": "¥", "AUD": "A$", "CHF": "CHF", "CNY": "¥",
+                  "INR": "₹", "BRL": "R$", "MXN": "$", "ZAR": "R"
+                };
+                setValue("currencySymbol", symbols[value] || value);
+              }} defaultValue="USD">
+                <SelectTrigger className="border-gray-300">
+                  <SelectValue placeholder="Select currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USD">🇺🇸 USD - US Dollar</SelectItem>
+                  <SelectItem value="EUR">🇪🇺 EUR - Euro</SelectItem>
+                  <SelectItem value="GBP">🇬🇧 GBP - British Pound</SelectItem>
+                  <SelectItem value="CAD">🇨🇦 CAD - Canadian Dollar</SelectItem>
+                  <SelectItem value="JPY">🇯🇵 JPY - Japanese Yen</SelectItem>
+                  <SelectItem value="AUD">🇦🇺 AUD - Australian Dollar</SelectItem>
+                  <SelectItem value="CHF">🇨🇭 CHF - Swiss Franc</SelectItem>
+                  <SelectItem value="CNY">🇨🇳 CNY - Chinese Yuan</SelectItem>
+                  <SelectItem value="INR">🇮🇳 INR - Indian Rupee</SelectItem>
+                  <SelectItem value="BRL">🇧🇷 BRL - Brazilian Real</SelectItem>
+                  <SelectItem value="MXN">🇲🇽 MXN - Mexican Peso</SelectItem>
+                  <SelectItem value="ZAR">🇿🇦 ZAR - South African Rand</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="defaultLocale">Default Language</Label>
-        <select
-          id="defaultLocale"
-          {...register("defaultLocale")}
-          className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <div className="space-y-2">
+              <Label htmlFor="currencySymbol">Currency Symbol</Label>
+              <Input
+                id="currencySymbol"
+                {...register("currencySymbol")}
+                placeholder="$"
+                className="border-gray-300 font-mono"
+              />
+              <span className="text-xs text-gray-500">
+                This symbol will be displayed with prices
+              </span>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="defaultLocale">Default Language</Label>
+            <Select onValueChange={(value) => setValue("defaultLocale", value as "en" | "fr")} defaultValue="en">
+              <SelectTrigger className="border-gray-300">
+                <SelectValue placeholder="Select default language" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="fr">Français</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Contact Information Section */}
+      <Card className="border-gray-200">
+        <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Phone className="h-5 w-5 text-green-600" />
+            Contact Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="flex items-center gap-2">
+                <Mail className="h-4 w-4" />
+                Contact Email
+              </Label>
+              <Input
+                id="email"
+                type="email"
+                {...register("email")}
+                placeholder="contact@restaurant.com"
+                className="border-gray-300"
+              />
+              {errors.email && (
+                <span className="text-sm text-red-500">{errors.email.message}</span>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone" className="flex items-center gap-2">
+                <Phone className="h-4 w-4" />
+                Phone Number
+              </Label>
+              <Input
+                id="phone"
+                type="tel"
+                {...register("phone")}
+                placeholder="+1 (555) 123-4567"
+                className="border-gray-300"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="website" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Website
+            </Label>
+            <Input
+              id="website"
+              type="url"
+              {...register("website")}
+              placeholder="https://www.yourrestaurant.com"
+              className="border-gray-300"
+            />
+            {errors.website && (
+              <span className="text-sm text-red-500">{errors.website.message}</span>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Address Section */}
+      <Card className="border-gray-200">
+        <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <MapPin className="h-5 w-5 text-orange-600" />
+            Address Information
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="streetAddress">Street Address</Label>
+            <Input
+              id="streetAddress"
+              {...register("streetAddress")}
+              placeholder="123 Main Street"
+              className="border-gray-300"
+            />
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                {...register("city")}
+                placeholder="New York"
+                className="border-gray-300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="state">State/Province</Label>
+              <Input
+                id="state"
+                {...register("state")}
+                placeholder="NY"
+                className="border-gray-300"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="postalCode">Postal Code</Label>
+              <Input
+                id="postalCode"
+                {...register("postalCode")}
+                placeholder="10001"
+                className="border-gray-300"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="country">Country</Label>
+            <Input
+              id="country"
+              {...register("country")}
+              placeholder="United States"
+              className="border-gray-300"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Operating Hours Section */}
+      <Card className="border-gray-200">
+        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Clock className="h-5 w-5 text-purple-600" />
+            Operating Hours
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-2">
+            <Label htmlFor="openingHours">Opening Hours</Label>
+            <Textarea
+              id="openingHours"
+              {...register("openingHours")}
+              placeholder="Mon-Fri: 9:00 AM - 10:00 PM&#10;Sat-Sun: 10:00 AM - 11:00 PM"
+              className="border-gray-300 min-h-[80px]"
+            />
+            <span className="text-xs text-gray-500">
+              Enter your operating hours. Use line breaks for different days.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Branding & Design Section */}
+      <Card className="border-gray-200">
+        <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Palette className="h-5 w-5 text-indigo-600" />
+            Branding & Design
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6 space-y-6">
+          {/* Logo Upload */}
+          <div className="space-y-4">
+            <Label className="flex items-center gap-2">
+              <ImageIcon className="h-4 w-4" />
+              Restaurant Logo
+            </Label>
+            <RestaurantLogoUpload
+              restaurantSlug=""
+              restaurantName="New Restaurant"
+              currentLogoUrl={logoUrl}
+              onLogoUpload={(url) => setValue("logoUrl", url)}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Cover Image Upload */}
+          <div className="space-y-4">
+            <Label className="flex items-center gap-2">
+              <ImageIcon className="h-4 w-4" />
+              Restaurant Cover Image
+            </Label>
+            <RestaurantCoverUpload
+              restaurantSlug=""
+              restaurantName="New Restaurant"
+              currentCoverUrl={coverImageUrl}
+              onCoverUpload={(url) => setValue("coverImageUrl", url)}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="colorTheme" className="flex items-center gap-2">
+                <Palette className="h-4 w-4" />
+                Primary Brand Color
+              </Label>
+              <div className="flex items-center gap-3">
+                <Input
+                  id="colorTheme"
+                  type="color"
+                  {...register("colorTheme")}
+                  className="h-12 w-20 border-gray-300"
+                />
+                <Input
+                  type="text"
+                  {...register("colorTheme")}
+                  placeholder="#3B82F6"
+                  className="flex-1 border-gray-300 font-mono"
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="secondaryColor">Secondary Color</Label>
+              <div className="flex items-center gap-3">
+                <Input
+                  id="secondaryColor"
+                  type="color"
+                  {...register("secondaryColor")}
+                  className="h-12 w-20 border-gray-300"
+                />
+                <Input
+                  type="text"
+                  {...register("secondaryColor")}
+                  placeholder="#6B7280"
+                  className="flex-1 border-gray-300 font-mono"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Google Fonts Selection */}
+          <div className="space-y-4">
+            <GoogleFontsSelector
+              currentFontUrl={googleFontUrl}
+              onFontChange={(fontUrl, fontFamily) => {
+                setValue("googleFontUrl", fontUrl);
+                setValue("fontFamily", fontFamily);
+              }}
+              disabled={isSubmitting}
+            />
+          </div>
+
+          {/* Cover Image Style */}
+          <div className="space-y-2">
+            <Label htmlFor="coverImageStyle" className="flex items-center gap-2">
+              <Monitor className="h-4 w-4" />
+              Cover Image Background Style
+            </Label>
+            <Select onValueChange={(value) => setValue("coverImageStyle", value as "cover" | "repeat")} defaultValue="cover">
+              <SelectTrigger className="border-gray-300">
+                <SelectValue placeholder="Select background style" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cover">
+                  <div className="space-y-1">
+                    <div className="font-medium">Cover (Recommended)</div>
+                    <div className="text-xs text-gray-500">Image fills the entire background area</div>
+                  </div>
+                </SelectItem>
+                <SelectItem value="repeat">
+                  <div className="space-y-1">
+                    <div className="font-medium">Repeat Pattern</div>
+                    <div className="text-xs text-gray-500">Image repeats as a pattern/texture</div>
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Social Media Section */}
+      <Card className="border-gray-200">
+        <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Share2 className="h-5 w-5 text-pink-600" />
+            Social Media
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-2">
+            <Label htmlFor="socialMedia">Social Media Links</Label>
+            <Textarea
+              id="socialMedia"
+              {...register("socialMedia")}
+              placeholder="Facebook: https://facebook.com/yourrestaurant&#10;Instagram: https://instagram.com/yourrestaurant&#10;Twitter: https://twitter.com/yourrestaurant"
+              className="border-gray-300 min-h-[100px]"
+            />
+            <span className="text-xs text-gray-500">
+              Enter your social media links, one per line with platform name.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Submit Button */}
+      <div className="flex justify-end">
+        <Button 
+          type="submit" 
+          disabled={isSubmitting} 
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 text-lg font-medium shadow-lg"
         >
-          <option value="en">English</option>
-          <option value="fr">Français</option>
-        </select>
+          {isSubmitting ? "Creating Restaurant..." : "Create Restaurant"}
+        </Button>
       </div>
-
-      <Button type="submit" disabled={isSubmitting} className="mt-4">
-        {isSubmitting ? "Creating..." : "Create Restaurant"}
-      </Button>
     </form>
   );
 }

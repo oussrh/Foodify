@@ -18,7 +18,7 @@ pnpm install
 # Start development server
 pnpm dev
 
-# Build the application (includes DB setup and seeding)
+# Build the application
 pnpm build
 
 # Lint code

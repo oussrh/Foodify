@@ -97,19 +97,50 @@ export default function SimpleARCamera({ dish, restaurantId, locale }: SimpleARC
     await recordARView()
     
     // Small delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 500))
+    await new Promise(resolve => setTimeout(resolve, 300))
     
     if (deviceInfo.isIOS && dish.usdzUrl) {
-      // iOS devices use USDZ files with AR Quick Look
+      // iOS devices use USDZ files with AR Quick Look - this opens the native camera
       const link = document.createElement('a')
       link.href = dish.usdzUrl
       link.setAttribute('rel', 'ar')
-      link.setAttribute('download', `${dishName.replace(/\s+/g, '_')}.usdz`)
+      // Add AR Quick Look attributes for better camera integration
+      link.setAttribute('data-ar', 'true')
+      link.setAttribute('data-ar-scale', 'true')
+      link.setAttribute('data-ar-placement', 'floor')
       document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
+      
+      // Force click to trigger AR Quick Look camera
+      const clickEvent = new MouseEvent('click', {
+        view: window,
+        bubbles: true,
+        cancelable: true
+      })
+      link.dispatchEvent(clickEvent)
+      
+      // Clean up
+      setTimeout(() => {
+        if (document.body.contains(link)) {
+          document.body.removeChild(link)
+        }
+      }, 1000)
+      
+    } else if (deviceInfo.isAndroid && dish.glbUrl) {
+      // Android devices - use scene-viewer intent which opens native AR camera
+      const sceneViewerUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(dish.glbUrl)}&mode=ar_preferred&title=${encodeURIComponent(dishName)}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(window.location.origin + '/ar-viewer?model=' + encodeURIComponent(dish.glbUrl) + '&name=' + encodeURIComponent(dishName))};end;`
+      
+      // Try to launch native AR first
+      window.location.href = sceneViewerUrl
+      
+      // Fallback to web AR viewer after a delay if native doesn't work
+      setTimeout(() => {
+        if (document.visibilityState === 'visible') {
+          window.open(`/ar-viewer?model=${encodeURIComponent(dish.glbUrl || '')}&name=${encodeURIComponent(dishName)}`, '_blank')
+        }
+      }, 2000)
+      
     } else if (dish.glbUrl) {
-      // Android and other devices use WebXR or model-viewer
+      // Desktop or other devices - use WebXR/model-viewer
       window.open(`/ar-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}`, '_blank')
     }
     

@@ -156,24 +156,31 @@ export default function ARViewerClient() {
     if (modelViewerLoaded && containerRef.current && modelUrl) {
       const modelViewer = document.createElement('model-viewer')
       
-      // Set attributes
+      // Set attributes for better AR integration
       modelViewer.setAttribute('src', modelUrl)
       modelViewer.setAttribute('alt', `3D model of ${dishName}`)
       modelViewer.setAttribute('ar', '')
       modelViewer.setAttribute('ar-modes', 'webxr scene-viewer quick-look')
+      modelViewer.setAttribute('ar-scale', 'auto')
+      modelViewer.setAttribute('ar-placement', 'floor')
       modelViewer.setAttribute('camera-controls', '')
       modelViewer.setAttribute('touch-action', 'pan-y')
       modelViewer.setAttribute('auto-rotate', '')
-      modelViewer.setAttribute('auto-rotate-delay', '3000')
+      modelViewer.setAttribute('auto-rotate-delay', '2000')
       modelViewer.setAttribute('rotation-per-second', '30deg')
       modelViewer.setAttribute('min-camera-orbit', 'auto 90deg auto')
       modelViewer.setAttribute('max-camera-orbit', 'auto 90deg auto')
       modelViewer.setAttribute('environment-image', 'neutral')
       modelViewer.setAttribute('shadow-intensity', '1')
+      modelViewer.setAttribute('shadow-softness', '0.5')
       modelViewer.setAttribute('exposure', '1')
       modelViewer.setAttribute('tone-mapping', 'aces')
       modelViewer.setAttribute('loading', 'eager')
       modelViewer.setAttribute('reveal', 'auto')
+      // Add iOS-specific quick-look attributes
+      if (/iPhone|iPad/.test(navigator.userAgent)) {
+        modelViewer.setAttribute('ios-src', modelUrl.replace('.glb', '.usdz'))
+      }
       
       // Set styles
       modelViewer.style.width = '100%'
@@ -189,21 +196,33 @@ export default function ARViewerClient() {
         setError('Failed to load 3D model')
       })
       
-      // Create AR button
+      // Create AR button with better mobile integration
       const arButton = document.createElement('button')
       arButton.setAttribute('slot', 'ar-button')
-      arButton.className = 'absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 hover:from-purple-600 hover:via-pink-600 hover:to-indigo-600 text-white px-8 py-4 rounded-2xl shadow-2xl font-semibold flex items-center gap-3 transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm'
+      arButton.className = 'absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-2xl shadow-2xl font-semibold flex items-center gap-2 md:gap-3 transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm text-sm md:text-base active:scale-95 touch-manipulation'
+      
+      // Add vibration feedback for mobile
+      arButton.addEventListener('touchstart', () => {
+        if ('vibrate' in navigator) {
+          navigator.vibrate(50)
+        }
+      })
       
       const arButtonContent = `
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
         </svg>
-        <span>View in AR</span>
-        ${arMode ? `<span class="bg-white/20 text-white text-xs ml-2 px-2 py-1 rounded-full">${
+        <span class="font-medium">${
+          arMode === 'quick-look' ? 'Open AR Camera' :
+          arMode === 'scene-viewer' ? 'View in AR' :
+          arMode === 'webxr' ? 'Enter AR Mode' :
+          'View in AR'
+        }</span>
+        ${arMode ? `<span class="bg-white/25 text-white text-xs px-2 py-0.5 rounded-full hidden md:inline">${
           arMode === 'webxr' ? 'WebXR' :
-          arMode === 'quick-look' ? 'iOS' :
-          arMode === 'scene-viewer' ? 'Android' : ''
+          arMode === 'quick-look' ? 'iOS AR' :
+          arMode === 'scene-viewer' ? 'Android AR' : ''
         }</span>` : ''}
       `
       arButton.innerHTML = arButtonContent

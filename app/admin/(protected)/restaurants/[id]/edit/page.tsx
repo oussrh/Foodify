@@ -80,6 +80,28 @@ export default async function EditRestaurantPage({
     logoUrl: restaurant.logoUrl ?? "",
     colorTheme: restaurant.colorTheme ?? "",
     defaultLocale: restaurant.defaultLocale,
+    // Address fields
+    streetAddress: restaurant.streetAddress ?? "",
+    city: restaurant.city ?? "",
+    state: restaurant.state ?? "",
+    postalCode: restaurant.postalCode ?? "",
+    country: restaurant.country ?? "",
+    // Business info fields
+    website: restaurant.website ?? "",
+    description: restaurant.description ?? "",
+    cuisineType: restaurant.cuisineType ?? "",
+    priceRange: restaurant.priceRange as "$" | "$$" | "$$$" | "$$$$" | undefined,
+    openingHours: restaurant.openingHours ?? "",
+    socialMedia: restaurant.socialMedia ?? "",
+    // Design fields
+    coverImageUrl: restaurant.coverImageUrl ?? "",
+    coverImageStyle: restaurant.coverImageStyle as "cover" | "repeat" | undefined,
+    secondaryColor: restaurant.secondaryColor ?? "",
+    fontFamily: restaurant.fontFamily ?? "",
+    googleFontUrl: restaurant.googleFontUrl ?? "",
+    // Business settings
+    currency: restaurant.currency ?? "",
+    currencySymbol: restaurant.currencySymbol ?? "",
   };
   
   const activeDishes = restaurant?.dishes?.filter((d: any) => d.isActive).length || 0
@@ -152,6 +174,12 @@ export default async function EditRestaurantPage({
             </div>
           </div>
           <div className="flex gap-2 flex-wrap">
+            <Button variant="outline" size="sm" asChild className="border-blue-200 text-blue-600 hover:bg-blue-50">
+              <Link href={`/admin/restaurants/${restaurant.id}/info`}>
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Public Info & QR
+              </Link>
+            </Button>
             <Button variant="outline" size="sm" asChild className="border-orange-200 text-orange-600 hover:bg-orange-50">
               <Link href={`/admin/restaurants/${restaurant.id}/dishes`}>
                 <ChefHat className="w-4 h-4 mr-2" />

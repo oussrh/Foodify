@@ -15,7 +15,7 @@ import {
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
 import { deleteRestaurant } from "@/app/actions/restaurant-actions";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, AlertTriangle } from "lucide-react";
 
 interface DeleteRestaurantButtonProps {
   id: string;
@@ -68,29 +68,60 @@ export default function DeleteRestaurantButton({
           Delete
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
+      <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete restaurant?</AlertDialogTitle>
-          <AlertDialogDescription>
-            {restaurantName
-              ? `Are you sure you want to delete "${restaurantName}"? This will permanently remove the restaurant, all its dishes, categories, and related data. This action cannot be undone.`
-              : "Are you sure you want to delete this restaurant? This will permanently remove the restaurant, all its dishes, categories, and related data. This action cannot be undone."}
-          </AlertDialogDescription>
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-red-100 rounded-full">
+              <AlertTriangle className="h-6 w-6 text-red-600" />
+            </div>
+            <div>
+              <AlertDialogTitle className="text-lg font-semibold text-gray-900">
+                Delete Restaurant
+              </AlertDialogTitle>
+            </div>
+          </div>
         </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={loading}>Cancel</AlertDialogCancel>
+        <div className="space-y-4">
+          <AlertDialogDescription className="text-gray-600 leading-relaxed">
+            Are you sure you want to permanently delete{" "}
+            {restaurantName ? (
+              <span className="font-semibold text-gray-900">&ldquo;{restaurantName}&rdquo;</span>
+            ) : (
+              "this restaurant"
+            )}?
+          </AlertDialogDescription>
+          
+          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <div className="flex items-start gap-2">
+              <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-red-700">
+                <strong>Warning:</strong> This action cannot be undone. All restaurant data including menus, dishes, users, categories, and customer data will be permanently removed.
+              </div>
+            </div>
+          </div>
+        </div>
+        <AlertDialogFooter className="gap-3">
+          <AlertDialogCancel 
+            disabled={loading}
+            className="flex-1"
+          >
+            Cancel
+          </AlertDialogCancel>
           <AlertDialogAction
             onClick={handleDelete}
             disabled={loading}
-            className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            className="flex-1 bg-red-600 hover:bg-red-700 focus:ring-red-600"
           >
             {loading ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Deleting...
               </>
             ) : (
-              "Delete Restaurant"
+              <>
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete Permanently
+              </>
             )}
           </AlertDialogAction>
         </AlertDialogFooter>
