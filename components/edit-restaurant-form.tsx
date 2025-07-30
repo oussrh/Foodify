@@ -104,21 +104,12 @@ export default function EditRestaurantForm({
   
   // Track form changes
   useEffect(() => {
-    console.log('Form dirty state changed:', isDirty)
     setHasUnsavedChanges(isDirty)
   }, [isDirty])
-  
-  // Debug form values
-  const formValues = watch()
-  useEffect(() => {
-    console.log('Form values changed:', formValues)
-  }, [formValues])
 
   // Handle save
-  const onSubmit = async (data: EditRestaurantValues) => {
+  const onSubmit = useCallback(async (data: EditRestaurantValues) => {
     try {
-      console.log('=== FORM SUBMISSION STARTED ===')
-      console.log('Form data being submitted:', data)
       setSaveStatus('saving')
       
       // Clean up empty color values to prevent validation errors
@@ -132,10 +123,7 @@ export default function EditRestaurantForm({
         currencySymbol: data.currencySymbol || undefined,
       }
       
-      console.log('Cleaned form data:', cleanedData)
-      
       const result = await updateRestaurant(id, cleanedData)
-      console.log('Restaurant update result:', result)
       
       setSaveStatus('saved')
       setHasUnsavedChanges(false)
@@ -143,17 +131,14 @@ export default function EditRestaurantForm({
       // Reset form state to mark as clean
       reset(data)
       
-      console.log('=== FORM SUBMISSION COMPLETED ===')
-      
       // Show saved status briefly
       setTimeout(() => setSaveStatus('idle'), 2000)
     } catch (error) {
-      console.error('=== FORM SUBMISSION FAILED ===', error)
-      console.error('Error details:', error)
+      console.error('Restaurant update error:', error)
       setSaveStatus('error')
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
-  }
+  }, [id, reset, setSaveStatus, setHasUnsavedChanges])
   
   // Handle cancel
   const handleCancel = useCallback(() => {
@@ -166,21 +151,19 @@ export default function EditRestaurantForm({
     }
   }, [hasUnsavedChanges, reset, defaultValues])
   
-  // Create a ref to the submit function
+  // Create a submit function that's always up to date
   const submitForm = useCallback(() => {
-    handleSubmit(onSubmit)()
-  }, [handleSubmit, onSubmit])
+    if (hasUnsavedChanges && !isSubmitting) {
+      handleSubmit(onSubmit)()
+    }
+  }, [handleSubmit, onSubmit, hasUnsavedChanges, isSubmitting])
   
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 's') {
         e.preventDefault()
-        console.log('Ctrl+S pressed, hasUnsavedChanges:', hasUnsavedChanges, 'isSubmitting:', isSubmitting)
-        if (hasUnsavedChanges && !isSubmitting) {
-          console.log('Triggering form submit...')
-          submitForm()
-        }
+        submitForm()
       }
       if (e.key === 'Escape') {
         handleCancel()
@@ -189,7 +172,7 @@ export default function EditRestaurantForm({
     
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [hasUnsavedChanges, isSubmitting, handleCancel, submitForm])
+  }, [submitForm, handleCancel])
   
   // Warn about unsaved changes on page leave
   useEffect(() => {
@@ -204,32 +187,9 @@ export default function EditRestaurantForm({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload)
   }, [hasUnsavedChanges])
 
-  // Test input change handler
-  const handleInputChange = (fieldName: string) => (e: any) => {
-    const value = e.target.value
-    console.log(`Field ${fieldName} changed to:`, value)
-    setValue(fieldName as any, value, { shouldDirty: true, shouldValidate: true })
-  }
 
   return (
     <div className="relative">
-      {/* Debug panel - temporary */}
-      <div className="fixed top-4 left-4 z-50 p-3 bg-blue-900 text-white text-xs rounded max-w-sm">
-        <div>isDirty: {isDirty.toString()}</div>
-        <div>hasUnsavedChanges: {hasUnsavedChanges.toString()}</div>
-        <div>isSubmitting: {isSubmitting.toString()}</div>
-        <div>saveStatus: {saveStatus}</div>
-        <div>Current name: {watch('name')}</div>
-        <button 
-          onClick={() => {
-            console.log('Manual trigger - setting name field')
-            setValue('name', 'Test Restaurant ' + Date.now(), { shouldDirty: true })
-          }}
-          className="mt-2 px-2 py-1 bg-green-600 text-white rounded text-xs"
-        >
-          Test Change
-        </button>
-      </div>
       
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Basic Information Section */}
@@ -331,7 +291,6 @@ export default function EditRestaurantForm({
                 Currency
               </Label>
               <Select onValueChange={(value) => {
-                console.log('Currency changed to:', value)
                 setValue("currency", value, { shouldDirty: true });
                 // Auto-set currency symbol based on selection
                 const symbols: Record<string, string> = {
@@ -340,7 +299,6 @@ export default function EditRestaurantForm({
                   "INR": "₹", "BRL": "R$", "MXN": "$", "ZAR": "R"
                 };
                 const newSymbol = symbols[value] || value;
-                console.log('Setting currency symbol to:', newSymbol)
                 setValue("currencySymbol", newSymbol, { shouldDirty: true });
               }} defaultValue={defaultValues.currency || "USD"}>
                 <SelectTrigger className="border-gray-300">
@@ -713,22 +671,7 @@ export default function EditRestaurantForm({
           type="button"
           size="lg"
           disabled={isSubmitting || !hasUnsavedChanges}
-          onClick={async () => {
-            console.log('=== SAVE BUTTON CLICKED ===')
-            console.log('Current form state:')
-            console.log('- isDirty:', isDirty)
-            console.log('- hasUnsavedChanges:', hasUnsavedChanges)
-            console.log('- isSubmitting:', isSubmitting)
-            console.log('- Current form values:', watch())
-            
-            if (!hasUnsavedChanges) {
-              console.log('No unsaved changes detected!')
-              return
-            }
-            
-            console.log('Triggering form submission...')
-            await handleSubmit(onSubmit)()
-          }}
+          onClick={submitForm}
           className={`shadow-2xl transition-all duration-200 border-0 min-w-[140px] ${
             hasUnsavedChanges
               ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white scale-105 hover:scale-110'

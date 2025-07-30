@@ -19,7 +19,9 @@
       "Bash(npx next:*)",
       "Bash(pnpm prisma generate:*)",
       "Bash(pnpm prisma:*)",
-      "Bash(pnpm dev:*)"
+      "Bash(pnpm dev:*)",
+      "Bash(cmd /c \"pnpm lint\")",
+      "Bash(cmd /c \"pnpm lint && pnpm type-check\")"
     ],
     "deny": []
   }
