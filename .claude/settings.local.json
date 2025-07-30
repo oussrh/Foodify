@@ -21,7 +21,9 @@
       "Bash(pnpm prisma:*)",
       "Bash(pnpm dev:*)",
       "Bash(cmd /c \"pnpm lint\")",
-      "Bash(cmd /c \"pnpm lint && pnpm type-check\")"
+      "Bash(cmd /c \"pnpm lint && pnpm type-check\")",
+      "Bash(npm install:*)",
+      "Bash(pnpm add:*)"
     ],
     "deny": []
   }

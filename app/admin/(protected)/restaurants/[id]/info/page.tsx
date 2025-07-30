@@ -116,7 +116,7 @@ export default async function RestaurantInfoPage({
                 <span className="font-mono text-sm">{restaurant.slug}</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                QR code, public link, and analytics for your restaurant's public page
+                QR code, public link, and analytics for your restaurant&apos;s public page
               </p>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -53,15 +54,15 @@ const schema = z.object({
   postalCode: z.string().optional(),
   country: z.string().optional(),
   // Business info fields
-  website: z.string().url("Invalid URL format").optional().or(z.literal("")),
+  website: z.string().optional().or(z.literal("")).refine((val) => !val || z.string().url().safeParse(val).success, "Invalid URL format"),
   description: z.string().optional(),
   cuisineType: z.string().optional(),
-  priceRange: z.enum(["$", "$$", "$$$", "$$$$"]).optional(),
+  priceRange: z.enum(["$", "$$", "$$$", "$$$$"]).optional().or(z.literal("")).or(z.undefined()),
   openingHours: z.string().optional(),
   socialMedia: z.string().optional(),
   // Design fields
-  coverImageUrl: z.string().url("Invalid URL format").optional().or(z.literal("")),
-  coverImageStyle: z.enum(["cover", "repeat"]).optional(),
+  coverImageUrl: z.string().optional().or(z.literal("")).refine((val) => !val || z.string().url().safeParse(val).success, "Invalid URL format"),
+  coverImageStyle: z.enum(["cover", "repeat"]).optional().or(z.literal("")).or(z.undefined()),
   secondaryColor: z.string().optional().or(z.literal("")),
   fontFamily: z.string().optional(),
   googleFontUrl: z.string().optional(),
@@ -111,8 +112,9 @@ export default function EditRestaurantForm({
   const onSubmit = useCallback(async (data: EditRestaurantValues) => {
     try {
       setSaveStatus('saving')
+      toast.loading('Saving restaurant settings...', { id: 'restaurant-save' })
       
-      // Clean up empty color values to prevent validation errors
+      // Clean up empty values to prevent validation errors
       const cleanedData = {
         ...data,
         colorTheme: data.colorTheme || undefined,
@@ -121,6 +123,9 @@ export default function EditRestaurantForm({
         googleFontUrl: data.googleFontUrl || undefined,
         currency: data.currency || undefined,
         currencySymbol: data.currencySymbol || undefined,
+        priceRange: data.priceRange || undefined,
+        coverImageStyle: data.coverImageStyle || undefined,
+        website: data.website || undefined,
       }
       
       const result = await updateRestaurant(id, cleanedData)
@@ -131,11 +136,22 @@ export default function EditRestaurantForm({
       // Reset form state to mark as clean
       reset(data)
       
+      toast.success('Restaurant settings saved successfully!', { 
+        id: 'restaurant-save',
+        description: 'All changes have been saved.'
+      })
+      
       // Show saved status briefly
       setTimeout(() => setSaveStatus('idle'), 2000)
     } catch (error) {
       console.error('Restaurant update error:', error)
       setSaveStatus('error')
+      
+      toast.error('Failed to save restaurant settings', {
+        id: 'restaurant-save',
+        description: error instanceof Error ? error.message : 'Please try again.'
+      })
+      
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
   }, [id, reset, setSaveStatus, setHasUnsavedChanges])
@@ -153,9 +169,16 @@ export default function EditRestaurantForm({
   
   // Create a submit function that's always up to date
   const submitForm = useCallback(() => {
-    if (hasUnsavedChanges && !isSubmitting) {
-      handleSubmit(onSubmit)()
+    if (!hasUnsavedChanges) {
+      toast.info('No changes to save')
+      return
     }
+    
+    if (isSubmitting) {
+      return
+    }
+    
+    handleSubmit(onSubmit)()
   }, [handleSubmit, onSubmit, hasUnsavedChanges, isSubmitting])
   
   // Keyboard shortcuts
@@ -190,8 +213,7 @@ export default function EditRestaurantForm({
 
   return (
     <div className="relative">
-      
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Basic Information Section */}
       <Card className="border-gray-200">
         <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">

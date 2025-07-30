@@ -152,7 +152,7 @@ export default function CreateRestaurantForm() {
                 <span className="text-sm text-red-500">{errors.slug.message}</span>
               )}
               <span className="text-xs text-gray-500">
-                Used in your restaurant's URL (yourslug.foodify.com)
+                Used in your restaurant&apos;s URL (yourslug.foodify.com)
               </span>
             </div>
           </div>

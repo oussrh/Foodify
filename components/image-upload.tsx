@@ -78,7 +78,7 @@ export default function ImageUpload({
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
   }
 
-  const uploadToCloudinary = async (file: File): Promise<UploadResult> => {
+  const uploadToCloudinary = useCallback(async (file: File): Promise<UploadResult> => {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
     
@@ -126,9 +126,9 @@ export default function ImageUpload({
       }
       throw new Error('Network error occurred during upload')
     }
-  }
+  }, [restaurantName])
 
-  const validateFile = (file: File): string | null => {
+  const validateFile = useCallback((file: File): string | null => {
     // Validate file type
     if (!file.type.startsWith('image/')) {
       return 'Please select an image file (JPG, PNG, WebP, or GIF)'
@@ -146,7 +146,7 @@ export default function ImageUpload({
     }
 
     return null
-  }
+  }, [])
 
   const processFile = useCallback(async (file: File) => {
     const validationError = validateFile(file)

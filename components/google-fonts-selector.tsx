@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -49,6 +49,17 @@ export default function GoogleFontsSelector({
   const [previewText, setPreviewText] = useState('Your Restaurant Name')
   const [loadedFonts, setLoadedFonts] = useState<Set<string>>(new Set())
 
+  const loadFont = useCallback((fontUrl: string, fontName: string) => {
+    if (loadedFonts.has(fontName)) return
+
+    const link = document.createElement('link')
+    link.href = fontUrl
+    link.rel = 'stylesheet'
+    document.head.appendChild(link)
+    
+    setLoadedFonts(prev => new Set([...prev, fontName]))
+  }, [loadedFonts])
+
   // Find current font from URL
   useEffect(() => {
     if (currentFontUrl) {
@@ -58,18 +69,7 @@ export default function GoogleFontsSelector({
         loadFont(found.url, found.name)
       }
     }
-  }, [currentFontUrl])
-
-  const loadFont = (fontUrl: string, fontName: string) => {
-    if (loadedFonts.has(fontName)) return
-
-    const link = document.createElement('link')
-    link.href = fontUrl
-    link.rel = 'stylesheet'
-    document.head.appendChild(link)
-    
-    setLoadedFonts(prev => new Set([...prev, fontName]))
-  }
+  }, [currentFontUrl, loadFont])
 
   const handleFontSelect = (fontName: string) => {
     const font = POPULAR_FONTS.find(f => f.name === fontName)
@@ -204,7 +204,7 @@ export default function GoogleFontsSelector({
         <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
           <Check className="h-4 w-4 text-green-600" />
           <span className="text-sm text-green-700">
-            Font "{selectedFont}" will be applied to your restaurant page
+            Font &ldquo;{selectedFont}&rdquo; will be applied to your restaurant page
           </span>
         </div>
       )}
