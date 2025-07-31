@@ -3,12 +3,7 @@ import prisma from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu'
+import { CardContextMenu, CardContextMenuItem } from '@/components/card-context-menu'
 import { 
   MoreVertical, 
   ArrowLeft,
@@ -344,50 +339,42 @@ export default async function UserRestaurantsPage({
                           <span className="text-xs">Access since {new Date(restaurant.createdAt).toLocaleDateString()}</span>
                         </div>
                       </div>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/restaurants/${restaurant.id}/edit`}>
-                              <Edit className="h-4 w-4 mr-2" />
-                              Edit Restaurant
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/restaurants/${restaurant.id}/dishes`}>
-                              <ChefHat className="h-4 w-4 mr-2" />
-                              Manage Dishes
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link href={`/admin/restaurants/${restaurant.id}/menu`}>
-                              <Utensils className="h-4 w-4 mr-2" />
-                              Manage Menu
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <Link 
-                              href={`/restaurant/${restaurant.slug}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              View Public Page
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem asChild>
-                            <RemoveUserRestaurantButton
-                              userId={user.id}
-                              restaurantIds={user.restaurants.map((res: any) => res.id)}
-                              restaurantId={restaurant.id}
-                            />
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <CardContextMenu>
+                        <CardContextMenuItem>
+                          <Link href={`/admin/restaurants/${restaurant.id}/edit`} className="flex items-center w-full">
+                            <Edit className="h-4 w-4 mr-2" />
+                            Edit Restaurant
+                          </Link>
+                        </CardContextMenuItem>
+                        <CardContextMenuItem>
+                          <Link href={`/admin/restaurants/${restaurant.id}/dishes`} className="flex items-center w-full">
+                            <ChefHat className="h-4 w-4 mr-2" />
+                            Manage Dishes
+                          </Link>
+                        </CardContextMenuItem>
+                        <CardContextMenuItem>
+                          <Link href={`/admin/restaurants/${restaurant.id}/menu`} className="flex items-center w-full">
+                            <Utensils className="h-4 w-4 mr-2" />
+                            Manage Menu
+                          </Link>
+                        </CardContextMenuItem>
+                        <CardContextMenuItem>
+                          <Link 
+                            href={`/restaurant/${restaurant.slug}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center w-full"
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            View Public Page
+                          </Link>
+                        </CardContextMenuItem>
+                        <RemoveUserRestaurantButton
+                          userId={user.id}
+                          restaurantIds={user.restaurants.map((res: any) => res.id)}
+                          restaurantId={restaurant.id}
+                        />
+                      </CardContextMenu>
                     </div>
                   </CardHeader>
                   

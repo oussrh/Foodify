@@ -22,7 +22,7 @@ import {
   Maximize,
   Minimize,
   View,
-  Cube,
+  Box,
   ScanLine
 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -69,35 +69,65 @@ export default function ARViewerClient() {
   }, [])
 
   useEffect(() => {
-    // Check for WebXR support
-    if ('xr' in navigator) {
-      // @ts-ignore
-      navigator.xr.isSessionSupported('immersive-ar').then((supported: boolean) => {
-        setIsARSupported(supported)
-        if (supported) {
-          setArMode('webxr')
-        } else if (/iPhone|iPad/.test(navigator.userAgent)) {
-          setArMode('quick-look')
-        } else if (/Android/.test(navigator.userAgent)) {
-          setArMode('scene-viewer')
+    // Enhanced AR support detection with camera permissions check
+    const checkARSupport = async () => {
+      // Check camera permissions first
+      try {
+        if ('permissions' in navigator) {
+          const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName })
+          console.log('Camera permission status:', cameraPermission.state)
         }
-      }).catch(() => {
-        setIsARSupported(false)
-        // Fallback detection
+      } catch (error) {
+        console.log('Permission API not supported:', error)
+      }
+
+      // Check for WebXR support with better error handling
+      if ('xr' in navigator) {
+        try {
+          // @ts-ignore
+          const supported = await navigator.xr.isSessionSupported('immersive-ar')
+          console.log('WebXR immersive-ar supported:', supported)
+          setIsARSupported(supported)
+          
+          if (supported) {
+            setArMode('webxr')
+          } else {
+            // Fallback to platform-specific AR
+            if (/iPhone|iPad/.test(navigator.userAgent)) {
+              setArMode('quick-look')
+              setIsARSupported(true) // iOS AR Quick Look is always supported
+            } else if (/Android/.test(navigator.userAgent)) {
+              setArMode('scene-viewer')
+              setIsARSupported(true) // Android Scene Viewer is usually supported
+            }
+          }
+        } catch (error) {
+          console.error('WebXR support check failed:', error)
+          setIsARSupported(false)
+          // Fallback detection
+          if (/iPhone|iPad/.test(navigator.userAgent)) {
+            setArMode('quick-look')
+            setIsARSupported(true)
+          } else if (/Android/.test(navigator.userAgent)) {
+            setArMode('scene-viewer')
+            setIsARSupported(true)
+          }
+        }
+      } else {
+        // No WebXR, but platform AR might still work
         if (/iPhone|iPad/.test(navigator.userAgent)) {
           setArMode('quick-look')
+          setIsARSupported(true)
         } else if (/Android/.test(navigator.userAgent)) {
           setArMode('scene-viewer')
+          setIsARSupported(true)
+        } else {
+          setIsARSupported(false)
         }
-      })
-    } else {
-      // Fallback for browsers without WebXR
-      if (/iPhone|iPad/.test(navigator.userAgent)) {
-        setArMode('quick-look')
-      } else if (/Android/.test(navigator.userAgent)) {
-        setArMode('scene-viewer')
       }
     }
+
+    checkARSupport()
     
     // Load model-viewer script
     const script = document.createElement('script')
@@ -188,18 +218,48 @@ export default function ARViewerClient() {
         modelViewer.removeAttribute('ar')
         modelViewer.removeAttribute('ar-modes')
       } else if (viewMode === 'ar') {
-        // AR Mode - Camera enabled for mobile AR experience
+        // AR Mode - Enhanced camera configuration for mobile AR experience
         modelViewer.setAttribute('ar', '')
         modelViewer.setAttribute('ar-modes', 'webxr scene-viewer quick-look')
         modelViewer.setAttribute('ar-scale', 'auto')
         modelViewer.setAttribute('ar-placement', 'floor')
-        modelViewer.setAttribute('min-camera-orbit', 'auto 90deg auto')
-        modelViewer.setAttribute('max-camera-orbit', 'auto 90deg auto')
+        
+        // Enhanced AR camera settings for better mobile experience
+        modelViewer.setAttribute('camera-controls', 'enable-pan')
+        modelViewer.setAttribute('disable-pan', 'false')
+        modelViewer.setAttribute('disable-zoom', 'false')
+        modelViewer.setAttribute('interaction-policy', 'always-allow')
+        modelViewer.setAttribute('touch-action', 'manipulation')
+        
+        // Improved lighting and rendering for AR
+        modelViewer.setAttribute('environment-image', 'legacy')
+        modelViewer.setAttribute('skybox-image', 'null')
+        modelViewer.setAttribute('shadow-intensity', '0.7')
+        modelViewer.setAttribute('shadow-softness', '0.8')
+        
+        // Better camera orbit constraints for AR
+        modelViewer.setAttribute('min-camera-orbit', 'auto 0deg auto')
+        modelViewer.setAttribute('max-camera-orbit', 'auto 180deg auto')
+        modelViewer.setAttribute('min-field-of-view', '25deg')
+        modelViewer.setAttribute('max-field-of-view', '45deg')
+        
+        // Remove auto-rotate for AR mode
         modelViewer.removeAttribute('auto-rotate')
-        // Add iOS-specific quick-look attributes
+        
+        // Platform-specific optimizations
         if (/iPhone|iPad/.test(navigator.userAgent)) {
-          modelViewer.setAttribute('ios-src', modelUrl.replace('.glb', '.usdz'))
+          // iOS AR Quick Look optimizations
+          const usdzUrl = modelUrl.replace('.glb', '.usdz')
+          modelViewer.setAttribute('ios-src', usdzUrl)
+          modelViewer.setAttribute('quick-look-browsers', 'safari chrome')
+        } else if (/Android/.test(navigator.userAgent)) {
+          // Android Scene Viewer optimizations
+          modelViewer.setAttribute('ar-modes', 'scene-viewer webxr')
+          modelViewer.setAttribute('ar', '')
         }
+        
+        // Add camera access logging for debugging
+        console.log('AR mode configured for:', arMode, 'Device:', navigator.userAgent.includes('iPhone') ? 'iOS' : navigator.userAgent.includes('Android') ? 'Android' : 'Desktop')
       }
       
       // Set styles
@@ -207,28 +267,87 @@ export default function ARViewerClient() {
       modelViewer.style.height = '100%'
       modelViewer.style.backgroundColor = viewMode === 'ar' ? 'transparent' : '#f8fafc'
       
-      // Add event listeners
+      // Add enhanced event listeners for better AR experience
       modelViewer.addEventListener('load', () => {
         setModelLoaded(true)
+        console.log(`${viewMode === 'ar' ? 'AR' : '3D'} model loaded successfully`)
         toast.success(`${viewMode === 'ar' ? 'AR' : '3D'} model loaded successfully!`)
       })
       
-      modelViewer.addEventListener('error', () => {
+      modelViewer.addEventListener('error', (event) => {
+        console.error('Model loading error:', event)
         setError('Failed to load 3D model')
         toast.error('Failed to load 3D model')
       })
       
-      // Create AR button only for AR mode
+      // Add AR-specific event listeners
+      if (viewMode === 'ar') {
+        modelViewer.addEventListener('ar-status', (event: any) => {
+          console.log('AR status:', event.detail.status)
+          if (event.detail.status === 'session-started') {
+            console.log('AR session started successfully')
+            toast.success('AR camera activated!')
+          } else if (event.detail.status === 'failed') {
+            console.error('AR session failed')
+            toast.error('AR camera failed to start. Please check permissions.')
+          }
+        })
+        
+        modelViewer.addEventListener('camera-change', () => {
+          console.log('AR camera view changed')
+        })
+        
+        // Handle WebXR session events
+        if (arMode === 'webxr') {
+          modelViewer.addEventListener('ar-tracking', (event: any) => {
+            console.log('AR tracking status:', event.detail)
+          })
+        }
+      }
+      
+      // Create enhanced AR button only for AR mode
       if (viewMode === 'ar') {
         const arButton = document.createElement('button')
         arButton.setAttribute('slot', 'ar-button')
         arButton.className = 'absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-2xl shadow-2xl font-semibold flex items-center gap-2 md:gap-3 transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm text-sm md:text-base active:scale-95 touch-manipulation z-10'
         
-        // Add vibration feedback for mobile
-        arButton.addEventListener('touchstart', () => {
+        // Enhanced mobile feedback and camera preparation
+        arButton.addEventListener('touchstart', async () => {
+          // Haptic feedback
           if ('vibrate' in navigator) {
             navigator.vibrate(50)
           }
+          
+          // Pre-check camera permissions for better UX
+          try {
+            if ('permissions' in navigator) {
+              const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName })
+              if (cameraPermission.state === 'denied') {
+                console.warn('Camera permission denied - AR may not work properly')
+              }
+            }
+          } catch (error) {
+            console.log('Permission check failed:', error)
+          }
+        })
+        
+        // Add click handler for better camera activation
+        arButton.addEventListener('click', async (event) => {
+          console.log('AR button clicked, preparing camera...')
+          
+          // Add loading state to button
+          arButton.innerHTML = `
+            <svg class="w-4 h-4 md:w-5 md:h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="font-medium">Activating AR Camera...</span>
+          `
+          
+          // Reset button after delay
+          setTimeout(() => {
+            arButton.innerHTML = arButtonContent
+          }, 3000)
         })
         
         const arButtonContent = `
@@ -450,7 +569,7 @@ export default function ARViewerClient() {
                   </>
                 ) : (
                   <>
-                    <Cube className="h-3 w-3 mr-1" />
+                    <Box className="h-3 w-3 mr-1" />
                     3D Mode
                   </>
                 )}
@@ -516,7 +635,7 @@ export default function ARViewerClient() {
                 : 'hover:bg-blue-500/10 text-blue-600'
             }`}
           >
-            <Cube className="h-4 w-4 mr-2" />
+            <Box className="h-4 w-4 mr-2" />
             3D View
           </Button>
           <Button
@@ -633,7 +752,7 @@ export default function ARViewerClient() {
                   </p>
                   <p className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
-                      <Cube className="h-3 w-3" />
+                      <Box className="h-3 w-3" />
                     </div>
                     Pinch or scroll to zoom
                   </p>

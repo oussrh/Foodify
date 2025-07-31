@@ -4,12 +4,6 @@ import Link from 'next/link'
 import prisma from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
@@ -40,6 +34,7 @@ import {
   Target
 } from 'lucide-react'
 import { AdminRestaurantActions } from '@/components/admin-restaurant-actions'
+import { CardContextMenu, CardContextMenuItem } from '@/components/card-context-menu'
 import Image from 'next/image'
 
 async function getRestaurants(searchQuery: string) {
@@ -369,7 +364,7 @@ export default async function RestaurantsPage({
             const restaurantValue = restaurant.dishes.reduce((acc, d) => acc + Number(d.price || 0), 0)
             
             return (
-              <Card key={restaurant.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+              <Card key={restaurant.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1 relative">
                 <div className="aspect-video relative bg-muted overflow-hidden">
                   {restaurant.logoUrl ? (
                     <>
@@ -439,50 +434,44 @@ export default async function RestaurantsPage({
                         <span className="text-xs font-mono">{restaurant.slug}</span>
                       </div>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/restaurants/${restaurant.id}/edit`}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Restaurant
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/restaurants/${restaurant.id}/dishes`}>
-                            <ChefHat className="h-4 w-4 mr-2" />
-                            Manage Dishes
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/restaurants/${restaurant.id}/menu`}>
-                            <Utensils className="h-4 w-4 mr-2" />
-                            Manage Menu
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/restaurants/${restaurant.id}/users`}>
-                            <Users className="h-4 w-4 mr-2" />
-                            Manage Users
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link 
-                            href={`/restaurant/${restaurant.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            View Public Page
-                          </Link>
-                        </DropdownMenuItem>
-                        <AdminRestaurantActions restaurantId={restaurant.id} restaurantName={restaurant.name} />
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <CardContextMenu>
+                      <CardContextMenuItem>
+                        <Link href={`/admin/restaurants/${restaurant.id}/edit`} className="flex items-center w-full">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Restaurant
+                        </Link>
+                      </CardContextMenuItem>
+                      <CardContextMenuItem>
+                        <Link href={`/admin/restaurants/${restaurant.id}/dishes`} className="flex items-center w-full">
+                          <ChefHat className="h-4 w-4 mr-2" />
+                          Manage Dishes
+                        </Link>
+                      </CardContextMenuItem>
+                      <CardContextMenuItem>
+                        <Link href={`/admin/restaurants/${restaurant.id}/menu`} className="flex items-center w-full">
+                          <Utensils className="h-4 w-4 mr-2" />
+                          Manage Menu
+                        </Link>
+                      </CardContextMenuItem>
+                      <CardContextMenuItem>
+                        <Link href={`/admin/restaurants/${restaurant.id}/users`} className="flex items-center w-full">
+                          <Users className="h-4 w-4 mr-2" />
+                          Manage Users
+                        </Link>
+                      </CardContextMenuItem>
+                      <CardContextMenuItem>
+                        <Link 
+                          href={`/restaurant/${restaurant.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center w-full"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View Public Page
+                        </Link>
+                      </CardContextMenuItem>
+                      <AdminRestaurantActions restaurantId={restaurant.id} restaurantName={restaurant.name} />
+                    </CardContextMenu>
                   </div>
                 </CardHeader>
                 
@@ -670,50 +659,44 @@ export default async function RestaurantsPage({
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem asChild>
-                                <Link href={`/admin/restaurants/${restaurant.id}/edit`}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit Restaurant
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link href={`/admin/restaurants/${restaurant.id}/dishes`}>
-                                  <ChefHat className="h-4 w-4 mr-2" />
-                                  Manage Dishes
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link href={`/admin/restaurants/${restaurant.id}/menu`}>
-                                  <Utensils className="h-4 w-4 mr-2" />
-                                  Manage Menu
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link href={`/admin/restaurants/${restaurant.id}/users`}>
-                                  <Users className="h-4 w-4 mr-2" />
-                                  Manage Users
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link 
-                                  href={`/restaurant/${restaurant.slug}`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <ExternalLink className="h-4 w-4 mr-2" />
-                                  View Public Page
-                                </Link>
-                              </DropdownMenuItem>
-                              <AdminRestaurantActions restaurantId={restaurant.id} restaurantName={restaurant.name} />
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <CardContextMenu alwaysVisible={true}>
+                            <CardContextMenuItem>
+                              <Link href={`/admin/restaurants/${restaurant.id}/edit`} className="flex items-center w-full">
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Restaurant
+                              </Link>
+                            </CardContextMenuItem>
+                            <CardContextMenuItem>
+                              <Link href={`/admin/restaurants/${restaurant.id}/dishes`} className="flex items-center w-full">
+                                <ChefHat className="h-4 w-4 mr-2" />
+                                Manage Dishes
+                              </Link>
+                            </CardContextMenuItem>
+                            <CardContextMenuItem>
+                              <Link href={`/admin/restaurants/${restaurant.id}/menu`} className="flex items-center w-full">
+                                <Utensils className="h-4 w-4 mr-2" />
+                                Manage Menu
+                              </Link>
+                            </CardContextMenuItem>
+                            <CardContextMenuItem>
+                              <Link href={`/admin/restaurants/${restaurant.id}/users`} className="flex items-center w-full">
+                                <Users className="h-4 w-4 mr-2" />
+                                Manage Users
+                              </Link>
+                            </CardContextMenuItem>
+                            <CardContextMenuItem>
+                              <Link 
+                                href={`/restaurant/${restaurant.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center w-full"
+                              >
+                                <ExternalLink className="h-4 w-4 mr-2" />
+                                View Public Page
+                              </Link>
+                            </CardContextMenuItem>
+                            <AdminRestaurantActions restaurantId={restaurant.id} restaurantName={restaurant.name} />
+                          </CardContextMenu>
                         </td>
                       </tr>
                     )

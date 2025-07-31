@@ -23,7 +23,10 @@
       "Bash(cmd /c \"pnpm lint\")",
       "Bash(cmd /c \"pnpm lint && pnpm type-check\")",
       "Bash(npm install:*)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "Bash(ls)",
+      "Bash(node:*)",
+      "Bash(pnpm build:*)"
     ],
     "deny": []
   }

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu'
+import { CardContextMenuItem } from '@/components/card-context-menu'
 import { Button } from '@/components/ui/button'
 import { 
   AlertDialog,
@@ -68,7 +68,7 @@ export function AdminDishActions({ dishId, dishName }: AdminDishActionsProps) {
 
   return (
     <>
-      <DropdownMenuItem onClick={handleStatusToggle} disabled={loading} className="focus:bg-gray-50">
+      <CardContextMenuItem onClick={handleStatusToggle} className={loading ? "opacity-50 pointer-events-none" : ""}>
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -80,9 +80,9 @@ export function AdminDishActions({ dishId, dishName }: AdminDishActionsProps) {
             <span>Toggle Visibility</span>
           </>
         )}
-      </DropdownMenuItem>
+      </CardContextMenuItem>
 
-      <DropdownMenuItem onClick={handlePopularToggle} disabled={loading} className="focus:bg-gray-50">
+      <CardContextMenuItem onClick={handlePopularToggle} className={loading ? "opacity-50 pointer-events-none" : ""}>
         {loading ? (
           <>
             <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -94,22 +94,21 @@ export function AdminDishActions({ dishId, dishName }: AdminDishActionsProps) {
             <span>Toggle Popular</span>
           </>
         )}
-      </DropdownMenuItem>
+      </CardContextMenuItem>
 
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <AlertDialogTrigger asChild>
-          <DropdownMenuItem 
-            onSelect={(e) => {
+          <CardContextMenuItem 
+            onClick={(e) => {
               e.preventDefault()
               // Small delay to ensure dropdown menu closes before dialog opens
               setTimeout(() => setDeleteDialogOpen(true), 10)
             }} 
-            className="focus:bg-red-50 text-red-600"
-            disabled={loading}
+            className={`text-red-600 hover:bg-red-50 ${loading ? "opacity-50 pointer-events-none" : ""}`}
           >
             <Trash2 className="h-4 w-4 mr-2" />
             <span>Delete Dish</span>
-          </DropdownMenuItem>
+          </CardContextMenuItem>
         </AlertDialogTrigger>
         
         <AlertDialogContent className="sm:max-w-md">

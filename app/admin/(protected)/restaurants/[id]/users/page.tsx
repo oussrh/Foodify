@@ -4,12 +4,7 @@ import Link from "next/link";
 import prisma from "@/lib/prisma";
 import { buttonVariants, Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
+import { CardContextMenu, CardContextMenuItem } from '@/components/card-context-menu';
 import { 
   MoreVertical, 
   Pencil, 
@@ -309,28 +304,19 @@ export default async function RestaurantUsersPage({
                       </div>
                     </div>
                   </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem asChild>
-                        <Link href={`/admin/users/${user.id}/edit`}>
-                          <Edit3 className="h-4 w-4 mr-2" />
-                          Edit User
-                        </Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <RemoveRestaurantUserButton
-                          restaurantId={restaurant.id}
-                          userIds={restaurant.users.map((r: any) => r.id)}
-                          userId={user.id}
-                        />
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <CardContextMenu>
+                    <CardContextMenuItem>
+                      <Link href={`/admin/users/${user.id}/edit`} className="flex items-center w-full">
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        Edit User
+                      </Link>
+                    </CardContextMenuItem>
+                    <RemoveRestaurantUserButton
+                      restaurantId={restaurant.id}
+                      userIds={restaurant.users.map((r: any) => r.id)}
+                      userId={user.id}
+                    />
+                  </CardContextMenu>
                 </div>
               </CardHeader>
               
@@ -416,28 +402,19 @@ export default async function RestaurantUsersPage({
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="sm">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-48">
-                            <DropdownMenuItem asChild>
-                              <Link href={`/admin/users/${user.id}/edit`}>
-                                <Edit3 className="h-4 w-4 mr-2" />
-                                Edit User
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem asChild>
-                              <RemoveRestaurantUserButton
-                                restaurantId={restaurant.id}
-                                userIds={restaurant.users.map((r: any) => r.id)}
-                                userId={user.id}
-                              />
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <CardContextMenu alwaysVisible={true}>
+                          <CardContextMenuItem>
+                            <Link href={`/admin/users/${user.id}/edit`} className="flex items-center w-full">
+                              <Edit3 className="h-4 w-4 mr-2" />
+                              Edit User
+                            </Link>
+                          </CardContextMenuItem>
+                          <RemoveRestaurantUserButton
+                            restaurantId={restaurant.id}
+                            userIds={restaurant.users.map((r: any) => r.id)}
+                            userId={user.id}
+                          />
+                        </CardContextMenu>
                       </td>
                     </tr>
                   ))}

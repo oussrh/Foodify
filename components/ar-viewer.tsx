@@ -108,24 +108,66 @@ export default function ARViewer({ dish, restaurantId, locale }: ARViewerProps) 
   const handleARView = async () => {
     setIsLoading(true)
     
+    // Check camera permissions before proceeding
+    try {
+      if ('permissions' in navigator) {
+        const cameraPermission = await navigator.permissions.query({ name: 'camera' as PermissionName })
+        console.log('Camera permission status:', cameraPermission.state)
+        
+        if (cameraPermission.state === 'denied') {
+          setIsLoading(false)
+          toast.error('Camera access denied. Please enable camera permissions in your browser settings.')
+          return
+        }
+      }
+    } catch (error) {
+      console.log('Permission API not available:', error)
+    }
+    
     // Record the AR view
     await recordARView()
     
     // Small delay for better UX
     await new Promise(resolve => setTimeout(resolve, 800))
     
-    if (deviceInfo.isIOS && dish.usdzUrl) {
-      // iOS devices use USDZ files with AR Quick Look
-      const link = document.createElement('a')
-      link.href = dish.usdzUrl
-      link.setAttribute('rel', 'ar')
-      link.setAttribute('download', `${dishName.replace(/\s+/g, '_')}.usdz`)
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    } else if (dish.glbUrl) {
-      // Android and other devices use WebXR or model-viewer
-      window.open(`/ar-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}`, '_blank')
+    try {
+      if (deviceInfo.isIOS && dish.usdzUrl) {
+        // iOS devices use USDZ files with AR Quick Look
+        console.log('Launching iOS AR Quick Look with USDZ:', dish.usdzUrl)
+        const link = document.createElement('a')
+        link.href = dish.usdzUrl
+        link.setAttribute('rel', 'ar')
+        link.setAttribute('download', `${dishName.replace(/\s+/g, '_')}.usdz`)
+        
+        // Better iOS AR handling
+        if (/Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent)) {
+          // Safari - direct AR Quick Look
+          document.body.appendChild(link)
+          link.click()
+          document.body.removeChild(link)
+        } else {
+          // Other iOS browsers - open in new tab
+          window.open(dish.usdzUrl, '_blank')
+        }
+      } else if (dish.glbUrl) {
+        // Android and other devices use WebXR or model-viewer
+        console.log('Launching WebXR/Model Viewer with GLB:', dish.glbUrl)
+        const arWindow = window.open(
+          `/ar-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}`, 
+          '_blank',
+          'width=100vw,height=100vh,fullscreen=yes'
+        )
+        
+        // Focus the AR window
+        if (arWindow) {
+          arWindow.focus()
+        } else {
+          toast.error('Popup blocked. Please allow popups for AR experience.')
+        }
+      }
+    } catch (error) {
+      console.error('AR launch error:', error)
+      toast.error('Failed to start AR experience. Please try again.')
     }
     
     setIsLoading(false)

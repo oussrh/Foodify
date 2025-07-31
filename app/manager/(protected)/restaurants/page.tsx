@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
+import { CardContextMenu, CardContextMenuItem } from '@/components/card-context-menu'
 import { Button } from '@/components/ui/button'
 import {
   Card,
@@ -8,12 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Badge } from '@/components/ui/badge'
 import { 
   MoreVertical, 
@@ -122,7 +117,7 @@ export default async function ManagerRestaurantsPage() {
             const totalManagers = restaurant.users.length
             
             return (
-              <Card key={restaurant.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-0 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1">
+              <Card key={restaurant.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-0 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 relative">
                 <div className="aspect-video relative bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
                   {restaurant.logoUrl ? (
                     <>
@@ -176,43 +171,37 @@ export default async function ManagerRestaurantsPage() {
                         <span className="text-xs font-mono">{restaurant.slug}</span>
                       </div>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/manager/restaurants/${restaurant.id}/edit`}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Restaurant
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/manager/restaurants/${restaurant.id}/dishes`}>
-                            <ChefHat className="h-4 w-4 mr-2" />
-                            Manage Dishes
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link href={`/manager/restaurants/${restaurant.id}/menu`}>
-                            <Menu className="h-4 w-4 mr-2" />
-                            Manage Menu
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <Link 
-                            href={`/restaurant/${restaurant.slug}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            View Public Page
-                          </Link>
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <CardContextMenu>
+                      <CardContextMenuItem>
+                        <Link href={`/manager/restaurants/${restaurant.id}/edit`} className="flex items-center w-full">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Restaurant
+                        </Link>
+                      </CardContextMenuItem>
+                      <CardContextMenuItem>
+                        <Link href={`/manager/restaurants/${restaurant.id}/dishes`} className="flex items-center w-full">
+                          <ChefHat className="h-4 w-4 mr-2" />
+                          Manage Dishes
+                        </Link>
+                      </CardContextMenuItem>
+                      <CardContextMenuItem>
+                        <Link href={`/manager/restaurants/${restaurant.id}/menu`} className="flex items-center w-full">
+                          <Menu className="h-4 w-4 mr-2" />
+                          Manage Menu
+                        </Link>
+                      </CardContextMenuItem>
+                      <CardContextMenuItem>
+                        <Link 
+                          href={`/restaurant/${restaurant.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center w-full"
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          View Public Page
+                        </Link>
+                      </CardContextMenuItem>
+                    </CardContextMenu>
                   </div>
                 </CardHeader>
                 

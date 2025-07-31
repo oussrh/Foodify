@@ -91,6 +91,7 @@ model MenuCategory {
   nameEn        String
   nameFr        String
   sortOrder     Int
+  isActive      Boolean         @default(true)
   subcategories MenuSubcategory[]
 }
 
@@ -101,6 +102,7 @@ model MenuSubcategory {
   nameEn      String
   nameFr      String
   sortOrder   Int
+  isActive    Boolean      @default(true)
   dishes      Dish[]
 }
 

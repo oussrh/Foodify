@@ -13,8 +13,9 @@ import { updateDish } from '@/app/actions/dish-actions'
 import ARFileUpload from '@/components/ar-file-upload'
 import ARModelPreview from '@/components/ar-model-preview'
 import ImageUpload from '@/components/image-upload'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { 
   ChefHat, 
   Globe, 
@@ -25,7 +26,8 @@ import {
   AlertCircle,
   CheckCircle,
   Utensils,
-  Edit
+  Edit,
+  X
 } from 'lucide-react'
 
 type Subcategory = { id: string; nameEn: string }
@@ -75,9 +77,8 @@ export default function EditDishForm({
   subcategories: Subcategory[]
   restaurantName?: string
 }) {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [success, setSuccess] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [usdzUrl, setUsdzUrl] = useState(defaultValues.usdzUrl || '')
   const [glbUrl, setGlbUrl] = useState(defaultValues.glbUrl || '')
   const [imageUrl, setImageUrl] = useState(defaultValues.imageUrl || '')
@@ -87,14 +88,20 @@ export default function EditDishForm({
   const {
     register,
     handleSubmit,
-    formState: { errors, isDirty },
+    formState: { errors, isDirty, isSubmitting },
     watch,
     setValue,
     reset,
   } = useForm<EditDishValues>({
     resolver: zodResolver(schema),
     defaultValues,
+    mode: 'onChange'
   })
+
+  // Track form changes
+  useEffect(() => {
+    setHasUnsavedChanges(isDirty)
+  }, [isDirty])
 
   // Update state when defaultValues change (after database updates)
   useEffect(() => {
@@ -104,60 +111,163 @@ export default function EditDishForm({
     reset(defaultValues) // Reset the entire form with new default values
   }, [defaultValues, reset])
 
-  const onSubmit = async (data: EditDishValues) => {
-    setIsSubmitting(true)
-    setError(null)
-    
-    const finalData = {
-      ...data,
-      imageUrl: imageUrl || data.imageUrl,
-      subcategoryId: data.subcategoryId || null,
-      usdzUrl: usdzUrl || '',
-      glbUrl: glbUrl || '',
-    }
-    
-    console.log('Form submission data:', {
-      formData: data,
-      usdzUrl,
-      glbUrl,
-      imageUrl,
-      finalData
-    })
-    
+  // Handle save
+  const onSubmit = useCallback(async (data: EditDishValues) => {
     try {
+      setSaveStatus('saving')
+      toast.loading('Saving dish...', { id: 'dish-save' })
+      
+      const finalData = {
+        ...data,
+        imageUrl: imageUrl || data.imageUrl,
+        subcategoryId: data.subcategoryId || null,
+        usdzUrl: usdzUrl || '',
+        glbUrl: glbUrl || '',
+      }
+      
+      console.log('Form submission data:', {
+        formData: data,
+        usdzUrl,
+        glbUrl,
+        imageUrl,
+        finalData
+      })
+      
       await updateDish(id, restaurantId, finalData)
-      setSuccess(true)
+      
+      setSaveStatus('saved')
+      setHasUnsavedChanges(false)
+      
+      // Reset form state to mark as clean
+      reset(data)
+      
+      toast.success('Dish saved successfully!', { 
+        id: 'dish-save',
+        description: 'All changes have been saved.'
+      })
+      
       router.refresh() // Refresh the page to get updated data
-      setTimeout(() => setSuccess(false), 3000)
-    } catch (err) {
-      setError('Failed to update dish. Please try again.')
-      console.error('Error updating dish:', err)
-    } finally {
-      setIsSubmitting(false)
+      
+      // Show saved status briefly
+      setTimeout(() => setSaveStatus('idle'), 2000)
+    } catch (error) {
+      console.error('Dish update error:', error)
+      setSaveStatus('error')
+      
+      toast.error('Failed to save dish', {
+        id: 'dish-save',
+        description: error instanceof Error ? error.message : 'Please try again.'
+      })
+      
+      setTimeout(() => setSaveStatus('idle'), 3000)
     }
-  }
+  }, [id, restaurantId, imageUrl, usdzUrl, glbUrl, reset, router])
   
+  // Handle cancel
+  const handleCancel = useCallback(() => {
+    if (hasUnsavedChanges) {
+      if (confirm('You have unsaved changes. Are you sure you want to discard them?')) {
+        reset(defaultValues)
+        setHasUnsavedChanges(false)
+        setSaveStatus('idle')
+        setUsdzUrl(defaultValues.usdzUrl || '')
+        setGlbUrl(defaultValues.glbUrl || '')
+        setImageUrl(defaultValues.imageUrl || '')
+      }
+    }
+  }, [hasUnsavedChanges, reset, defaultValues])
+  
+  // Create a submit function that's always up to date
+  const submitForm = useCallback(() => {
+    if (!hasUnsavedChanges) {
+      toast.info('No changes to save')
+      return
+    }
+    
+    if (isSubmitting) {
+      return
+    }
+    
+    handleSubmit(onSubmit)()
+  }, [handleSubmit, onSubmit, hasUnsavedChanges, isSubmitting])
+  
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault()
+        submitForm()
+      }
+      if (e.key === 'Escape') {
+        handleCancel()
+      }
+    }
+    
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [submitForm, handleCancel])
+
   const handlePreview = (modelUrl: string, modelType: 'usdz' | 'glb') => {
     setPreviewModel({ url: modelUrl, type: modelType })
   }
 
   return (
     <div className="space-y-8">
-      {/* Success Message */}
-      {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <span className="text-sm text-green-700 font-medium">Dish updated successfully!</span>
+      {/* Enhanced Status Indicator */}
+      <div className="flex items-center justify-between">
+        <div>
+          {hasUnsavedChanges ? (
+            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 shadow-lg">
+              <AlertCircle className="h-3 w-3 mr-1" />
+              Unsaved changes
+              <kbd className="ml-2 px-1 py-0.5 text-xs bg-yellow-100 rounded">Ctrl+S</kbd>
+            </Badge>
+          ) : saveStatus === 'saved' ? (
+            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 shadow-lg">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              All changes saved
+            </Badge>
+          ) : (
+            <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-300">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Up to date
+            </Badge>
+          )}
         </div>
-      )}
-
-      {/* Error Message */}
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <span className="text-sm text-red-700 font-medium">{error}</span>
-        </div>
-      )}
+        
+        {/* Enhanced Save Button */}
+        <Button
+          onClick={submitForm}
+          disabled={!hasUnsavedChanges || isSubmitting}
+          className={`transition-all duration-300 ${
+            hasUnsavedChanges
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white scale-105 hover:scale-110'
+              : 'bg-gray-300 text-gray-500 cursor-not-allowed scale-100'
+          }`}
+        >
+          {saveStatus === 'saving' ? (
+            <>
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+              Saving...
+            </>
+          ) : saveStatus === 'saved' ? (
+            <>
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Saved!
+            </>
+          ) : saveStatus === 'error' ? (
+            <>
+              <AlertCircle className="h-4 w-4 mr-2" />
+              Try Again
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              {hasUnsavedChanges ? 'Save Changes' : 'No Changes'}
+            </>
+          )}
+        </Button>
+      </div>
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
@@ -337,33 +447,30 @@ export default function EditDishForm({
           onPreview={handlePreview}
         />
 
-        {/* Submit Button */}
-        <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
-          <Button 
-            type="submit" 
-            disabled={isSubmitting || !isDirty}
-            className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50"
-            size="lg"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Updating Dish...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                Save Changes
-              </div>
+        {/* Form Actions */}
+        <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-200">
+          <div className="flex items-center gap-3">
+            {hasUnsavedChanges && (
+              <Button 
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isSubmitting}
+                className="border-gray-300 text-gray-600 hover:bg-gray-50"
+              >
+                <X className="h-4 w-4 mr-2" />
+                Cancel Changes
+              </Button>
             )}
-          </Button>
+          </div>
           
-          {isDirty && (
-            <div className="flex items-center text-sm text-amber-600">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              Unsaved changes
-            </div>
-          )}
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl+S</kbd>
+            <span>to save</span>
+            <span>•</span>
+            <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Esc</kbd>
+            <span>to cancel</span>
+          </div>
         </div>
       </form>
       

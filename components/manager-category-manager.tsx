@@ -8,6 +8,8 @@ import {
   updateSubcategory,
   reorderCategories,
   reorderSubcategories,
+  toggleCategoryStatus,
+  toggleSubcategoryStatus,
 } from "@/app/actions/menu-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -117,12 +119,16 @@ export default function ManagerCategoryManager({
   };
 
   const handleToggleCategoryStatus = async (id: string) => {
-    // Note: This would need a backend implementation for category status
-    setCategories(prev => 
-      prev.map(cat => 
-        cat.id === id ? { ...cat, isActive: !cat.isActive } : cat
-      )
-    );
+    try {
+      await toggleCategoryStatus(id);
+      setCategories(prev => 
+        prev.map(cat => 
+          cat.id === id ? { ...cat, isActive: !cat.isActive } : cat
+        )
+      );
+    } catch (error) {
+      console.error('Failed to toggle category status:', error);
+    }
   };
 
   const handleDragEnd = async (event: DragEndEvent) => {
@@ -171,19 +177,23 @@ export default function ManagerCategoryManager({
   };
 
   const handleToggleSubStatus = async (catId: string, subId: string) => {
-    // Note: This would need a backend implementation for subcategory status
-    setCategories(prev =>
-      prev.map(cat =>
-        cat.id === catId
-          ? {
-              ...cat,
-              subcategories: cat.subcategories.map(sub =>
-                sub.id === subId ? { ...sub, isActive: !sub.isActive } : sub
-              ),
-            }
-          : cat
-      )
-    );
+    try {
+      await toggleSubcategoryStatus(subId);
+      setCategories(prev =>
+        prev.map(cat =>
+          cat.id === catId
+            ? {
+                ...cat,
+                subcategories: cat.subcategories.map(sub =>
+                  sub.id === subId ? { ...sub, isActive: !sub.isActive } : sub
+                ),
+              }
+            : cat
+        )
+      );
+    } catch (error) {
+      console.error('Failed to toggle subcategory status:', error);
+    }
   };
 
   const handleMoveSub = async (
@@ -286,7 +296,7 @@ export default function ManagerCategoryManager({
           <Badge className="bg-orange-100 text-orange-700 border-orange-200">
             Manager Mode
           </Badge>
-          <span className="text-sm text-gray-500">Organize & deactivate (no delete)</span>
+          <span className="text-sm text-gray-500">Organize & enable/disable (no delete)</span>
         </div>
       </div>
 

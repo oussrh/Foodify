@@ -1,16 +1,11 @@
 import Link from 'next/link'
 import { buttonVariants, Button } from '@/components/ui/button'
 import ResetAdminPasswordButton from '@/components/reset-admin-password-button'
+import { CardContextMenu, CardContextMenuItem } from '@/components/card-context-menu'
 import prisma from '@/lib/prisma'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from '@/components/ui/dropdown-menu'
 import { 
   MoreVertical, 
   Shield,
@@ -274,7 +269,7 @@ export default async function AdminsPage({
             })()
             
             return (
-              <Card key={admin.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-0 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1">
+              <Card key={admin.id} className="group overflow-hidden hover:shadow-lg transition-all duration-300 border-0 bg-white shadow-sm hover:shadow-xl hover:-translate-y-1 relative">
                 <div className="aspect-video relative bg-gradient-to-br from-red-50 to-pink-50 overflow-hidden">
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center space-y-2">
@@ -316,24 +311,17 @@ export default async function AdminsPage({
                         <span className="text-xs">Created {new Date(admin.createdAt).toLocaleDateString()}</span>
                       </div>
                     </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem asChild>
-                          <Link href={`/admin/admins/${admin.id}/edit`}>
-                            <Edit className="h-4 w-4 mr-2" />
-                            Edit Admin
-                          </Link>
-                        </DropdownMenuItem>
-                        <DropdownMenuItem asChild>
-                          <ResetAdminPasswordButton id={admin.id} />
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <CardContextMenu>
+                      <CardContextMenuItem>
+                        <Link href={`/admin/admins/${admin.id}/edit`} className="flex items-center w-full">
+                          <Edit className="h-4 w-4 mr-2" />
+                          Edit Admin
+                        </Link>
+                      </CardContextMenuItem>
+                      <CardContextMenuItem>
+                        <ResetAdminPasswordButton id={admin.id} />
+                      </CardContextMenuItem>
+                    </CardContextMenu>
                   </div>
                 </CardHeader>
                 
@@ -433,24 +421,17 @@ export default async function AdminsPage({
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="sm">
-                                <MoreVertical className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem asChild>
-                                <Link href={`/admin/admins/${admin.id}/edit`}>
-                                  <Edit className="h-4 w-4 mr-2" />
-                                  Edit Admin
-                                </Link>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <ResetAdminPasswordButton id={admin.id} />
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <CardContextMenu alwaysVisible={true}>
+                            <CardContextMenuItem>
+                              <Link href={`/admin/admins/${admin.id}/edit`} className="flex items-center w-full">
+                                <Edit className="h-4 w-4 mr-2" />
+                                Edit Admin
+                              </Link>
+                            </CardContextMenuItem>
+                            <CardContextMenuItem>
+                              <ResetAdminPasswordButton id={admin.id} />
+                            </CardContextMenuItem>
+                          </CardContextMenu>
                         </td>
                       </tr>
                     )
