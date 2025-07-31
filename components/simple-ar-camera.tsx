@@ -17,7 +17,10 @@ import {
   AlertCircle,
   CheckCircle,
   Apple,
-  Globe
+  Globe,
+  Cube,
+  Eye,
+  Monitor
 } from 'lucide-react'
 
 interface SimpleARCameraProps {
@@ -90,6 +93,24 @@ export default function SimpleARCamera({ dish, restaurantId, locale }: SimpleARC
     }
   }
 
+  const launch3DViewer = async () => {
+    setIsLoading(true)
+    
+    // Record the view
+    await recordARView()
+    
+    // Small delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 300))
+    
+    if (dish.glbUrl) {
+      // Open in 3D mode by default
+      window.open(`/ar-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}&mode=3d`, '_blank')
+    }
+    
+    setIsLoading(false)
+    setIsOpen(false)
+  }
+
   const launchARExperience = async () => {
     setIsLoading(true)
     
@@ -127,7 +148,7 @@ export default function SimpleARCamera({ dish, restaurantId, locale }: SimpleARC
       
     } else if (deviceInfo.isAndroid && dish.glbUrl) {
       // Android devices - use scene-viewer intent which opens native AR camera
-      const sceneViewerUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(dish.glbUrl)}&mode=ar_preferred&title=${encodeURIComponent(dishName)}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(window.location.origin + '/ar-viewer?model=' + encodeURIComponent(dish.glbUrl) + '&name=' + encodeURIComponent(dishName))};end;`
+      const sceneViewerUrl = `intent://arvr.google.com/scene-viewer/1.0?file=${encodeURIComponent(dish.glbUrl)}&mode=ar_preferred&title=${encodeURIComponent(dishName)}#Intent;scheme=https;package=com.google.ar.core;action=android.intent.action.VIEW;S.browser_fallback_url=${encodeURIComponent(window.location.origin + '/ar-viewer?model=' + encodeURIComponent(dish.glbUrl) + '&name=' + encodeURIComponent(dishName) + '&mode=ar')};end;`
       
       // Try to launch native AR first
       window.location.href = sceneViewerUrl
@@ -135,13 +156,13 @@ export default function SimpleARCamera({ dish, restaurantId, locale }: SimpleARC
       // Fallback to web AR viewer after a delay if native doesn't work
       setTimeout(() => {
         if (document.visibilityState === 'visible') {
-          window.open(`/ar-viewer?model=${encodeURIComponent(dish.glbUrl || '')}&name=${encodeURIComponent(dishName)}`, '_blank')
+          window.open(`/ar-viewer?model=${encodeURIComponent(dish.glbUrl || '')}&name=${encodeURIComponent(dishName)}&mode=ar`, '_blank')
         }
       }, 2000)
       
     } else if (dish.glbUrl) {
-      // Desktop or other devices - use WebXR/model-viewer
-      window.open(`/ar-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}`, '_blank')
+      // Desktop or other devices - use WebXR/model-viewer in AR mode
+      window.open(`/ar-viewer?model=${encodeURIComponent(dish.glbUrl)}&name=${encodeURIComponent(dishName)}&mode=ar`, '_blank')
     }
     
     setIsLoading(false)

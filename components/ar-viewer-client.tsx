@@ -1,4 +1,3 @@
-// PathFile: components/ar-viewer-client.tsx
 "use client"
 
 import { useEffect, useRef, useState, useCallback } from 'react'
@@ -8,26 +7,25 @@ import { Badge } from '@/components/ui/badge'
 import { 
   ArrowLeft, 
   RotateCcw, 
-  ZoomIn, 
-  ZoomOut,
-  Move3D,
   Camera,
+  Eye,
+  Monitor,
+  Smartphone,
   AlertCircle,
   Loader2,
   Fullscreen,
   Share,
-  Info,
   Settings,
-  Eye,
-  Smartphone,
-  Monitor,
   RefreshCw,
-  Download,
   CheckCircle,
   X,
   Maximize,
-  Minimize
+  Minimize,
+  View,
+  Cube,
+  ScanLine
 } from 'lucide-react'
+import { toast } from 'sonner'
 
 // Define ModelViewer interface for better type safety
 interface ModelViewer extends HTMLElement {
@@ -37,11 +35,14 @@ interface ModelViewer extends HTMLElement {
   removeAttribute(name: string): void;
 }
 
+type ViewMode = '3d' | 'ar'
+
 export default function ARViewerClient() {
   const searchParams = useSearchParams()
   const modelUrl = searchParams.get('model')
   const dishName = searchParams.get('name') || 'Dish'
   
+  const [viewMode, setViewMode] = useState<ViewMode>('3d')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isARSupported, setIsARSupported] = useState(false)
@@ -64,7 +65,7 @@ export default function ARViewerClient() {
     }
     controlsTimeoutRef.current = setTimeout(() => {
       setShowControls(false)
-    }, 3000)
+    }, 4000)
   }, [])
 
   useEffect(() => {
@@ -130,13 +131,18 @@ export default function ARViewerClient() {
     
     // Mouse movement listener for auto-hide controls
     const handleMouseMove = () => resetControlsTimer()
+    const handleTouchStart = () => resetControlsTimer()
     document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('touchstart', handleTouchStart)
     
     // Handle fullscreen changes
     const handleFullscreenChange = () => {
       setIsFullscreen(!!document.fullscreenElement)
     }
     document.addEventListener('fullscreenchange', handleFullscreenChange)
+    
+    // Initialize controls timer
+    resetControlsTimer()
     
     return () => {
       if (document.head.contains(script)) {
@@ -147,107 +153,126 @@ export default function ARViewerClient() {
         clearTimeout(controlsTimeoutRef.current)
       }
       document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('touchstart', handleTouchStart)
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
   }, [resetControlsTimer])
 
-  // Create the model-viewer element programmatically
+  // Create or update the model-viewer element
   useEffect(() => {
     if (modelViewerLoaded && containerRef.current && modelUrl) {
       const modelViewer = document.createElement('model-viewer')
       
-      // Set attributes for better AR integration
+      // Set base attributes
       modelViewer.setAttribute('src', modelUrl)
       modelViewer.setAttribute('alt', `3D model of ${dishName}`)
-      modelViewer.setAttribute('ar', '')
-      modelViewer.setAttribute('ar-modes', 'webxr scene-viewer quick-look')
-      modelViewer.setAttribute('ar-scale', 'auto')
-      modelViewer.setAttribute('ar-placement', 'floor')
       modelViewer.setAttribute('camera-controls', '')
       modelViewer.setAttribute('touch-action', 'pan-y')
-      modelViewer.setAttribute('auto-rotate', '')
-      modelViewer.setAttribute('auto-rotate-delay', '2000')
-      modelViewer.setAttribute('rotation-per-second', '30deg')
-      modelViewer.setAttribute('min-camera-orbit', 'auto 90deg auto')
-      modelViewer.setAttribute('max-camera-orbit', 'auto 90deg auto')
-      modelViewer.setAttribute('environment-image', 'neutral')
+      modelViewer.setAttribute('loading', 'eager')
+      modelViewer.setAttribute('reveal', 'auto')
       modelViewer.setAttribute('shadow-intensity', '1')
       modelViewer.setAttribute('shadow-softness', '0.5')
       modelViewer.setAttribute('exposure', '1')
       modelViewer.setAttribute('tone-mapping', 'aces')
-      modelViewer.setAttribute('loading', 'eager')
-      modelViewer.setAttribute('reveal', 'auto')
-      // Add iOS-specific quick-look attributes
-      if (/iPhone|iPad/.test(navigator.userAgent)) {
-        modelViewer.setAttribute('ios-src', modelUrl.replace('.glb', '.usdz'))
+      
+      // Set view mode specific attributes
+      if (viewMode === '3d') {
+        // 3D Mode - No AR, better for desktop viewing
+        modelViewer.setAttribute('auto-rotate', '')
+        modelViewer.setAttribute('auto-rotate-delay', '1000')
+        modelViewer.setAttribute('rotation-per-second', '20deg')
+        modelViewer.setAttribute('environment-image', 'neutral')
+        modelViewer.setAttribute('min-camera-orbit', 'auto 0deg auto')
+        modelViewer.setAttribute('max-camera-orbit', 'auto 180deg auto')
+        modelViewer.setAttribute('camera-orbit', '45deg 75deg auto')
+        modelViewer.removeAttribute('ar')
+        modelViewer.removeAttribute('ar-modes')
+      } else if (viewMode === 'ar') {
+        // AR Mode - Camera enabled for mobile AR experience
+        modelViewer.setAttribute('ar', '')
+        modelViewer.setAttribute('ar-modes', 'webxr scene-viewer quick-look')
+        modelViewer.setAttribute('ar-scale', 'auto')
+        modelViewer.setAttribute('ar-placement', 'floor')
+        modelViewer.setAttribute('min-camera-orbit', 'auto 90deg auto')
+        modelViewer.setAttribute('max-camera-orbit', 'auto 90deg auto')
+        modelViewer.removeAttribute('auto-rotate')
+        // Add iOS-specific quick-look attributes
+        if (/iPhone|iPad/.test(navigator.userAgent)) {
+          modelViewer.setAttribute('ios-src', modelUrl.replace('.glb', '.usdz'))
+        }
       }
       
       // Set styles
       modelViewer.style.width = '100%'
       modelViewer.style.height = '100%'
-      modelViewer.style.backgroundColor = 'transparent'
+      modelViewer.style.backgroundColor = viewMode === 'ar' ? 'transparent' : '#f8fafc'
       
       // Add event listeners
       modelViewer.addEventListener('load', () => {
         setModelLoaded(true)
+        toast.success(`${viewMode === 'ar' ? 'AR' : '3D'} model loaded successfully!`)
       })
       
       modelViewer.addEventListener('error', () => {
         setError('Failed to load 3D model')
+        toast.error('Failed to load 3D model')
       })
       
-      // Create AR button with better mobile integration
-      const arButton = document.createElement('button')
-      arButton.setAttribute('slot', 'ar-button')
-      arButton.className = 'absolute bottom-6 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-2xl shadow-2xl font-semibold flex items-center gap-2 md:gap-3 transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm text-sm md:text-base active:scale-95 touch-manipulation'
-      
-      // Add vibration feedback for mobile
-      arButton.addEventListener('touchstart', () => {
-        if ('vibrate' in navigator) {
-          navigator.vibrate(50)
-        }
-      })
-      
-      const arButtonContent = `
-        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-        <span class="font-medium">${
-          arMode === 'quick-look' ? 'Open AR Camera' :
-          arMode === 'scene-viewer' ? 'View in AR' :
-          arMode === 'webxr' ? 'Enter AR Mode' :
-          'View in AR'
-        }</span>
-        ${arMode ? `<span class="bg-white/25 text-white text-xs px-2 py-0.5 rounded-full hidden md:inline">${
-          arMode === 'webxr' ? 'WebXR' :
-          arMode === 'quick-look' ? 'iOS AR' :
-          arMode === 'scene-viewer' ? 'Android AR' : ''
-        }</span>` : ''}
-      `
-      arButton.innerHTML = arButtonContent
+      // Create AR button only for AR mode
+      if (viewMode === 'ar') {
+        const arButton = document.createElement('button')
+        arButton.setAttribute('slot', 'ar-button')
+        arButton.className = 'absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-2xl shadow-2xl font-semibold flex items-center gap-2 md:gap-3 transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm text-sm md:text-base active:scale-95 touch-manipulation z-10'
+        
+        // Add vibration feedback for mobile
+        arButton.addEventListener('touchstart', () => {
+          if ('vibrate' in navigator) {
+            navigator.vibrate(50)
+          }
+        })
+        
+        const arButtonContent = `
+          <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+          </svg>
+          <span class="font-medium">Open AR Camera</span>
+          ${arMode ? `<span class="bg-white/25 text-white text-xs px-2 py-0.5 rounded-full hidden md:inline">${
+            arMode === 'webxr' ? 'WebXR' :
+            arMode === 'quick-look' ? 'iOS AR' :
+            arMode === 'scene-viewer' ? 'Android AR' : ''
+          }</span>` : ''}
+        `
+        arButton.innerHTML = arButtonContent
+        modelViewer.appendChild(arButton)
+      }
       
       // Add loading poster
       const poster = document.createElement('div')
       poster.setAttribute('slot', 'poster')
-      poster.className = 'absolute inset-0 flex items-center justify-center bg-gradient-to-br from-purple-900 via-black to-indigo-900'
+      poster.className = `absolute inset-0 flex items-center justify-center ${
+        viewMode === 'ar' 
+          ? 'bg-gradient-to-br from-purple-900 via-black to-indigo-900' 
+          : 'bg-gradient-to-br from-slate-100 via-white to-slate-200'
+      }`
       poster.innerHTML = `
-        <div class="text-center text-white space-y-4">
+        <div class="text-center ${viewMode === 'ar' ? 'text-white' : 'text-gray-800'} space-y-4">
           <div class="relative">
-            <svg class="h-12 w-12 animate-spin text-purple-400 mx-auto" fill="none" viewBox="0 0 24 24">
+            <svg class="h-12 w-12 animate-spin ${viewMode === 'ar' ? 'text-purple-400' : 'text-blue-500'} mx-auto" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
             </svg>
-            <div class="absolute inset-0 bg-purple-500/20 rounded-full animate-pulse"></div>
+            <div class="absolute inset-0 ${viewMode === 'ar' ? 'bg-purple-500/20' : 'bg-blue-500/20'} rounded-full animate-pulse"></div>
           </div>
           <div class="space-y-2">
-            <p class="text-lg font-medium">Loading 3D model...</p>
-            <p class="text-sm text-gray-400">Please wait while we prepare your AR experience</p>
+            <p class="text-lg font-medium">Loading ${viewMode === 'ar' ? 'AR' : '3D'} model...</p>
+            <p class="text-sm ${viewMode === 'ar' ? 'text-gray-400' : 'text-gray-600'}">
+              ${viewMode === 'ar' ? 'Preparing your AR camera experience' : 'Preparing 3D viewer'}
+            </p>
           </div>
         </div>
       `
       
-      modelViewer.appendChild(arButton)
       modelViewer.appendChild(poster)
       
       // Clear container and add model viewer
@@ -256,7 +281,14 @@ export default function ARViewerClient() {
       
       modelViewerRef.current = modelViewer as ModelViewer
     }
-  }, [modelViewerLoaded, modelUrl, dishName, arMode])
+  }, [modelViewerLoaded, modelUrl, dishName, arMode, viewMode])
+
+  // Switch view mode
+  const switchViewMode = (mode: ViewMode) => {
+    setViewMode(mode)
+    setModelLoaded(false)
+    toast.success(`Switched to ${mode === 'ar' ? 'AR' : '3D'} mode`)
+  }
 
   // Fullscreen toggle
   const toggleFullscreen = async () => {
@@ -278,6 +310,7 @@ export default function ARViewerClient() {
       if (modelViewerRef.current.jumpCameraToGoal) {
         modelViewerRef.current.jumpCameraToGoal()
       }
+      toast.success('View reset')
     }
   }
 
@@ -286,18 +319,21 @@ export default function ARViewerClient() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${dishName} - 3D AR Model`,
-          text: `Check out this interactive AR model of ${dishName}!`,
+          title: `${dishName} - ${viewMode === 'ar' ? 'AR' : '3D'} Model`,
+          text: `Check out this interactive ${viewMode === 'ar' ? 'AR' : '3D'} model of ${dishName}!`,
           url: window.location.href,
         })
+        toast.success('Shared successfully!')
       } catch (err) {
         console.log('Error sharing:', err)
         // Fallback: copy to clipboard
         await navigator.clipboard?.writeText(window.location.href)
+        toast.success('Link copied to clipboard!')
       }
     } else {
       // Fallback: copy to clipboard
       await navigator.clipboard?.writeText(window.location.href)
+      toast.success('Link copied to clipboard!')
     }
   }
 
@@ -386,7 +422,7 @@ export default function ARViewerClient() {
   return (
     <div className="min-h-screen bg-background relative overflow-hidden">
       {/* Header */}
-      <div className={`absolute top-0 left-0 right-0 z-20 p-6 transition-all duration-300 ${
+      <div className={`absolute top-0 left-0 right-0 z-20 p-4 transition-all duration-300 ${
         showControls ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
       }`}>
         <div className="flex items-center justify-between">
@@ -402,7 +438,24 @@ export default function ARViewerClient() {
           <div className="text-center">
             <h1 className="text-foreground font-bold text-xl">{dishName}</h1>
             <div className="flex items-center gap-2 justify-center mt-2">
-              {arMode && (
+              <Badge className={`text-xs ${
+                viewMode === 'ar' 
+                  ? 'bg-purple-500/20 text-purple-600 border-purple-500/30' 
+                  : 'bg-blue-500/20 text-blue-600 border-blue-500/30'
+              }`}>
+                {viewMode === 'ar' ? (
+                  <>
+                    <Camera className="h-3 w-3 mr-1" />
+                    AR Mode
+                  </>
+                ) : (
+                  <>
+                    <Cube className="h-3 w-3 mr-1" />
+                    3D Mode
+                  </>
+                )}
+              </Badge>
+              {arMode && viewMode === 'ar' && (
                 <Badge className="bg-primary/20 text-primary border-primary/30 text-xs">
                   {arMode === 'webxr' && (
                     <>
@@ -448,6 +501,40 @@ export default function ARViewerClient() {
         </div>
       </div>
 
+      {/* View Mode Toggle */}
+      <div className={`absolute top-20 left-1/2 transform -translate-x-1/2 z-20 transition-all duration-300 ${
+        showControls ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      }`}>
+        <div className="flex items-center gap-2 bg-card/90 backdrop-blur-xl rounded-2xl p-2 border border-border shadow-lg">
+          <Button
+            onClick={() => switchViewMode('3d')}
+            variant={viewMode === '3d' ? 'default' : 'ghost'}
+            size="sm"
+            className={`${
+              viewMode === '3d' 
+                ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                : 'hover:bg-blue-500/10 text-blue-600'
+            }`}
+          >
+            <Cube className="h-4 w-4 mr-2" />
+            3D View
+          </Button>
+          <Button
+            onClick={() => switchViewMode('ar')}
+            variant={viewMode === 'ar' ? 'default' : 'ghost'}
+            size="sm"
+            className={`${
+              viewMode === 'ar' 
+                ? 'bg-purple-500 hover:bg-purple-600 text-white' 
+                : 'hover:bg-purple-500/10 text-purple-600'
+            }`}
+          >
+            <Camera className="h-4 w-4 mr-2" />
+            AR View
+          </Button>
+        </div>
+      </div>
+
       {/* 3D Model Viewer */}
       <div className="h-screen w-full relative">
         <div 
@@ -458,10 +545,18 @@ export default function ARViewerClient() {
         {/* Model loaded indicator */}
         {modelLoaded && (
           <div className="absolute top-6 right-6 z-10">
-            <div className="bg-green-500/20 border border-green-500/30 rounded-xl px-4 py-2 backdrop-blur-xl">
-              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 text-sm">
+            <div className={`border rounded-xl px-4 py-2 backdrop-blur-xl ${
+              viewMode === 'ar'
+                ? 'bg-purple-500/20 border-purple-500/30'
+                : 'bg-green-500/20 border-green-500/30'
+            }`}>
+              <div className={`flex items-center gap-2 text-sm ${
+                viewMode === 'ar'
+                  ? 'text-purple-600 dark:text-purple-400'
+                  : 'text-green-600 dark:text-green-400'
+              }`}>
                 <CheckCircle className="h-4 w-4" />
-                <span>AR Ready</span>
+                <span>{viewMode === 'ar' ? 'AR Ready' : '3D Ready'}</span>
               </div>
             </div>
           </div>
@@ -503,58 +598,104 @@ export default function ARViewerClient() {
           </div>
           
           <div className="mt-6 pt-4 border-t border-border">
-            <h4 className="text-foreground text-sm font-medium mb-3">How to Navigate</h4>
+            <h4 className="text-foreground text-sm font-medium mb-3">
+              {viewMode === 'ar' ? 'AR Mode Guide' : '3D Navigation'}
+            </h4>
             <div className="text-muted-foreground text-xs space-y-2">
-              <p className="flex items-center gap-3">
-                <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
-                  <Move3D className="h-3 w-3" />
-                </div>
-                Drag horizontally to rotate model
-              </p>
-              <p className="flex items-center gap-3">
-                <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
-                  <ZoomIn className="h-3 w-3" />
-                </div>
-                Pinch or scroll to zoom
-              </p>
-              <p className="flex items-center gap-3">
-                <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
-                  <Camera className="h-3 w-3" />
-                </div>
-                Tap AR button for immersive view
-              </p>
+              {viewMode === 'ar' ? (
+                <>
+                  <p className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
+                      <Camera className="h-3 w-3" />
+                    </div>
+                    Tap "Open AR Camera" to start
+                  </p>
+                  <p className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
+                      <ScanLine className="h-3 w-3" />
+                    </div>
+                    Point at flat surface (table/floor)
+                  </p>
+                  <p className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
+                      <View className="h-3 w-3" />
+                    </div>
+                    Tap to place dish in real world
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
+                      <RotateCcw className="h-3 w-3" />
+                    </div>
+                    Drag to rotate model
+                  </p>
+                  <p className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
+                      <Cube className="h-3 w-3" />
+                    </div>
+                    Pinch or scroll to zoom
+                  </p>
+                  <p className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
+                      <Camera className="h-3 w-3" />
+                    </div>
+                    Switch to AR mode for camera
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      {/* AR Capability Indicator */}
+      {/* Mode Info */}
       <div className={`absolute bottom-8 left-6 z-20 transition-all duration-300 ${
         showControls ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
       }`}>
         <div className={`rounded-2xl p-4 backdrop-blur-xl border shadow-2xl max-w-sm ${
-          isARSupported || arMode 
-            ? 'bg-green-500/20 border-green-500/30' 
-            : 'bg-amber-500/20 border-amber-500/30'
+          viewMode === 'ar'
+            ? (isARSupported || arMode 
+                ? 'bg-purple-500/20 border-purple-500/30' 
+                : 'bg-amber-500/20 border-amber-500/30')
+            : 'bg-blue-500/20 border-blue-500/30'
         }`}>
           <div className="flex items-start gap-3">
-            {isARSupported || arMode ? (
-              <CheckCircle className="h-5 w-5 text-green-500 dark:text-green-400 mt-0.5" />
+            {viewMode === 'ar' ? (
+              isARSupported || arMode ? (
+                <CheckCircle className="h-5 w-5 text-purple-500 dark:text-purple-400 mt-0.5" />
+              ) : (
+                <AlertCircle className="h-5 w-5 text-amber-500 dark:text-amber-400 mt-0.5" />
+              )
             ) : (
-              <AlertCircle className="h-5 w-5 text-amber-500 dark:text-amber-400 mt-0.5" />
+              <CheckCircle className="h-5 w-5 text-blue-500 dark:text-blue-400 mt-0.5" />
             )}
             <div>
               <p className={`font-semibold text-sm ${
-                isARSupported || arMode ? 'text-green-700 dark:text-green-300' : 'text-amber-700 dark:text-amber-300'
+                viewMode === 'ar'
+                  ? (isARSupported || arMode 
+                      ? 'text-purple-700 dark:text-purple-300' 
+                      : 'text-amber-700 dark:text-amber-300')
+                  : 'text-blue-700 dark:text-blue-300'
               }`}>
-                {isARSupported || arMode ? 'AR Available' : 'AR Limited'}
+                {viewMode === 'ar' 
+                  ? (isARSupported || arMode ? 'AR Mode Active' : 'AR Limited')
+                  : '3D Mode Active'
+                }
               </p>
               <p className={`text-xs mt-1 ${
-                isARSupported || arMode ? 'text-green-600 dark:text-green-400' : 'text-amber-600 dark:text-amber-400'
+                viewMode === 'ar'
+                  ? (isARSupported || arMode 
+                      ? 'text-purple-600 dark:text-purple-400' 
+                      : 'text-amber-600 dark:text-amber-400')
+                  : 'text-blue-600 dark:text-blue-400'
               }`}>
-                {isARSupported || arMode 
-                  ? `Your device supports ${arMode?.toUpperCase()} AR experiences`
-                  : "Your device doesn't support AR, but you can still explore the 3D model"
+                {viewMode === 'ar' 
+                  ? (isARSupported || arMode 
+                      ? `AR camera ready with ${arMode?.toUpperCase()}`
+                      : "Limited AR support - try mobile device")
+                  : "Interactive 3D model with full controls"
                 }
               </p>
             </div>
@@ -567,8 +708,8 @@ export default function ARViewerClient() {
         <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
           <div className="bg-card/80 backdrop-blur-xl rounded-full px-4 py-2 border border-border">
             <p className="text-muted-foreground text-xs flex items-center gap-2">
-              <Info className="h-3 w-3" />
-              Move mouse to show controls
+              <Eye className="h-3 w-3" />
+              Touch or move mouse to show controls
             </p>
           </div>
         </div>
