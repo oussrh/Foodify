@@ -25,116 +25,117 @@ enum DeviceType {
 }
 
 model Restaurant {
-  id            String         @id @default(uuid())
-  name          String
-  slug          String         @unique
-  email         String?
-  phone         String?
-  tagline       String?
-  logoUrl       String?
-  colorTheme    String?
-  defaultLocale Locale
+  id              String         @id @default(uuid())
+  name            String
+  slug            String         @unique
+  email           String?
+  phone           String?
+  tagline         String?
+  logoUrl         String?
+  colorTheme      String?
+  defaultLocale   Locale
   // Address Information
-  streetAddress String?
-  city          String?
-  state         String?
-  postalCode    String?
-  country       String?
+  streetAddress   String?
+  city            String?
+  state           String?
+  postalCode      String?
+  country         String?
   // Additional Business Information
-  website       String?
-  description   String?
-  cuisineType   String?
-  priceRange    String?        // e.g., "$", "$$", "$$$", "$$$$"
-  openingHours  String?        // JSON string with operating hours
-  socialMedia   String?        // JSON string with social media links
+  website         String?
+  description     String?
+  cuisineType     String?
+  priceRange      String? // e.g., "$", "$$", "$$$", "$$$$"
+  openingHours    String? // JSON string with operating hours
+  socialMedia     String? // JSON string with social media links
   // Design/Branding
-  coverImageUrl String?
-  coverImageStyle String?      // "cover" or "repeat"
-  secondaryColor String?
-  fontFamily    String?
-  googleFontUrl String?        // Google Fonts URL for easy implementation
+  coverImageUrl   String?
+  coverImageStyle String? // "cover" or "repeat"
+  secondaryColor  String?
+  fontFamily      String?
+  googleFontUrl   String? // Google Fonts URL for easy implementation
   // Business Settings
-  currency      String?        // e.g., "USD", "EUR", "GBP", "CAD"
-  currencySymbol String?       // e.g., "$", "€", "£", "C$"
-  createdAt     DateTime       @default(now())
-  users         User[]
-  categories    MenuCategory[]
-  dishes        Dish[]
+  currency        String? // e.g., "USD", "EUR", "GBP", "CAD"
+  currencySymbol  String? // e.g., "$", "€", "£", "C$"
+  createdAt       DateTime       @default(now())
+  users           User[]
+  categories      MenuCategory[]
+  dishes          Dish[]
 }
 
 model User {
-  id                    String     @id @default(uuid())
-  email                 String     @unique
-  emailVerified         DateTime?
-  passwordHash          String
-  totpSecret            String?
-  emailOtpCode          String?
-  emailOtpExpires       DateTime?
-  newEmail              String?
-  emailChangeToken      String?
+  id                      String           @id @default(uuid())
+  email                   String           @unique
+  emailVerified           DateTime?
+  passwordHash            String
+  totpSecret              String?
+  emailOtpCode            String?
+  emailOtpExpires         DateTime?
+  newEmail                String?
+  emailChangeToken        String?
   emailChangeTokenExpires DateTime?
-  emailVerifyToken      String?
+  emailVerifyToken        String?
   emailVerifyTokenExpires DateTime?
-  role                  UserRole
-  restaurants           Restaurant[]
-  activityLogs          ActivityLog[]
-  createdAt             DateTime   @default(now())
-  lastLogin             DateTime?
-  passwordResetToken    String?
-  passwordResetExpires  DateTime?
+  role                    UserRole
+  restaurants             Restaurant[]
+  activityLogs            ActivityLog[]
+  createdAt               DateTime         @default(now())
+  lastLogin               DateTime?
+  passwordResetToken      String?
+  passwordResetExpires    DateTime?
+  UserSessionLog          UserSessionLog[]
 }
 
 model MenuCategory {
-  id            String          @id @default(uuid())
+  id            String            @id @default(uuid())
   restaurantId  String
-  restaurant    Restaurant      @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurant    Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   nameEn        String
   nameFr        String
   sortOrder     Int
-  isActive      Boolean         @default(true)
+  isActive      Boolean           @default(true)
   subcategories MenuSubcategory[]
 }
 
 model MenuSubcategory {
-  id          String       @id @default(uuid())
-  categoryId  String
-  category    MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  nameEn      String
-  nameFr      String
-  sortOrder   Int
-  isActive    Boolean      @default(true)
-  dishes      Dish[]
+  id         String       @id @default(uuid())
+  categoryId String
+  category   MenuCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  nameEn     String
+  nameFr     String
+  sortOrder  Int
+  isActive   Boolean      @default(true)
+  dishes     Dish[]
 }
 
 model Dish {
-  id              String            @id @default(uuid())
+  id              String           @id @default(uuid())
   restaurantId    String
-  restaurant      Restaurant        @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurant      Restaurant       @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   subcategoryId   String?
-  subcategory     MenuSubcategory?  @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  subcategory     MenuSubcategory? @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
   nameEn          String
   nameFr          String
   descriptionEn   String
   descriptionFr   String
-  price           Decimal           @db.Decimal(10,2)
+  price           Decimal          @db.Decimal(10, 2)
   imageUrl        String
   usdzUrl         String
   glbUrl          String
-  isActive        Boolean           @default(true)
+  isActive        Boolean          @default(true)
   calories        Int?
-  isMostPurchased Boolean           @default(false)
+  isMostPurchased Boolean          @default(false)
   sortOrder       Int
-  createdAt       DateTime        @default(now())
+  createdAt       DateTime         @default(now())
   ingredients     Ingredient[]
   views           DishView[]
 }
 
 model Ingredient {
-  id      String @id @default(uuid())
-  dishId  String
-  dish    Dish   @relation(fields: [dishId], references: [id])
-  nameEn  String
-  nameFr  String
+  id     String @id @default(uuid())
+  dishId String
+  dish   Dish   @relation(fields: [dishId], references: [id])
+  nameEn String
+  nameFr String
 }
 
 model DishView {
@@ -156,5 +157,15 @@ model ActivityLog {
   createdAt DateTime @default(now())
   ipAddress String?
 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserSessionLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String // 'LOGIN' | 'LOGOUT'
+  device    String? // 'mobile' | 'desktop' | 'tablet'
+  ipAddress String?
+  createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
