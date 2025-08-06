@@ -151,6 +151,19 @@ export async function POST(request: NextRequest) {
       );
     `
 
+    // Create UserSessionLog table
+    await prisma.$executeRaw`
+      CREATE TABLE IF NOT EXISTS "UserSessionLog" (
+        "id" TEXT NOT NULL DEFAULT gen_random_uuid(),
+        "userId" TEXT NOT NULL,
+        "action" TEXT NOT NULL,
+        "device" TEXT,
+        "ipAddress" TEXT,
+        "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY ("id")
+      );
+    `
+
     // Create junction table
     await prisma.$executeRaw`
       CREATE TABLE IF NOT EXISTS "_RestaurantToUser" (
@@ -207,7 +220,7 @@ export async function POST(request: NextRequest) {
 
     await prisma.$executeRaw`
       DO $$ BEGIN
-        ALTER TABLE "DishView" ADD CONSTRAINT "DishView_dishId_fkey" 
+        ALTER TABLE "DishView" ADD CONSTRAINT "DishView_dishId_fkey"
           FOREIGN KEY ("dishId") REFERENCES "Dish"("id");
       EXCEPTION
         WHEN duplicate_object THEN null;
@@ -216,7 +229,16 @@ export async function POST(request: NextRequest) {
 
     await prisma.$executeRaw`
       DO $$ BEGIN
-        ALTER TABLE "_RestaurantToUser" ADD CONSTRAINT "_RestaurantToUser_A_fkey" 
+        ALTER TABLE "UserSessionLog" ADD CONSTRAINT "UserSessionLog_userId_fkey"
+          FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE;
+      EXCEPTION
+        WHEN duplicate_object THEN null;
+      END $$;
+    `
+
+    await prisma.$executeRaw`
+      DO $$ BEGIN
+        ALTER TABLE "_RestaurantToUser" ADD CONSTRAINT "_RestaurantToUser_A_fkey"
           FOREIGN KEY ("A") REFERENCES "Restaurant"("id") ON DELETE CASCADE;
       EXCEPTION
         WHEN duplicate_object THEN null;
