@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import MenuSearchFilter, { type FilterOptions } from './menu-search-filter'
 import ImprovedDishCard from './improved-dish-card'
 import ARQuickAccessFAB from './ar-quick-access-fab'
@@ -85,7 +85,7 @@ export default function RestaurantMenuClient({
   }
 
   // Filter dishes based on active filters
-  const filterDish = (dish: Dish): boolean => {
+  const filterDish = useCallback((dish: Dish): boolean => {
     // Search filter
     if (filters.search) {
       const searchLower = filters.search.toLowerCase()
@@ -106,7 +106,7 @@ export default function RestaurantMenuClient({
     if (filters.popular && !dish.isMostPurchased) return false
 
     return true
-  }
+  }, [filters])
 
   // Filter all categories and dishes
   const filteredData = useMemo(() => {
@@ -121,7 +121,7 @@ export default function RestaurantMenuClient({
     const filteredUncategorized = uncategorizedDishes.filter(filterDish)
 
     return { categories: filtered, uncategorizedDishes: filteredUncategorized }
-  }, [filters, categories, uncategorizedDishes])
+  }, [filterDish, categories, uncategorizedDishes])
 
   // Count AR dishes
   const arDishCount = useMemo(() => {

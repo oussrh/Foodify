@@ -34,10 +34,14 @@ export async function updateCategory(
 export async function toggleCategoryStatus(id: string) {
   const category = await prisma.menuCategory.findUnique({ where: { id } })
   if (!category) throw new Error('Category not found')
-  return prisma.menuCategory.update({ 
-    where: { id }, 
-    data: { isActive: !category.isActive } 
+  return prisma.menuCategory.update({
+    where: { id },
+    data: { isActive: !category.isActive }
   })
+}
+
+export async function deleteCategory(id: string) {
+  return prisma.menuCategory.delete({ where: { id } })
 }
 
 export async function createSubcategory(
@@ -60,10 +64,14 @@ export async function updateSubcategory(
 export async function toggleSubcategoryStatus(id: string) {
   const subcategory = await prisma.menuSubcategory.findUnique({ where: { id } })
   if (!subcategory) throw new Error('Subcategory not found')
-  return prisma.menuSubcategory.update({ 
-    where: { id }, 
-    data: { isActive: !subcategory.isActive } 
+  return prisma.menuSubcategory.update({
+    where: { id },
+    data: { isActive: !subcategory.isActive }
   })
+}
+
+export async function deleteSubcategory(id: string) {
+  return prisma.menuSubcategory.delete({ where: { id } })
 }
 
 export async function reorderCategories(restaurantId: string, ids: string[]) {
