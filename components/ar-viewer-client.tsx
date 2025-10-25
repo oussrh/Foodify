@@ -4,9 +4,9 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  ArrowLeft, 
-  RotateCcw, 
+import {
+  ArrowLeft,
+  RotateCcw,
   Camera,
   Eye,
   Monitor,
@@ -23,7 +23,9 @@ import {
   Minimize,
   View,
   Box,
-  ScanLine
+  ScanLine,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -207,42 +209,63 @@ export default function ARViewerClient() {
       
       // Set view mode specific attributes
       if (viewMode === '3d') {
-        // 3D Mode - No AR, better for desktop viewing
+        // 3D Mode - No AR, better for desktop viewing with enhanced lighting
         modelViewer.setAttribute('auto-rotate', '')
         modelViewer.setAttribute('auto-rotate-delay', '1000')
         modelViewer.setAttribute('rotation-per-second', '20deg')
-        modelViewer.setAttribute('environment-image', 'neutral')
+
+        // Enhanced lighting configuration for 3D mode to prevent black models
+        modelViewer.setAttribute('environment-image', 'https://modelviewer.dev/shared-assets/environments/moon_1k.hdr')
+        modelViewer.setAttribute('skybox-height', '2m')
+        modelViewer.setAttribute('exposure', '1.2')
+        modelViewer.setAttribute('shadow-intensity', '0.8')
+        modelViewer.setAttribute('shadow-softness', '0.6')
+
+        // Enhanced tone mapping for better color rendering
+        modelViewer.setAttribute('tone-mapping', 'commerce')
+
+        // Camera constraints - prevent seeing bottom of dish
         modelViewer.setAttribute('min-camera-orbit', 'auto 0deg auto')
         modelViewer.setAttribute('max-camera-orbit', 'auto 180deg auto')
         modelViewer.setAttribute('camera-orbit', '45deg 75deg auto')
+
+        // Remove AR attributes
         modelViewer.removeAttribute('ar')
         modelViewer.removeAttribute('ar-modes')
       } else if (viewMode === 'ar') {
-        // AR Mode - Enhanced camera configuration for mobile AR experience
+        // AR Mode - Enhanced camera configuration for mobile AR experience with optimizations
         modelViewer.setAttribute('ar', '')
         modelViewer.setAttribute('ar-modes', 'webxr scene-viewer quick-look')
         modelViewer.setAttribute('ar-scale', 'auto')
         modelViewer.setAttribute('ar-placement', 'floor')
-        
+
+        // Performance optimizations for faster AR loading
+        modelViewer.setAttribute('loading', 'eager')
+        modelViewer.setAttribute('reveal', 'interaction')
+        modelViewer.setAttribute('interaction-prompt', 'none')
+        modelViewer.setAttribute('preload', '')
+
         // Enhanced AR camera settings for better mobile experience
         modelViewer.setAttribute('camera-controls', 'enable-pan')
         modelViewer.setAttribute('disable-pan', 'false')
         modelViewer.setAttribute('disable-zoom', 'false')
         modelViewer.setAttribute('interaction-policy', 'always-allow')
         modelViewer.setAttribute('touch-action', 'manipulation')
-        
-        // Improved lighting and rendering for AR
-        modelViewer.setAttribute('environment-image', 'legacy')
+
+        // Improved lighting and rendering for AR with better visibility
+        modelViewer.setAttribute('environment-image', 'https://modelviewer.dev/shared-assets/environments/aircraft_workshop_01_1k.hdr')
         modelViewer.setAttribute('skybox-image', 'null')
-        modelViewer.setAttribute('shadow-intensity', '0.7')
-        modelViewer.setAttribute('shadow-softness', '0.8')
-        
+        modelViewer.setAttribute('exposure', '1.3')
+        modelViewer.setAttribute('shadow-intensity', '0.9')
+        modelViewer.setAttribute('shadow-softness', '0.7')
+        modelViewer.setAttribute('tone-mapping', 'commerce')
+
         // Better camera orbit constraints for AR
         modelViewer.setAttribute('min-camera-orbit', 'auto 0deg auto')
         modelViewer.setAttribute('max-camera-orbit', 'auto 180deg auto')
         modelViewer.setAttribute('min-field-of-view', '25deg')
         modelViewer.setAttribute('max-field-of-view', '45deg')
-        
+
         // Remove auto-rotate for AR mode
         modelViewer.removeAttribute('auto-rotate')
         
@@ -262,10 +285,10 @@ export default function ARViewerClient() {
         console.log('AR mode configured for:', arMode, 'Device:', navigator.userAgent.includes('iPhone') ? 'iOS' : navigator.userAgent.includes('Android') ? 'Android' : 'Desktop')
       }
       
-      // Set styles
+      // Set styles with enhanced background for better 3D visibility
       modelViewer.style.width = '100%'
       modelViewer.style.height = '100%'
-      modelViewer.style.backgroundColor = viewMode === 'ar' ? 'transparent' : '#f8fafc'
+      modelViewer.style.backgroundColor = viewMode === 'ar' ? 'transparent' : '#e5e7eb'
       
       // Add enhanced event listeners for better AR experience
       modelViewer.addEventListener('load', () => {
@@ -429,7 +452,37 @@ export default function ARViewerClient() {
       if (modelViewerRef.current.jumpCameraToGoal) {
         modelViewerRef.current.jumpCameraToGoal()
       }
+      // Reset to default camera orbit
+      modelViewerRef.current.setAttribute('camera-orbit', '45deg 75deg auto')
       toast.success('View reset')
+    }
+  }
+
+  // Zoom in
+  const zoomIn = () => {
+    if (modelViewerRef.current) {
+      const currentOrbit = modelViewerRef.current.getAttribute('camera-orbit') || '45deg 75deg auto'
+      const parts = currentOrbit.split(' ')
+      const distance = parts[2] === 'auto' ? '100%' : parts[2]
+      const newDistance = distance === 'auto' || distance === '100%'
+        ? '80%'
+        : `${Math.max(50, parseInt(distance) - 10)}%`
+      modelViewerRef.current.setAttribute('camera-orbit', `${parts[0]} ${parts[1]} ${newDistance}`)
+      toast.success('Zoomed in')
+    }
+  }
+
+  // Zoom out
+  const zoomOut = () => {
+    if (modelViewerRef.current) {
+      const currentOrbit = modelViewerRef.current.getAttribute('camera-orbit') || '45deg 75deg auto'
+      const parts = currentOrbit.split(' ')
+      const distance = parts[2] === 'auto' ? '100%' : parts[2]
+      const newDistance = distance === 'auto' || distance === '100%'
+        ? '120%'
+        : `${Math.min(200, parseInt(distance) + 10)}%`
+      modelViewerRef.current.setAttribute('camera-orbit', `${parts[0]} ${parts[1]} ${newDistance}`)
+      toast.success('Zoomed out')
     }
   }
 
@@ -695,19 +748,40 @@ export default function ARViewerClient() {
           </div>
           
           <div className="space-y-3">
-            <Button 
-              variant="ghost" 
-              size="sm" 
+            <Button
+              variant="ghost"
+              size="sm"
               className="w-full justify-start"
               onClick={resetView}
             >
               <RotateCcw className="h-4 w-4 mr-3" />
               Reset View
             </Button>
-            
-            <Button 
-              variant="ghost" 
-              size="sm" 
+
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex-1 justify-start"
+                onClick={zoomIn}
+              >
+                <ZoomIn className="h-4 w-4 mr-3" />
+                Zoom In
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="flex-1 justify-start"
+                onClick={zoomOut}
+              >
+                <ZoomOut className="h-4 w-4 mr-3" />
+                Zoom Out
+              </Button>
+            </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
               className="w-full justify-start"
               onClick={() => setShowControls(false)}
             >
@@ -727,7 +801,7 @@ export default function ARViewerClient() {
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <Camera className="h-3 w-3" />
                     </div>
-                    Tap "Open AR Camera" to start
+                    Tap &ldquo;Open AR Camera&rdquo; to start
                   </p>
                   <p className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
@@ -748,13 +822,19 @@ export default function ARViewerClient() {
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <RotateCcw className="h-3 w-3" />
                     </div>
-                    Drag to rotate model
+                    Drag to rotate model horizontally
                   </p>
                   <p className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <Box className="h-3 w-3" />
                     </div>
-                    Pinch or scroll to zoom
+                    Pinch or scroll to zoom in/out
+                  </p>
+                  <p className="flex items-center gap-3">
+                    <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
+                      <View className="h-3 w-3" />
+                    </div>
+                    View from top, sides, and angles
                   </p>
                   <p className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">

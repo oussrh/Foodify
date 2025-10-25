@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { Metadata, Viewport } from 'next'
+import { type Metadata, type Viewport } from 'next'
 import ARViewerClient from '@/components/ar-viewer-client'
 
 export const metadata: Metadata = {
