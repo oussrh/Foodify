@@ -1,7 +1,7 @@
 {
   "measuredAt": "2026-09-20",
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
-  "score": 90,
+  "score": 99,
   "hard": [
     "api.bareResponse",
     "api.floatMoney",
@@ -18,6 +18,8 @@
     "docs.danglingSource",
     "docs.frontMatter",
     "docs.indexDrift",
+    "fn.shapeExemptions",
+    "types.escapes",
     "valid.rawEnv",
     "valid.unparsedBoundary",
     "valid.wholeEnv"
@@ -38,114 +40,57 @@
     "docs.danglingSource": 0,
     "docs.frontMatter": 0,
     "docs.indexDrift": 0,
-    "size.excessCode": 5060,
-    "size.overBudget": 34,
-    "size.overRaw": 1,
-    "types.escapes": 1,
+    "fn.shapeExemptions": 0,
+    "size.excessCode": 228,
+    "size.overBudget": 8,
+    "size.overRaw": 0,
+    "types.escapes": 0,
     "valid.rawEnv": 0,
     "valid.unparsedBoundary": 0,
     "valid.wholeEnv": 0
   },
   "scanned": {
     "api.bareResponse": 6,
-    "api.floatMoney": 182,
+    "api.floatMoney": 315,
     "api.rowReturn": 8,
     "api.unboundedList": 6,
     "auth.unguardedAdminPage": 17,
-    "cache.serverCacheUse": 182,
+    "cache.serverCacheUse": 315,
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 56,
+    "docs.citations": 72,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 183,
-    "size.overBudget": 183,
-    "size.overRaw": 194,
-    "types.escapes": 183,
-    "valid.rawEnv": 181,
+    "size.excessCode": 317,
+    "size.overBudget": 317,
+    "size.overRaw": 329,
+    "types.escapes": 317,
+    "valid.rawEnv": 315,
     "valid.unparsedBoundary": 15,
-    "valid.wholeEnv": 192
+    "valid.wholeEnv": 327
   },
   "debt": {
     "size.excessCode": {
-      "app/admin/(protected)/admins/[id]/edit/page.tsx": 82,
       "app/admin/(protected)/admins/create/page.tsx": 42,
       "app/admin/(protected)/admins/page.tsx": 5,
       "app/admin/(protected)/page.tsx": 52,
-      "app/admin/(protected)/users/[id]/edit/page.tsx": 153,
       "app/admin/(protected)/users/create/page.tsx": 38,
       "app/admin/(protected)/users/page.tsx": 21,
       "app/manager/(protected)/change-email/confirm-new/page.tsx": 33,
-      "app/manager/(protected)/change-email/confirm-old/page.tsx": 77,
-      "app/manager/(protected)/profile/page.tsx": 309,
       "app/manager/(protected)/restaurants/[id]/dishes/page.tsx": 3,
-      "app/restaurant/[slug]/page.tsx": 34,
-      "components/3d-viewer-client.tsx": 151,
-      "components/admin-category-manager.tsx": 411,
-      "components/ar-file-upload.tsx": 286,
-      "components/ar-model-preview.tsx": 113,
-      "components/ar-viewer-client.tsx": 557,
-      "components/branding/branding-panel.tsx": 38,
-      "components/contact/contact-panel.tsx": 2,
-      "components/create-client-form.tsx": 82,
-      "components/create-dish-form.tsx": 105,
-      "components/create-restaurant-form.tsx": 262,
-      "components/edit-client-form.tsx": 278,
-      "components/edit-dish-form.tsx": 129,
-      "components/edit-restaurant-form.tsx": 189,
-      "components/image-upload.tsx": 286,
-      "components/ingredient-manager.tsx": 50,
-      "components/manager-category-manager.tsx": 328,
-      "components/menu/restaurant-page.tsx": 334,
-      "components/qr-code-display.tsx": 160,
-      "components/reset-admin-password-button.tsx": 108,
-      "components/restaurant-cover-upload.tsx": 128,
-      "components/restaurant-logo-upload.tsx": 114,
-      "components/update-password-form.tsx": 100
+      "app/restaurant/[slug]/page.tsx": 34
     },
     "size.overBudget": {
-      "app/admin/(protected)/admins/[id]/edit/page.tsx": 1,
       "app/admin/(protected)/admins/create/page.tsx": 1,
       "app/admin/(protected)/admins/page.tsx": 1,
       "app/admin/(protected)/page.tsx": 1,
-      "app/admin/(protected)/users/[id]/edit/page.tsx": 1,
       "app/admin/(protected)/users/create/page.tsx": 1,
       "app/admin/(protected)/users/page.tsx": 1,
       "app/manager/(protected)/change-email/confirm-new/page.tsx": 1,
-      "app/manager/(protected)/change-email/confirm-old/page.tsx": 1,
-      "app/manager/(protected)/profile/page.tsx": 1,
       "app/manager/(protected)/restaurants/[id]/dishes/page.tsx": 1,
-      "app/restaurant/[slug]/page.tsx": 1,
-      "components/3d-viewer-client.tsx": 1,
-      "components/admin-category-manager.tsx": 1,
-      "components/ar-file-upload.tsx": 1,
-      "components/ar-model-preview.tsx": 1,
-      "components/ar-viewer-client.tsx": 1,
-      "components/branding/branding-panel.tsx": 1,
-      "components/contact/contact-panel.tsx": 1,
-      "components/create-client-form.tsx": 1,
-      "components/create-dish-form.tsx": 1,
-      "components/create-restaurant-form.tsx": 1,
-      "components/edit-client-form.tsx": 1,
-      "components/edit-dish-form.tsx": 1,
-      "components/edit-restaurant-form.tsx": 1,
-      "components/image-upload.tsx": 1,
-      "components/ingredient-manager.tsx": 1,
-      "components/manager-category-manager.tsx": 1,
-      "components/menu/restaurant-page.tsx": 1,
-      "components/qr-code-display.tsx": 1,
-      "components/reset-admin-password-button.tsx": 1,
-      "components/restaurant-cover-upload.tsx": 1,
-      "components/restaurant-logo-upload.tsx": 1,
-      "components/update-password-form.tsx": 1
-    },
-    "size.overRaw": {
-      "components/ar-viewer-client.tsx": 1
-    },
-    "types.escapes": {
-      "components/ar-viewer-client.tsx": 1
+      "app/restaurant/[slug]/page.tsx": 1
     }
   },
   "versions": {
@@ -164,6 +109,7 @@
     "docs.danglingSource": 1,
     "docs.frontMatter": 1,
     "docs.indexDrift": 1,
+    "fn.shapeExemptions": 1,
     "size.excessCode": 1,
     "size.overBudget": 1,
     "size.overRaw": 1,
@@ -172,20 +118,5 @@
     "valid.unparsedBoundary": 1,
     "valid.wholeEnv": 1
   },
-  "entries": {
-    "size.excessCode": {
-      "at": "2026-09-20",
-      "was": 5056,
-      "now": 5068,
-      "reason": "requireSuperAdminPage() as the first statement of the six admin pages already over their budget (an import and a call each): the fresh super-admin check Next's preserved layout cannot make on client navigation (CACHE.2); phase 8 splits these pages",
-      "owner": "Oussama Rhoni"
-    },
-    "size.overBudget": {
-      "at": "2026-09-20",
-      "was": 31,
-      "now": 34,
-      "reason": "harness merged into main; the day-0 floor was measured on a tree without the branding, contact and PWA work (four files named in docs/STANDARDS_PROGRESS.md)",
-      "owner": "Oussama Rhoni"
-    }
-  }
+  "entries": {}
 }

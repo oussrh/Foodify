@@ -4,6 +4,16 @@
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
+import { readExemptions } from './scripts/codemods/shape-exemptions.mjs'
+import { COMPONENT_LINES, SHAPE_RULE_CONFIG } from './scripts/codemods/shape-exemptions.mjs'
+
+// Function shape (CODE-SHAPE, phase 7): the standard's thresholds at error over the whole tree,
+// off only for the files scripts/ci/shape-exemptions.json lists. That list is generated from the
+// findings (scripts/codemods/shape-exemptions.mjs --write), checked by the lint script (--check:
+// a listed file that passes is an error) and counted by the ratchet (fn.shapeExemptions), so it
+// can only shrink. A new failure anywhere else is a lint error the moment it is written.
+// A path is a literal here, so the glob characters a route segment carries ([id], (protected)) are escaped.
+const shapeExemptions = readExemptions().map((p) => p.replace(/[[\]()]/g, (ch) => `\\${ch}`))
 
 const config = [
   { ignores: ['.next/**', 'node_modules/**', 'coverage/**', 'generated/**', 'public/**', '.claude/**', '.abatty/**', 'patches/**'] },
@@ -55,6 +65,12 @@ const config = [
     },
   },
   { rules: { 'no-debugger': 'error' } },
+  { files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'], rules: SHAPE_RULE_CONFIG },
+  { files: ['**/*.tsx'], rules: { 'max-lines-per-function': COMPONENT_LINES } },
+  // Tests and fixtures describe a behaviour per block, not a function per concern; a spec's
+  // describe body is one long arrow by design.
+  { files: ['**/*.test.{ts,tsx}', 'e2e/**'], rules: { 'max-lines-per-function': 'off' } },
+  ...(shapeExemptions.length ? [{ files: shapeExemptions, rules: { 'max-lines': 'off', 'max-lines-per-function': 'off', complexity: 'off', 'max-params': 'off' } }] : []),
   {
     // The presets scope their plugins to these extensions (no .cjs); overrides must match.
     files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'],

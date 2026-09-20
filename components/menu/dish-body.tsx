@@ -2,18 +2,10 @@
 
 import Image from 'next/image'
 import { Camera, Share2 } from 'lucide-react'
-import { toast } from 'sonner'
 import ARLaunchButton from './ar-launch-button'
-import {
-  MENU_TEXT,
-  allergenLabel,
-  dietaryLabel,
-  formatPrice,
-  hasAR,
-  type Locale,
-  type MenuDish,
-  type Money,
-} from '@/lib/menu'
+import { DishFacts, DishIngredients, DishTags } from './dish-details'
+import { shareLink } from './share-link'
+import { MENU_TEXT, formatPrice, hasAR, type Locale, type MenuDish, type Money } from '@/lib/menu'
 
 interface DishBodyProps {
   dish: MenuDish
@@ -32,18 +24,7 @@ export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, ph
   const description = locale === 'fr' ? dish.descriptionFr : dish.descriptionEn
   const ar = hasAR(dish)
 
-  const share = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({ title: name, url: shareUrl })
-      } else {
-        await navigator.clipboard.writeText(shareUrl)
-        toast.success(t.linkCopied)
-      }
-    } catch {
-      // user cancelled the share sheet
-    }
-  }
+  const share = () => shareLink({ title: name, url: shareUrl }, t.linkCopied)
 
   return (
     <article className="flex flex-col gap-4">
@@ -86,50 +67,9 @@ export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, ph
 
       {description && <p className="text-[15px] leading-relaxed text-muted-foreground">{description}</p>}
 
-      {(dish.dietary.length > 0 || dish.isMostPurchased) && (
-        <div className="flex flex-wrap gap-1.5">
-          {dish.isMostPurchased && (
-            <span className="rounded-full bg-brand-tint px-2.5 py-1 text-xs font-medium text-brand">{t.popular}</span>
-          )}
-          {dish.dietary.map((key) => (
-            <span key={key} className="rounded-full border border-border-strong px-2.5 py-1 text-xs text-foreground">
-              {dietaryLabel(key, locale)}
-            </span>
-          ))}
-        </div>
-      )}
-
-      {dish.ingredients.length > 0 && (
-        <section className="flex flex-col gap-2">
-          <h3 className="text-sm font-semibold">{t.ingredients}</h3>
-          <ul className="flex flex-wrap gap-1.5">
-            {dish.ingredients.map((ing) => (
-              <li key={ing.id} className="rounded-full border border-border-strong px-2.5 py-1 text-xs">
-                {locale === 'fr' ? ing.nameFr : ing.nameEn}
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {(dish.calories !== null || dish.allergens.length > 0) && (
-        <dl className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-muted-foreground">
-          {dish.calories !== null && (
-            <div className="flex gap-1">
-              <dd className="tnum font-medium text-foreground">{dish.calories}</dd>
-              <dt>{t.kcal}</dt>
-            </div>
-          )}
-          {dish.allergens.length > 0 && (
-            <div className="flex gap-1">
-              <dt>{t.contains}</dt>
-              <dd className="font-medium text-foreground">
-                {dish.allergens.map((a) => allergenLabel(a, locale)).join(', ')}
-              </dd>
-            </div>
-          )}
-        </dl>
-      )}
+      <DishTags dish={dish} locale={locale} />
+      <DishIngredients dish={dish} locale={locale} />
+      <DishFacts dish={dish} locale={locale} />
     </article>
   )
 }

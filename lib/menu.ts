@@ -103,6 +103,9 @@ export function allergenLabel(key: string, locale: Locale): string {
   return opt ? opt[locale] : key
 }
 
+/** A category or subcategory name in the guest's language. */
+export const localName = (locale: Locale, en: string, fr: string) => (locale === 'fr' ? fr : en)
+
 export function hasAR(dish: Pick<MenuDish, 'usdzUrl' | 'glbUrl'>): boolean {
   return Boolean(dish.usdzUrl || dish.glbUrl)
 }

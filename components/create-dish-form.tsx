@@ -5,27 +5,24 @@
 import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DietarySelect from "@/components/dietary-select";
 import { createDish } from "@/app/actions/dish-actions";
 import { dishInput } from "@/lib/schemas/dish";
-import ARFileUpload from "@/components/ar-file-upload";
-import ARModelPreview from "@/components/ar-model-preview";
-import ImageUpload from "@/components/image-upload";
-import { useState } from "react";
+import { DishNameFields, DishDescriptionFields } from "@/components/dish-form/dish-fields";
 import {
-  ChefHat,
-  Globe,
-  DollarSign,
-  Save,
-  AlertCircle,
-  CheckCircle,
-  Utensils,
-} from "lucide-react";
+  DishPriceField,
+  DishCaloriesField,
+  DishCategorySelect,
+  DishPopularCheckbox,
+} from "@/components/dish-form/dish-detail-fields";
+import DishMediaUploads from "@/components/dish-form/dish-media-uploads";
+import DishModelPreview from "@/components/dish-form/dish-model-preview";
+import CreateDishSubmit from "@/components/dish-form/create-dish-submit";
+import { useDishAssets } from "@/components/dish-form/use-dish-assets";
+import { createDishPayload } from "@/components/dish-form/create-dish-payload";
+import { useState } from "react";
+import { ChefHat, AlertCircle, CheckCircle } from "lucide-react";
 
 type Subcategory = { id: string; nameEn: string };
 
@@ -50,10 +47,8 @@ export default function CreateDishForm({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [usdzUrl, setUsdzUrl] = useState('')
-  const [glbUrl, setGlbUrl] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [previewModel, setPreviewModel] = useState<{url: string, type: 'usdz' | 'glb'} | null>(null)
+  const assets = useDishAssets({})
+  const { imageUrl, usdzUrl, glbUrl, resetAssets } = assets
 
   const {
     register,
@@ -84,21 +79,7 @@ export default function CreateDishForm({
       }
     }
 
-    const finalData = {
-      nameEn: data.nameEn,
-      nameFr: data.nameFr,
-      descriptionEn: data.descriptionEn,
-      descriptionFr: data.descriptionFr,
-      price: data.price,
-      calories: calories,
-      imageUrl: imageUrl || data.imageUrl,
-      subcategoryId: data.subcategoryId || null,
-      usdzUrl: usdzUrl || '',
-      glbUrl: glbUrl || '',
-      isMostPurchased: data.isMostPurchased || false,
-      dietary: data.dietary || [],
-      allergens: data.allergens || [],
-    }
+    const finalData = createDishPayload(data, calories, { imageUrl, usdzUrl, glbUrl })
 
     console.log('Create dish form submission data:', {
       formData: data,
@@ -112,9 +93,7 @@ export default function CreateDishForm({
       await createDish(restaurantId, finalData);
       setSuccess(true)
       reset()
-      setUsdzUrl('')
-      setGlbUrl('')
-      setImageUrl('')
+      resetAssets({})
       setTimeout(() => setSuccess(false), 3000)
     } catch (err) {
       setError('Failed to create dish. Please try again.')
@@ -123,10 +102,6 @@ export default function CreateDishForm({
       setIsSubmitting(false)
     }
   };
-
-  const handlePreview = (modelUrl: string, modelType: 'usdz' | 'glb') => {
-    setPreviewModel({ url: modelUrl, type: modelType })
-  }
 
   return (
     <div className="space-y-8">
@@ -157,120 +132,26 @@ export default function CreateDishForm({
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             {/* Names */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="nameEn" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  English Name
-                </Label>
-                <Input
-                  id="nameEn"
-                  {...register("nameEn")}
-                  className="border-border focus:border-border-strong"
-                  placeholder="Enter dish name in English"
-                  disabled={isSubmitting}
-                />
-                {errors.nameEn && (
-                  <p className="text-xs text-destructive flex items-center gap-1">
-                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
-                    {errors.nameEn.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="nameFr" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  French Name
-                </Label>
-                <Input
-                  id="nameFr"
-                  {...register("nameFr")}
-                  className="border-border focus:border-border-strong"
-                  placeholder="Entrez le nom du plat en français"
-                  disabled={isSubmitting}
-                />
-                {errors.nameFr && (
-                  <p className="text-xs text-destructive flex items-center gap-1">
-                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
-                    {errors.nameFr.message}
-                  </p>
-                )}
-              </div>
-            </div>
+            <DishNameFields
+              nameEn={register("nameEn")}
+              nameFr={register("nameFr")}
+              errors={errors}
+              disabled={isSubmitting}
+              placeholders={{ en: "Enter dish name in English", fr: "Entrez le nom du plat en français" }}
+            />
 
             {/* Descriptions */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="descriptionEn" className="text-sm font-medium text-muted-foreground">
-                  English Description
-                </Label>
-                <Textarea
-                  id="descriptionEn"
-                  {...register("descriptionEn")}
-                  className="border-border focus:border-border-strong min-h-[100px]"
-                  placeholder="Describe the dish in English"
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="descriptionFr" className="text-sm font-medium text-muted-foreground">
-                  French Description
-                </Label>
-                <Textarea
-                  id="descriptionFr"
-                  {...register("descriptionFr")}
-                  className="border-border focus:border-border-strong min-h-[100px]"
-                  placeholder="Décrivez le plat en français"
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
+            <DishDescriptionFields
+              descriptionEn={register("descriptionEn")}
+              descriptionFr={register("descriptionFr")}
+              disabled={isSubmitting}
+              placeholders={{ en: "Describe the dish in English", fr: "Décrivez le plat en français" }}
+            />
 
             {/* Price and Details */}
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="price" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Price
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  {...register("price")}
-                  className="border-border focus:border-border-strong"
-                  placeholder="0.00"
-                  disabled={isSubmitting}
-                />
-                {errors.price && (
-                  <p className="text-xs text-destructive flex items-center gap-1">
-                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
-                    {errors.price.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="calories" className="text-sm font-medium text-muted-foreground">
-                  Calories (optional)
-                </Label>
-                <Input
-                  id="calories"
-                  type="number"
-                  {...register("calories")}
-                  className="border-border focus:border-border-strong"
-                  placeholder="250"
-                  disabled={isSubmitting}
-                />
-                {errors.calories && (
-                  <p className="text-xs text-destructive flex items-center gap-1">
-                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
-                    {errors.calories.message}
-                  </p>
-                )}
-              </div>
+              <DishPriceField field={register("price")} error={errors.price} disabled={isSubmitting} placeholder="0.00" />
+              <DishCaloriesField field={register("calories")} error={errors.calories} disabled={isSubmitting} placeholder="250" />
 
               <div className="md:col-span-2">
                 <DietarySelect
@@ -282,108 +163,23 @@ export default function CreateDishForm({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="subcategory" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Utensils className="h-4 w-4" />
-                  Category
-                </Label>
-                <select
-                  id="subcategory"
-                  {...register("subcategoryId")}
-                  className="w-full border border-border focus:border-border-strong rounded-md px-3 py-2 text-sm focus:outline-hidden focus:ring-2"
-                  disabled={isSubmitting}
-                >
-                  <option value="">No category</option>
-                  {subcategories.map((s: Subcategory) => (
-                    <option key={s.id} value={s.id}>
-                      {s.nameEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <DishCategorySelect field={register("subcategoryId")} subcategories={subcategories} disabled={isSubmitting} />
             </div>
 
             {/* Image URL - Hidden field for form */}
             <input type="hidden" {...register("imageUrl")} value={imageUrl} />
 
             {/* Special Options */}
-            <div className="space-y-3">
-              <p className="text-sm font-medium leading-none text-muted-foreground">Special Options</p>
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    {...register("isMostPurchased")}
-                    className="rounded border-border text-muted-foreground"
-                    disabled={isSubmitting}
-                  />
-                  <span className="text-sm text-muted-foreground">Mark as Popular Dish</span>
-                </label>
-              </div>
-            </div>
+            <DishPopularCheckbox field={register("isMostPurchased")} disabled={isSubmitting} />
           </CardContent>
         </Card>
 
-        {/* Dish Image Upload */}
-        <ImageUpload
-          restaurantName={restaurantName || 'Restaurant'}
-          currentImageUrl={imageUrl}
-          onImageUpload={(url) => {
-            setImageUrl(url)
-            setValue('imageUrl', url)
-          }}
-        />
+        <DishMediaUploads restaurantName={restaurantName} assets={assets} onImageUrl={(url) => setValue('imageUrl', url)} />
 
-        {/* AR Models Upload */}
-        <ARFileUpload
-          restaurantName={restaurantName || 'Restaurant'}
-          currentUsdzUrl={usdzUrl}
-          currentGlbUrl={glbUrl}
-          onUsdzUpload={setUsdzUrl}
-          onGlbUpload={setGlbUrl}
-          onPreview={handlePreview}
-        />
-
-        {/* Submit Button */}
-        <div className="flex items-center gap-4 pt-4 border-t border-border">
-          <Button
-            type="submit"
-            disabled={isSubmitting || !isDirty}
-            className="flex-1 disabled:opacity-50"
-            size="lg"
-          >
-            {isSubmitting ? (
-              <div className="flex items-center gap-2">
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                Creating Dish...
-              </div>
-            ) : (
-              <div className="flex items-center gap-2">
-                <Save className="h-4 w-4" />
-                Create Dish
-              </div>
-            )}
-          </Button>
-
-          {isDirty && (
-            <div className="flex items-center text-sm text-warning">
-              <AlertCircle className="h-4 w-4 mr-1" />
-              Unsaved changes
-            </div>
-          )}
-        </div>
+        <CreateDishSubmit isSubmitting={isSubmitting} isDirty={isDirty} />
       </form>
 
-      {/* AR Model Preview */}
-      {previewModel && (
-        <ARModelPreview
-          isOpen={!!previewModel}
-          onClose={() => setPreviewModel(null)}
-          modelUrl={previewModel.url}
-          modelType={previewModel.type}
-          dishName={nameEn || 'Dish Preview'}
-        />
-      )}
+      <DishModelPreview assets={assets} dishName={nameEn} />
     </div>
   );
 }

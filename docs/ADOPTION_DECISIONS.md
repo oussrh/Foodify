@@ -22,7 +22,7 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Situation**: the harness was baselined on `security/guard-actions-and-routes`, a tree without the branding, contact and PWA work already on `main`. On merge the ratchet reported `size.overBudget` 31 → 34 and `size.excessCode` 5302 → 5307: `components/menu/restaurant-page.tsx` (603 code lines, budget 250), `app/restaurant/[slug]/page.tsx` (134 / 100), `components/branding/branding-panel.tsx` (287 / 250), `components/contact/contact-panel.tsx` (253 / 250).
 - **Default taken**: `abatty baseline --reason --owner` on the merged tree; the two size floors now hold `main`'s true day-0 numbers. The other regressions were fixed, not re-baselined: `lib/env.ts` absorbs the five new `process.env` reads, `docs/README.md` lists every document.
 - **Alternative set aside**: splitting the four files in the merge commit. The restaurant page is the customer-facing menu, just rebuilt with the PWA flow and without tests; its split (header, sections, PWA banners, footer are the seams) is a reviewed change of its own.
-- **Re-read when**: the restaurant page is split. That drops `size.excessCode` by 353 and `size.overBudget` by 1; the three marginal files follow, and this entry is closed.
+- **Re-read when**: the restaurant page is split. That drops `size.excessCode` by 353 and `size.overBudget` by 1; the three marginal files follow, and this entry is closed. **Closed 2026-09-20 (phase 7, d773304)**: the page is 124 code lines over eight files, the branding and contact panels are under budget; `app/restaurant/[slug]/page.tsx` is one of the eight pages phase 8 finishes.
 
 
 ## 2026-09-20 · phase 0 · the CI audit step is blocking, and red on day one
@@ -153,4 +153,28 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Default taken**: the actions keep their `(rawId, raw)` arguments, each parsed (phase 4); the return is the payload rule's concern, held by `api.rowReturn`.
 - **Alternative set aside**: folding every action into a single-object input, which rewrites 36 signatures and their callers for no client that could tell the difference.
 - **Re-read when**: an action is exposed outside the forms that call it.
+
+## 2026-09-20 · phase 7 · the shape rules at error, off only for a generated list the ratchet counts
+
+- **Situation**: CODE-SHAPE wants `max-lines`, `max-lines-per-function`, `complexity` and `max-params` in the linter; 72 findings in 44 files at the standard's thresholds on the day the rules went in. The plan wants the exemption list generated from the debt, never hand-maintained.
+- **Default taken**: the three function rules at error over the whole tree; `scripts/ci/shape-exemptions.json` written by `scripts/codemods/shape-exemptions.mjs --write` from the findings, refused by `pnpm lint` when a listed file passes (`--check`) or is gone, counted by `fn.shapeExemptions`; `max-lines` runs at error at the 800-line cap (the per-kind budgets stay the ratchet's `size.*` metrics, which the check credits only from a top-level `size` key this baseline does not have; the cap in the linter is what makes CODE-SHAPE read all four rules). Tests and browser specs are carved out of the length rule: a describe body is one long arrow by design. The list is empty and the metric hard at zero.
+- **Alternative set aside**: the rules at warn under `--max-warnings=0`, which is the same thing with a worse name; a per-file `eslint-disable`, which the standard forbids.
+- **Re-read when**: a threshold changes.
+
+## 2026-09-20 · phase 7 · how "behaviour identical" was proven for a split component
+
+- **Situation**: 44 files split into 130 new ones by four workers in parallel; a class or a string dropped in a JSX extraction is invisible to the type checker and to the unit tests.
+- **Default taken**: each worker rendered the `git show HEAD:` copy and the replacement to static markup under the same props and several forced states (both locales, every mode, empty and full data) and compared byte for byte (69 scenarios for the uploads and viewers, 21 for the forms, 10 components for the menu and shell, every page for the pages), then diffed the multiset of classes, strings, attributes and tags; what a server render cannot reach (effects, handlers) was transcribed statement for statement and, where it carried logic, unit-tested (`lib/sign-in-checks`, `browser-upload`, `file-checks`, `model-viewer-attributes`, `ar-support`, `camera-controls`, `form-defaults`). The scratch harnesses were deleted; the proof is in the log and the commits.
+- **Alternative set aside**: trusting the type checker and the 16 browser tests, which see one journey.
+- **Re-read when**: a split touches a component with no server-rendered output to compare.
+
+## 2026-09-20 · phase 7 · small non-identities accepted, and where things moved
+
+- `cleanPhone`/`formatAddress` moved from the footer to `components/menu/contact-format.ts` (the footer columns needed them; a back-import would be a cycle); `ShellRole`/`ShellRestaurant` live in `components/shell/shell-types.ts` (no consumer outside the file existed; a type import that closes a value cycle still fails `no-circular`); `ContactFormValues` is defined in `components/contact/contact-form-values.ts` and re-exported from the panel for the settings form; `EditRestaurantValues` is re-exported from the form for its importers; the forms' default values (`restaurantFormValues`, `dishFormValues`) live in `components/forms/form-defaults.ts`, not `lib/`, because they name the forms' value types and `lib/` is a leaf.
+- A three-way ternary whose arms were one class string is that string; `"cursor-pointer "` lost its trailing space; `<strong>Size:</strong> {n}` renders two text nodes; a props object built by a loop orders its keys differently; state moved into an always-mounted child keeps its lifetime; `useCallback` wrappers with no memoised consumer were dropped. None changes classList, textContent or a value a test or a user reads.
+- The four uploads keep their own Cloudinary strings (`components/upload/browser-upload.ts`) rather than converging on `lib/brand-upload.ts`, whose messages differ: converging is a behaviour change for another day.
+- The AR viewer's one mount effect became four hooks (script, controls, fullscreen, support); each keeps its cleanup and listens to different events, so order is not observable. The `@ts-expect-error` on `navigator.xr` is a typed view behind the same `'xr' in navigator` test.
+- Left as found: a latent restart of `closeOf` on an unterminated `/*` (unreachable on parseable source); `key={index}` in the profile's activity list; `lib/opening-hours.ts` already at six exports; the settings form's `onSubmit` at complexity 12, the limit. Fixed on review: three same-arm ternaries carried across the split, two em-dashes in copy moved into new files, `localName` moved from a hook module to `lib/menu.ts`.
+- Twenty-five of the new files export two to four sibling components (a card and its parts). The repository's rule is five exports per file (`.claude/rules/size-limits.md`); the standard's one-component-per-file is read here as one *concern* per file, a card with the parts only it renders. Re-read when a sibling gains a second consumer: it moves to its own file then.
+- `components/forms/form-defaults.ts` (the row-to-form mappers) sits outside the `lib/**` coverage floor; it carries its own 126-line test. Deriving the forms' value types in `lib/schemas/` would let it move under the floor; a phase 9/10 tidy.
 

@@ -7,6 +7,7 @@ import { unguardedAdminPage } from './abatty-probes/auth.mjs'
 import { unparsedBoundary } from './abatty-probes/boundary.mjs'
 import { serverCacheUse } from './abatty-probes/cache.mjs'
 import { wholeEnv } from './abatty-probes/env.mjs'
+import { shapeExemptions } from './abatty-probes/shape.mjs'
 
 /** @type {import("abatty").Probe[]} */
-export const probes = [unparsedBoundary, wholeEnv, serverCacheUse, unguardedAdminPage, bareResponse, unboundedList, rowReturn, floatMoney]
+export const probes = [unparsedBoundary, wholeEnv, serverCacheUse, unguardedAdminPage, bareResponse, unboundedList, rowReturn, floatMoney, shapeExemptions]

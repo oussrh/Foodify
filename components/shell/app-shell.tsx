@@ -3,34 +3,13 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import { usePathname } from 'next/navigation'
-import { signOut } from 'next-auth/react'
-import {
-  Building2,
-  ChevronDown,
-  Home,
-  LogOut,
-  Shield,
-  User as UserIcon,
-  Users,
-  type LucideIcon,
-} from 'lucide-react'
+import { Building2, Home, Shield, User as UserIcon, Users, type LucideIcon } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-
-export type ShellRole = 'admin' | 'manager'
-
-export interface ShellRestaurant {
-  id: string
-  name: string
-}
+import UserMenu from './user-menu'
+import RestaurantSwitcher from './restaurant-switcher'
+import RestaurantTabs from './restaurant-tabs'
+import type { ShellRestaurant, ShellRole } from './shell-types'
 
 interface AppShellProps {
   role: ShellRole
@@ -60,19 +39,6 @@ const NAV: Record<ShellRole, NavItem[]> = {
   ],
 }
 
-/** Sub-navigation shown while working inside one restaurant. */
-function restaurantTabs(role: ShellRole, id: string) {
-  const base = `/${role}/restaurants/${id}`
-  const tabs: { href: Route; label: string }[] = [
-    { href: `${base}/info` as Route, label: 'Info' },
-    { href: `${base}/menu` as Route, label: 'Menu' },
-    { href: `${base}/dishes` as Route, label: 'Dishes' },
-    { href: `${base}/edit` as Route, label: 'Settings' },
-  ]
-  if (role === 'admin') tabs.push({ href: `${base}/users` as Route, label: 'People' })
-  return tabs
-}
-
 export default function AppShell({ role, user, restaurants, children }: AppShellProps) {
   const pathname = usePathname()
   const nav = NAV[role]
@@ -84,67 +50,6 @@ export default function AppShell({ role, user, restaurants, children }: AppShell
   const section = match?.[2] ?? 'info'
 
   const isActive = (item: NavItem) => (item.exact ? pathname === item.href : pathname.startsWith(item.href))
-  const initials = user.email.slice(0, 2).toUpperCase()
-  const loginPath = role === 'admin' ? '/admin/login' : '/manager/login'
-
-  const userMenu = (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-          aria-label="Account menu"
-        >
-          {initials}
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-60">
-        <DropdownMenuLabel className="font-normal">
-          <span className="block truncate text-sm font-medium">{user.email}</span>
-          <span className="block text-xs text-muted-foreground">{role === 'admin' ? 'Super admin' : 'Restaurant manager'}</span>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {role === 'manager' && (
-          <DropdownMenuItem asChild>
-            <Link href="/manager/profile">Account settings</Link>
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuItem onClick={() => signOut({ redirect: true, callbackUrl: loginPath })}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Sign out
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-
-  const switcher = currentRestaurant && (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <button
-          type="button"
-          className="inline-flex h-9 max-w-[60vw] items-center gap-1.5 rounded-md border border-input bg-card px-3 text-sm font-medium hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring md:max-w-xs"
-        >
-          <span className="truncate">{currentRestaurant.name}</span>
-          <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64">
-        <DropdownMenuLabel>Switch restaurant</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {restaurants.map((r) => (
-          <DropdownMenuItem key={r.id} asChild>
-            <Link href={`/${role}/restaurants/${r.id}/${section}` as Route} className={cn(r.id === restaurantId && 'font-semibold')}>
-              {r.name}
-            </Link>
-          </DropdownMenuItem>
-        ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href={`/${role}/restaurants` as Route}>All restaurants</Link>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -171,7 +76,7 @@ export default function AppShell({ role, user, restaurants, children }: AppShell
           ))}
         </nav>
         <div className="mt-auto flex items-center gap-2 border-t border-border pt-3">
-          {userMenu}
+          <UserMenu role={role} user={user} />
           <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{user.email}</span>
           <ThemeToggle size="icon-sm" />
         </div>
@@ -185,33 +90,16 @@ export default function AppShell({ role, user, restaurants, children }: AppShell
               <span className="h-2.5 w-2.5 rounded-full bg-primary" aria-hidden="true" />
               <span className="sr-only sm:not-sr-only">Foodify</span>
             </Link>
-            {switcher}
+            {currentRestaurant && <RestaurantSwitcher role={role} restaurants={restaurants} current={currentRestaurant} section={section} />}
             <div className="flex-1" />
             <div className="md:hidden">
               <ThemeToggle size="icon-sm" />
             </div>
-            <div className="md:hidden">{userMenu}</div>
-          </div>
-          {currentRestaurant && (
-            <div className="scrollbar-none flex gap-1 overflow-x-auto px-4 pb-2 md:px-6">
-              {restaurantTabs(role, currentRestaurant.id).map((tab) => {
-                const active = pathname.startsWith(tab.href)
-                return (
-                  <Link
-                    key={tab.href}
-                    href={tab.href}
-                    aria-current={active ? 'page' : undefined}
-                    className={cn(
-                      'h-8 shrink-0 whitespace-nowrap rounded-full px-3 text-[13px] font-medium leading-8 transition-colors',
-                      active ? 'bg-foreground text-background' : 'text-muted-foreground hover:bg-accent hover:text-foreground',
-                    )}
-                  >
-                    {tab.label}
-                  </Link>
-                )
-              })}
+            <div className="md:hidden">
+              <UserMenu role={role} user={user} />
             </div>
-          )}
+          </div>
+          {currentRestaurant && <RestaurantTabs role={role} restaurantId={currentRestaurant.id} pathname={pathname} />}
         </header>
 
         <main className="min-w-0 flex-1 px-4 py-5 pb-24 md:px-6 md:py-6 md:pb-10">

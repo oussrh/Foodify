@@ -50,6 +50,53 @@ function toHandle(value: string): string | null {
   return trimmed.replace(/^@/, '') || null
 }
 
+type Entry = { platform: Platform; value: string }
+
+/**
+ * The entries of the JSON object format, in key order, or null when the text is not a JSON
+ * object (not JSON, or an array, a string, a number, null).
+ */
+function jsonEntries(raw: string): Entry[] | null {
+  try {
+    const parsed = JSON.parse(raw)
+    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null
+    const entries: Entry[] = []
+    for (const [key, value] of Object.entries(parsed)) {
+      const platform = PLATFORM_ALIASES[key.toLowerCase()]
+      if (platform && typeof value === 'string') entries.push({ platform, value })
+    }
+    return entries
+  } catch {
+    // Not JSON — the free-text format
+    return null
+  }
+}
+
+/**
+ * One free-text line as an entry: "platform: value" / "platform - value" / "platform value",
+ * else a bare URL whose hostname names the platform. Null for a blank, unknown or malformed line.
+ */
+function lineEntry(line: string): Entry | null {
+  const entry = line.trim()
+  if (!entry) return null
+
+  const labelled = entry.match(/^([a-z]+)\s*[:\-=]?\s+(.+)$/i)
+  if (labelled) {
+    const platform = PLATFORM_ALIASES[labelled[1].toLowerCase()]
+    if (platform) return { platform, value: labelled[2] }
+  }
+
+  const urlMatch = entry.match(/https?:\/\/[^\s]+/i)
+  if (!urlMatch) return null
+  try {
+    const platform = detectPlatformFromHost(new URL(urlMatch[0]).host)
+    return platform ? { platform, value: urlMatch[0] } : null
+  } catch {
+    // ignore malformed URL
+    return null
+  }
+}
+
 /**
  * Parses the `Restaurant.socialMedia` column into per-platform handles.
  *
@@ -58,58 +105,28 @@ function toHandle(value: string): string | null {
  *  - free text, one entry per line, each being a profile URL
  *    (`https://www.instagram.com/foo`) or `platform: value` (`instagram: @foo`)
  *
- * Never throws — anything unrecognized is ignored.
+ * The first value seen for a platform wins. Never throws — anything unrecognized is ignored.
  */
 export function parseSocialMedia(raw: string | null | undefined): SocialHandles {
   if (!raw || !raw.trim()) return { ...EMPTY }
 
   const result: SocialHandles = { ...EMPTY }
 
-  const assign = (platform: Platform, value: string) => {
+  const assign = ({ platform, value }: Entry) => {
     if (result[platform]) return
     const handle = toHandle(value)
     if (handle) result[platform] = handle
   }
 
-  // 1. JSON object format
-  try {
-    const parsed = JSON.parse(raw)
-    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-      for (const [key, value] of Object.entries(parsed)) {
-        const platform = PLATFORM_ALIASES[key.toLowerCase()]
-        if (platform && typeof value === 'string') assign(platform, value)
-      }
-      return result
-    }
-  } catch {
-    // Not JSON — fall through to free-text parsing
+  const json = jsonEntries(raw)
+  if (json) {
+    json.forEach(assign)
+    return result
   }
 
-  // 2. Free-text format: one entry per line
   for (const line of raw.split(/\r?\n/)) {
-    const entry = line.trim()
-    if (!entry) continue
-
-    // "platform: value" / "platform - value" / "platform value"
-    const labelled = entry.match(/^([a-z]+)\s*[:\-=]?\s+(.+)$/i)
-    if (labelled) {
-      const platform = PLATFORM_ALIASES[labelled[1].toLowerCase()]
-      if (platform) {
-        assign(platform, labelled[2])
-        continue
-      }
-    }
-
-    // Bare URL — detect platform from the hostname
-    const urlMatch = entry.match(/https?:\/\/[^\s]+/i)
-    if (urlMatch) {
-      try {
-        const platform = detectPlatformFromHost(new URL(urlMatch[0]).host)
-        if (platform) assign(platform, urlMatch[0])
-      } catch {
-        // ignore malformed URL
-      }
-    }
+    const entry = lineEntry(line)
+    if (entry) assign(entry)
   }
 
   return result

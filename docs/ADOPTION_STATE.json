@@ -219,7 +219,32 @@
     },
     {
       "id": 7,
-      "status": "pending"
+      "status": "done",
+      "updatedAt": "2026-09-20T21:28:05Z",
+      "numbersBefore": {
+        "rules": {
+          "CODE-SHAPE": "missing (none of max-lines, max-lines-per-function, complexity, max-params in the linter)"
+        },
+        "shapeFindings": "72 at the standard thresholds (max-lines-per-function 35, complexity 37, max-params 0) in 44 files, measured 2026-09-20 with the rules forced on over the whole tree (tests and e2e specs carved out of the length rule)",
+        "score": "66/100",
+        "enforcedShare": "75% (39/52)"
+      },
+      "numbersAfter": {
+        "rules": {
+          "CODE-SHAPE": "present (max-lines 800, max-lines-per-function 60/150, complexity 12, max-params 4 at error)"
+        },
+        "shapeFindings": "0 (72 -> 0 in 44 files; 130 new files, none over its budget)",
+        "fn.shapeExemptions": "0, hard (44 -> 0)",
+        "size.overBudget": "8 (34 -> 8: the eight pages phase 8 finishes)",
+        "size.excessCode": "228 (5060 -> 228)",
+        "size.overRaw": "0 (1 -> 0)",
+        "types.escapes": "0, hard (1 -> 0)",
+        "score": "70/100",
+        "enforcedShare": "76% (42/55)",
+        "readability": "99/100 (navigability 95)",
+        "switches": "pnpm lint red on a planted five-parameter function, on a 70-line function in a .ts, on a 160-line one in a .tsx, and on a passing file added to the exemption list; green after each restore; fn.shapeExemptions HARD FAIL 1 / 0 on a hand-added entry",
+        "tests": "267 unit (39 files), 20 browser"
+      }
     },
     {
       "id": 8,

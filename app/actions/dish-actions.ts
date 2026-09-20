@@ -16,24 +16,24 @@ import {
   type IngredientPatch,
 } from '@/lib/schemas/dish'
 
+/**
+ * The AR asset URL as it is stored: a Cloudinary URL or a local path (`/...`) as-is, anything
+ * else uploaded to the restaurant's Cloudinary folder, nothing as ''.
+ */
+async function storedArUrl(url: string | undefined, restaurantId: string): Promise<string> {
+  if (!url) return ''
+  if (url.includes('cloudinary.com') || url.startsWith('/')) return url
+  return uploadArAsset(url, restaurantId)
+}
+
 export async function createDish(rawRestaurantId: string, raw: DishInput) {
   await requireRestaurantAccess({ id: rawRestaurantId })
   const restaurantId = uuid.parse(rawRestaurantId)
   const data = dishInput.parse(raw)
   const count = await prisma.dish.count({ where: { restaurantId } })
 
-  // Only process AR URLs if they exist and are not already Cloudinary URLs or local paths
-  const usdzUrl = data.usdzUrl && (data.usdzUrl.includes('cloudinary.com') || data.usdzUrl.startsWith('/'))
-    ? data.usdzUrl
-    : data.usdzUrl
-      ? await uploadArAsset(data.usdzUrl, restaurantId)
-      : ''
-
-  const glbUrl = data.glbUrl && (data.glbUrl.includes('cloudinary.com') || data.glbUrl.startsWith('/'))
-    ? data.glbUrl
-    : data.glbUrl
-      ? await uploadArAsset(data.glbUrl, restaurantId)
-      : ''
+  const usdzUrl = await storedArUrl(data.usdzUrl, restaurantId)
+  const glbUrl = await storedArUrl(data.glbUrl, restaurantId)
 
   console.log('createDish - Final data being saved to database:', {
     restaurantId,
@@ -69,24 +69,9 @@ export async function updateDish(rawId: string, raw: DishPatch) {
   const data = dishPatch.parse(raw)
   const updatedData = { ...data }
 
-  // Only process AR URLs if they are not already Cloudinary URLs or local paths
-  if (data.usdzUrl) {
-    // If it's already a Cloudinary URL or local path starting with /, use it as-is
-    if (data.usdzUrl.includes('cloudinary.com') || data.usdzUrl.startsWith('/')) {
-      updatedData.usdzUrl = data.usdzUrl
-    } else {
-      updatedData.usdzUrl = await uploadArAsset(data.usdzUrl, restaurantId)
-    }
-  }
-
-  if (data.glbUrl) {
-    // If it's already a Cloudinary URL or local path starting with /, use it as-is
-    if (data.glbUrl.includes('cloudinary.com') || data.glbUrl.startsWith('/')) {
-      updatedData.glbUrl = data.glbUrl
-    } else {
-      updatedData.glbUrl = await uploadArAsset(data.glbUrl, restaurantId)
-    }
-  }
+  // An AR URL is only touched when the patch carries one.
+  if (data.usdzUrl) updatedData.usdzUrl = await storedArUrl(data.usdzUrl, restaurantId)
+  if (data.glbUrl) updatedData.glbUrl = await storedArUrl(data.glbUrl, restaurantId)
 
   console.log('updateDish - Final data being saved to database:', {
     id,

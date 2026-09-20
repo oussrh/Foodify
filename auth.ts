@@ -7,8 +7,7 @@ import Credentials from 'next-auth/providers/credentials'
 import prisma from './lib/prisma'
 import { serverEnv } from './lib/env'
 import { credentials as credentialsSchema } from './lib/schemas/user'
-import bcrypt from 'bcryptjs'
-import { safeEqual, verifyTOTP } from './lib/totp'
+import { assertPortalRole, completeSecondFactor, userWithPassword } from './lib/sign-in-checks'
 
 declare module 'next-auth' {
   interface User {
@@ -45,59 +44,16 @@ export const {
         const parsed = credentialsSchema.safeParse(raw)
         if (!parsed.success) return null
         const { email, password, code, role } = parsed.data
-        
+
         try {
-          const user = await prisma.user.findUnique({ where: { email } })
-          if (!user) {
-            console.log('User not found:', email)
-            return null
-          }
-
-          const valid = await bcrypt.compare(password, user.passwordHash)
-          if (!valid) {
-            console.log('Invalid password for user:', email)
-            return null
-          }
-
+          const user = await userWithPassword(email, password)
+          if (!user) return null
           // The portal the sign-in page serves; a super admin may use either.
-          if (role) {
-            if (user.role !== role && user.role !== 'SUPER_ADMIN') {
-              console.log('Role mismatch for user:', email, 'expected:', role, 'actual:', user.role)
-              throw new Error('Unauthorized role')
-            }
-          }
+          assertPortalRole(user, role)
+          await completeSecondFactor(user, code)
 
-          if (user.emailOtpCode) {
-            const expired = user.emailOtpExpires && user.emailOtpExpires < new Date()
-            if (!code || !safeEqual(code, user.emailOtpCode) || expired) {
-              throw new Error('Invalid two-factor code')
-            }
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { 
-                emailOtpCode: null, 
-                emailOtpExpires: null, 
-                lastLogin: new Date() 
-              },
-            })
-          } else if (user.totpSecret) {
-            if (!code || !verifyTOTP(code, user.totpSecret)) {
-              throw new Error('Invalid two-factor code')
-            }
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { lastLogin: new Date() },
-            })
-          } else {
-            // Update last login even without 2FA
-            await prisma.user.update({
-              where: { id: user.id },
-              data: { lastLogin: new Date() },
-            })
-          }
-
-          return { 
-            id: user.id, 
+          return {
+            id: user.id,
             email: user.email,
             role: user.role
           }

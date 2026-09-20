@@ -1,13 +1,13 @@
 'use client'
 
 import { useId, useRef, useState } from 'react'
-import Image from 'next/image'
-import { ImagePlus, Loader2, Trash2, Upload } from 'lucide-react'
+import { Trash2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
 import { uploadRestaurantCover, uploadRestaurantLogo } from '@/app/actions/restaurant-actions'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { BRAND_IMAGE_LIMITS, uploadBrandImage, validateBrandImage, type BrandImageKind } from '@/lib/brand-upload'
+import TileThumbnail from './tile-thumbnail'
 
 interface ImageTileProps {
   kind: BrandImageKind
@@ -83,23 +83,7 @@ export default function ImageTile({ kind, label, value, restaurantSlug, onChange
           isLogo ? 'items-center' : 'flex-col sm:flex-row sm:items-center',
         )}
       >
-        <div
-          className={cn(
-            'relative shrink-0 overflow-hidden rounded-md border border-border bg-muted',
-            isLogo ? 'h-16 w-16' : 'aspect-16/7 w-full sm:w-56',
-          )}
-        >
-          {value ? (
-            <Image src={value} alt="" fill unoptimized sizes={isLogo ? '64px' : '224px'} className={isLogo ? 'object-contain p-1' : 'object-cover'} />
-          ) : (
-            <ImagePlus className="absolute inset-0 m-auto h-5 w-5 text-muted-foreground" />
-          )}
-          {busy && (
-            <span className="absolute inset-0 flex items-center justify-center bg-background/70">
-              <Loader2 className="h-5 w-5 animate-spin" />
-            </span>
-          )}
-        </div>
+        <TileThumbnail value={value} isLogo={isLogo} busy={busy} />
 
         <div className="flex min-w-0 flex-1 flex-col gap-2">
           <p className="text-xs text-muted-foreground">{limits.hint}. Saved as soon as it uploads.</p>

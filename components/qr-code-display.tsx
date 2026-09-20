@@ -1,7 +1,7 @@
 // PathFile: components/qr-code-display.tsx
 "use client"
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -11,28 +11,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
-import { 
-  QrCode, 
-  Download,
-  Share2,
-  Copy,
-  CheckCircle,
-  Smartphone,
-  Camera,
-  ExternalLink,
-  Eye,
-  Zap,
-  Users,
-  Globe,
-  Printer,
-  Mail,
-  MessageSquare,
-  Star,
-  Sparkles,
-  CheckCircle2,
-  Info
-} from 'lucide-react'
+import { QrCode, Camera, ExternalLink, Sparkles } from 'lucide-react'
 import Image from 'next/image'
+import { QR_SIZES, qrCodeUrl } from '@/components/qr/qr-urls'
+import { useQrActions } from '@/components/qr/use-qr-actions'
+import { MenuUrlPanel, QrActions, QrSizePreview, type PreviewMode } from '@/components/qr/qr-preview'
+import { FeaturesGrid, InstructionsGrid, TechnicalInfo } from '@/components/qr/qr-guides'
 
 interface QRCodeDisplayProps {
   url: string
@@ -41,89 +25,11 @@ interface QRCodeDisplayProps {
 
 export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProps) {
   const [isOpen, setIsOpen] = useState(false)
-  const [copied, setCopied] = useState(false)
-  const [isDownloading, setIsDownloading] = useState(false)
-  const [previewMode, setPreviewMode] = useState<'small' | 'large'>('small')
-  
+  const [previewMode, setPreviewMode] = useState<PreviewMode>('small')
+  const { copied, isDownloading, copyToClipboard, downloadQRCode, shareMenu, openMenuPreview } = useQrActions(url, restaurantName)
+
   // Generate QR code URL using a QR code service with enhanced styling
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}&color=1b1a17&bgcolor=ffffff&qzone=2&format=png`
-  const qrCodeLargeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(url)}&color=1b1a17&bgcolor=ffffff&qzone=2&format=png`
-  const qrCodeDownloadUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(url)}&color=1b1a17&bgcolor=ffffff&qzone=2&format=png`
-
-  const copyToClipboard = useCallback(async () => {
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 3000)
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err)
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea')
-      textArea.value = url
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textArea)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 3000)
-    }
-  }, [url])
-
-  const downloadQRCode = useCallback(async () => {
-    setIsDownloading(true)
-    try {
-      const response = await fetch(qrCodeDownloadUrl)
-      const blob = await response.blob()
-      const downloadUrl = window.URL.createObjectURL(blob)
-      
-      const link = document.createElement('a')
-      link.href = downloadUrl
-      link.download = `${restaurantName.replace(/\s+/g, '_')}_QR_Menu_HD.png`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      
-      // Clean up the blob URL
-      window.URL.revokeObjectURL(downloadUrl)
-    } catch (err) {
-      console.error('Download failed:', err)
-      // Fallback to direct link
-      const link = document.createElement('a')
-      link.href = qrCodeDownloadUrl
-      link.download = `${restaurantName.replace(/\s+/g, '_')}_QR_Menu_HD.png`
-      link.target = '_blank'
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-    } finally {
-      setIsDownloading(false)
-    }
-  }, [qrCodeDownloadUrl, restaurantName])
-
-  const shareMenu = useCallback(async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${restaurantName} - Digital Menu`,
-          text: `Check out the digital menu for ${restaurantName} with AR experience!`,
-          url: url,
-        })
-      } catch (err) {
-        if (err instanceof Error && err.name !== 'AbortError') {
-          console.error('Error sharing:', err)
-          // Fallback to copying URL
-          copyToClipboard()
-        }
-      }
-    } else {
-      // Fallback to copying URL
-      copyToClipboard()
-    }
-  }, [url, restaurantName, copyToClipboard])
-
-  const openMenuPreview = () => {
-    window.open(url, '_blank', 'width=400,height=700,scrollbars=yes,resizable=yes')
-  }
+  const qrCodeCardUrl = qrCodeUrl(url, QR_SIZES.card)
 
   return (
     <>
@@ -133,7 +39,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
           <div className="bg-card p-4 rounded-lg inline-block ring-4 ring-white/20 transition-colors group-hover:shadow-3xl">
             <div className="relative">
               <Image
-                src={qrCodeUrl}
+                src={qrCodeCardUrl}
                 alt={`QR Code for ${restaurantName} digital menu`}
                 width={128}
                 height={128}
@@ -148,7 +54,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
             <Sparkles className="h-3 w-3 text-white" />
           </div>
         </div>
-        
+
         <div className="space-y-2">
           <p className="text-foreground text-sm font-medium">Scan for Digital Menu</p>
           <Badge className="bg-primary/10 text-primary border-primary/20 text-xs">
@@ -161,8 +67,8 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
       {/* Enhanced QR Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogTrigger asChild>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             size="sm"
             className="mt-3 bg-background/50 border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
@@ -171,7 +77,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
             <ExternalLink className="h-3 w-3 ml-1" />
           </Button>
         </DialogTrigger>
-        
+
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="text-center space-y-3">
             <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
@@ -182,258 +88,14 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
             </DialogTitle>
             <p className="text-muted-foreground">{restaurantName}</p>
           </DialogHeader>
-          
+
           <div className="space-y-8 mt-6">
-            {/* QR Code Display with Toggle */}
-            <div className="text-center space-y-4">
-              <div className="flex justify-center gap-2 mb-4">
-                <Button
-                  variant={previewMode === 'small' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setPreviewMode('small')}
-                  className={previewMode === 'small' ? 'bg-primary' : ''}
-                >
-                  Small
-                </Button>
-                <Button
-                  variant={previewMode === 'large' ? 'default' : 'outline'}
-                  size="sm"
-                  onClick={() => setPreviewMode('large')}
-                  className={previewMode === 'large' ? 'bg-primary' : ''}
-                >
-                  Large
-                </Button>
-              </div>
-              
-              <div className="relative inline-block">
-                <div className="bg-card p-6 rounded-lg border-4 border-border">
-                  <Image
-                    src={previewMode === 'large' ? qrCodeLargeUrl : qrCodeUrl}
-                    alt={`QR Code for ${restaurantName} digital menu`}
-                    width={previewMode === 'large' ? 400 : 300}
-                    height={previewMode === 'large' ? 400 : 300}
-                    className={`${previewMode === 'large' ? 'w-80 h-80' : 'w-60 h-60'} transition-colors`}
-                  />
-                </div>
-                {/* Corner decoration */}
-                <div className="absolute -top-3 -right-3 rounded-full p-2">
-                  <CheckCircle2 className="h-4 w-4 text-white" />
-                </div>
-              </div>
-            </div>
-            
-            {/* Features Grid */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 border border-border rounded-md">
-                <h4 className="font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                  <Users className="h-4 w-4" />
-                  Customer Experience
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
-                    <Smartphone className="h-4 w-4" />
-                    <span>Mobile-optimized digital menu</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
-                    <Camera className="h-4 w-4" />
-                    <span>Interactive AR dish visualization</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
-                    <Zap className="h-4 w-4" />
-                    <span>Real-time menu updates</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 border border-border rounded-md">
-                <h4 className="font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                  <Star className="h-4 w-4" />
-                  Business Benefits
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
-                    <Globe className="h-4 w-4" />
-                    <span>Contactless menu access</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
-                    <CheckCircle className="h-4 w-4" />
-                    <span>Instant menu updates</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
-                    <Eye className="h-4 w-4" />
-                    <span>Enhanced customer engagement</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            {/* URL Display */}
-            <div className="p-4 border border-border rounded-md">
-              <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-semibold text-foreground flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  Menu URL
-                </p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={openMenuPreview}
-                  className="text-muted-foreground hover:text-muted-foreground hover:bg-muted"
-                >
-                  <Eye className="h-4 w-4 mr-1" />
-                  Preview
-                </Button>
-              </div>
-              <div className="flex items-center gap-2">
-                <code className="flex-1 p-3 bg-background border-2 border-border rounded-lg text-sm text-foreground break-all font-mono">
-                  {url}
-                </code>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={copyToClipboard}
-                  className={`transition-colors ${
- copied 
- ? "border-border text-success bg-muted" 
- : "border-border hover:border-border hover:bg-muted"
- }`}
-                >
-                  {copied ? (
-                    <CheckCircle className="h-4 w-4" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
-              </div>
-              {copied && (
-                <div className="flex items-center gap-2 mt-2 p-2 bg-muted border border-border rounded-lg">
-                  <CheckCircle className="h-4 w-4 text-success" />
-                  <p className="text-sm text-success font-medium">URL copied to clipboard!</p>
-                </div>
-              )}
-            </div>
-            
-            {/* Enhanced Action Buttons */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <Button
-                onClick={downloadQRCode}
-                disabled={isDownloading}
-                className="text-white transition-colors"
-              >
-                {isDownloading ? (
-                  <>
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    Downloading...
-                  </>
-                ) : (
-                  <>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download HD QR
-                  </>
-                )}
-              </Button>
-              
-              <Button
-                onClick={shareMenu}
-                variant="outline"
-                className="border-border text-success hover:bg-muted hover:border-border transition-colors"
-              >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share Menu
-              </Button>
-              
-              <Button
-                onClick={openMenuPreview}
-                variant="outline"
-                className="border-border text-muted-foreground hover:bg-muted hover:border-border transition-colors"
-              >
-                <Eye className="h-4 w-4 mr-2" />
-                Preview Menu
-              </Button>
-            </div>
-            
-            {/* Enhanced Instructions */}
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 border border-border rounded-md">
-                <h4 className="font-semibold text-muted-foreground mb-3 flex items-center gap-2">
-                  <Printer className="h-4 w-4" />
-                  Setup Instructions
-                </h4>
-                <ol className="text-sm text-muted-foreground dark:text-muted-foreground space-y-2">
-                  <li className="flex items-start gap-2">
-                    <span className="shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">1</span>
-                    <span>Download the HD QR code</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">2</span>
-                    <span>Print and place on tables or entrance</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">3</span>
-                    <span>Customers scan to access digital menu</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">4</span>
-                    <span>They can explore dishes in AR</span>
-                  </li>
-                </ol>
-              </div>
-
-              <div className="p-4 border border-border rounded-md">
-                <h4 className="font-semibold text-success mb-3 flex items-center gap-2">
-                  <Info className="h-4 w-4" />
-                  Marketing Tips
-                </h4>
-                <ul className="text-sm text-success dark:text-muted-foreground space-y-2">
-                  <li className="flex items-start gap-2">
-                    <MessageSquare className="h-4 w-4 mt-0.5 shrink-0" />
-                    <span>Add &ldquo;Scan for AR Menu&rdquo; signage</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Mail className="h-4 w-4 mt-0.5 shrink-0" />
-                    <span>Include QR in social media posts</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Star className="h-4 w-4 mt-0.5 shrink-0" />
-                    <span>Highlight AR features to customers</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Sparkles className="h-4 w-4 mt-0.5 shrink-0" />
-                    <span>Train staff on digital menu benefits</span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-
-            {/* Technical Info */}
-            <div className="p-4 bg-muted border border-border rounded-md">
-              <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
-                <Info className="h-4 w-4" />
-                Technical Information
-              </h4>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-muted-foreground">
-                <div>
-                  <span className="font-medium">Format:</span>
-                  <br />
-                  <span>PNG High Quality</span>
-                </div>
-                <div>
-                  <span className="font-medium">Size:</span>
-                  <br />
-                  <span>1200×1200 pixels</span>
-                </div>
-                <div>
-                  <span className="font-medium">Error Correction:</span>
-                  <br />
-                  <span>Medium Level</span>
-                </div>
-                <div>
-                  <span className="font-medium">Compatibility:</span>
-                  <br />
-                  <span>All QR scanners</span>
-                </div>
-              </div>
-            </div>
+            <QrSizePreview url={url} restaurantName={restaurantName} previewMode={previewMode} onChange={setPreviewMode} />
+            <FeaturesGrid />
+            <MenuUrlPanel url={url} copied={copied} onCopy={copyToClipboard} onPreview={openMenuPreview} />
+            <QrActions isDownloading={isDownloading} onDownload={downloadQRCode} onShare={shareMenu} onPreview={openMenuPreview} />
+            <InstructionsGrid />
+            <TechnicalInfo />
           </div>
         </DialogContent>
       </Dialog>
