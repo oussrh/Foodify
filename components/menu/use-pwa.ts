@@ -44,7 +44,7 @@ interface WorkerHandlers {
 }
 
 /** Registers the worker and wires its lifecycle to the hook's handlers; returns the cleanup. */
-function registerServiceWorker(handlers: WorkerHandlers) {
+export function registerServiceWorker(handlers: WorkerHandlers) {
   let disposed = false
   const onMessage = (e: MessageEvent) => {
     if (e.data?.type === 'PRECACHED') handlers.onPrecached()
@@ -52,11 +52,16 @@ function registerServiceWorker(handlers: WorkerHandlers) {
   navigator.serviceWorker.addEventListener('message', onMessage)
 
   // A new worker took control after we asked it to skip waiting: the page is now stale. On a
-  // first visit the freshly installed worker claims the page too, and that is not an update.
-  const hadController = Boolean(navigator.serviceWorker.controller)
+  // first visit the freshly installed worker claims the page too, and that first claim is not an
+  // update; the next change (the one Refresh asks for) is.
+  let hadController = Boolean(navigator.serviceWorker.controller)
   let refreshing = false
   const onControllerChange = () => {
-    if (!hadController || refreshing) return
+    if (!hadController) {
+      hadController = true
+      return
+    }
+    if (refreshing) return
     refreshing = true
     handlers.onControllerChange()
   }

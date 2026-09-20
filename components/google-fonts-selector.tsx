@@ -130,7 +130,7 @@ export default function GoogleFontsSelector({
         <Card className="p-4 border-border">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
-              <p className="flex items-center gap-2 text-sm font-medium">
+              <p className="flex items-center gap-2 text-sm font-medium leading-none">
                 <Eye className="h-4 w-4" />
                 Font Preview
               </p>

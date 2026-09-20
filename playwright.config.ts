@@ -28,7 +28,7 @@ export default defineConfig({
   webServer: {
     command: `pnpm start --port ${port}`,
     url: `http://localhost:${port}/offline`,
-    reuseExistingServer: !ci,
+    reuseExistingServer: false,
     timeout: 60_000,
     env: { AUTH_TRUST_HOST: 'true', NEXTAUTH_URL: `http://localhost:${port}`, PORT: String(port) },
   },

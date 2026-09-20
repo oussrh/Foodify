@@ -324,7 +324,7 @@ export default function CreateDishForm({
             
             {/* Special Options */}
             <div className="space-y-3">
-              <p className="text-sm font-medium text-muted-foreground">Special Options</p>
+              <p className="text-sm font-medium leading-none text-muted-foreground">Special Options</p>
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input

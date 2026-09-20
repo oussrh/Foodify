@@ -143,7 +143,7 @@ export default function CreateClientForm({
             
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <p className="text-sm font-medium leading-none text-muted-foreground flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
                   Restaurant Assignments
                 </p>

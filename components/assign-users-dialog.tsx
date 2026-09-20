@@ -89,7 +89,7 @@ export default function AssignUsersDialog({
                 checked={selected.includes(u.id)}
                 onCheckedChange={() => toggle(u.id)}
               />
-              <span className="text-sm">{u.email}</span>
+              <span className="text-sm font-medium leading-none">{u.email}</span>
             </label>
           ))}
         </div>

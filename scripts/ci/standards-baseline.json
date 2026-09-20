@@ -23,7 +23,7 @@
     "docs.danglingSource": 0,
     "docs.frontMatter": 0,
     "docs.indexDrift": 0,
-    "size.excessCode": 5160,
+    "size.excessCode": 5163,
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 1,
@@ -33,15 +33,15 @@
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 32,
+    "docs.citations": 36,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 162,
-    "size.overBudget": 162,
-    "size.overRaw": 169,
-    "types.escapes": 162,
-    "valid.rawEnv": 161
+    "size.excessCode": 163,
+    "size.overBudget": 163,
+    "size.overRaw": 172,
+    "types.escapes": 163,
+    "valid.rawEnv": 162
   },
   "debt": {
     "size.excessCode": {
@@ -62,7 +62,7 @@
       "components/ar-file-upload.tsx": 289,
       "components/ar-model-preview.tsx": 113,
       "components/ar-viewer-client.tsx": 557,
-      "components/branding/branding-panel.tsx": 37,
+      "components/branding/branding-panel.tsx": 38,
       "components/contact/contact-panel.tsx": 2,
       "components/create-client-form.tsx": 87,
       "components/create-dish-form.tsx": 121,
@@ -73,7 +73,7 @@
       "components/image-upload.tsx": 289,
       "components/ingredient-manager.tsx": 50,
       "components/manager-category-manager.tsx": 328,
-      "components/menu/restaurant-page.tsx": 332,
+      "components/menu/restaurant-page.tsx": 334,
       "components/qr-code-display.tsx": 160,
       "components/reset-admin-password-button.tsx": 108,
       "components/restaurant-cover-upload.tsx": 131,
@@ -156,9 +156,9 @@
   "entries": {
     "size.excessCode": {
       "at": "2026-09-20",
-      "was": 5158,
-      "now": 5160,
-      "reason": "a label must name its control: the two category managers each gain the useId() line that gives their inputs ids; the two files are near-duplicates that phase 8 merges",
+      "was": 5160,
+      "now": 5163,
+      "reason": "the hydration marker the browser suite waits on (two lines in the menu page) and lib/color split out of lib/brand-color (one import line in the branding panel)",
       "owner": "Oussama Rhoni"
     },
     "size.overBudget": {

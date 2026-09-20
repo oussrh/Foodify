@@ -4,10 +4,10 @@ import { expectNoSeriousA11yViolations } from './axe'
 // The seeded restaurant (prisma/seed.ts). The journey a guest takes from a QR code.
 const MENU = '/restaurant/foodify-test-kitchen'
 
-/** The rows are real links until React attaches its handlers; wait for hydration before clicking. */
+/** The rows are real links until React attaches its handlers; the page marks itself once hydrated. */
 async function openMenu(page: Page, url = MENU) {
   await page.goto(url)
-  await page.waitForLoadState('networkidle')
+  await page.locator('[data-hydrated]').waitFor()
 }
 
 test.describe('public menu', () => {

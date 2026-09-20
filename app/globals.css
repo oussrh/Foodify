@@ -142,7 +142,7 @@
     --destructive: 8 59% 44.5%;        /* #B4412F */
     --destructive-foreground: 0 0% 100%;
     --success: 153 55% 27%;
-    --warning: 42 100% 30%;            /* #9A6B00 */
+    --warning: 42 100% 28%;            /* #8F6400: 4.6:1 on muted, was 4.11 at 30% */
     --border: 47 15% 88.4%;            /* Line    #E6E4DD */
     --border-strong: 49 11% 80.6%;     /* #D3D1C8 */
     --input: 49 11% 80.6%;

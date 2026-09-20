@@ -57,9 +57,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - name: the browser suite's data (the schema and the seeded restaurant)
+      - name: the browser suite's data (the migrations, then the seeded restaurant)
         run: |
-          pnpm exec prisma db push
+          pnpm exec prisma migrate deploy
           pnpm exec prisma db seed
       - name: the range this run judges
         # On a push to main, origin/main already equals HEAD, so the gate's own fork-point logic

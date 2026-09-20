@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { contrast, hslToRgb, type RGB } from '@/lib/brand-color'
+import { contrast, hslToRgb, type RGB } from '@/lib/color'
 
 // The design tokens (app/globals.css) are HSL channels: "153 55% 27%". Every text-on-surface pair
 // the UI paints must read at WCAG AA in both themes (A11Y-CONTRAST): 4.5:1 for text, 3:1 for the
@@ -35,16 +35,24 @@ const TEXT_PAIRS: [string, string, number][] = [
   ['success', 'background', 4.5],
   ['warning', 'background', 4.5],
   ['destructive', 'background', 4.5],
+  // painted on the muted surface too: badges, hints and the status colours in tables and dialogs
+  ['muted-foreground', 'muted', 4.5],
+  ['primary', 'muted', 4.5],
+  ['success', 'muted', 4.5],
+  ['warning', 'muted', 4.5],
+  ['destructive', 'muted', 4.5],
 ]
 /**
  * Non-text UI against the surface it sits on (WCAG 1.4.11 asks 3:1 for a control's boundary).
- * The focus ring meets it. The input border does not yet: pinned at its measured 1.4 (light) so it
- * cannot fall further, to be raised to 3 when the token moves (docs/ADOPTION_DECISIONS.md, phase 3).
+ * The focus ring meets it. The input border does not yet: pinned at what it measures (1.46 in the
+ * light theme, 1.60 in the dark) so it cannot fall further, to be raised to 3 when the token moves
+ * (docs/ADOPTION_DECISIONS.md, phase 3). Surfaces painted with an alpha (bg-warning/12, the tint)
+ * are composited at run time and are not computed here.
  */
-const UI_PAIRS: [string, string, number][] = [
-  ['ring', 'background', 3],
-  ['input', 'background', 1.4],
-]
+const UI_PAIRS: Record<string, [string, string, number][]> = {
+  light: [['ring', 'background', 3], ['input', 'background', 1.46]],
+  dark: [['ring', 'background', 3], ['input', 'background', 1.6]],
+}
 
 describe.each(Object.entries(themes))('%s theme tokens', (name, t) => {
   it('parsed every colour token', () => {
@@ -55,7 +63,7 @@ describe.each(Object.entries(themes))('%s theme tokens', (name, t) => {
     expect(contrast(t[text], t[surface])).toBeGreaterThanOrEqual(min)
   })
 
-  it.each(UI_PAIRS)('%s against %s reads at least %s:1', (part, surface, min) => {
+  it.each(UI_PAIRS[name])('%s against %s reads at least %s:1', (part, surface, min) => {
     expect(contrast(t[part], t[surface])).toBeGreaterThanOrEqual(min)
   })
 })
