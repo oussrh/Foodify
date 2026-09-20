@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useClientValue } from '@/components/use-client-value'
 import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import { Camera, Check, Download, Search, Share2, SlidersHorizontal, Utensils, WifiOff, X } from 'lucide-react'
@@ -63,7 +64,13 @@ export default function RestaurantPage({
   urlFilter,
 }: RestaurantPageProps) {
   // Server renders the restaurant default (or ?lang=); the guest's remembered/browser language is applied after mount.
-  const [locale, setLocaleState] = useState<Locale>(urlLang === 'fr' || urlLang === 'en' ? urlLang : restaurant.defaultLocale)
+  // Server and hydration: the URL's language or the restaurant's; then the remembered choice and the browser.
+  const detected = useClientValue(
+    () => resolveInitialLocale(restaurant.defaultLocale, urlLang),
+    urlLang === 'fr' || urlLang === 'en' ? urlLang : restaurant.defaultLocale,
+  )
+  const [chosen, setChosen] = useState<Locale | null>(null)
+  const locale = chosen ?? detected
   const [query, setQuery] = useState('')
   const [arOnly, setArOnly] = useState(urlFilter === 'ar')
   const [dietary, setDietary] = useState<string[]>([])
@@ -93,7 +100,8 @@ export default function RestaurantPage({
   const t = MENU_TEXT[locale]
   const heroRef = useRef<HTMLDivElement>(null)
   const chipsRef = useRef<HTMLDivElement>(null)
-  const sectionRefs = useRef<Map<string, HTMLElement>>(new Map())
+  // Sections are found by their ids (set below) from the scroll listener and the jump handler.
+  const sectionEl = (id: string) => document.getElementById(`section-${id}`)
 
   useEffect(() => {
     if (!updateReady) return
@@ -104,16 +112,12 @@ export default function RestaurantPage({
   const name = (en: string, fr: string) => (locale === 'fr' ? fr : en)
   const money: Money = { locale, symbol: restaurant.currencySymbol, code: restaurant.currency }
 
-  // ---- Language: resolve once on mount, remember choices, keep <html lang> honest ----
-  useEffect(() => {
-    setLocaleState(resolveInitialLocale(restaurant.defaultLocale, urlLang))
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // ---- Language: remember choices, keep <html lang> honest ----
   useEffect(() => {
     document.documentElement.lang = locale
   }, [locale])
   const setLocale = (next: Locale) => {
-    setLocaleState(next)
+    setChosen(next)
     try {
       window.localStorage.setItem(LOCALE_STORAGE_KEY, next)
     } catch {
@@ -215,7 +219,7 @@ export default function RestaurantPage({
         const line = BAR_HEIGHT + CHIPS_HEIGHT + 12
         let current: string | null = null
         for (const s of sections) {
-          const el = sectionRefs.current.get(s.id)
+          const el = sectionEl(s.id)
           if (el && el.getBoundingClientRect().top <= line) current = s.id
         }
         setActiveSection(current ?? sections[0]?.id ?? null)
@@ -237,7 +241,7 @@ export default function RestaurantPage({
   }, [activeSection])
 
   const jumpTo = (id: string) => {
-    sectionRefs.current.get(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    sectionEl(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   // ---- Dish sheet, with the back button closing it ----------------------------
@@ -502,10 +506,6 @@ export default function RestaurantPage({
               key={section.id}
               id={`section-${section.id}`}
               aria-labelledby={`heading-${section.id}`}
-              ref={(el) => {
-                if (el) sectionRefs.current.set(section.id, el)
-                else sectionRefs.current.delete(section.id)
-              }}
               className="scroll-mt-[112px] pt-6"
             >
               <div className="flex items-baseline justify-between gap-3 pb-1">

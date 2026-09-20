@@ -59,15 +59,14 @@ export default function ARViewerClient() {
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Auto-hide controls after inactivity
+  const armControlsTimer = useCallback(() => {
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
+    controlsTimeoutRef.current = setTimeout(() => setShowControls(false), 4000)
+  }, [])
   const resetControlsTimer = useCallback(() => {
     setShowControls(true)
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current)
-    }
-    controlsTimeoutRef.current = setTimeout(() => {
-      setShowControls(false)
-    }, 4000)
-  }, [])
+    armControlsTimer()
+  }, [armControlsTimer])
 
   useEffect(() => {
     // Enhanced AR support detection with camera permissions check
@@ -172,8 +171,8 @@ export default function ARViewerClient() {
     }
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     
-    // Initialize controls timer
-    resetControlsTimer()
+    // Controls start visible; only the hide timer needs arming.
+    armControlsTimer()
     
     return () => {
       if (document.head.contains(script)) {
@@ -187,7 +186,7 @@ export default function ARViewerClient() {
       document.removeEventListener('touchstart', handleTouchStart)
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
-  }, [resetControlsTimer])
+  }, [resetControlsTimer, armControlsTimer])
 
   // Create or update the model-viewer element.
   // Depends on isLoading because the container div is only mounted once the loading screen is gone.

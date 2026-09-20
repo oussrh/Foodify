@@ -1,7 +1,7 @@
 // PathFile: components/ar-model-preview.tsx
 "use client"
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useSyncExternalStore } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -44,6 +44,12 @@ interface ModelViewer extends HTMLElement {
   removeAttribute(name: string): void;
 }
 
+const isModelViewerDefined = () => typeof customElements !== 'undefined' && Boolean(customElements.get('model-viewer'))
+const subscribeModelViewer = (onChange: () => void) => {
+  customElements.whenDefined('model-viewer').then(onChange, () => {})
+  return () => {}
+}
+
 export default function ARModelPreview({
   isOpen,
   onClose,
@@ -51,36 +57,22 @@ export default function ARModelPreview({
   modelType,
   dishName = 'Dish Preview'
 }: ARModelPreviewProps) {
-  const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isAutoRotating, setIsAutoRotating] = useState(true)
-  const [modelViewerLoaded, setModelViewerLoaded] = useState(false)
+  const modelViewerLoaded = useSyncExternalStore(subscribeModelViewer, isModelViewerDefined, () => false)
+  const isLoading = !error && (modelType === 'glb' ? !modelViewerLoaded : !isOpen)
   const containerRef = useRef<HTMLDivElement>(null)
   const modelViewerRef = useRef<ModelViewer | null>(null)
 
+  // The viewer script is injected once; the registry (above) says when the element exists.
   useEffect(() => {
-    if (isOpen && modelType === 'glb') {
-      // Check if script is already loaded
-      if (!document.querySelector('script[src*="model-viewer"]')) {
-        const script = document.createElement('script')
-        script.type = 'module'
-        script.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js'
-        script.onload = () => {
-          setIsLoading(false)
-          setModelViewerLoaded(true)
-        }
-        script.onerror = () => {
-          setError('Failed to load 3D viewer')
-          setIsLoading(false)
-        }
-        document.head.appendChild(script)
-      } else {
-        setIsLoading(false)
-        setModelViewerLoaded(true)
-      }
-    } else if (isOpen && modelType === 'usdz') {
-      setIsLoading(false)
-    }
+    if (!isOpen || modelType !== 'glb' || isModelViewerDefined()) return
+    if (document.querySelector('script[src*="model-viewer"]')) return
+    const script = document.createElement('script')
+    script.type = 'module'
+    script.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js'
+    script.onerror = () => setError('Failed to load 3D viewer')
+    document.head.appendChild(script)
   }, [isOpen, modelType])
 
   // Create the model-viewer element programmatically
