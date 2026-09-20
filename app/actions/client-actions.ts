@@ -4,18 +4,6 @@ import bcrypt from 'bcryptjs'
 import prisma from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guard'
 
-export async function listClients(search?: string) {
-  await requireSuperAdmin()
-  return prisma.user.findMany({
-    where: {
-      role: 'RESTAURANT_ADMIN',
-      email: search ? { contains: search } : undefined,
-    },
-    include: { restaurants: true },
-    orderBy: { createdAt: 'desc' },
-  })
-}
-
 export async function createClient(data: {
   email: string
   password: string
@@ -62,11 +50,6 @@ export async function updateClient(
         : undefined,
     },
   })
-}
-
-export async function deleteClient(id: string) {
-  await requireSuperAdmin()
-  return prisma.user.delete({ where: { id } })
 }
 
 export async function resetClientPassword(id: string, newPassword: string) {

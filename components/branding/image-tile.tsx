@@ -4,6 +4,7 @@ import { useId, useRef, useState } from 'react'
 import Image from 'next/image'
 import { ImagePlus, Loader2, Trash2, Upload } from 'lucide-react'
 import { toast } from 'sonner'
+import { uploadRestaurantCover, uploadRestaurantLogo } from '@/app/actions/restaurant-actions'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { BRAND_IMAGE_LIMITS, uploadBrandImage, validateBrandImage, type BrandImageKind } from '@/lib/brand-upload'
@@ -36,7 +37,7 @@ export default function ImageTile({ kind, label, value, restaurantSlug, onChange
     }
     setBusy(true)
     try {
-      const url = await uploadBrandImage(file, kind, restaurantSlug)
+      const url = await uploadBrandImage(file, kind, restaurantSlug, kind === 'logo' ? uploadRestaurantLogo : uploadRestaurantCover)
       onChange(url)
       if (onPersist) await onPersist(url)
       toast.success(kind === 'logo' ? 'Logo updated' : 'Cover updated')

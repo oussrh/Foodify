@@ -1,9 +1,16 @@
 // lib/brand-upload.ts  (client-side)
 // Uploads a restaurant's logo or cover image: straight to Cloudinary when the unsigned
-// preset is configured, otherwise through the server action. Returns the public URL.
-import { uploadRestaurantCover, uploadRestaurantLogo } from '@/app/actions/restaurant-actions'
+// preset is configured, otherwise through the server action the caller passes in
+// (lib/ never imports app/actions — see .dependency-cruiser.cjs). Returns the public URL.
+import { publicEnv } from '@/lib/env'
 
 export type BrandImageKind = 'logo' | 'cover'
+
+/** Shape of `uploadRestaurantLogo` / `uploadRestaurantCover` from app/actions/restaurant-actions. */
+export type BrandUploadAction = (
+  body: FormData,
+  slug: string,
+) => Promise<{ success: boolean; error?: string; logoUrl?: string; coverUrl?: string }>
 
 export const BRAND_IMAGE_LIMITS = {
   logo: { maxBytes: 5 * 1024 * 1024, types: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'], hint: 'PNG, SVG, JPG or WebP · square works best · up to 5 MB' },
@@ -19,8 +26,7 @@ export function validateBrandImage(file: File, kind: BrandImageKind): string | n
 }
 
 async function uploadDirect(file: File, kind: BrandImageKind, slug: string): Promise<string> {
-  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+  const { cloudinaryCloudName: cloudName, cloudinaryUploadPreset: preset } = publicEnv
   if (!cloudName || !preset) throw new Error('Direct upload not configured')
   const body = new FormData()
   body.append('file', file)
@@ -34,16 +40,21 @@ async function uploadDirect(file: File, kind: BrandImageKind, slug: string): Pro
   return json.secure_url as string
 }
 
-export async function uploadBrandImage(file: File, kind: BrandImageKind, slug: string): Promise<string> {
+export async function uploadBrandImage(
+  file: File,
+  kind: BrandImageKind,
+  slug: string,
+  viaServer: BrandUploadAction,
+): Promise<string> {
   try {
     return await uploadDirect(file, kind, slug)
   } catch (directError) {
     console.warn('Direct upload failed, using the server:', directError)
     const body = new FormData()
     body.append('file', file)
-    const result = kind === 'logo' ? await uploadRestaurantLogo(body, slug) : await uploadRestaurantCover(body, slug)
+    const result = await viaServer(body, slug)
     if (!result.success) throw new Error(result.error || 'Upload failed')
-    const url = kind === 'logo' ? (result as { logoUrl?: string }).logoUrl : (result as { coverUrl?: string }).coverUrl
+    const url = kind === 'logo' ? result.logoUrl : result.coverUrl
     if (!url) throw new Error('Upload returned no URL')
     return url
   }

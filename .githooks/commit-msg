@@ -1,0 +1,3 @@
+#!/bin/sh
+# Refuses a commit message that names a tool where scrub.enabled is on; a no-op otherwise.
+npx abatty scrub --message "$1"

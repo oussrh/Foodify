@@ -245,5 +245,3 @@ export const MENU_TEXT = {
     refresh: 'Actualiser',
   },
 } as const
-
-export type MenuText = (typeof MENU_TEXT)['en']

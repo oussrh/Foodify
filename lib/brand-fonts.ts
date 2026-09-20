@@ -4,7 +4,7 @@
 
 export type FontCategory = 'sans' | 'serif' | 'display'
 
-export interface BrandFont {
+interface BrandFont {
   family: string
   category: FontCategory
   /** Stylesheet URL stored on the restaurant (what the public page loads) */
@@ -36,8 +36,3 @@ export const BRAND_FONTS_PREVIEW_URL =
   'https://fonts.googleapis.com/css2?' +
   BRAND_FONTS.map((f) => f.url.split('?family=')[1].split('&display')[0]).map((p) => 'family=' + p).join('&') +
   '&display=swap'
-
-export function findBrandFont(family: string | null | undefined): BrandFont | undefined {
-  if (!family) return undefined
-  return BRAND_FONTS.find((f) => f.family.toLowerCase() === family.toLowerCase())
-}

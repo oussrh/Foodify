@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { publicEnv } from '@/lib/env'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -17,7 +18,7 @@ interface UsePwaOptions {
 export type InstallPlatform = 'prompt' | 'ios' | 'none'
 
 /** The service worker URL carries the build id, so every deploy ships a fresh worker and cache. */
-const SW_URL = `/sw.js?v=${process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 8) || process.env.NEXT_PUBLIC_BUILD_ID || 'dev'}`
+const SW_URL = `/sw.js?v=${publicEnv.buildId}`
 
 /** Registers the menu service worker (production only) and exposes install, offline-readiness and connectivity. */
 export function usePwa({ precacheUrls, onUpdate }: UsePwaOptions) {
@@ -53,7 +54,7 @@ export function usePwa({ precacheUrls, onUpdate }: UsePwaOptions) {
     window.addEventListener('offline', onOffline)
 
     let cleanupSw = () => {}
-    if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+    if (publicEnv.isProduction && 'serviceWorker' in navigator) {
       cleanupSw = registerServiceWorker()
     }
 
