@@ -165,5 +165,3 @@ export const MENU_TEXT = {
     darkMode: 'Mode sombre',
   },
 } as const
-
-export type MenuText = (typeof MENU_TEXT)['en']

@@ -1,0 +1,11 @@
+[
+  {
+    "type": "module",
+    "from": "middleware.ts",
+    "to": "middleware.ts",
+    "rule": {
+      "severity": "error",
+      "name": "no-orphans"
+    }
+  }
+]

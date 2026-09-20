@@ -42,7 +42,7 @@ pnpm prisma       # Access Prisma CLI
 
 ### Authentication & Security
 - NextAuth v5 with credentials + email OTP/TOTP 2FA
-- Role-based access control via middleware
+- Role-based access control in `lib/auth-guard.ts` (`requireSuperAdmin`, `requireRestaurantAccess`, dish/category variants); `middleware.ts` only rewrites subdomains
 - Prisma adapter for session management
 - MFA support for both admin and manager accounts
 
@@ -77,6 +77,7 @@ All data mutations use Next.js server actions in `app/actions/`:
 - `restaurant-actions.ts` - Restaurant management
 - `admin-auth-actions.ts` - Admin authentication flows
 - Actions handle file uploads, database operations, and validation
+- Every export of a `'use server'` file is a public POST endpoint: the first line of each one is a guard from `lib/auth-guard.ts` (see `docs/LESSONS.md`). Unused exports are deleted, not kept "for later" — `knip` fails the gate on them.
 
 ### Routing Structure
 ```

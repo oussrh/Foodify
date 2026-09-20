@@ -4,15 +4,6 @@ import prisma from '@/lib/prisma'
 import { uploadArAsset } from '@/lib/cloudinary'
 import { requireDishAccess, requireIngredientAccess, requireRestaurantAccess } from '@/lib/auth-guard'
 
-export async function listDishes(restaurantId: string) {
-  await requireRestaurantAccess({ id: restaurantId })
-  return prisma.dish.findMany({
-    where: { restaurantId },
-    include: { subcategory: true },
-    orderBy: { sortOrder: 'asc' },
-  })
-}
-
 export async function createDish(
   restaurantId: string,
   data: {
@@ -146,15 +137,6 @@ export async function toggleDishStatus(id: string) {
   })
 }
 
-// Update dish price
-export async function updateDishPrice(id: string, price: number) {
-  await requireDishAccess(id)
-  return prisma.dish.update({
-    where: { id },
-    data: { price }
-  })
-}
-
 // Toggle most purchased status
 export async function toggleMostPurchased(id: string) {
   await requireDishAccess(id)
@@ -194,26 +176,3 @@ export async function deleteIngredient(id: string) {
   return prisma.ingredient.delete({ where: { id } })
 }
 
-// Get dish with all details including ingredients
-export async function getDishDetails(id: string) {
-  await requireDishAccess(id)
-  return prisma.dish.findUnique({
-    where: { id },
-    include: {
-      ingredients: {
-        orderBy: { nameEn: 'asc' }
-      },
-      subcategory: {
-        include: {
-          category: true
-        }
-      },
-      views: true,
-      _count: {
-        select: {
-          views: true
-        }
-      }
-    }
-  })
-}

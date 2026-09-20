@@ -3,11 +3,6 @@
 import prisma from '@/lib/prisma'
 import { requireRestaurantAccess, requireSuperAdmin } from '@/lib/auth-guard'
 
-export async function listRestaurants() {
-  await requireSuperAdmin()
-  return prisma.restaurant.findMany({ orderBy: { createdAt: 'desc' } })
-}
-
 export async function createRestaurant(data: {
   name: string
   slug: string
@@ -98,14 +93,6 @@ export async function updateRestaurant(
 export async function deleteRestaurant(id: string) {
   await requireSuperAdmin()
   return prisma.restaurant.delete({ where: { id } })
-}
-
-export async function listRestaurantsForUser(userId: string) {
-  await requireSuperAdmin()
-  return prisma.restaurant.findMany({
-    where: { users: { some: { id: userId } } },
-    orderBy: { createdAt: 'desc' },
-  })
 }
 
 export async function uploadRestaurantLogo(formData: FormData, restaurantSlug: string) {
