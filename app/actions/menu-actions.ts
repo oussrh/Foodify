@@ -10,10 +10,10 @@ export async function getMenu(rawRestaurantId: string) {
   const restaurantId = uuid.parse(rawRestaurantId)
   return prisma.menuCategory.findMany({
     where: { restaurantId },
-    include: { 
-      subcategories: { 
+    include: {
+      subcategories: {
         orderBy: { sortOrder: 'asc' }
-      } 
+      }
     },
     orderBy: { sortOrder: 'asc' },
   })
@@ -24,7 +24,7 @@ export async function createCategory(rawRestaurantId: string, raw: CategoryInput
   const restaurantId = uuid.parse(rawRestaurantId)
   const data = categoryInput.parse(raw)
   const count = await prisma.menuCategory.count({ where: { restaurantId } })
-  return prisma.menuCategory.create({
+  return prisma.menuCategory.create({ select: { id: true, nameEn: true, nameFr: true, sortOrder: true, isActive: true },
     data: { ...data, restaurantId, sortOrder: count },
   })
 }
@@ -33,7 +33,7 @@ export async function updateCategory(rawId: string, raw: CategoryPatch) {
   await requireCategoryAccess(rawId)
   const id = uuid.parse(rawId)
   const data = categoryPatch.parse(raw)
-  return prisma.menuCategory.update({ where: { id }, data })
+  return prisma.menuCategory.update({ select: { id: true, nameEn: true, nameFr: true, sortOrder: true, isActive: true }, where: { id }, data })
 }
 
 export async function toggleCategoryStatus(rawId: string) {
@@ -41,7 +41,7 @@ export async function toggleCategoryStatus(rawId: string) {
   const id = uuid.parse(rawId)
   const category = await prisma.menuCategory.findUnique({ where: { id } })
   if (!category) throw new Error('Category not found')
-  return prisma.menuCategory.update({
+  return prisma.menuCategory.update({ select: { id: true, nameEn: true, nameFr: true, sortOrder: true, isActive: true },
     where: { id },
     data: { isActive: !category.isActive }
   })
@@ -50,7 +50,7 @@ export async function toggleCategoryStatus(rawId: string) {
 export async function deleteCategory(rawId: string) {
   await requireCategoryAccess(rawId)
   const id = uuid.parse(rawId)
-  return prisma.menuCategory.delete({ where: { id } })
+  return prisma.menuCategory.delete({ select: { id: true, nameEn: true, nameFr: true, sortOrder: true, isActive: true }, where: { id } })
 }
 
 export async function createSubcategory(rawCategoryId: string, raw: CategoryInput) {
@@ -58,7 +58,7 @@ export async function createSubcategory(rawCategoryId: string, raw: CategoryInpu
   const categoryId = uuid.parse(rawCategoryId)
   const data = categoryInput.parse(raw)
   const count = await prisma.menuSubcategory.count({ where: { categoryId } })
-  return prisma.menuSubcategory.create({
+  return prisma.menuSubcategory.create({ select: { id: true, nameEn: true, nameFr: true, sortOrder: true, isActive: true },
     data: { ...data, categoryId, sortOrder: count },
   })
 }
@@ -67,7 +67,7 @@ export async function updateSubcategory(rawId: string, raw: CategoryPatch) {
   await requireSubcategoryAccess(rawId)
   const id = uuid.parse(rawId)
   const data = categoryPatch.parse(raw)
-  return prisma.menuSubcategory.update({ where: { id }, data })
+  return prisma.menuSubcategory.update({ select: { id: true, nameEn: true, nameFr: true, sortOrder: true, isActive: true }, where: { id }, data })
 }
 
 export async function toggleSubcategoryStatus(rawId: string) {
@@ -75,7 +75,7 @@ export async function toggleSubcategoryStatus(rawId: string) {
   const id = uuid.parse(rawId)
   const subcategory = await prisma.menuSubcategory.findUnique({ where: { id } })
   if (!subcategory) throw new Error('Subcategory not found')
-  return prisma.menuSubcategory.update({
+  return prisma.menuSubcategory.update({ select: { id: true, nameEn: true, nameFr: true, sortOrder: true, isActive: true },
     where: { id },
     data: { isActive: !subcategory.isActive }
   })
@@ -84,7 +84,7 @@ export async function toggleSubcategoryStatus(rawId: string) {
 export async function deleteSubcategory(rawId: string) {
   await requireSubcategoryAccess(rawId)
   const id = uuid.parse(rawId)
-  return prisma.menuSubcategory.delete({ where: { id } })
+  return prisma.menuSubcategory.delete({ select: { id: true, nameEn: true, nameFr: true, sortOrder: true, isActive: true }, where: { id } })
 }
 
 export async function reorderCategories(rawRestaurantId: string, rawIds: string[]) {
@@ -96,6 +96,7 @@ export async function reorderCategories(rawRestaurantId: string, rawIds: string[
       prisma.menuCategory.updateMany({ where: { id, restaurantId }, data: { sortOrder: index } })
     )
   )
+  return { count: ids.length }
 }
 
 export async function reorderSubcategories(rawCategoryId: string, rawIds: string[]) {
@@ -107,4 +108,5 @@ export async function reorderSubcategories(rawCategoryId: string, rawIds: string
       prisma.menuSubcategory.updateMany({ where: { id, categoryId }, data: { sortOrder: index } })
     )
   )
+  return { count: ids.length }
 }

@@ -24,7 +24,7 @@ export async function createClient(raw: ClientInput) {
     restaurantIds.push(restaurant.id)
   }
 
-  return prisma.user.create({
+  return prisma.user.create({ select: { id: true, email: true },
     data: {
       email: data.email,
       passwordHash,
@@ -39,7 +39,7 @@ export async function updateClient(rawId: string, raw: ClientPatch) {
   const id = uuid.parse(rawId)
   const data = clientPatch.parse(raw)
   const { restaurantIds, ...rest } = data
-  return prisma.user.update({
+  return prisma.user.update({ select: { id: true, email: true },
     where: { id },
     data: {
       ...rest,
@@ -54,7 +54,7 @@ export async function resetClientPassword(rawId: string, newPassword: string) {
   await requireSuperAdmin()
   const id = uuid.parse(rawId)
   const passwordHash = await bcrypt.hash(password.parse(newPassword), 10)
-  return prisma.user.update({
+  return prisma.user.update({ select: { id: true, email: true },
     where: { id },
     data: { passwordHash, passwordResetToken: null, passwordResetExpires: null },
   })

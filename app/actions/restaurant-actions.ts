@@ -20,7 +20,7 @@ function refreshDashboards() {
 export async function createRestaurant(raw: RestaurantInput) {
   await requireSuperAdmin()
   const data = restaurantInput.parse(raw)
-  const restaurant = await prisma.restaurant.create({ data })
+  const restaurant = await prisma.restaurant.create({ data, select: { id: true, slug: true } })
   refreshDashboards()
   return restaurant
 }
@@ -29,15 +29,15 @@ export async function updateRestaurant(rawId: string, raw: RestaurantPatch) {
   await requireRestaurantAccess({ id: rawId })
   const id = uuid.parse(rawId)
   const data = restaurantPatch.parse(raw)
-  const result = await prisma.restaurant.update({ where: { id }, data })
+  const restaurant = await prisma.restaurant.update({ where: { id }, data, select: { id: true, slug: true } })
   refreshDashboards()
-  return result
+  return restaurant
 }
 
 export async function deleteRestaurant(rawId: string) {
   await requireSuperAdmin()
   const id = uuid.parse(rawId)
-  const restaurant = await prisma.restaurant.delete({ where: { id } })
+  const restaurant = await prisma.restaurant.delete({ where: { id }, select: { id: true } })
   refreshDashboards()
   return restaurant
 }

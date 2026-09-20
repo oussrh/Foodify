@@ -3,6 +3,9 @@
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
   "score": 90,
   "hard": [
+    "api.bareResponse",
+    "api.rowReturn",
+    "api.unboundedList",
     "auth.unguardedAdminPage",
     "cache.serverCacheUse",
     "change.changelogMissing",
@@ -19,6 +22,9 @@
     "valid.wholeEnv"
   ],
   "metrics": {
+    "api.bareResponse": 0,
+    "api.rowReturn": 0,
+    "api.unboundedList": 0,
     "auth.unguardedAdminPage": 0,
     "cache.serverCacheUse": 0,
     "change.changelogMissing": 0,
@@ -39,22 +45,25 @@
     "valid.wholeEnv": 0
   },
   "scanned": {
+    "api.bareResponse": 6,
+    "api.rowReturn": 8,
+    "api.unboundedList": 6,
     "auth.unguardedAdminPage": 17,
-    "cache.serverCacheUse": 177,
+    "cache.serverCacheUse": 180,
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 52,
+    "docs.citations": 54,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 178,
-    "size.overBudget": 178,
-    "size.overRaw": 188,
-    "types.escapes": 178,
-    "valid.rawEnv": 176,
+    "size.excessCode": 182,
+    "size.overBudget": 182,
+    "size.overRaw": 192,
+    "types.escapes": 182,
+    "valid.rawEnv": 180,
     "valid.unparsedBoundary": 15,
-    "valid.wholeEnv": 186
+    "valid.wholeEnv": 190
   },
   "debt": {
     "size.excessCode": {
@@ -137,6 +146,9 @@
     }
   },
   "versions": {
+    "api.bareResponse": 1,
+    "api.rowReturn": 1,
+    "api.unboundedList": 1,
     "auth.unguardedAdminPage": 1,
     "cache.serverCacheUse": 1,
     "change.changelogMissing": 1,

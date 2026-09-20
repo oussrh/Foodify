@@ -140,3 +140,17 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Alternative set aside**: a role check in `proxy.ts` on every request. It would read the token, not the database, so it would be the cached decision the rule forbids; and a database read there would run on every asset request.
 - **Re-read when**: a third role appears, or the session strategy changes.
 
+## 2026-09-20 · phase 6 · an internal API: envelope, bounded lists and payloads, but no spec, keys or versions
+
+- **Situation**: API.1 asks for one envelope, money as a decimal string, bounded followable lists, payload returns, `Idempotency-Key` on retryable writes, `If-Match` on racing writes and a versioning decision; API.2 for a spec generated from code and checked both ways; API.3 for GraphQL. This surface is five route handlers and 36 server actions, all first-party (two admin dialogs, a menu's view counter), no third-party client, no GraphQL. The pinned catalogue wires no API-* check.
+- **Default taken**: the envelope (`lib/api.ts`), the bounded followable lists (`lib/schemas/list.ts`), money as a decimal string beside the ISO 4217 code, and payload returns, each held by a probe at zero (`api.bareResponse`, `api.unboundedList`, `api.rowReturn`). Not taken, with the reason: idempotency keys (no retryable write; the one public POST counts a view and a replay counts a view), `If-Match` (no write two people race: the settings form is one manager's, and the assignment routes set a whole list), versioning (an internal API changes with its one client in the same commit; the house default, a URL path prefix, applies the day a second client exists), an OpenAPI spec (five internal routes; generated from the zod schemas when a route is published), GraphQL (none).
+- **Alternative set aside**: RFC 9457 `application/problem+json` for failures; the standard keeps `{ error, code }` where a client base exists, and the two dialogs are that client base.
+- **Re-read when**: a route serves a client outside this repository, or a write can be retried by a client (a payment, an order).
+
+## 2026-09-20 · phase 6 · a server action's signature stays `(id, data)`
+
+- **Situation**: API.1's "a mutation takes one input object" is written for a wire API. A server action is a typed function call from this application's own forms.
+- **Default taken**: the actions keep their `(rawId, raw)` arguments, each parsed (phase 4); the return is the payload rule's concern, held by `api.rowReturn`.
+- **Alternative set aside**: folding every action into a single-object input, which rewrites 36 signatures and their callers for no client that could tell the difference.
+- **Re-read when**: an action is exposed outside the forms that call it.
+

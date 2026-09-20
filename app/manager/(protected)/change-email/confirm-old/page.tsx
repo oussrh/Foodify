@@ -4,13 +4,13 @@ import { CheckCircle, AlertCircle, Mail, ArrowLeft, ArrowRight, Clock } from 'lu
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 
-export default async function ConfirmOldEmailPage({ 
-  searchParams 
-}: { 
-  searchParams: Promise<{ token?: string }> 
+export default async function ConfirmOldEmailPage({
+  searchParams
+}: {
+  searchParams: Promise<{ token?: string }>
 }) {
   const params = await searchParams
-  const success = params.token ? await confirmOldEmail(params.token) : false
+  const success = params.token ? (await confirmOldEmail(params.token)).confirmed : false
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6">
@@ -18,8 +18,8 @@ export default async function ConfirmOldEmailPage({
         {/* Header */}
         <div className="text-center space-y-3">
           <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
- success 
- ? '' 
+ success
+ ? ''
  : ''
  }`}>
             {success ? (
@@ -47,7 +47,7 @@ export default async function ConfirmOldEmailPage({
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   <h2 className="text-lg font-semibold text-foreground">
                     Step 1 Complete
@@ -114,7 +114,7 @@ export default async function ConfirmOldEmailPage({
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <h2 className="text-lg font-semibold text-foreground">
                     Invalid or expired link
