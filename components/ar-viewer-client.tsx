@@ -306,7 +306,7 @@ export default function ARViewerClient() {
       // Add AR-specific event listeners
       if (viewMode === 'ar') {
         modelViewer.addEventListener('ar-status', (event) => {
-          const { status } = (event as CustomEvent<{ status: string }>).detail
+          const { status } = (event as CustomEvent<{ status: string }>).detail // model-viewer dispatches CustomEvents; lib.dom types listeners as Event
           console.log('AR status:', status)
           if (status === 'session-started') {
             toast.success('AR camera activated!')
@@ -323,7 +323,7 @@ export default function ARViewerClient() {
         // Handle WebXR session events
         if (arMode === 'webxr') {
           modelViewer.addEventListener('ar-tracking', (event) => {
-            console.log('AR tracking status:', (event as CustomEvent<{ status: string }>).detail)
+            console.log('AR tracking status:', (event as CustomEvent<{ status: string }>).detail) // same: a CustomEvent from model-viewer
           })
         }
       }

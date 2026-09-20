@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
-import { useClientValue } from '@/components/use-client-value'
+import { useMenuLocale } from './use-menu-locale'
 import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import { Camera, Check, Download, Search, Share2, SlidersHorizontal, Utensils, WifiOff, X } from 'lucide-react'
@@ -11,18 +11,7 @@ import { Switch } from '@/components/ui/switch'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
 import type { SocialHandles } from '@/lib/social-media'
-import {
-  DIETARY_OPTIONS,
-  LOCALE_STORAGE_KEY,
-  MENU_TEXT,
-  hasAR,
-  resolveInitialLocale,
-  type Locale,
-  type MenuCategory,
-  type MenuDish,
-  type MenuRestaurant,
-  type Money,
-} from '@/lib/menu'
+import { DIETARY_OPTIONS, MENU_TEXT, hasAR, type Locale, type MenuCategory, type MenuDish, type MenuRestaurant, type Money } from '@/lib/menu'
 import { dayName, openStatus, parseOpeningHours } from '@/lib/opening-hours'
 import DishRow from './dish-row'
 import DishBody from './dish-body'
@@ -63,14 +52,7 @@ export default function RestaurantPage({
   urlLang,
   urlFilter,
 }: RestaurantPageProps) {
-  // Server renders the restaurant default (or ?lang=); the guest's remembered/browser language is applied after mount.
-  // Server and hydration: the URL's language or the restaurant's; then the remembered choice and the browser.
-  const detected = useClientValue(
-    () => resolveInitialLocale(restaurant.defaultLocale, urlLang),
-    urlLang === 'fr' || urlLang === 'en' ? urlLang : restaurant.defaultLocale,
-  )
-  const [chosen, setChosen] = useState<Locale | null>(null)
-  const locale = chosen ?? detected
+  const [locale, chooseLocale] = useMenuLocale(restaurant.defaultLocale, urlLang)
   const [query, setQuery] = useState('')
   const [arOnly, setArOnly] = useState(urlFilter === 'ar')
   const [dietary, setDietary] = useState<string[]>([])
@@ -117,12 +99,7 @@ export default function RestaurantPage({
     document.documentElement.lang = locale
   }, [locale])
   const setLocale = (next: Locale) => {
-    setChosen(next)
-    try {
-      window.localStorage.setItem(LOCALE_STORAGE_KEY, next)
-    } catch {
-      // storage unavailable
-    }
+    chooseLocale(next)
     const url = new URL(window.location.href)
     url.searchParams.set('lang', next)
     window.history.replaceState(window.history.state, '', url)

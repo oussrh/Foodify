@@ -93,7 +93,7 @@ export default function EditRestaurantForm({
   // The active tab lives in the URL so a reload (or a shared link) lands on the same section.
   const urlTab = useClientValue(() => new URLSearchParams(window.location.search).get('tab'), null)
   const [pickedTab, setActiveTab] = useState<SettingsTab | null>(null)
-  const activeTab: SettingsTab = pickedTab ?? (TABS.some((tab) => tab.key === urlTab) ? (urlTab as SettingsTab) : 'general')
+  const activeTab: SettingsTab = pickedTab ?? TABS.find((tab) => tab.key === urlTab)?.key ?? 'general'
   const showTab = useCallback((tab: SettingsTab) => {
     setActiveTab(tab)
     const url = new URL(window.location.href)

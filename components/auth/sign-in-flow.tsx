@@ -46,25 +46,29 @@ export default function SignInFlow({ role, initialStep = 'credentials' }: SignIn
   const cfg = CONFIG[role]
   const router = useRouter()
   const [step, setStep] = useState<Step>(initialStep)
-  // On the /mfa routes the credentials step left them in sessionStorage; typed values take over.
+  // On the /mfa routes the credentials step left them in sessionStorage. They are read once, on
+  // the first client render, and kept: the storage is cleared on success and on "start over",
+  // and neither may send the page back to the login.
   const [ek, pk] = cfg.storage
+  const storedEmail = useClientValue(() => (initialStep === 'code' ? sessionStorage.getItem(ek) ?? '' : ''), '')
+  const storedPassword = useClientValue(() => (initialStep === 'code' ? sessionStorage.getItem(pk) ?? '' : ''), '')
   const hydrated = useClientValue(() => true, false)
-  const pendingEmail = useClientValue(() => (initialStep === 'code' ? sessionStorage.getItem(ek) ?? '' : ''), '')
-  const pendingPassword = useClientValue(() => (initialStep === 'code' ? sessionStorage.getItem(pk) ?? '' : ''), '')
+  const [pending, setPending] = useState<{ email: string; password: string } | null>(null)
+  if (hydrated && pending === null) setPending({ email: storedEmail, password: storedPassword })
   const [typedEmail, setEmail] = useState<string | null>(null)
   const [typedPassword, setPassword] = useState<string | null>(null)
-  const email = typedEmail ?? pendingEmail
-  const password = typedPassword ?? pendingPassword
+  const email = typedEmail ?? pending?.email ?? ''
+  const password = typedPassword ?? pending?.password ?? ''
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [resending, setResending] = useState(false)
   const [timeLeft, setTimeLeft] = useState(CODE_TTL)
 
-  // An /mfa route with nothing pending goes back to the login.
+  // An /mfa route that loaded with nothing pending goes back to the login.
   useEffect(() => {
-    if (hydrated && initialStep === 'code' && (!pendingEmail || !pendingPassword)) router.replace(cfg.login)
-  }, [hydrated, initialStep, pendingEmail, pendingPassword, cfg, router])
+    if (pending && initialStep === 'code' && (!pending.email || !pending.password)) router.replace(cfg.login)
+  }, [pending, initialStep, cfg, router])
 
   useEffect(() => {
     if (step !== 'code') return

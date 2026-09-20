@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, type CSSProperties } from 'react'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
-import { LOCALE_STORAGE_KEY, MENU_TEXT, resolveInitialLocale, type Locale, type MenuDish, type MenuRestaurant, type Money } from '@/lib/menu'
-import { useClientValue } from '@/components/use-client-value'
+import { MENU_TEXT, type Locale, type MenuDish, type MenuRestaurant, type Money } from '@/lib/menu'
+import { useMenuLocale } from './use-menu-locale'
 import DishBody from './dish-body'
 
 interface DishPageProps {
@@ -20,28 +20,13 @@ interface DishPageProps {
 
 /** Full-page version of the dish sheet, for shared links and QR codes that point at one dish. */
 export default function DishPage({ dish, restaurant, breadcrumb, brandStyle, shareUrl, urlLang }: DishPageProps) {
-  // Server and hydration: the URL's language or the restaurant's; then the remembered choice and the browser.
-  const detected = useClientValue(
-    () => resolveInitialLocale(restaurant.defaultLocale, urlLang),
-    urlLang === 'fr' || urlLang === 'en' ? urlLang : restaurant.defaultLocale,
-  )
-  const [chosen, setChosen] = useState<Locale | null>(null)
-  const locale = chosen ?? detected
+  const [locale, setLocale] = useMenuLocale(restaurant.defaultLocale, urlLang)
   const t = MENU_TEXT[locale]
   const money: Money = { locale, symbol: restaurant.currencySymbol, code: restaurant.currency }
 
   useEffect(() => {
     document.documentElement.lang = locale
   }, [locale])
-  const setLocale = (next: Locale) => {
-    setChosen(next)
-    try {
-      window.localStorage.setItem(LOCALE_STORAGE_KEY, next)
-    } catch {
-      // storage unavailable
-    }
-  }
-
   const style: CSSProperties = {
     ...(brandStyle as CSSProperties),
     ...(restaurant.fontFamily ? { fontFamily: `"${restaurant.fontFamily}", var(--font-sans), sans-serif` } : {}),

@@ -6,8 +6,9 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Added
 
+- `scripts/codemods/remove-unused-imports.mjs`: removes the import bindings ESLint reports unused and nothing else, driven by ESLint's JSON output; dry run by default, `--write` to apply; eleven fixture cases. `lib/device.ts` (`isIOS`, `isAndroid`, tested) and `components/menu/use-menu-locale.ts` (the guest's language on a menu page) are the seams the review found duplicated.
 - `components/use-client-value.ts`: a value that exists only in the browser (user agent, matchMedia, storage) read through `useSyncExternalStore` with a server snapshot, so components stop setting state from effects after hydration.
-- `lib/time.ts` (`daysAgo`, `daysSince`, with tests): the dashboards' clock reads in one place instead of `Date.now()` arithmetic in six pages.
+- `lib/time.ts` (`daysAgo`, `daysSince`, with tests): the dashboards' clock reads in one place instead of `Date.now()` arithmetic in six pages; `daysSince` is never negative, where the old arithmetic could be under clock skew.
 - `.gitattributes`: every text file is LF in the working tree as well as the index (`* text=auto eol=lf`), so a Windows checkout no longer flips docs to CRLF, which abatty's front-matter parser misreads.
 - Unit suite (Vitest, `pnpm test`): 85 tests over the shared layer (opening hours, social links, brand colour, pricing and locale, brand uploads, TOTP, JSON-LD) with the coverage floor for `lib/**` pinned in `vitest.config.ts` at the measured figure; `docs/TESTING.md` lists the floor and every exclusion; `pnpm test:changed` holds the floor over the files a push changed (CI runs it).
 - CI (`.github/workflows/checks.yml`): `pnpm run gate` (the pre-push hook's script) and a production audit on every push and pull request, frozen install; a pull-request template with the gate's checklist.

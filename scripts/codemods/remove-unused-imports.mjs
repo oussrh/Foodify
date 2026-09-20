@@ -36,68 +36,90 @@ function unusedByFile(cwd) {
   return result;
 }
 
+/** "line:column" of a node's start, 1-based as ESLint reports positions. */
+function positionOf(node, sf) {
+  const { line, character } = sf.getLineAndCharacterOfPosition(node.getStart(sf));
+  return `${line + 1}:${character + 1}`;
+}
+
+/** The named bindings that survive, and how many were dropped. */
+function keptNamed(named, marks, sf) {
+  const kept = [];
+  let dropped = 0;
+  for (const el of named.elements) {
+    if (marks.has(positionOf(el.name, sf))) dropped++;
+    else kept.push(el.getText(sf));
+  }
+  return { kept, dropped };
+}
+
+/**
+ * What one import declaration keeps once the marked bindings are gone.
+ * @returns {{ dropped: number, keepDefault: boolean, namespace: string | null, kept: string[], multiline: boolean }}
+ */
+function planImport(stmt, marks, sf) {
+  const clause = stmt.importClause;
+  const bindings = clause.namedBindings;
+  const keepDefault = Boolean(clause.name) && !marks.has(positionOf(clause.name, sf));
+  let dropped = clause.name && !keepDefault ? 1 : 0;
+  let namespace = null;
+  let kept = [];
+  let multiline = false;
+  if (bindings && ts.isNamespaceImport(bindings)) {
+    if (marks.has(positionOf(bindings.name, sf))) dropped++;
+    else namespace = bindings.name.text;
+  } else if (bindings && ts.isNamedImports(bindings)) {
+    const named = keptNamed(bindings, marks, sf);
+    kept = named.kept;
+    dropped += named.dropped;
+    multiline = /\n/.test(bindings.getText(sf));
+  }
+  return { dropped, keepDefault, namespace, kept, multiline };
+}
+
+/** The edit that removes a whole statement: its lines, a trailing comment on its last line, and the line break after it. */
+function dropStatement(text, stmt, sf) {
+  const start = text.lastIndexOf('\n', stmt.getStart(sf)) + 1;
+  const lineEnd = text.indexOf('\n', stmt.getEnd());
+  const rest = text.slice(stmt.getEnd(), lineEnd < 0 ? text.length : lineEnd);
+  const trailingIsComment = /^\s*(\/\/.*|\/\*.*\*\/\s*)?$/.test(rest);
+  let end = trailingIsComment && lineEnd >= 0 ? lineEnd + 1 : stmt.getEnd();
+  if (!trailingIsComment && text[end] === '\r') end++;
+  if (!trailingIsComment && text[end] === '\n') end++;
+  return { start, end, replacement: '' };
+}
+
+/** The edit that re-emits a statement with its surviving bindings, keeping its leading trivia, `type` and semicolon. */
+function reemitStatement(text, stmt, sf, plan) {
+  const clause = stmt.importClause;
+  const parts = [];
+  if (plan.keepDefault) parts.push(clause.name.text);
+  if (plan.namespace) parts.push(`* as ${plan.namespace}`);
+  if (plan.kept.length) parts.push(plan.multiline ? `{\n  ${plan.kept.join(',\n  ')},\n}` : `{ ${plan.kept.join(', ')} }`);
+  const typeOnly = clause.isTypeOnly ? 'type ' : '';
+  const moduleText = stmt.moduleSpecifier.getText(sf);
+  const semicolon = text.slice(stmt.getStart(sf), stmt.getEnd()).trimEnd().endsWith(';') ? ';' : '';
+  const leading = text.slice(stmt.getFullStart(), stmt.getStart(sf));
+  return { start: stmt.getFullStart(), end: stmt.getEnd(), replacement: `${leading}import ${typeOnly}${parts.join(', ')} from ${moduleText}${semicolon}` };
+}
+
 /**
  * Rewrite one source text, dropping the import bindings whose name starts at one of `marks`
  * ("line:column", 1-based as ESLint reports). Returns { text, removed, statements }.
  */
 export function removeUnusedImports(text, marks, fileName = 'file.tsx') {
   const sf = ts.createSourceFile(fileName, text, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
-  const at = (node) => {
-    const { line, character } = sf.getLineAndCharacterOfPosition(node.getStart(sf));
-    return `${line + 1}:${character + 1}`;
-  };
-  const edits = []; // { start, end, replacement }
+  const edits = [];
   let removed = 0;
   let statements = 0;
   for (const stmt of sf.statements) {
     if (!ts.isImportDeclaration(stmt) || !stmt.importClause) continue;
-    const clause = stmt.importClause;
-    const keepDefault = clause.name ? !marks.has(at(clause.name)) : false;
-    const bindings = clause.namedBindings;
-    let namespace = null;
-    let kept = [];
-    let dropped = 0;
-    if (bindings && ts.isNamespaceImport(bindings)) {
-      namespace = marks.has(at(bindings.name)) ? null : bindings.name.text;
-      if (!namespace) dropped++;
-    } else if (bindings && ts.isNamedImports(bindings)) {
-      for (const el of bindings.elements) {
-        if (marks.has(at(el.name))) dropped++;
-        else kept.push(el.getText(sf));
-      }
-    }
-    if (clause.name && !keepDefault) dropped++;
-    if (dropped === 0) continue;
-    removed += dropped;
-    const hadDefault = Boolean(clause.name);
-    const hadNamed = Boolean(bindings && ts.isNamedImports(bindings) && bindings.elements.length);
-    const survivors = (keepDefault ? 1 : 0) + kept.length + (namespace ? 1 : 0);
-    const fullStart = stmt.getFullStart();
-    const end = stmt.getEnd();
-    if (survivors === 0) {
-      statements++;
-      // Drop the statement's own lines: from the start of its first line (comments above it
-      // stay) through the line break that followed it.
-      const lineStart = text.lastIndexOf('\n', stmt.getStart(sf)) + 1;
-      let cut = end;
-      if (text[cut] === '\r') cut++;
-      if (text[cut] === '\n') cut++;
-      edits.push({ start: lineStart, end: cut, replacement: '' });
-      continue;
-    }
-    const typeOnly = clause.isTypeOnly ? 'type ' : '';
-    const moduleText = stmt.moduleSpecifier.getText(sf);
-    const multiline = hadNamed && /\n/.test(bindings.getText(sf));
-    const parts = [];
-    if (keepDefault) parts.push(clause.name.text);
-    if (namespace) parts.push(`* as ${namespace}`);
-    if (kept.length) {
-      parts.push(multiline ? `{\n  ${kept.join(',\n  ')},\n}` : `{ ${kept.join(', ')} }`);
-    }
-    const semicolon = text.slice(stmt.getStart(sf), end).trimEnd().endsWith(';') ? ';' : '';
-    const leading = text.slice(fullStart, stmt.getStart(sf));
-    edits.push({ start: fullStart, end, replacement: `${leading}import ${typeOnly}${parts.join(', ')} from ${moduleText}${semicolon}` });
-    void hadDefault;
+    const plan = planImport(stmt, marks, sf);
+    if (plan.dropped === 0) continue;
+    removed += plan.dropped;
+    const survivors = (plan.keepDefault ? 1 : 0) + plan.kept.length + (plan.namespace ? 1 : 0);
+    if (survivors === 0) statements++;
+    edits.push(survivors === 0 ? dropStatement(text, stmt, sf) : reemitStatement(text, stmt, sf, plan));
   }
   let out = text;
   for (const e of edits.sort((a, b) => b.start - a.start)) out = out.slice(0, e.start) + e.replacement + out.slice(e.end);

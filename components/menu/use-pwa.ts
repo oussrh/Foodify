@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useEffectEvent, useRef, useState, useSyncExternalStore } from 'react'
 import { publicEnv } from '@/lib/env'
 import { useClientValue } from '@/components/use-client-value'
+import { isIOS as isIOSDevice } from '@/lib/device'
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>
@@ -21,7 +22,6 @@ export type InstallPlatform = 'prompt' | 'ios' | 'none'
 /** The service worker URL carries the build id, so every deploy ships a fresh worker and cache. */
 const SW_URL = `/sw.js?v=${publicEnv.buildId}`
 
-const isIOSDevice = () => /iPhone|iPad|iPod/.test(navigator.userAgent) && !('MSStream' in window)
 const isInstalled = () =>
   window.matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true
 
@@ -35,6 +35,72 @@ const subscribeOnline = (onChange: () => void) => {
   }
 }
 const readOnline = () => navigator.onLine
+
+interface WorkerHandlers {
+  onPrecached: () => void
+  onUpdateReady: () => void
+  onControllerChange: () => void
+  sendPrecache: (active: ServiceWorker) => void
+}
+
+/** Registers the worker and wires its lifecycle to the hook's handlers; returns the cleanup. */
+function registerServiceWorker(handlers: WorkerHandlers) {
+  let disposed = false
+  const onMessage = (e: MessageEvent) => {
+    if (e.data?.type === 'PRECACHED') handlers.onPrecached()
+  }
+  navigator.serviceWorker.addEventListener('message', onMessage)
+
+  // A new worker took control after we asked it to skip waiting: the page is now stale.
+  let refreshing = false
+  const onControllerChange = () => {
+    if (refreshing) return
+    refreshing = true
+    handlers.onControllerChange()
+  }
+  navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
+
+  navigator.serviceWorker
+    .register(SW_URL)
+    .then(async (reg) => {
+      if (disposed) return
+      // Offer a refresh when a newer version is waiting behind the current one.
+      const trackWaiting = (worker: ServiceWorker | null) => {
+        if (!worker) return
+        worker.addEventListener('statechange', () => {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) handlers.onUpdateReady()
+        })
+      }
+      if (reg.waiting && navigator.serviceWorker.controller) handlers.onUpdateReady()
+      reg.addEventListener('updatefound', () => trackWaiting(reg.installing))
+
+      // Save the whole menu for offline use once the page is idle.
+      const ready = await navigator.serviceWorker.ready
+      const send = () => {
+        if (ready.active) handlers.sendPrecache(ready.active)
+      }
+      if ('requestIdleCallback' in window) window.requestIdleCallback(send, { timeout: 4000 })
+      else setTimeout(send, 1500)
+
+      // Installed apps refresh the saved menu in the background (Chromium only; needs engagement).
+      const periodic = (ready as ServiceWorkerRegistration & { periodicSync?: { register: (tag: string, o: { minInterval: number }) => Promise<void> } }).periodicSync
+      if (periodic) {
+        try {
+          const status = await navigator.permissions.query({ name: 'periodic-background-sync' as PermissionName })
+          if (status.state === 'granted') await periodic.register('refresh-menu', { minInterval: 24 * 60 * 60 * 1000 })
+        } catch {
+          /* not available */
+        }
+      }
+    })
+    .catch((err) => console.warn('Service worker not registered:', err))
+
+  return () => {
+    disposed = true
+    navigator.serviceWorker.removeEventListener('message', onMessage)
+    navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
+  }
+}
 
 /** Registers the menu service worker (production only) and exposes install, offline-readiness and connectivity. */
 export function usePwa({ precacheUrls, onUpdate }: UsePwaOptions) {
@@ -67,67 +133,14 @@ export function usePwa({ precacheUrls, onUpdate }: UsePwaOptions) {
     window.addEventListener('beforeinstallprompt', onPrompt)
     window.addEventListener('appinstalled', onInstalled)
 
-    function registerServiceWorker() {
-      let disposed = false
-      const onMessage = (e: MessageEvent) => {
-        if (e.data?.type === 'PRECACHED') setOfflineReady(true)
-      }
-      navigator.serviceWorker.addEventListener('message', onMessage)
-
-      // A new worker took control after we asked it to skip waiting: the page is now stale.
-      let refreshing = false
-      const onControllerChange = () => {
-        if (refreshing) return
-        refreshing = true
-        notifyUpdate()
-      }
-      navigator.serviceWorker.addEventListener('controllerchange', onControllerChange)
-
-      navigator.serviceWorker
-        .register(SW_URL)
-        .then(async (reg) => {
-          if (disposed) return
-          // Offer a refresh when a newer version is waiting behind the current one.
-          const trackWaiting = (worker: ServiceWorker | null) => {
-            if (!worker) return
-            worker.addEventListener('statechange', () => {
-              if (worker.state === 'installed' && navigator.serviceWorker.controller) setUpdateReady(true)
-            })
-          }
-          if (reg.waiting && navigator.serviceWorker.controller) setUpdateReady(true)
-          reg.addEventListener('updatefound', () => trackWaiting(reg.installing))
-
-          // Save the whole menu for offline use once the page is idle.
-          const ready = await navigator.serviceWorker.ready
-          const send = () => {
-            if (ready.active) sendPrecache(ready.active)
-          }
-          if ('requestIdleCallback' in window) window.requestIdleCallback(send, { timeout: 4000 })
-          else setTimeout(send, 1500)
-
-          // Installed apps refresh the saved menu in the background (Chromium only; needs engagement).
-          const periodic = (ready as ServiceWorkerRegistration & { periodicSync?: { register: (tag: string, o: { minInterval: number }) => Promise<void> } }).periodicSync
-          if (periodic) {
-            try {
-              const status = await navigator.permissions.query({ name: 'periodic-background-sync' as PermissionName })
-              if (status.state === 'granted') await periodic.register('refresh-menu', { minInterval: 24 * 60 * 60 * 1000 })
-            } catch {
-              /* not available */
-            }
-          }
-        })
-        .catch((err) => console.warn('Service worker not registered:', err))
-
-      return () => {
-        disposed = true
-        navigator.serviceWorker.removeEventListener('message', onMessage)
-        navigator.serviceWorker.removeEventListener('controllerchange', onControllerChange)
-      }
-    }
-
     let cleanupSw = () => {}
     if (publicEnv.isProduction && 'serviceWorker' in navigator) {
-      cleanupSw = registerServiceWorker()
+      cleanupSw = registerServiceWorker({
+        onPrecached: () => setOfflineReady(true),
+        onUpdateReady: () => setUpdateReady(true),
+        onControllerChange: () => notifyUpdate(),
+        sendPrecache: (active) => sendPrecache(active),
+      })
     }
 
     return () => {

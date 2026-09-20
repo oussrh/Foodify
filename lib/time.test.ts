@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { daysAgo, daysSince } from './time'
 
 const NOON = Date.UTC(2026, 8, 20, 12, 0, 0)
@@ -8,11 +8,14 @@ describe('daysAgo', () => {
     expect(daysAgo(7, NOON).toISOString()).toBe('2026-09-13T12:00:00.000Z')
   })
 
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
   it('reads the clock only when no instant is given', () => {
-    const before = Date.now()
-    const t = daysAgo(0).getTime()
-    expect(t).toBeGreaterThanOrEqual(before)
-    expect(t).toBeLessThanOrEqual(Date.now())
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(NOON))
+    expect(daysAgo(1).toISOString()).toBe('2026-09-19T12:00:00.000Z')
   })
 })
 

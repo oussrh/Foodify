@@ -43,6 +43,22 @@ describe('removeUnusedImports', () => {
     expect(removeUnusedImports(src, marks('1:15')).text).toBe(`import type { B as Bee } from 'x';\nexport type V = Bee\n`)
   })
 
+  it('drops an unused namespace import and keeps a used one beside a dropped default', () => {
+    expect(removeUnusedImports(`import * as N from 'x'\nexport const v = 1\n`, marks('1:13')).text).toBe(`export const v = 1\n`)
+    const src = `import D, * as N from 'x'\nexport const v = N\n`
+    expect(removeUnusedImports(src, marks('1:8')).text).toBe(`import * as N from 'x'\nexport const v = N\n`)
+  })
+
+  it('drops an aliased binding by the column of its local name', () => {
+    const src = `import { A as Ay, B as Bee } from 'x'\nexport const v = Ay\n`
+    expect(removeUnusedImports(src, marks('1:24')).text).toBe(`import { A as Ay } from 'x'\nexport const v = Ay\n`)
+  })
+
+  it('takes a trailing comment along with a removed statement', () => {
+    const src = `import { Gone } from 'x' // why it was here\nexport const v = 1\n`
+    expect(removeUnusedImports(src, marks('1:10')).text).toBe(`export const v = 1\n`)
+  })
+
   it('leaves an unused binding that is not an import alone', () => {
     const src = `import { A } from 'x'\nconst unused = 1\nexport const v = A\n`
     const { text, removed } = removeUnusedImports(src, marks('2:7'))

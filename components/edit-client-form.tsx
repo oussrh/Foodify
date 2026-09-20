@@ -46,6 +46,9 @@ const schema = z.object({
 
 export type EditClientValues = z.infer<typeof schema>
 
+// One empty list, so an unset field keeps the same identity across renders (the memos below depend on it).
+const NO_RESTAURANTS: string[] = []
+
 export default function EditClientForm({
   id,
   defaultValues,
@@ -90,8 +93,7 @@ export default function EditClientForm({
   }
 
   const currentEmail = useWatch({ control, name: 'email' })
-  const watchedRestaurantIds = useWatch({ control, name: 'restaurantIds' })
-  const selectedRestaurants = useMemo(() => watchedRestaurantIds ?? [], [watchedRestaurantIds])
+  const selectedRestaurants = useWatch({ control, name: 'restaurantIds' }) ?? NO_RESTAURANTS
 
   // Filter restaurants based on search and toggle
   const filteredRestaurants = useMemo(() => {

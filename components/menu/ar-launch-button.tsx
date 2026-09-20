@@ -5,11 +5,9 @@ import { Camera, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MENU_TEXT, type Locale } from '@/lib/menu'
 import { useClientValue } from '@/components/use-client-value'
+import { isAndroid, isIOS } from '@/lib/device'
 
-const ua = () => navigator.userAgent
-const onIOS = () => /iPhone|iPad|iPod/i.test(ua())
-const onAndroid = () => /Android/i.test(ua())
-const arSupport = () => (onIOS() ? 'quick-look' : 'xr' in navigator ? 'webxr' : onAndroid() ? 'scene-viewer' : 'limited')
+const arSupport = () => (isIOS() ? 'quick-look' : 'xr' in navigator ? 'webxr' : isAndroid() ? 'scene-viewer' : 'limited')
 
 interface ARLaunchButtonProps {
   dish: {
@@ -29,10 +27,7 @@ interface ARLaunchButtonProps {
  */
 export default function ARLaunchButton({ dish, locale, className }: ARLaunchButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const isIOS = useClientValue(onIOS, false)
-  const isAndroid = useClientValue(onAndroid, false)
-  const browserSupport = useClientValue(arSupport, 'unknown')
-  const device = { isIOS, isAndroid, browserSupport }
+  const device = { isIOS: useClientValue(isIOS, false), isAndroid: useClientValue(isAndroid, false), browserSupport: useClientValue(arSupport, 'unknown') }
   const t = MENU_TEXT[locale]
   const dishName = locale === 'fr' ? dish.nameFr : dish.nameEn
 
