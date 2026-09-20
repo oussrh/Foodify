@@ -1,9 +1,13 @@
 "use client"
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Camera, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { MENU_TEXT, type Locale } from '@/lib/menu'
+import { useClientValue } from '@/components/use-client-value'
+import { isAndroid, isIOS } from '@/lib/device'
+
+const arSupport = () => (isIOS() ? 'quick-look' : 'xr' in navigator ? 'webxr' : isAndroid() ? 'scene-viewer' : 'limited')
 
 interface ARLaunchButtonProps {
   dish: {
@@ -23,20 +27,9 @@ interface ARLaunchButtonProps {
  */
 export default function ARLaunchButton({ dish, locale, className }: ARLaunchButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [device, setDevice] = useState({ isIOS: false, isAndroid: false, browserSupport: 'unknown' })
+  const device = { isIOS: useClientValue(isIOS, false), isAndroid: useClientValue(isAndroid, false), browserSupport: useClientValue(arSupport, 'unknown') }
   const t = MENU_TEXT[locale]
   const dishName = locale === 'fr' ? dish.nameFr : dish.nameEn
-
-  useEffect(() => {
-    const ua = navigator.userAgent
-    const isIOS = /iPhone|iPad|iPod/i.test(ua)
-    const isAndroid = /Android/i.test(ua)
-    let browserSupport = 'limited'
-    if (isIOS) browserSupport = 'quick-look'
-    else if ('xr' in navigator) browserSupport = 'webxr'
-    else if (isAndroid) browserSupport = 'scene-viewer'
-    setDevice({ isIOS, isAndroid, browserSupport })
-  }, [])
 
   if (!dish.usdzUrl && !dish.glbUrl) return null
 

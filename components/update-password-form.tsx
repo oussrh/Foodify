@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
@@ -10,12 +10,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { updatePassword } from '@/app/actions/profile-actions'
-import { 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  AlertCircle,
   Loader2,
   Shield,
   Check,
@@ -26,7 +26,6 @@ import {
   Info,
   ArrowRight,
   CheckCircle2,
-  RefreshCw
 } from 'lucide-react'
 
 const schema = z
@@ -54,7 +53,7 @@ export default function UpdatePasswordForm() {
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
+    control,
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
   
   const [loading, setLoading] = useState(false)
@@ -64,8 +63,8 @@ export default function UpdatePasswordForm() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const password = watch('password') || ''
-  const confirmPassword = watch('confirm') || ''
+  const password = useWatch({ control, name: 'password' }) || ''
+  const confirmPassword = useWatch({ control, name: 'confirm' }) || ''
 
   // Password strength validation
   const passwordChecks = [

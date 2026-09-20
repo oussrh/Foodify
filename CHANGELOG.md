@@ -6,6 +6,9 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Added
 
+- `scripts/codemods/remove-unused-imports.mjs`: removes the import bindings ESLint reports unused and nothing else, driven by ESLint's JSON output; dry run by default, `--write` to apply; eleven fixture cases. `lib/device.ts` (`isIOS`, `isAndroid`, tested) and `components/menu/use-menu-locale.ts` (the guest's language on a menu page) are the seams the review found duplicated.
+- `components/use-client-value.ts`: a value that exists only in the browser (user agent, matchMedia, storage) read through `useSyncExternalStore` with a server snapshot, so components stop setting state from effects after hydration.
+- `lib/time.ts` (`daysAgo`, `daysSince`, with tests): the dashboards' clock reads in one place instead of `Date.now()` arithmetic in six pages; `daysSince` is never negative, where the old arithmetic could be under clock skew.
 - `.gitattributes`: every text file is LF in the working tree as well as the index (`* text=auto eol=lf`), so a Windows checkout no longer flips docs to CRLF, which abatty's front-matter parser misreads.
 - Unit suite (Vitest, `pnpm test`): 85 tests over the shared layer (opening hours, social links, brand colour, pricing and locale, brand uploads, TOTP, JSON-LD) with the coverage floor for `lib/**` pinned in `vitest.config.ts` at the measured figure; `docs/TESTING.md` lists the floor and every exclusion; `pnpm test:changed` holds the floor over the files a push changed (CI runs it).
 - CI (`.github/workflows/checks.yml`): `pnpm run gate` (the pre-push hook's script) and a production audit on every push and pull request, frozen install; a pull-request template with the gate's checklist.
@@ -19,6 +22,9 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Changed
 
+- `pnpm lint` is `eslint . --max-warnings=0` and the tree has zero findings: the twelve `any`s are typed (Prisma rows infer their own types, the JWT carries `role` by declaration, model-viewer's AR events are `CustomEvent`s), which also brought `types.escapes` 13 → 1; the ESLint config no longer holds any preset rule at warn.
+- The eight forms subscribe to their fields with `useWatch` and read them in handlers with `getValues` instead of `watch()`, which the React Compiler cannot memoise (the client form's never-updating `useMemo` over `watch` went with it). Compiling the forms exposed four more mount-effect patterns, fixed the same way: `hasUnsavedChanges` is `isDirty` in the dish and restaurant forms (every place that cleared it also reset the form), the settings tab comes from the URL as a client value, and new default values reach the dish form's asset fields during render, with only the form reset left in the effect. `DishStatusManager` no longer takes `restaurantId`.
+- The React Compiler rules of `react-hooks` 7 are met: the theme toggle, the AR launch button, the menu and dish pages (language detection), the sign-in flow (pending credentials, the code countdown), the font picker (selection derived from the saved URL, a font counts as loaded when its stylesheet has), the AR preview (the `<model-viewer>` element read from the custom-element registry) and `usePwa` (connectivity as a store, the precache list and update callback through `useEffectEvent`) no longer set state synchronously in effects, read refs during render or call a function before its declaration; the menu finds its sections by id instead of a ref map.
 - `otplib` 13 (`verifySync`; it refuses secrets under 16 bytes, which no stored secret and no code hits: a future enrolment uses `generateSecret()`), `resend` 6, `lucide-react` 1.47 (brand logos are gone from Lucide: the Instagram, Facebook and X glyphs the footer and the contact panel show now live in `components/social-icons.tsx`, the Lucide 0.525 shapes under its ISC licence). Held back with the reason recorded: TypeScript 7 (typescript-eslint supports `<6.1`), ESLint 10 (see above), Prisma 8 (a release candidate), `@types/node` 26 (the runtime is Node 22/24).
 - Tailwind CSS 4.3: `tailwind.config.ts` is gone, the design tokens are declared in `app/globals.css` (`@theme`, `@custom-variant dark`, `@plugin 'tailwindcss-animate'`, the `container` utility) by the official upgrade tool, which also renamed the utilities v4 renamed in 52 files (`shrink-0`, `outline-hidden`, `ring-3`); PostCSS runs `@tailwindcss/postcss` alone (autoprefixer is built in). Buttons keep the pointer cursor v4 removed. Verified on the production build: the public menu and the manager dashboard render as before.
 - Prisma 7.10: the client is generated into `generated/prisma` (gitignored) by the `prisma-client` generator and talks to Postgres through `@prisma/adapter-pg`; the connection URL and the seed command live in `prisma.config.ts`; the seed is `prisma/seed.ts` run by `tsx`; `DATABASE_URL` is read through `lib/env.ts` (`serverEnv`), as is the public app URL (`publicEnv.appUrl`). Coverage floor for `lib/**` raised to 93.0 / 81.3 / 79.4 / 93.3 with tests for `lib/env.ts`. The Prisma CLI is a devDependency (a build tool; Vercel installs it for the build); `pnpm.overrides` lift its `deepmerge-ts` and `mysql2` to patched releases, and `pnpm audit --prod` reports no known vulnerabilities.
@@ -36,6 +42,8 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Removed
 
+- Dead code the Next 16 lint presets exposed: the `restaurantId` prop the two upload components accepted and ignored, the calories editor's leftover state and handler in `DishStatusManager` (and its `calories` prop), an unused router, watched field and result in the restaurant form, two unstyled alert-dialog primitives shadowed by the styled exports, an unused type; a fabricated "File size: ~NMB" in the AR preview.
+- 84 unused import bindings in 24 files (11 whole import statements), by `scripts/codemods/remove-unused-imports.mjs`; `size.excessCode` 5306 → 5236.
 - `tsconfig.tsbuildinfo` (a type-checker cache, dirty after every run) and `.claude/settings.local.json` (per-machine tool permissions) are no longer tracked; both and `.serena/` are ignored.
 - `.eslintrc.json` and `next lint` (gone in Next 16); the import graph's one known violation (root `middleware.ts` read as an orphan), fixed in the rule rather than carried.
 - `/api/seed`, `/api/setup`, `/api/deploy`.
@@ -44,6 +52,8 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Fixed
 
+- The manager profile's "view restaurant" link pointed at `/manager/restaurants/[id]`, a route with no page (an `as any` on the href hid it from the typed routes); it opens the restaurant's info page.
+- The back button navigates through Next's router instead of assigning `window.location`.
 - Three empty `interface X extends Y {}` in `components/ui/` are type aliases; the WebXR `@ts-ignore` says why it expects an error.
 - `no-debugger` is an ESLint error (the gate's lint control stayed green without it); knip also watches `src/` so the dead-code control is meaningful.
 - Placeholder credentials in `.env.example` and `DEPLOYMENT.md` use `<angle-bracket>` form; the real Cloudinary cloud name and API key are scrubbed from the example.

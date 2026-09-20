@@ -1,15 +1,14 @@
 // PathFile: components/3d-viewer-client.tsx
 "use client"
 
-import { useEffect, useState, useRef, createElement } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { 
-  ArrowLeft, 
-  RotateCcw, 
-  ZoomIn, 
-  ZoomOut,
+import {
+  ArrowLeft,
+  RotateCcw,
+  ZoomIn,
   Move3D,
   Eye,
   AlertCircle,
@@ -20,7 +19,7 @@ import {
   Pause,
   Settings,
   Info,
-  Monitor
+  Monitor,
 } from 'lucide-react'
 
 // Define ModelViewer interface for better type safety

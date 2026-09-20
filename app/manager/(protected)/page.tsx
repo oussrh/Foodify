@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { EmptyState, PageHeader, StatStrip } from '@/components/shell/page-header'
 import { RestaurantRowMenu } from '@/components/shell/row-actions'
+import { daysAgo } from '@/lib/time'
 
 export default async function ManagerDashboard() {
   const session = await auth()
@@ -12,7 +13,7 @@ export default async function ManagerDashboard() {
     throw new Error('Not authenticated')
   }
 
-  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const since = daysAgo(7)
 
   const restaurants = await prisma.restaurant.findMany({
     where: { users: { some: { email: session.user.email } } },

@@ -45,36 +45,30 @@ export default function GoogleFontsSelector({
   onFontChange, 
   disabled = false 
 }: GoogleFontsSelectorProps) {
-  const [selectedFont, setSelectedFont] = useState('')
+  const fontFromUrl = POPULAR_FONTS.find((font) => font.url === currentFontUrl)
+  const [pickedFont, setPickedFont] = useState<string | null>(null)
+  const selectedFont = pickedFont ?? fontFromUrl?.name ?? ''
   const [previewText, setPreviewText] = useState('Your Restaurant Name')
   const [loadedFonts, setLoadedFonts] = useState<Set<string>>(new Set())
 
   const loadFont = useCallback((fontUrl: string, fontName: string) => {
-    if (loadedFonts.has(fontName)) return
-
+    if (document.querySelector(`link[href="${fontUrl}"]`)) return
     const link = document.createElement('link')
     link.href = fontUrl
     link.rel = 'stylesheet'
+    link.onload = () => setLoadedFonts((prev) => new Set(prev).add(fontName))
     document.head.appendChild(link)
-    
-    setLoadedFonts(prev => new Set([...prev, fontName]))
-  }, [loadedFonts])
+  }, [])
 
-  // Find current font from URL
+  // The saved font is loaded for its preview.
   useEffect(() => {
-    if (currentFontUrl) {
-      const found = POPULAR_FONTS.find(font => font.url === currentFontUrl)
-      if (found) {
-        setSelectedFont(found.name)
-        loadFont(found.url, found.name)
-      }
-    }
-  }, [currentFontUrl, loadFont])
+    if (fontFromUrl) loadFont(fontFromUrl.url, fontFromUrl.name)
+  }, [fontFromUrl, loadFont])
 
   const handleFontSelect = (fontName: string) => {
     const font = POPULAR_FONTS.find(f => f.name === fontName)
     if (font) {
-      setSelectedFont(fontName)
+      setPickedFont(fontName)
       loadFont(font.url, font.name)
       onFontChange(font.url, font.name)
     }

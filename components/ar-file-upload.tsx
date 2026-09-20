@@ -1,39 +1,28 @@
 "use client"
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog'
-import { 
-  Upload, 
-  File, 
-  CheckCircle, 
-  AlertCircle, 
-  X, 
+  File,
+  CheckCircle,
+  AlertCircle,
+  X,
   Eye,
   Camera,
   Loader2,
   CloudUpload,
-  FileType,
   Info,
   Download,
-  RefreshCw,
   Smartphone,
   Monitor,
   Globe,
   Apple,
-  Zap
+  Zap,
 } from 'lucide-react'
 
 interface ARFileUploadProps {
-  restaurantId: string
   restaurantName: string
   currentUsdzUrl?: string
   currentGlbUrl?: string
@@ -50,7 +39,6 @@ interface UploadResult {
 }
 
 export default function ARFileUpload({
-  restaurantId,
   restaurantName,
   currentUsdzUrl,
   currentGlbUrl,

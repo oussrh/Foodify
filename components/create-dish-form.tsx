@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -11,30 +11,22 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DietarySelect from "@/components/dietary-select";
-import { Badge } from "@/components/ui/badge";
 import { createDish } from "@/app/actions/dish-actions";
 import ARFileUpload from "@/components/ar-file-upload";
 import ARModelPreview from "@/components/ar-model-preview";
 import ImageUpload from "@/components/image-upload";
 import { useState } from "react";
-import { 
-  ChefHat, 
-  Globe, 
-  DollarSign, 
-  Image as ImageIcon,
-  Camera,
+import {
+  ChefHat,
+  Globe,
+  DollarSign,
   Save,
   AlertCircle,
   CheckCircle,
-  Utensils
+  Utensils,
 } from "lucide-react";
 
 type Subcategory = { id: string; nameEn: string };
-
-interface Restaurant {
-  id: string;
-  name: string;
-}
 
 // Simple schema without transforms - handle conversion manually
 const schema = z.object({
@@ -78,12 +70,13 @@ export default function CreateDishForm({
     formState: { errors, isDirty },
     reset,
     setValue,
-    watch,
+    control,
     setError: setFormError,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onChange",
   });
+  const [dietary = [], allergens = [], nameEn] = useWatch({ control, name: ['dietary', 'allergens', 'nameEn'] })
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
@@ -297,8 +290,8 @@ export default function CreateDishForm({
 
               <div className="md:col-span-2">
                 <DietarySelect
-                  dietary={watch('dietary') || []}
-                  allergens={watch('allergens') || []}
+                  dietary={dietary}
+                  allergens={allergens}
                   onDietaryChange={(v) => setValue('dietary', v, { shouldDirty: true })}
                   onAllergensChange={(v) => setValue('allergens', v, { shouldDirty: true })}
                   disabled={isSubmitting}
@@ -349,7 +342,6 @@ export default function CreateDishForm({
 
         {/* Dish Image Upload */}
         <ImageUpload
-          restaurantId={restaurantId}
           restaurantName={restaurantName || 'Restaurant'}
           currentImageUrl={imageUrl}
           onImageUpload={(url) => {
@@ -360,7 +352,6 @@ export default function CreateDishForm({
 
         {/* AR Models Upload */}
         <ARFileUpload
-          restaurantId={restaurantId}
           restaurantName={restaurantName || 'Restaurant'}
           currentUsdzUrl={usdzUrl}
           currentGlbUrl={glbUrl}
@@ -406,7 +397,7 @@ export default function CreateDishForm({
           onClose={() => setPreviewModel(null)}
           modelUrl={previewModel.url}
           modelType={previewModel.type}
-          dishName={watch('nameEn') || 'Dish Preview'}
+          dishName={nameEn || 'Dish Preview'}
         />
       )}
     </div>

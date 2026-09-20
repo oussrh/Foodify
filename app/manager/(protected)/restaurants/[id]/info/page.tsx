@@ -5,6 +5,7 @@ import { ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader, StatStrip } from '@/components/shell/page-header'
 import QRCodeDisplay from '@/components/qr-code-display'
+import { daysAgo } from '@/lib/time'
 
 export default async function RestaurantInfoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -14,7 +15,7 @@ export default async function RestaurantInfoPage({ params }: { params: Promise<{
   const restaurant = await prisma.restaurant.findFirst({ where: { id, users: { some: { email: session.user.email } } } })
   if (!restaurant) redirect('/manager/restaurants')
 
-  const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
+  const since = daysAgo(30)
   const [views, arViews, recent, dishes] = await Promise.all([
     prisma.dishView.count({ where: { dish: { restaurantId: restaurant.id } } }),
     prisma.dishView.count({ where: { dish: { restaurantId: restaurant.id }, arViewed: true } }),

@@ -17,17 +17,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import {
-  AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogAction,
-  AlertDialogCancel,
-} from "@/components/ui/alert-dialog";
-import {
   GripVertical,
   Plus,
   ChevronDown,
@@ -38,8 +27,6 @@ import {
   EyeOff,
   Edit2,
   FolderPlus,
-  Settings,
-  Sparkles,
 } from "lucide-react";
 import {
   DndContext,

@@ -12,13 +12,11 @@ import {
   Building2,
   Calendar,
   Settings,
-  Key,
   Mail,
   BarChart3,
   ExternalLink,
   Lightbulb,
   Star,
-  TrendingUp
 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 
@@ -56,14 +54,14 @@ export default async function EditUserPage({
   const restaurants = await prisma.restaurant.findMany({ orderBy: { name: 'asc' } })
   const defaultValues: EditClientValues = {
     email: user.email,
-    restaurantIds: user.restaurants.map((r: any) => r.id),
+    restaurantIds: user.restaurants.map((r) => r.id),
   }
 
   // Calculate user statistics
   const totalRestaurants = user.restaurants.length
-  const totalDishes = user.restaurants.reduce((acc: number, r: any) => acc + r.dishes.length, 0)
-  const activeDishes = user.restaurants.reduce((acc: number, r: any) => acc + r.dishes.filter((d: any) => d.isActive).length, 0)
-  const totalCategories = user.restaurants.reduce((acc: number, r: any) => acc + r.categories.length, 0)
+  const totalDishes = user.restaurants.reduce((acc, r) => acc + r.dishes.length, 0)
+  const activeDishes = user.restaurants.reduce((acc, r) => acc + r.dishes.filter((d) => d.isActive).length, 0)
+  const totalCategories = user.restaurants.reduce((acc, r) => acc + r.categories.length, 0)
 
   return (
     <div className="space-y-8">
@@ -201,7 +199,7 @@ export default async function EditUserPage({
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground font-medium">User&apos;s Restaurants:</p>
                   <div className="space-y-1 max-h-32 overflow-y-auto">
-                    {user.restaurants.map((restaurant: any) => (
+                    {user.restaurants.map((restaurant) => (
                       <Button
                         key={restaurant.id}
                         asChild

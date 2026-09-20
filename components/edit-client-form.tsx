@@ -1,36 +1,32 @@
 // PathFile: components/edit-client-form.tsx
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { updateClient } from '@/app/actions/client-actions'
-import { 
-  Mail, 
-  Building2, 
-  Save, 
-  Check, 
-  AlertCircle, 
-  Plus, 
-  X, 
-  Search, 
+import {
+  Mail,
+  Building2,
+  Save,
+  Check,
+  AlertCircle,
+  Plus,
+  X,
+  Search,
   Users,
   Settings,
   Shield,
-  Eye,
-  EyeOff,
-  RefreshCw,
   CheckCircle2,
   Sparkles,
   ArrowRight,
   Filter,
-  Loader2
+  Loader2,
 } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import {
@@ -49,6 +45,9 @@ const schema = z.object({
 })
 
 export type EditClientValues = z.infer<typeof schema>
+
+// One empty list, so an unset field keeps the same identity across renders (the memos below depend on it).
+const NO_RESTAURANTS: string[] = []
 
 export default function EditClientForm({
   id,
@@ -70,7 +69,8 @@ export default function EditClientForm({
     register,
     handleSubmit,
     formState: { errors, isDirty },
-    watch,
+    control,
+    getValues,
     setValue,
   } = useForm<EditClientValues>({ 
     resolver: zodResolver(schema), 
@@ -92,12 +92,8 @@ export default function EditClientForm({
     }
   }
 
-  const currentEmail = watch('email')
-
-  // Fix for useMemo dependency issue - wrap selectedRestaurants in useMemo
-  const selectedRestaurants = useMemo(() => {
-    return watch('restaurantIds') || []
-  }, [watch])
+  const currentEmail = useWatch({ control, name: 'email' })
+  const selectedRestaurants = useWatch({ control, name: 'restaurantIds' }) ?? NO_RESTAURANTS
 
   // Filter restaurants based on search and toggle
   const filteredRestaurants = useMemo(() => {
@@ -115,10 +111,8 @@ export default function EditClientForm({
   // Calculate assignment changes
   const assignmentChanges = useMemo(() => {
     const originalIds = defaultValues.restaurantIds || []
-    const currentIds = selectedRestaurants
-    
-    const added = currentIds.filter(id => !originalIds.includes(id))
-    const removed = originalIds.filter(id => !currentIds.includes(id))
+    const added = selectedRestaurants.filter((id) => !originalIds.includes(id))
+    const removed = originalIds.filter((id) => !selectedRestaurants.includes(id))
     
     return { added, removed }
   }, [defaultValues.restaurantIds, selectedRestaurants])
@@ -388,7 +382,7 @@ export default function EditClientForm({
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                      const currentValues = watch('restaurantIds') || []
+                                      const currentValues = getValues('restaurantIds') || []
                                       const newValues = currentValues.filter(currentId => currentId !== restaurant.id)
                                       setValue('restaurantIds', newValues, { shouldDirty: true })
                                     }}
@@ -404,7 +398,7 @@ export default function EditClientForm({
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                      const currentValues = watch('restaurantIds') || []
+                                      const currentValues = getValues('restaurantIds') || []
                                       const newValues = [...currentValues, restaurant.id]
                                       setValue('restaurantIds', newValues, { shouldDirty: true })
                                     }}
@@ -504,7 +498,7 @@ export default function EditClientForm({
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                const currentValues = watch('restaurantIds') || []
+                                const currentValues = getValues('restaurantIds') || []
                                 const newValues = currentValues.filter(currentId => currentId !== restaurantId)
                                 setValue('restaurantIds', newValues, { shouldDirty: true })
                               }}

@@ -13,19 +13,17 @@ import {
   Smartphone,
   AlertCircle,
   Loader2,
-  Fullscreen,
   Share,
   Settings,
   RefreshCw,
   CheckCircle,
-  X,
   Maximize,
   Minimize,
   View,
   Box,
   ScanLine,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -61,15 +59,14 @@ export default function ARViewerClient() {
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Auto-hide controls after inactivity
+  const armControlsTimer = useCallback(() => {
+    if (controlsTimeoutRef.current) clearTimeout(controlsTimeoutRef.current)
+    controlsTimeoutRef.current = setTimeout(() => setShowControls(false), 4000)
+  }, [])
   const resetControlsTimer = useCallback(() => {
     setShowControls(true)
-    if (controlsTimeoutRef.current) {
-      clearTimeout(controlsTimeoutRef.current)
-    }
-    controlsTimeoutRef.current = setTimeout(() => {
-      setShowControls(false)
-    }, 4000)
-  }, [])
+    armControlsTimer()
+  }, [armControlsTimer])
 
   useEffect(() => {
     // Enhanced AR support detection with camera permissions check
@@ -174,8 +171,8 @@ export default function ARViewerClient() {
     }
     document.addEventListener('fullscreenchange', handleFullscreenChange)
     
-    // Initialize controls timer
-    resetControlsTimer()
+    // Controls start visible; only the hide timer needs arming.
+    armControlsTimer()
     
     return () => {
       if (document.head.contains(script)) {
@@ -189,7 +186,7 @@ export default function ARViewerClient() {
       document.removeEventListener('touchstart', handleTouchStart)
       document.removeEventListener('fullscreenchange', handleFullscreenChange)
     }
-  }, [resetControlsTimer])
+  }, [resetControlsTimer, armControlsTimer])
 
   // Create or update the model-viewer element.
   // Depends on isLoading because the container div is only mounted once the loading screen is gone.
@@ -308,12 +305,12 @@ export default function ARViewerClient() {
       
       // Add AR-specific event listeners
       if (viewMode === 'ar') {
-        modelViewer.addEventListener('ar-status', (event: any) => {
-          console.log('AR status:', event.detail.status)
-          if (event.detail.status === 'session-started') {
-            console.log('AR session started successfully')
+        modelViewer.addEventListener('ar-status', (event) => {
+          const { status } = (event as CustomEvent<{ status: string }>).detail // model-viewer dispatches CustomEvents; lib.dom types listeners as Event
+          console.log('AR status:', status)
+          if (status === 'session-started') {
             toast.success('AR camera activated!')
-          } else if (event.detail.status === 'failed') {
+          } else if (status === 'failed') {
             console.error('AR session failed')
             toast.error('AR camera failed to start. Please check permissions.')
           }
@@ -325,8 +322,8 @@ export default function ARViewerClient() {
         
         // Handle WebXR session events
         if (arMode === 'webxr') {
-          modelViewer.addEventListener('ar-tracking', (event: any) => {
-            console.log('AR tracking status:', event.detail)
+          modelViewer.addEventListener('ar-tracking', (event) => {
+            console.log('AR tracking status:', (event as CustomEvent<{ status: string }>).detail) // same: a CustomEvent from model-viewer
           })
         }
       }
@@ -358,7 +355,7 @@ export default function ARViewerClient() {
         })
         
         // Add click handler for better camera activation
-        arButton.addEventListener('click', async (event) => {
+        arButton.addEventListener('click', async () => {
           console.log('AR button clicked, preparing camera...')
           
           // Add loading state to button

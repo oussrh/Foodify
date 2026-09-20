@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useClientValue } from '@/components/use-client-value'
 import { useRouter } from 'next/navigation'
 import type { Route } from 'next'
 import { signIn } from 'next-auth/react'
@@ -45,31 +46,32 @@ export default function SignInFlow({ role, initialStep = 'credentials' }: SignIn
   const cfg = CONFIG[role]
   const router = useRouter()
   const [step, setStep] = useState<Step>(initialStep)
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  // On the /mfa routes the credentials step left them in sessionStorage. They are read once, on
+  // the first client render, and kept: the storage is cleared on success and on "start over",
+  // and neither may send the page back to the login.
+  const [ek, pk] = cfg.storage
+  const storedEmail = useClientValue(() => (initialStep === 'code' ? sessionStorage.getItem(ek) ?? '' : ''), '')
+  const storedPassword = useClientValue(() => (initialStep === 'code' ? sessionStorage.getItem(pk) ?? '' : ''), '')
+  const hydrated = useClientValue(() => true, false)
+  const [pending, setPending] = useState<{ email: string; password: string } | null>(null)
+  if (hydrated && pending === null) setPending({ email: storedEmail, password: storedPassword })
+  const [typedEmail, setEmail] = useState<string | null>(null)
+  const [typedPassword, setPassword] = useState<string | null>(null)
+  const email = typedEmail ?? pending?.email ?? ''
+  const password = typedPassword ?? pending?.password ?? ''
   const [code, setCode] = useState('')
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [resending, setResending] = useState(false)
   const [timeLeft, setTimeLeft] = useState(CODE_TTL)
 
-  // The /mfa routes resume a pending sign-in stored by the credentials step.
+  // An /mfa route that loaded with nothing pending goes back to the login.
   useEffect(() => {
-    if (initialStep !== 'code') return
-    const [ek, pk] = cfg.storage
-    const e = sessionStorage.getItem(ek)
-    const p = sessionStorage.getItem(pk)
-    if (!e || !p) {
-      router.replace(cfg.login)
-      return
-    }
-    setEmail(e)
-    setPassword(p)
-  }, [initialStep, cfg, router])
+    if (pending && initialStep === 'code' && (!pending.email || !pending.password)) router.replace(cfg.login)
+  }, [pending, initialStep, cfg, router])
 
   useEffect(() => {
     if (step !== 'code') return
-    setTimeLeft(CODE_TTL)
     const timer = setInterval(() => setTimeLeft((t) => (t <= 1 ? 0 : t - 1)), 1000)
     return () => clearInterval(timer)
   }, [step])
@@ -87,6 +89,7 @@ export default function SignInFlow({ role, initialStep = 'credentials' }: SignIn
       const [ek, pk] = cfg.storage
       sessionStorage.setItem(ek, email)
       sessionStorage.setItem(pk, password)
+      setTimeLeft(CODE_TTL)
       setStep('code')
     } catch {
       setError('Something went wrong. Try again.')

@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import DietarySelect from '@/components/dietary-select'
-import { Badge } from '@/components/ui/badge'
 import { updateDish } from '@/app/actions/dish-actions'
 import ARFileUpload from '@/components/ar-file-upload'
 import ARModelPreview from '@/components/ar-model-preview'
@@ -17,18 +16,12 @@ import ImageUpload from '@/components/image-upload'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { 
-  ChefHat, 
-  Globe, 
-  DollarSign, 
-  Image as ImageIcon,
-  Camera,
+import {
+  Globe,
+  DollarSign,
   Save,
-  AlertCircle,
-  CheckCircle,
   Utensils,
   Edit,
-  X
 } from 'lucide-react'
 
 type Subcategory = { id: string; nameEn: string }
@@ -82,7 +75,6 @@ export default function EditDishForm({
   subcategories: Subcategory[]
   restaurantName?: string
 }) {
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [usdzUrl, setUsdzUrl] = useState(defaultValues.usdzUrl || '')
   const [glbUrl, setGlbUrl] = useState(defaultValues.glbUrl || '')
@@ -94,7 +86,7 @@ export default function EditDishForm({
     register,
     handleSubmit,
     formState: { errors, isDirty, isSubmitting },
-    watch,
+    control,
     setValue,
     reset,
   } = useForm<EditDishValues>({
@@ -102,18 +94,21 @@ export default function EditDishForm({
     defaultValues,
     mode: 'onChange'
   })
+  const [dietary = [], allergens = [], nameEn] = useWatch({ control, name: ['dietary', 'allergens', 'nameEn'] })
 
-  // Track form changes
-  useEffect(() => {
-    setHasUnsavedChanges(isDirty)
-  }, [isDirty])
+  const hasUnsavedChanges = isDirty
 
-  // Update state when defaultValues change (after database updates)
-  useEffect(() => {
+  // New defaults (after a save the page re-renders with fresh data): the asset fields follow
+  // them during this render, the form resets after it.
+  const [prevDefaults, setPrevDefaults] = useState(defaultValues)
+  if (prevDefaults !== defaultValues) {
+    setPrevDefaults(defaultValues)
     setUsdzUrl(defaultValues.usdzUrl || '')
     setGlbUrl(defaultValues.glbUrl || '')
     setImageUrl(defaultValues.imageUrl || '')
-    reset(defaultValues) // Reset the entire form with new default values
+  }
+  useEffect(() => {
+    reset(defaultValues)
   }, [defaultValues, reset])
 
   // Handle save
@@ -141,7 +136,6 @@ export default function EditDishForm({
       await updateDish(id, restaurantId, finalData)
       
       setSaveStatus('saved')
-      setHasUnsavedChanges(false)
       
       // Reset form state to mark as clean
       reset(data)
@@ -173,7 +167,6 @@ export default function EditDishForm({
     if (hasUnsavedChanges) {
       if (confirm('You have unsaved changes. Are you sure you want to discard them?')) {
         reset(defaultValues)
-        setHasUnsavedChanges(false)
         setSaveStatus('idle')
         setUsdzUrl(defaultValues.usdzUrl || '')
         setGlbUrl(defaultValues.glbUrl || '')
@@ -334,8 +327,8 @@ export default function EditDishForm({
 
               <div className="md:col-span-2">
                 <DietarySelect
-                  dietary={watch('dietary') || []}
-                  allergens={watch('allergens') || []}
+                  dietary={dietary}
+                  allergens={allergens}
                   onDietaryChange={(v) => setValue('dietary', v, { shouldDirty: true })}
                   onAllergensChange={(v) => setValue('allergens', v, { shouldDirty: true })}
                   disabled={isSubmitting}
@@ -386,7 +379,6 @@ export default function EditDishForm({
 
         {/* Dish Image Upload */}
         <ImageUpload
-          restaurantId={restaurantId}
           restaurantName={restaurantName || 'Restaurant'}
           currentImageUrl={imageUrl}
           onImageUpload={(url) => {
@@ -397,7 +389,6 @@ export default function EditDishForm({
 
         {/* AR Models Upload */}
         <ARFileUpload
-          restaurantId={restaurantId}
           restaurantName={restaurantName || 'Restaurant'}
           currentUsdzUrl={usdzUrl}
           currentGlbUrl={glbUrl}
@@ -441,7 +432,7 @@ export default function EditDishForm({
           onClose={() => setPreviewModel(null)}
           modelUrl={previewModel.url}
           modelType={previewModel.type}
-          dishName={watch('nameEn') || 'Dish Preview'}
+          dishName={nameEn || 'Dish Preview'}
         />
       )}
     </div>

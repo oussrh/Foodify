@@ -1,11 +1,11 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
+import { useClientValue } from '@/components/use-client-value'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState, useCallback } from 'react'
 import { cn } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,28 +13,17 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { updateRestaurant } from '@/app/actions/restaurant-actions'
 import BrandingPanel from '@/components/branding/branding-panel'
 import ContactPanel, { type ContactFormValues } from '@/components/contact/contact-panel'
 import type { UseFormRegister } from 'react-hook-form'
-import { 
-  Building2, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Globe, 
-  Palette, 
-  Clock,
+import {
+  Building2,
+  Globe,
   DollarSign,
   ChefHat,
-  Share2,
-  Type,
   CreditCard,
   Save,
-  X,
-  AlertCircle,
-  CheckCircle
 } from 'lucide-react'
 
 const schema = z.object({
@@ -100,16 +89,11 @@ export default function EditRestaurantForm({
   id: string
   defaultValues: EditRestaurantValues
 }) {
-  const router = useRouter()
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [activeTab, setActiveTab] = useState<SettingsTab>('general')
-
-  // Keep the active tab in the URL so a reload (or a shared link) lands on the same section.
-  useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get('tab')
-    if (t && TABS.some((tab) => tab.key === t)) setActiveTab(t as SettingsTab)
-  }, [])
+  // The active tab lives in the URL so a reload (or a shared link) lands on the same section.
+  const urlTab = useClientValue(() => new URLSearchParams(window.location.search).get('tab'), null)
+  const [pickedTab, setActiveTab] = useState<SettingsTab | null>(null)
+  const activeTab: SettingsTab = pickedTab ?? TABS.find((tab) => tab.key === urlTab)?.key ?? 'general'
   const showTab = useCallback((tab: SettingsTab) => {
     setActiveTab(tab)
     const url = new URL(window.location.href)
@@ -122,7 +106,7 @@ export default function EditRestaurantForm({
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
     setValue,
-    watch,
+    control,
     reset,
     resetField,
   } = useForm<EditRestaurantValues>({ 
@@ -131,11 +115,9 @@ export default function EditRestaurantForm({
     mode: 'onChange'
   })
 
-  const logoUrl = watch('logoUrl')
-  const coverImageUrl = watch('coverImageUrl')
-  const googleFontUrl = watch('googleFontUrl')
-  const currentCurrency = watch('currency')
-  const currentCurrencySymbol = watch('currencySymbol')
+  const values = useWatch({ control })
+  const { logoUrl, coverImageUrl, googleFontUrl } = values
+  const currentCurrencySymbol = values.currencySymbol
 
   // Uploads are saved the moment they finish, so they update the baseline instead of dirtying the form.
   const onBrandingChange = useCallback(
@@ -146,24 +128,21 @@ export default function EditRestaurantForm({
     [resetField, setValue],
   )
   const brandingValues = {
-    name: watch('name') || '',
-    tagline: watch('tagline') || '',
-    cuisineType: watch('cuisineType') || '',
-    city: watch('city') || '',
+    name: values.name || '',
+    tagline: values.tagline || '',
+    cuisineType: values.cuisineType || '',
+    city: values.city || '',
     currencySymbol: currentCurrencySymbol || '',
     logoUrl: logoUrl || '',
     coverImageUrl: coverImageUrl || '',
-    coverImageStyle: (watch('coverImageStyle') || 'cover') as 'cover' | 'repeat',
-    colorTheme: watch('colorTheme') || '',
-    fontFamily: watch('fontFamily') || '',
+    coverImageStyle: (values.coverImageStyle || 'cover') as 'cover' | 'repeat',
+    colorTheme: values.colorTheme || '',
+    fontFamily: values.fontFamily || '',
     googleFontUrl: googleFontUrl || '',
-    menuTheme: (watch('menuTheme') || 'system') as 'system' | 'light' | 'dark',
+    menuTheme: (values.menuTheme || 'system') as 'system' | 'light' | 'dark',
   }
   
-  // Track form changes
-  useEffect(() => {
-    setHasUnsavedChanges(isDirty)
-  }, [isDirty])
+  const hasUnsavedChanges = isDirty
 
   // Handle save
   const onSubmit = useCallback(async (data: EditRestaurantValues) => {
@@ -185,10 +164,9 @@ export default function EditRestaurantForm({
         website: data.website || undefined,
       }
       
-      const result = await updateRestaurant(id, cleanedData)
+      await updateRestaurant(id, cleanedData)
       
       setSaveStatus('saved')
-      setHasUnsavedChanges(false)
       
       // Reset form state to mark as clean
       reset(data)
@@ -211,14 +189,13 @@ export default function EditRestaurantForm({
       
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
-  }, [id, reset, setSaveStatus, setHasUnsavedChanges])
+  }, [id, reset, setSaveStatus])
   
   // Handle cancel
   const handleCancel = useCallback(() => {
     if (hasUnsavedChanges) {
       if (confirm('You have unsaved changes. Are you sure you want to discard them?')) {
         reset(defaultValues)
-        setHasUnsavedChanges(false)
         setSaveStatus('idle')
       }
     }
@@ -475,17 +452,17 @@ export default function EditRestaurantForm({
         register={register as unknown as UseFormRegister<ContactFormValues>}
         errors={errors}
         values={{
-          name: watch('name') || '',
-          email: watch('email'),
-          phone: watch('phone'),
-          website: watch('website'),
-          streetAddress: watch('streetAddress'),
-          city: watch('city'),
-          state: watch('state'),
-          postalCode: watch('postalCode'),
-          country: watch('country'),
-          openingHours: watch('openingHours'),
-          socialMedia: watch('socialMedia'),
+          name: values.name || '',
+          email: values.email,
+          phone: values.phone,
+          website: values.website,
+          streetAddress: values.streetAddress,
+          city: values.city,
+          state: values.state,
+          postalCode: values.postalCode,
+          country: values.country,
+          openingHours: values.openingHours,
+          socialMedia: values.socialMedia,
         }}
         onChange={(field, value) => setValue(field, value, { shouldDirty: true })}
         disabled={isSubmitting}

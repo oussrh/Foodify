@@ -1,7 +1,7 @@
 {
   "measuredAt": "2026-09-20",
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
-  "score": 83,
+  "score": 84,
   "hard": [
     "change.changelogMissing",
     "code.barrels",
@@ -23,62 +23,62 @@
     "docs.danglingSource": 0,
     "docs.frontMatter": 0,
     "docs.indexDrift": 0,
-    "size.excessCode": 5306,
+    "size.excessCode": 5158,
     "size.overBudget": 34,
     "size.overRaw": 1,
-    "types.escapes": 13,
+    "types.escapes": 1,
     "valid.rawEnv": 36
   },
   "scanned": {
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 29,
+    "docs.citations": 31,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 158,
-    "size.overBudget": 158,
-    "size.overRaw": 164,
-    "types.escapes": 158,
-    "valid.rawEnv": 157
+    "size.excessCode": 162,
+    "size.overBudget": 162,
+    "size.overRaw": 169,
+    "types.escapes": 162,
+    "valid.rawEnv": 161
   },
   "debt": {
     "size.excessCode": {
-      "app/admin/(protected)/admins/[id]/edit/page.tsx": 91,
+      "app/admin/(protected)/admins/[id]/edit/page.tsx": 80,
       "app/admin/(protected)/admins/create/page.tsx": 40,
       "app/admin/(protected)/admins/page.tsx": 5,
       "app/admin/(protected)/page.tsx": 50,
-      "app/admin/(protected)/users/[id]/edit/page.tsx": 153,
-      "app/admin/(protected)/users/create/page.tsx": 37,
+      "app/admin/(protected)/users/[id]/edit/page.tsx": 151,
+      "app/admin/(protected)/users/create/page.tsx": 36,
       "app/admin/(protected)/users/page.tsx": 19,
       "app/manager/(protected)/change-email/confirm-new/page.tsx": 33,
       "app/manager/(protected)/change-email/confirm-old/page.tsx": 77,
-      "app/manager/(protected)/profile/page.tsx": 328,
+      "app/manager/(protected)/profile/page.tsx": 309,
       "app/manager/(protected)/restaurants/[id]/dishes/page.tsx": 3,
       "app/restaurant/[slug]/page.tsx": 34,
-      "components/3d-viewer-client.tsx": 152,
-      "components/admin-category-manager.tsx": 412,
-      "components/ar-file-upload.tsx": 301,
-      "components/ar-model-preview.tsx": 124,
-      "components/ar-viewer-client.tsx": 560,
+      "components/3d-viewer-client.tsx": 151,
+      "components/admin-category-manager.tsx": 410,
+      "components/ar-file-upload.tsx": 289,
+      "components/ar-model-preview.tsx": 113,
+      "components/ar-viewer-client.tsx": 557,
       "components/branding/branding-panel.tsx": 37,
       "components/contact/contact-panel.tsx": 2,
       "components/create-client-form.tsx": 87,
-      "components/create-dish-form.tsx": 129,
-      "components/create-restaurant-form.tsx": 296,
-      "components/edit-client-form.tsx": 286,
-      "components/edit-dish-form.tsx": 151,
-      "components/edit-restaurant-form.tsx": 234,
-      "components/image-upload.tsx": 292,
+      "components/create-dish-form.tsx": 121,
+      "components/create-restaurant-form.tsx": 295,
+      "components/edit-client-form.tsx": 281,
+      "components/edit-dish-form.tsx": 142,
+      "components/edit-restaurant-form.tsx": 213,
+      "components/image-upload.tsx": 289,
       "components/ingredient-manager.tsx": 50,
-      "components/manager-category-manager.tsx": 340,
-      "components/menu/restaurant-page.tsx": 353,
+      "components/manager-category-manager.tsx": 327,
+      "components/menu/restaurant-page.tsx": 332,
       "components/qr-code-display.tsx": 160,
-      "components/reset-admin-password-button.tsx": 109,
+      "components/reset-admin-password-button.tsx": 108,
       "components/restaurant-cover-upload.tsx": 131,
-      "components/restaurant-logo-upload.tsx": 120,
-      "components/update-password-form.tsx": 110
+      "components/restaurant-logo-upload.tsx": 117,
+      "components/update-password-form.tsx": 109
     },
     "size.overBudget": {
       "app/admin/(protected)/admins/[id]/edit/page.tsx": 1,
@@ -120,11 +120,7 @@
       "components/ar-viewer-client.tsx": 1
     },
     "types.escapes": {
-      "app/admin/(protected)/users/[id]/edit/page.tsx": 6,
-      "app/admin/(protected)/users/create/page.tsx": 1,
-      "app/manager/(protected)/profile/page.tsx": 1,
-      "auth.ts": 2,
-      "components/ar-viewer-client.tsx": 3
+      "components/ar-viewer-client.tsx": 1
     },
     "valid.rawEnv": {
       "app/actions/admin-auth-actions.ts": 3,
@@ -158,13 +154,6 @@
     "valid.rawEnv": 1
   },
   "entries": {
-    "size.excessCode": {
-      "at": "2026-09-20",
-      "was": 5302,
-      "now": 5307,
-      "reason": "harness merged into main; the day-0 floor was measured on a tree without the branding, contact and PWA work (four files named in docs/STANDARDS_PROGRESS.md)",
-      "owner": "Oussama Rhoni"
-    },
     "size.overBudget": {
       "at": "2026-09-20",
       "was": 31,

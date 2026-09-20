@@ -40,8 +40,6 @@ import {
   Edit2,
   Trash2,
   FolderPlus,
-  Settings,
-  Sparkles,
   Shield,
 } from "lucide-react";
 import {

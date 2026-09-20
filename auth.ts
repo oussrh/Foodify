@@ -20,6 +20,13 @@ declare module 'next-auth' {
     }
   }
 }
+// The augmentation needs the module in the program; nothing is used from it.
+import type {} from 'next-auth/jwt'
+declare module 'next-auth/jwt' {
+  interface JWT {
+    role?: string
+  }
+}
 
 export const {
   handlers: { GET, POST },
@@ -110,14 +117,14 @@ export const {
   callbacks: {
     async jwt({ token, user }) {
       if (user?.role) {
-        (token as any).role = user.role
+        token.role = user.role
       }
       return token
     },
     async session({ session, token }) {
       if (token && session.user) {
         session.user.id = token.sub || ''
-        session.user.role = (token as any).role
+        session.user.role = token.role
       }
       return session
     },

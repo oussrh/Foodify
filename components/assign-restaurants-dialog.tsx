@@ -15,13 +15,12 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Plus, 
-  Building2, 
-  Search, 
-  Check, 
-  X,
-  Loader2
+import {
+  Plus,
+  Building2,
+  Search,
+  Check,
+  Loader2,
 } from "lucide-react";
 
 interface Restaurant {

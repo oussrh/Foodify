@@ -1,20 +1,17 @@
 "use client"
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { 
-  Upload, 
-  CheckCircle, 
-  AlertCircle, 
-  X, 
+import {
+  CheckCircle,
+  AlertCircle,
+  X,
   Eye,
   Loader2,
   CloudUpload,
   ImageIcon,
   Info,
   Download,
-  RefreshCw,
-  Palette
 } from 'lucide-react'
 import Image from 'next/image'
 import { uploadRestaurantLogo, updateRestaurant } from '@/app/actions/restaurant-actions'

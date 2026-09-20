@@ -5,8 +5,6 @@ import { buttonVariants } from "@/components/ui/button"
 
 const AlertDialog = AlertDialogPrimitive.Root
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger
-const AlertDialogCancel = AlertDialogPrimitive.Cancel
-const AlertDialogAction = AlertDialogPrimitive.Action
 
 const AlertDialogPortal = ({ ...props }: AlertDialogPrimitive.AlertDialogPortalProps) => (
   <AlertDialogPrimitive.Portal {...props} />
