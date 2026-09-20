@@ -248,7 +248,20 @@
     },
     {
       "id": 8,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-20T21:33:23Z",
+      "numbersBefore": {
+        "rules": {
+          "CODE-SIZE-800": "present",
+          "CODE-BARRELS": "present (0)",
+          "CODE-SIZE-300": "partial (8 pages over their 100-line budget)"
+        },
+        "size.overBudget": "8 (all pages: admin dashboard 152, admins/create 142, users/create 138, confirm-new 133, restaurant/[slug] 135, users 121, admins 105, manager dishes 103 code lines against 100)",
+        "size.excessCode": 228,
+        "size.overRaw": 0,
+        "score": "70/100",
+        "enforcedShare": "76% (42/55)"
+      }
     },
     {
       "id": 9,
