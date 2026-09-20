@@ -6,6 +6,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Added
 
+- CI (`.github/workflows/checks.yml`): the gate's steps on every push and pull request, frozen install, production audit, production build; a pull-request template with the gate's checklist.
 - The engineering standard's instrument: harness, gate, import graph, dead code (`abatty init`).
 - `lib/auth-guard.ts`: `requireSuperAdmin`, `requireRestaurantAccess` and the dish, ingredient, category and subcategory variants; every exported server action now starts with one.
 - `docs/LESSONS.md`, the lessons catalogue behind `CLAUDE.md`.

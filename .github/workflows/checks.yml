@@ -1,0 +1,66 @@
+# The gate, run by CI: the same package.json scripts the pre-push hook runs (`pnpm run gate`),
+# one step each so a red run names the step. Started from `abatty ci` (next preset) and adapted
+# for pnpm and for what this repository has today: no format step until a .prettierrc exists,
+# no database or browser job until `test:integration` / `e2e` scripts exist. Re-adapt after a
+# gate change (`abatty ci --check` reports against the npm template, so it always says "behind").
+name: checks
+on:
+  push:
+  pull_request:
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+env:
+  # Prisma auto-installs @prisma/client (rewriting package.json and the lockfile) when it fails to
+  # resolve it. A frozen install must fail loudly instead (SEC-LOCKFILE).
+  PRISMA_GENERATE_SKIP_AUTOINSTALL: "true"
+  # The build needs these variables to exist, not to be real: every route is rendered on demand.
+  DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
+  NEXTAUTH_URL: http://localhost:3000
+  NEXTAUTH_SECRET: ci-only-not-a-secret
+  AUTH_TRUST_HOST: "true"
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: lint (CODE.4)
+        run: pnpm run -s lint
+      - name: typecheck (CODE.3)
+        run: pnpm run -s typecheck
+      - name: import graph (CODE.5)
+        run: pnpm run -s graph
+      - name: dead code (CODE.6)
+        run: pnpm run -s dead
+      - name: the range this run judges
+        id: range
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch --no-tags origin "${{ github.base_ref }}"
+            echo "range=origin/${{ github.base_ref }}..HEAD" >> "$GITHUB_OUTPUT"
+          elif git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
+            echo "range=${{ github.event.before }}..HEAD" >> "$GITHUB_OUTPUT"
+          else
+            echo "range=HEAD~1..HEAD" >> "$GITHUB_OUTPUT"
+          fi
+      - name: abatty ratchet + changelog range (CHANGE.2)
+        run: pnpm run -s standards -- --range "${{ steps.range.outputs.range }}"
+      - name: secret scan (SEC.1)
+        run: pnpm exec abatty secrets
+      - name: audit (SEC.1)
+        run: pnpm audit --prod --audit-level=high
+      - name: build (TEST.3)
+        run: pnpm run -s build
