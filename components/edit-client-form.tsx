@@ -157,7 +157,7 @@ export default function EditClientForm({
           {/* Success Message */}
           {success && (
             <div className="mb-6 p-4 border border-border rounded-md flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                 <CheckCircle2 className="h-4 w-4 text-success dark:text-muted-foreground" />
               </div>
               <div className="flex-1">
@@ -170,7 +170,7 @@ export default function EditClientForm({
           {/* Error Message */}
           {error && (
             <div className="mb-6 p-4 border border-border rounded-md flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                 <AlertCircle className="h-4 w-4 text-destructive dark:text-muted-foreground" />
               </div>
               <div className="flex-1">
@@ -219,7 +219,7 @@ export default function EditClientForm({
                 
                 {errors.email && (
                   <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
-                    <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+                    <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
                     <p className="text-sm text-destructive dark:text-muted-foreground">{errors.email.message}</p>
                   </div>
                 )}
@@ -264,7 +264,7 @@ export default function EditClientForm({
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col bg-background border-border">
-                    <DialogHeader className="flex-shrink-0">
+                    <DialogHeader className="shrink-0">
                       <DialogTitle className="flex items-center gap-3 text-xl text-foreground">
                         <div className="p-2 bg-muted rounded-lg">
                           <Building2 className="h-5 w-5 text-muted-foreground dark:text-muted-foreground" />
@@ -280,7 +280,7 @@ export default function EditClientForm({
                     
                     <div className="flex-1 overflow-hidden flex flex-col space-y-4">
                       {/* Controls */}
-                      <div className="flex-shrink-0 grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="shrink-0 grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Search */}
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 transform -/2 text-muted-foreground h-4 w-4" />
@@ -315,7 +315,7 @@ export default function EditClientForm({
                       
                       {/* Assignment Summary */}
                       {(assignmentChanges.added.length > 0 || assignmentChanges.removed.length > 0) && (
-                        <div className="flex-shrink-0 p-4 border border-border rounded-md">
+                        <div className="shrink-0 p-4 border border-border rounded-md">
                           <div className="flex items-start gap-3">
                             <Sparkles className="h-5 w-5 text-muted-foreground dark:text-muted-foreground mt-0.5" />
                             <div className="flex-1">

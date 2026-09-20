@@ -231,7 +231,7 @@ export default function ARModelPreview({
 
                 <div className="p-4 bg-muted border border-border rounded-md">
                   <div className="flex items-start gap-3">
-                    <Info className="h-5 w-5 text-muted-foreground dark:text-muted-foreground mt-0.5 flex-shrink-0" />
+                    <Info className="h-5 w-5 text-muted-foreground dark:text-muted-foreground mt-0.5 shrink-0" />
                     <div className="text-sm">
                       <p className="font-medium text-muted-foreground mb-1">AR Quick Look Compatible</p>
                       <p className="text-muted-foreground dark:text-muted-foreground">

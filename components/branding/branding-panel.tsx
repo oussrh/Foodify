@@ -217,7 +217,7 @@ export default function BrandingPanel({ restaurantId, restaurantSlug, values, on
                 onChange={(e) => onChange('colorTheme', e.target.value)}
                 spellCheck={false}
                 aria-label="Brand colour hex"
-                className={cn('h-8 w-24 bg-transparent font-mono text-sm focus:outline-none', !validHex && 'text-destructive')}
+                className={cn('h-8 w-24 bg-transparent font-mono text-sm focus:outline-hidden', !validHex && 'text-destructive')}
               />
             </label>
           </div>

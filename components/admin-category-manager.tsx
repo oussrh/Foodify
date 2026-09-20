@@ -441,7 +441,7 @@ function SortableCategory({
                 variant="ghost"
                 size="icon"
                 onClick={toggleCollapsed}
-                className="flex-shrink-0"
+                className="shrink-0"
               >
                 {collapsed ? (
                   <ChevronRight className="w-4 h-4" />
@@ -450,7 +450,7 @@ function SortableCategory({
                 )}
               </Button>
               <GripVertical
-                className="text-muted-foreground flex-shrink-0 cursor-grab"
+                className="text-muted-foreground shrink-0 cursor-grab"
                 {...attributes}
                 {...listeners}
               />

@@ -25,7 +25,11 @@
     "components/ui/**": ["exports", "types"]
   },
   "ignoreFiles": [],
-  "ignoreDependencies": [],
+  "ignoreDependencies": [
+    // referenced only from app/globals.css (@import "tailwindcss", @plugin "tailwindcss-animate"); knip does not follow CSS
+    "tailwindcss",
+    "tailwindcss-animate"
+  ],
   "ignoreBinaries": [],
   "ignoreExportsUsedInFile": true,
   "rules": {

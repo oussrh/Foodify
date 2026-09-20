@@ -113,7 +113,7 @@ export default function ThreeDViewerClient() {
       // Add loading poster
       const poster = document.createElement('div')
       poster.setAttribute('slot', 'poster')
-      poster.className = 'absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black'
+      poster.className = 'absolute inset-0 flex items-center justify-center bg-linear-to-br from-gray-900 to-black'
       poster.innerHTML = `
         <div class="text-center text-white space-y-6">
           <div class="w-16 h-16 bg-blue-500/20 rounded-2xl flex items-center justify-center mx-auto">
@@ -132,7 +132,7 @@ export default function ThreeDViewerClient() {
       // Add error slot
       const errorSlot = document.createElement('div')
       errorSlot.setAttribute('slot', 'error')
-      errorSlot.className = 'absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-900 to-black'
+      errorSlot.className = 'absolute inset-0 flex items-center justify-center bg-linear-to-br from-gray-900 to-black'
       errorSlot.innerHTML = `
         <div class="text-center text-white space-y-4">
           <svg class="h-16 w-16 text-red-400 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -187,7 +187,7 @@ export default function ThreeDViewerClient() {
 
   if (!modelUrl) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-background to-muted flex items-center justify-center">
         <div className="text-center space-y-6 p-8">
           <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mx-auto">
             <AlertCircle className="h-10 w-10 text-destructive" />
@@ -207,7 +207,7 @@ export default function ThreeDViewerClient() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-background to-muted flex items-center justify-center">
         <div className="text-center space-y-6 p-8">
           <div className="w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto">
             <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -228,7 +228,7 @@ export default function ThreeDViewerClient() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background to-muted flex items-center justify-center">
+      <div className="min-h-screen bg-linear-to-br from-background to-muted flex items-center justify-center">
         <div className="text-center space-y-6 p-8">
           <div className="w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center mx-auto">
             <AlertCircle className="h-10 w-10 text-destructive" />
@@ -260,7 +260,7 @@ export default function ThreeDViewerClient() {
   }
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-background to-muted overflow-hidden">
+    <div className="min-h-screen relative bg-linear-to-br from-background to-muted overflow-hidden">
       {/* Header */}
       <div className={`absolute top-0 left-0 right-0 z-20 transition-all duration-300 ${showControls ? 'translate-y-0' : '-translate-y-full'}`}>
         <div className="bg-background/90 backdrop-blur-xl border-b border-border">
@@ -315,8 +315,8 @@ export default function ThreeDViewerClient() {
         />
 
         {/* Gradient overlays for better contrast */}
-        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-background/20 to-transparent pointer-events-none" />
-        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-background/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 top-0 h-32 bg-linear-to-b from-background/20 to-transparent pointer-events-none" />
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-linear-to-t from-background/20 to-transparent pointer-events-none" />
       </div>
 
       {/* Controls Panel */}
@@ -405,7 +405,7 @@ export default function ThreeDViewerClient() {
       <div className={`absolute bottom-8 left-8 transition-all duration-300 ${showInfo && showControls ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>
         <div className="bg-card/90 backdrop-blur-xl rounded-2xl p-6 border border-border shadow-2xl max-w-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-linear-to-br from-primary to-primary/80 rounded-xl flex items-center justify-center">
               <Monitor className="h-5 w-5 text-primary-foreground" />
             </div>
             <div>

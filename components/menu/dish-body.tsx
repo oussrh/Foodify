@@ -47,7 +47,7 @@ export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, ph
 
   return (
     <article className="flex flex-col gap-4">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-muted" style={photoTransition ? { viewTransitionName: 'dish-photo' } : undefined}>
+      <div className="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-muted" style={photoTransition ? { viewTransitionName: 'dish-photo' } : undefined}>
         <Image
           src={dish.imageUrl}
           alt={name}
@@ -75,7 +75,7 @@ export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, ph
             type="button"
             onClick={share}
             aria-label={t.share}
-            className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="ml-1 inline-flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           >
             <Share2 className="h-4 w-4" />
           </button>

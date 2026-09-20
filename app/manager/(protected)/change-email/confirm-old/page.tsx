@@ -68,15 +68,15 @@ export default async function ConfirmOldEmailPage({
                 </div>
                 <ol className="text-sm text-warning dark:text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-warning dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                    <span className="shrink-0 w-5 h-5 bg-muted text-warning dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">1</span>
                     <span>Check your new email inbox for a confirmation message</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-warning dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="shrink-0 w-5 h-5 bg-muted text-warning dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">2</span>
                     <span>Click the verification link in that email</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-warning dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="shrink-0 w-5 h-5 bg-muted text-warning dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">3</span>
                     <span>Your email change will be complete</span>
                   </li>
                 </ol>

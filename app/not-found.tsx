@@ -41,15 +41,15 @@ export default function NotFound() {
             <h3 className="text-lg font-semibold text-foreground mb-4">What can you do?</h3>
             <div className="grid md:grid-cols-3 gap-4 text-sm">
               <div className="flex items-center gap-3 p-3 rounded-md bg-muted text-muted-foreground">
-                <Search className="h-5 w-5 flex-shrink-0" />
+                <Search className="h-5 w-5 shrink-0" />
                 <span>Check the URL for typos</span>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-md bg-muted text-success">
-                <RefreshCw className="h-5 w-5 flex-shrink-0" />
+                <RefreshCw className="h-5 w-5 shrink-0" />
                 <span>Try refreshing the page</span>
               </div>
               <div className="flex items-center gap-3 p-3 rounded-md bg-muted text-muted-foreground">
-                <Home className="h-5 w-5 flex-shrink-0" />
+                <Home className="h-5 w-5 shrink-0" />
                 <span>Go back to homepage</span>
               </div>
             </div>

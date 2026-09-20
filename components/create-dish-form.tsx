@@ -313,7 +313,7 @@ export default function CreateDishForm({
                 <select
                   id="subcategory"
                   {...register("subcategoryId")}
-                  className="w-full border border-border focus:border-border-strong rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2"
+                  className="w-full border border-border focus:border-border-strong rounded-md px-3 py-2 text-sm focus:outline-hidden focus:ring-2"
                   disabled={isSubmitting}
                 >
                   <option value="">No category</option>

@@ -71,21 +71,21 @@ export default async function CreateUserPage() {
             <CardContent className="p-6 space-y-4">
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Strong Passwords</p>
                     <p className="text-xs text-muted-foreground">Use at least 8 characters with mixed case and numbers</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Restaurant Access</p>
                     <p className="text-xs text-muted-foreground">Assign users to existing restaurants or create new ones</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Email Notifications</p>
                     <p className="text-xs text-muted-foreground">Users will receive login credentials via email</p>

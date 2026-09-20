@@ -92,7 +92,7 @@ export default function AppShell({ role, user, restaurants, children }: AppShell
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground text-[11px] font-semibold text-background focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           aria-label="Account menu"
         >
           {initials}
@@ -122,7 +122,7 @@ export default function AppShell({ role, user, restaurants, children }: AppShell
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="inline-flex h-9 max-w-[60vw] items-center gap-1.5 rounded-md border border-input bg-card px-3 text-sm font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:max-w-xs"
+          className="inline-flex h-9 max-w-[60vw] items-center gap-1.5 rounded-md border border-input bg-card px-3 text-sm font-medium hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring md:max-w-xs"
         >
           <span className="truncate">{currentRestaurant.name}</span>
           <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -179,7 +179,7 @@ export default function AppShell({ role, user, restaurants, children }: AppShell
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+        <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
           <div className="flex h-14 items-center gap-2 px-4 md:px-6">
             <Link href={`/${role}` as Route} className="flex items-center gap-2 font-semibold md:hidden">
               <span className="h-2.5 w-2.5 rounded-full bg-primary" aria-hidden="true" />

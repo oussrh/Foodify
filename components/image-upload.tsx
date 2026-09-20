@@ -282,7 +282,7 @@ export default function ImageUpload({
           <CardContent className="p-8">
             <div className="p-6 border border-border rounded-md">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+                <div className="shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
                   <AlertCircle className="h-5 w-5 text-warning" />
                 </div>
                 <div className="flex-1">
@@ -338,7 +338,7 @@ export default function ImageUpload({
           {/* Success Message */}
           {success && (
             <div className="p-4 border border-border rounded-md flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                 <CheckCircle2 className="h-4 w-4 text-success" />
               </div>
               <div className="flex-1">
@@ -351,7 +351,7 @@ export default function ImageUpload({
           {/* Error Message */}
           {error && (
             <div className="p-4 border border-border rounded-md flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                 <AlertCircle className="h-4 w-4 text-destructive" />
               </div>
               <div className="flex-1">
@@ -554,7 +554,7 @@ export default function ImageUpload({
           {/* Image Requirements */}
           <div className="p-6 border border-border rounded-md">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+              <div className="shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
                 <FileImage className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="flex-1">

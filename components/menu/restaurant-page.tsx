@@ -306,7 +306,7 @@ export default function RestaurantPage({
   }
 
   const iconButton =
-    'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-input bg-card hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+    'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-input bg-card hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring'
 
   return (
     <div lang={locale} className={cn('brand-scope min-h-screen bg-background text-foreground', themeClass)} style={pageStyle}>
@@ -333,12 +333,12 @@ export default function RestaurantPage({
         ) : (
           <div className="absolute inset-0 bg-brand-tint" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/15 to-transparent" />
         <button
           type="button"
           onClick={shareMenu}
           aria-label={t.shareMenu}
-          className="absolute right-3 top-[calc(12px+env(safe-area-inset-top))] inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur hover:bg-black/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-6 sm:top-[calc(16px+env(safe-area-inset-top))]"
+          className="absolute right-3 top-[calc(12px+env(safe-area-inset-top))] inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur-sm hover:bg-black/50 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-white sm:right-6 sm:top-[calc(16px+env(safe-area-inset-top))]"
         >
           <Share2 className="h-4 w-4" />
         </button>
@@ -372,7 +372,7 @@ export default function RestaurantPage({
       </div>
 
       {/* Sticky bar: search, language, filters, theme */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur supports-[backdrop-filter]:bg-background/85">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur-sm supports-backdrop-filter:bg-background/85">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:px-6">
           {collapsed && restaurant.logoUrl && (
             <span className="relative hidden h-8 w-8 shrink-0 overflow-hidden rounded-md sm:block" aria-hidden="true">
@@ -389,7 +389,7 @@ export default function RestaurantPage({
               placeholder={t.search}
               aria-label={t.search}
               enterKeyHint="search"
-              className="h-10 w-full rounded-md border border-input bg-card pl-9 pr-8 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="h-10 w-full rounded-md border border-input bg-card pl-9 pr-8 text-sm placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
             />
             {query && (
               <button
@@ -454,7 +454,7 @@ export default function RestaurantPage({
                 }}
                 aria-current={activeSection === s.id ? 'location' : undefined}
                 className={cn(
-                  'h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-[13px] font-medium leading-[30px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-[13px] font-medium leading-[30px] transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
                   activeSection === s.id
                     ? 'border-foreground bg-foreground text-background'
                     : 'border-border-strong bg-card text-foreground hover:bg-accent',
@@ -469,7 +469,7 @@ export default function RestaurantPage({
                 onClick={() => setArOnly((v) => !v)}
                 aria-pressed={arOnly}
                 className={cn(
-                  'ml-auto inline-flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                  'ml-auto inline-flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 text-[13px] font-semibold transition-colors focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring',
                   arOnly ? 'bg-brand text-brand-on' : 'bg-brand-tint text-brand hover:opacity-90',
                 )}
               >
@@ -482,7 +482,7 @@ export default function RestaurantPage({
       </header>
 
       {/* Menu */}
-      <main id="menu" tabIndex={-1} className="mx-auto max-w-5xl px-4 pb-8 outline-none sm:px-6">
+      <main id="menu" tabIndex={-1} className="mx-auto max-w-5xl px-4 pb-8 outline-hidden sm:px-6">
         <p className="sr-only" role="status" aria-live="polite">
           {isFiltering ? t.results(totalMatches) : ''}
         </p>

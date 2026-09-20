@@ -76,7 +76,7 @@ export function AdminDeleteDishButton({ dishId, dishName, restaurantId }: AdminD
           
           <div className="p-3 bg-muted border border-border rounded-lg">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+              <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
               <div className="text-sm text-destructive">
                 <strong>Warning:</strong> This action cannot be undone. All dish data, including images, descriptions, and customer interactions will be permanently removed.
               </div>

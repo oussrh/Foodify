@@ -54,7 +54,7 @@ export default function MenuPreview({ values, theme, className }: MenuPreviewPro
           ) : (
             <div className="absolute inset-0 bg-brand-tint" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/15 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 flex items-end gap-2 px-3 pb-3">
             {values.logoUrl ? (
               <span className="relative block h-9 w-9 shrink-0 overflow-hidden rounded-md bg-white">

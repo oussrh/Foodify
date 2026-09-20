@@ -86,7 +86,7 @@ export default function ImageTile({ kind, label, value, restaurantSlug, onChange
         <div
           className={cn(
             'relative shrink-0 overflow-hidden rounded-md border border-border bg-muted',
-            isLogo ? 'h-16 w-16' : 'aspect-[16/7] w-full sm:w-56',
+            isLogo ? 'h-16 w-16' : 'aspect-16/7 w-full sm:w-56',
           )}
         >
           {value ? (

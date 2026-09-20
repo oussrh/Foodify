@@ -56,7 +56,7 @@ export function DishLiveSwitch({ dishId, isActive }: { dishId: string; isActive:
 }
 
 const menuButton =
-  'inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+  'inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring'
 
 interface DishRowMenuProps {
   dishId: string

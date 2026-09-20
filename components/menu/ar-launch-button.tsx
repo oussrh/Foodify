@@ -92,7 +92,7 @@ export default function ARLaunchButton({ dish, locale, className }: ARLaunchButt
       onClick={launch}
       disabled={isLoading}
       className={cn(
-        'inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-brand px-4 text-[15px] font-semibold text-brand-on transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+        'inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-brand px-4 text-[15px] font-semibold text-brand-on transition-opacity hover:opacity-90 active:opacity-80 disabled:opacity-60 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
         className,
       )}
     >

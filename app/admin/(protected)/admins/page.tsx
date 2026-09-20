@@ -45,7 +45,7 @@ export default async function AdminsPage({ searchParams }: { searchParams?: Prom
             defaultValue={search}
             placeholder="Search by email"
             aria-label="Search admins"
-            className="h-10 w-full rounded-md border border-input bg-card pl-9 pr-3 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="h-10 w-full rounded-md border border-input bg-card pl-9 pr-3 text-sm placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           />
         </form>
 

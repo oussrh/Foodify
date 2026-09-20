@@ -202,7 +202,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
               className="group flex items-center justify-between p-4 border-2 border-border rounded-md hover:border-border hover:bg-muted transition-colors"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center shrink-0">
                   <span className="text-xs font-medium text-warning">#{index + 1}</span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">

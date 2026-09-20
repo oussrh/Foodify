@@ -173,21 +173,21 @@ export default async function EditAdminPage({
             <CardContent className="p-6 space-y-4">
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Full System Control</p>
                     <p className="text-xs text-muted-foreground">Complete access to all restaurants, users, and settings</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-foreground">User Management</p>
                     <p className="text-xs text-muted-foreground">Create, edit, and delete administrator accounts</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Restaurant Control</p>
                     <p className="text-xs text-muted-foreground">Manage all restaurant data, menus, and configurations</p>

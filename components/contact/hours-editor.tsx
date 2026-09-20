@@ -15,7 +15,7 @@ interface HoursEditorProps {
 const DEFAULT_PERIOD: Period = { open: '12:00', close: '23:00' }
 
 const timeInput =
-  'h-9 rounded-md border border-input bg-card px-2 text-sm tnum focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50'
+  'h-9 rounded-md border border-input bg-card px-2 text-sm tnum focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50'
 
 export default function HoursEditor({ value, onChange, disabled }: HoursEditorProps) {
   const setDay = (day: DayKey, periods: Period[] | undefined) => {

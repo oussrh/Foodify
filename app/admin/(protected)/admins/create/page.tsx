@@ -70,21 +70,21 @@ export default function CreateAdminPage() {
             <CardContent className="p-6 space-y-4">
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Strong Passwords</p>
                     <p className="text-xs text-muted-foreground">Use at least 8 characters with mixed case, numbers, and symbols</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-foreground">System Access</p>
                     <p className="text-xs text-muted-foreground">Super admins have full access to all restaurants and users</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
                   <div>
                     <p className="text-sm font-medium text-foreground">Security</p>
                     <p className="text-xs text-muted-foreground">Only create admin accounts for trusted personnel</p>

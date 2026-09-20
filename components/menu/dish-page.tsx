@@ -50,11 +50,11 @@ export default function DishPage({ dish, restaurant, breadcrumb, brandStyle, sha
       className={cn('brand-scope min-h-screen bg-background text-foreground', restaurant.menuTheme === 'system' ? '' : restaurant.menuTheme)}
       style={style}
     >
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-lg items-center gap-2 px-4">
           <Link
             href={`/restaurant/${restaurant.slug}?lang=${locale}`}
-            className="inline-flex h-10 items-center gap-2 rounded-md pr-3 text-sm font-medium hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="inline-flex h-10 items-center gap-2 rounded-md pr-3 text-sm font-medium hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
           >
             <ArrowLeft className="h-4 w-4" aria-hidden="true" />
             <span className="truncate">{t.backToMenu}</span>

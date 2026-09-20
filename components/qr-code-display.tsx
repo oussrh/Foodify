@@ -361,19 +361,19 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
                 </h4>
                 <ol className="text-sm text-muted-foreground dark:text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                    <span className="shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">1</span>
                     <span>Download the HD QR code</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">2</span>
                     <span>Print and place on tables or entrance</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">3</span>
                     <span>Customers scan to access digital menu</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                    <span className="shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">4</span>
                     <span>They can explore dishes in AR</span>
                   </li>
                 </ol>
@@ -386,19 +386,19 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
                 </h4>
                 <ul className="text-sm text-success dark:text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
-                    <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <MessageSquare className="h-4 w-4 mt-0.5 shrink-0" />
                     <span>Add &ldquo;Scan for AR Menu&rdquo; signage</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Mail className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <Mail className="h-4 w-4 mt-0.5 shrink-0" />
                     <span>Include QR in social media posts</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Star className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <Star className="h-4 w-4 mt-0.5 shrink-0" />
                     <span>Highlight AR features to customers</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Sparkles className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                    <Sparkles className="h-4 w-4 mt-0.5 shrink-0" />
                     <span>Train staff on digital menu benefits</span>
                   </li>
                 </ul>

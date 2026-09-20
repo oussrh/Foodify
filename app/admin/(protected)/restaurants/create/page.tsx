@@ -51,7 +51,7 @@ export default function CreateRestaurantPage() {
             <div className="space-y-6">
               <div className="p-4 bg-muted border border-border rounded-lg">
                 <div className="flex items-start gap-3">
-                  <Sparkles className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                  <Sparkles className="h-5 w-5 text-muted-foreground mt-0.5 shrink-0" />
                   <div className="text-sm text-muted-foreground">
                     <p className="font-medium mb-1">Getting Started</p>
                     <p>Fill out the required information below. You can always update these details later from the restaurant management page.</p>

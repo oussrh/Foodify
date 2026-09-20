@@ -68,7 +68,7 @@ Key models and relationships:
 - Feature forms (`create-*-form.tsx`, `edit-*-form.tsx`, category managers, uploads) are shared by both roles.
 
 ### Design system ("Quiet Plate")
-- Tokens in `app/globals.css` (warm neutral ground, one accent "Basil", light + dark); radius encodes hierarchy (`rounded-sm` controls, `rounded-lg` cards, `rounded-sheet` sheets); shadows only on floating layers (`shadow-sheet`, `shadow-popover`).
+- Tokens in `app/globals.css` (Tailwind 4: the `@theme` block maps them to utilities; there is no `tailwind.config.ts`); warm neutral ground, one accent "Basil", light + dark; radius encodes hierarchy (`rounded-sm` controls, `rounded-lg` cards, `rounded-sheet` sheets); shadows only on floating layers (`shadow-sheet`, `shadow-popover`).
 - Font is Instrument Sans via `next/font` (`--font-sans`). Do not reintroduce Tailwind colour utilities (`bg-blue-500`, `text-gray-600`…) or gradients on chrome; use `primary`, `muted`, `success`, `warning`, `destructive`.
 - Restaurant brand colours are never painted raw under text: `lib/brand-color.ts` derives a contrast-safe ink + tint, exposed as `text-brand`, `bg-brand`, `bg-brand-tint`, `text-brand-on` inside a `.brand-scope` element.
 - `components/branding/` is the Settings → Branding tab: live phone preview (`menu-preview.tsx`), logo/cover tiles (`image-tile.tsx`, uploads persist immediately via `lib/brand-upload.ts`), colour presets + contrast readout, font picker (`lib/brand-fonts.ts`), and `Restaurant.menuTheme` (system | light | dark). A forced theme is applied as a `.light`/`.dark` class on the `.brand-scope` wrapper; `globals.css` defines both scopes.

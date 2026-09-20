@@ -335,7 +335,7 @@ export default function ARViewerClient() {
       if (viewMode === 'ar') {
         const arButton = document.createElement('button')
         arButton.setAttribute('slot', 'ar-button')
-        arButton.className = 'absolute bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-7 py-4 md:px-8 rounded-full shadow-2xl font-semibold flex items-center gap-2 md:gap-3 whitespace-nowrap transition-all duration-300 transform hover:scale-105 ring-2 ring-white/40 backdrop-blur-sm text-base active:scale-95 touch-manipulation z-10'
+        arButton.className = 'absolute bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 bg-linear-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-7 py-4 md:px-8 rounded-full shadow-2xl font-semibold flex items-center gap-2 md:gap-3 whitespace-nowrap transition-all duration-300 transform hover:scale-105 ring-2 ring-white/40 backdrop-blur-xs text-base active:scale-95 touch-manipulation z-10'
         
         // Enhanced mobile feedback and camera preparation
         arButton.addEventListener('touchstart', async () => {
@@ -397,8 +397,8 @@ export default function ARViewerClient() {
       poster.setAttribute('slot', 'poster')
       poster.className = `absolute inset-0 flex items-center justify-center ${
         viewMode === 'ar' 
-          ? 'bg-gradient-to-br from-purple-900 via-black to-indigo-900' 
-          : 'bg-gradient-to-br from-slate-100 via-white to-slate-200'
+          ? 'bg-linear-to-br from-purple-900 via-black to-indigo-900' 
+          : 'bg-linear-to-br from-slate-100 via-white to-slate-200'
       }`
       poster.innerHTML = `
         <div class="text-center ${viewMode === 'ar' ? 'text-white' : 'text-gray-800'} space-y-4">
@@ -514,7 +514,7 @@ export default function ARViewerClient() {
 
   if (!modelUrl) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background to-muted">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-background to-muted">
         <div className="text-center space-y-6 p-8 max-w-md">
           <div className="mx-auto w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center">
             <AlertCircle className="h-10 w-10 text-destructive" />
@@ -537,7 +537,7 @@ export default function ARViewerClient() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-purple-900/20 via-background to-indigo-900/20 dark:from-purple-900 dark:via-black dark:to-indigo-900">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-purple-900/20 via-background to-indigo-900/20 dark:from-purple-900 dark:via-black dark:to-indigo-900">
         <div className="text-center space-y-6 p-8 max-w-md">
           <div className="relative">
             <div className="mx-auto w-20 h-20 bg-primary/20 rounded-2xl flex items-center justify-center">
@@ -550,7 +550,7 @@ export default function ARViewerClient() {
             <p className="text-muted-foreground">Preparing {dishName} in immersive 3D...</p>
             <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
               <div 
-                className="h-3 bg-gradient-to-r from-primary to-primary/80 rounded-full transition-all duration-300"
+                className="h-3 bg-linear-to-r from-primary to-primary/80 rounded-full transition-all duration-300"
                 style={{ width: `${loadingProgress}%` }}
               ></div>
             </div>
@@ -563,7 +563,7 @@ export default function ARViewerClient() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-destructive/20 via-background to-muted">
+      <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-destructive/20 via-background to-muted">
         <div className="text-center space-y-6 p-8 max-w-md">
           <div className="mx-auto w-20 h-20 bg-destructive/20 rounded-2xl flex items-center justify-center">
             <AlertCircle className="h-10 w-10 text-destructive" />

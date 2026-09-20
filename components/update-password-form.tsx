@@ -128,7 +128,7 @@ export default function UpdatePasswordForm() {
       {/* Success Message */}
       {success && (
         <div className="p-4 border border-border rounded-md flex items-start gap-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+          <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
             <CheckCircle2 className="h-4 w-4 text-success" />
           </div>
           <div className="flex-1">
@@ -141,7 +141,7 @@ export default function UpdatePasswordForm() {
       {/* Error Message */}
       {error && (
         <div className="p-4 border border-border rounded-md flex items-start gap-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+          <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
             <AlertCircle className="h-4 w-4 text-destructive" />
           </div>
           <div className="flex-1">
@@ -176,7 +176,7 @@ export default function UpdatePasswordForm() {
           </div>
           {errors.currentPassword && (
             <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
-              <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
               <p className="text-sm text-destructive">{errors.currentPassword.message}</p>
             </div>
           )}
@@ -206,7 +206,7 @@ export default function UpdatePasswordForm() {
           </div>
           {errors.password && (
             <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
-              <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
               <p className="text-sm text-destructive">{errors.password.message}</p>
             </div>
           )}
@@ -246,7 +246,7 @@ export default function UpdatePasswordForm() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {passwordChecks.map((check, index) => (
                     <div key={index} className="flex items-center gap-2 p-2 rounded-lg transition-colors">
-                      <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
+                      <div className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
  check.test ? 'bg-muted' : 'bg-muted'
  }`}>
                         {check.test ? (
@@ -301,13 +301,13 @@ export default function UpdatePasswordForm() {
           </div>
           {errors.confirm && (
             <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
-              <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
               <p className="text-sm text-destructive">{errors.confirm.message}</p>
             </div>
           )}
           {confirmPassword && passwordsMatch && !errors.confirm && (
             <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
-              <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+              <CheckCircle className="h-4 w-4 text-success shrink-0" />
               <p className="text-sm text-success font-medium">Passwords match perfectly!</p>
             </div>
           )}
@@ -358,26 +358,26 @@ export default function UpdatePasswordForm() {
       {/* Security Tips */}
       <div className="p-6 border border-border rounded-md">
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+          <div className="shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
             <Shield className="h-5 w-5 text-muted-foreground" />
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-muted-foreground mb-3">Security Best Practices</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 shrink-0"></span>
                 <span>Use a unique password that you don&apos;t use anywhere else</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 shrink-0"></span>
                 <span>Consider using a password manager to generate and store strong passwords</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 shrink-0"></span>
                 <span>Never share your password with anyone</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 shrink-0"></span>
                 <span>Change your password if you suspect it has been compromised</span>
               </li>
             </ul>

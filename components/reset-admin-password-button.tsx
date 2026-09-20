@@ -169,7 +169,7 @@ export default function ResetAdminPasswordButton({
         <div className="space-y-6 mt-6">
           {error && (
             <div className="p-4 border border-border rounded-md flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+              <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                 <X className="h-4 w-4 text-destructive" />
               </div>
               <div className="flex-1">
@@ -184,7 +184,7 @@ export default function ResetAdminPasswordButton({
               {/* Warning Section */}
               <div className="p-4 border border-border rounded-md">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                  <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                     <AlertTriangle className="h-4 w-4 text-warning" />
                   </div>
                   <div className="flex-1">
@@ -200,7 +200,7 @@ export default function ResetAdminPasswordButton({
               {/* Security Features */}
               <div className="p-4 border border-border rounded-md">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                  <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                     <Shield className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
@@ -232,7 +232,7 @@ export default function ResetAdminPasswordButton({
               {/* Success Message */}
               <div className="p-4 border border-border rounded-md">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                  <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                     <CheckCircle2 className="h-4 w-4 text-success" />
                   </div>
                   <div className="flex-1">

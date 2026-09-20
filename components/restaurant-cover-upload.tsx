@@ -250,7 +250,7 @@ export default function RestaurantCoverUpload({
       <div className="space-y-4">
         <div className="p-6 border border-border rounded-md">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+            <div className="shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
               <AlertCircle className="h-5 w-5 text-warning" />
             </div>
             <div className="flex-1">
@@ -277,7 +277,7 @@ export default function RestaurantCoverUpload({
       {/* Success Message */}
       {success && (
         <div className="p-4 border border-border rounded-md flex items-start gap-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+          <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
             <CheckCircle className="h-4 w-4 text-success" />
           </div>
           <div className="flex-1">
@@ -290,7 +290,7 @@ export default function RestaurantCoverUpload({
       {/* Error Message */}
       {error && (
         <div className="p-4 border border-border rounded-md flex items-start gap-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+          <div className="shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
             <AlertCircle className="h-4 w-4 text-destructive" />
           </div>
           <div className="flex-1">
@@ -316,7 +316,7 @@ export default function RestaurantCoverUpload({
           <div className="space-y-4">
             <div className="p-4 border border-border rounded-md">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0">
+                <div className="shrink-0">
                   <div className="w-24 h-16 rounded-lg overflow-hidden border-2 border-white">
                     <Image
                       src={currentCoverUrl}
@@ -414,7 +414,7 @@ export default function RestaurantCoverUpload({
       {/* File Format Info */}
       <div className="p-4 border border-border rounded-md">
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
+          <div className="shrink-0 w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
             <Info className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex-1">

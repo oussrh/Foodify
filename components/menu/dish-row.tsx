@@ -31,7 +31,7 @@ export default function DishRow({ dish, locale, money, href, onOpen, transitioni
           e.preventDefault()
           onOpen(dish)
         }}
-        className="grid w-full grid-cols-[76px_1fr_auto] items-center gap-3 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
+        className="grid w-full grid-cols-[76px_1fr_auto] items-center gap-3 py-3 text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-md"
       >
         <span className="relative block h-[76px] w-[76px] overflow-hidden rounded-md bg-muted" style={transitioning ? { viewTransitionName: 'dish-photo' } : undefined}>
           <Image src={dish.imageUrl} alt="" fill sizes="76px" className="object-cover" />
