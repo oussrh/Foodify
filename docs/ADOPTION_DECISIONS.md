@@ -119,3 +119,24 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Alternative set aside**: a unit test against a mocked client, which cannot see a constraint or a query.
 - **Re-read when**: phase 10 opens; write the isolation test first.
 
+## 2026-09-20 · phase 5 · no read is cached on the server; the probe guarantees it
+
+- **Situation**: CACHE.1 and CACHE.2 govern cached reads: a key with every parameter, an invalidation on every write, a TTL, and never an authorisation decision. The plan allows "not applicable" with the reason. This application has no server cache layer: no store client, no `unstable_cache` or `"use cache"`, no client-side query cache; every dashboard and menu render reads Postgres (the dashboards are dynamic through `auth()`, the menu through its route parameter). What an open client does keep is Next's router cache of its preserved layout: the dashboards' shell, which lists every restaurant by name. The pinned catalogue wires no CACHE-* check for this stack.
+- **Default taken**: not applicable for server caches, held by a machine: `cache.serverCacheUse` (`abatty.probes.mjs`) counts what creates a cached read (the three `"use cache"` forms, `unstable_cache`, `cacheLife`, `cacheTag`, a static or revalidating route export, a fetch cache option, a cache store import), reads 0 and is hard. For the router cache, CACHE.1's "every write invalidates" holds: the three restaurant writes (create, update, delete) call `revalidatePath` on both portal roots, which makes the action's response carry a fresh render from the root and the shell show the change without a reload (the standards-reviewer caught the first draft removing the update's revalidation as "stray"; it was the one invalidation the shell had).
+- **Alternative set aside**: caching the public menu, the hot path behind the QR code. It is a design decision with a cost model (per-restaurant keys, invalidation from every dish, category and branding write, a TTL for the manifest and the JSON-LD), not a conformance fix; when it is taken, the probe goes red on the first cached read and this entry is re-read with CACHE.1 in hand.
+- **Re-read when**: a cached read is introduced (the gate says so), or the menu's render time becomes a measured problem.
+
+## 2026-09-20 · phase 5 · the two caches that do exist, and why they pass
+
+- **Situation**: the per-restaurant manifest route answers with `Cache-Control: public, max-age=3600`; the service worker (`public/sw.js`) keeps a visited menu for offline use.
+- **Default taken**: the manifest is a public read keyed by the restaurant slug in its URL (every parameter is in the key), carries no user data, and its TTL bounds how long a rebrand takes to reach an installed app: an hour, accepted. The service worker is a client cache keyed by URL and versioned by the build id, refreshed when the guest taps Refresh; its contract (never a stale shell, assets resolve) is the PWA track's, not CACHE.1's.
+- **Alternative set aside**: `no-store` on the manifest, which would fetch it on every install check for no gain.
+- **Re-read when**: the manifest carries anything per user, or the PWA track opens.
+
+## 2026-09-20 · phase 5 · the session token is identity, never the authorisation decision
+
+- **Situation**: CACHE.2 names an authorisation decision cached without a bounded TTL and an invalidation on every role change. The JWT carries `role` for its whole life; `requireUser` already re-reads the user on every action and route call, the manager pages scope every read by assignment, but the admin layout decided the role once per mount and Next preserves a layout across client navigations: a super admin demoted or deleted after the visit began kept reading admin pages until a full reload.
+- **Default taken**: every admin page calls `requireSuperAdminPage()` first (a codemod over the 17 pages), which re-reads the user and redirects. The token's `role` is used only to pick a portal on sign-in.
+- **Alternative set aside**: a role check in `proxy.ts` on every request. It would read the token, not the database, so it would be the cached decision the rule forbids; and a database read there would run on every asset request.
+- **Re-read when**: a third role appears, or the session strategy changes.
+

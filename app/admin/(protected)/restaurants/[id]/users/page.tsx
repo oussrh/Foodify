@@ -6,8 +6,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { EmptyState, PageHeader } from '@/components/shell/page-header'
 import AssignUsersDialog from '@/components/assign-users-dialog'
 import RemoveRestaurantUserButton from '@/components/remove-restaurant-user-button'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function RestaurantUsersPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireSuperAdminPage()
   const { id } = await params
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },

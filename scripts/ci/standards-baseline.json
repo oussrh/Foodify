@@ -3,6 +3,8 @@
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
   "score": 90,
   "hard": [
+    "auth.unguardedAdminPage",
+    "cache.serverCacheUse",
     "change.changelogMissing",
     "code.barrels",
     "context.overCap",
@@ -17,6 +19,8 @@
     "valid.wholeEnv"
   ],
   "metrics": {
+    "auth.unguardedAdminPage": 0,
+    "cache.serverCacheUse": 0,
     "change.changelogMissing": 0,
     "code.barrels": 0,
     "context.overCap": 0,
@@ -26,7 +30,7 @@
     "docs.danglingSource": 0,
     "docs.frontMatter": 0,
     "docs.indexDrift": 0,
-    "size.excessCode": 5056,
+    "size.excessCode": 5068,
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 1,
@@ -35,30 +39,32 @@
     "valid.wholeEnv": 0
   },
   "scanned": {
+    "auth.unguardedAdminPage": 17,
+    "cache.serverCacheUse": 177,
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 45,
+    "docs.citations": 52,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 173,
-    "size.overBudget": 173,
-    "size.overRaw": 182,
-    "types.escapes": 173,
-    "valid.rawEnv": 172,
+    "size.excessCode": 178,
+    "size.overBudget": 178,
+    "size.overRaw": 188,
+    "types.escapes": 178,
+    "valid.rawEnv": 176,
     "valid.unparsedBoundary": 15,
-    "valid.wholeEnv": 181
+    "valid.wholeEnv": 186
   },
   "debt": {
     "size.excessCode": {
-      "app/admin/(protected)/admins/[id]/edit/page.tsx": 80,
-      "app/admin/(protected)/admins/create/page.tsx": 40,
+      "app/admin/(protected)/admins/[id]/edit/page.tsx": 82,
+      "app/admin/(protected)/admins/create/page.tsx": 42,
       "app/admin/(protected)/admins/page.tsx": 5,
-      "app/admin/(protected)/page.tsx": 50,
-      "app/admin/(protected)/users/[id]/edit/page.tsx": 151,
-      "app/admin/(protected)/users/create/page.tsx": 36,
-      "app/admin/(protected)/users/page.tsx": 19,
+      "app/admin/(protected)/page.tsx": 52,
+      "app/admin/(protected)/users/[id]/edit/page.tsx": 153,
+      "app/admin/(protected)/users/create/page.tsx": 38,
+      "app/admin/(protected)/users/page.tsx": 21,
       "app/manager/(protected)/change-email/confirm-new/page.tsx": 33,
       "app/manager/(protected)/change-email/confirm-old/page.tsx": 77,
       "app/manager/(protected)/profile/page.tsx": 309,
@@ -131,6 +137,8 @@
     }
   },
   "versions": {
+    "auth.unguardedAdminPage": 1,
+    "cache.serverCacheUse": 1,
     "change.changelogMissing": 1,
     "code.barrels": 1,
     "context.overCap": 1,
@@ -149,6 +157,13 @@
     "valid.wholeEnv": 1
   },
   "entries": {
+    "size.excessCode": {
+      "at": "2026-09-20",
+      "was": 5056,
+      "now": 5068,
+      "reason": "requireSuperAdminPage() as the first statement of the six admin pages already over their budget (an import and a call each): the fresh super-admin check Next's preserved layout cannot make on client navigation (CACHE.2); phase 8 splits these pages",
+      "owner": "Oussama Rhoni"
+    },
     "size.overBudget": {
       "at": "2026-09-20",
       "was": 31,

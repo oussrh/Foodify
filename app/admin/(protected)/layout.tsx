@@ -1,30 +1,14 @@
 import AppShell from '@/components/shell/app-shell'
-import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
-import { redirect } from 'next/navigation'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 interface LayoutProps {
   children: React.ReactNode
 }
 
 export default async function AdminLayout({ children }: LayoutProps) {
-  const session = await auth()
-
-  if (!session?.user?.email) {
-    redirect('/admin/login')
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { email: session.user.email },
-    select: { role: true, email: true },
-  })
-
-  if (user?.role !== 'SUPER_ADMIN') {
-    if (user?.role === 'RESTAURANT_ADMIN') {
-      redirect('/manager')
-    }
-    redirect('/')
-  }
+  // The same check every page repeats: the layout is preserved across client navigations.
+  const user = await requireSuperAdminPage()
 
   const restaurants = await prisma.restaurant.findMany({
     select: { id: true, name: true },

@@ -12,8 +12,10 @@ import {
   Lightbulb,
   Star,
 } from 'lucide-react'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function CreateUserPage() {
+  await requireSuperAdminPage()
   const restaurants = await prisma.restaurant.findMany({ orderBy: { name: 'asc' } })
   
   return (

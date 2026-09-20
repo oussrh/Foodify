@@ -1,16 +1,16 @@
 import Link from 'next/link'
 import prisma from '@/lib/prisma'
-import { auth } from '@/auth'
 import { Plus, Search } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { EmptyState, PageHeader } from '@/components/shell/page-header'
 import ResetAdminPasswordButton from '@/components/reset-admin-password-button'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function AdminsPage({ searchParams }: { searchParams?: Promise<{ search?: string }> }) {
+  const me = await requireSuperAdminPage()
   const sp = searchParams ? await searchParams : undefined
   const search = (sp?.search || '').trim()
-  const session = await auth()
 
   const admins = await prisma.user.findMany({
     where: {
@@ -80,7 +80,7 @@ export default async function AdminsPage({ searchParams }: { searchParams?: Prom
                     <Link href={`/admin/admins/${a.id}/edit`} className="font-medium hover:underline">
                       {a.email}
                     </Link>
-                    {session?.user?.email === a.email && <span className="ml-2 text-xs text-muted-foreground">(you)</span>}
+                    {me.email === a.email && <span className="ml-2 text-xs text-muted-foreground">(you)</span>}
                   </TableCell>
                   <TableCell className="hidden sm:table-cell">
                     <span className="text-xs text-muted-foreground">{a.totpSecret ? 'Authenticator app' : 'Email code'}</span>

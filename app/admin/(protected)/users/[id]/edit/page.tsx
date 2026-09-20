@@ -19,12 +19,14 @@ import {
   Star,
 } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function EditUserPage({
   params,
 }: {
   params: Promise<{ id: string }>
 }) {
+  await requireSuperAdminPage()
   const { id } = await params
   const user = await prisma.user.findUnique({
     where: { id },

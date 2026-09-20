@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { PageHeader, StatStrip } from '@/components/shell/page-header'
 import DishesList from '@/components/shell/dishes-list'
 import { notFound } from 'next/navigation'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function DishesPage({
   params,
@@ -14,6 +15,7 @@ export default async function DishesPage({
   params: Promise<{ id: string }>
   searchParams?: Promise<{ search?: string }>
 }) {
+  await requireSuperAdminPage()
   const { id } = await params
   const sp = searchParams ? await searchParams : undefined
   const search = (sp?.search || '').trim()
