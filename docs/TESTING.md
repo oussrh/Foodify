@@ -20,7 +20,7 @@ the floor, is red even while the total holds (TEST.4, the changed-lines gate).
 
 ## Unit suite
 
-Colocated `*.test.ts` beside the module (TEST.1). Fixtures are builders in `test/factories/`,
+Colocated `*.test.ts` beside the module (TEST.1); Vitest's default discovery collects any `*.test.ts(x)` in the tree, so a test dropped beside a component is run, not silently skipped. Fixtures are builders in `test/factories/`,
 never inline blobs. Time is `vi.useFakeTimers()` + `vi.setSystemTime()` restored in `afterEach`;
 no test touches the network (`fetch` is stubbed where a module calls it).
 
@@ -34,7 +34,9 @@ change with the new number in the log of `STANDARDS_PROGRESS.md`.
 
 | Area | Statements | Branches | Functions | Lines | Set on |
 |---|---|---|---|---|---|
-| `lib/**` | 92.4 | 79.7 | 79.4 | 92.5 | 2026-09-20 |
+| `lib/**` | 92.7 | 79.7 | 79.4 | 92.9 | 2026-09-20 |
+| `lib/menu.ts` (money display, per file) | 88.8 | 85 | 63.6 | 86.2 | 2026-09-20 |
+| `lib/totp.ts` (2FA check, per file) | 100 | 100 | 100 | 100 | 2026-09-20 |
 
 `app/` and `components/` have no unit floor: server actions and route handlers need a session and
 Postgres (the phase-10 integration suite, TEST.2), and the components are presentational (the
@@ -53,6 +55,6 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 
 ## Still to come
 
-- Integration (TEST.2): real Postgres in a rolled-back transaction, on real migrations — phase 10.
-- End-to-end (TEST.3): Playwright with `axe`, a mobile viewport as a project — the browser job in
+- Integration (TEST.2): real Postgres in a rolled-back transaction, on real migrations: phase 10.
+- End-to-end (TEST.3): Playwright with `axe`, a mobile viewport as a project; the browser job in
   `.github/workflows/checks.yml` is added when the `e2e` script exists.

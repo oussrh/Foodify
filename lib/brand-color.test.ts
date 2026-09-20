@@ -1,8 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import { brandPalette, brandStyle, contrast, hexToRgb } from './brand-color'
 
-const PAPER: [number, number, number] = [250, 250, 248]
-const COAL: [number, number, number] = [20, 19, 17]
+type RGB = [number, number, number]
+const PAPER: RGB = [250, 250, 248]
+const COAL: RGB = [20, 19, 17]
+
+/** The palette only ever emits #rrggbb, so a null here is a broken palette, not a test input. */
+function rgb(hex: string): RGB {
+  const value = hexToRgb(hex)
+  if (!value) throw new Error(`palette emitted a non-hex colour: ${hex}`)
+  return value
+}
 
 describe('hexToRgb', () => {
   it('reads six-digit and three-digit hex, with or without the hash', () => {
@@ -18,10 +26,13 @@ describe('hexToRgb', () => {
 })
 
 describe('contrast', () => {
-  it('is symmetric and spans 1 to 21', () => {
-    expect(contrast([0, 0, 0], [255, 255, 255])).toBeCloseTo(21, 5)
-    expect(contrast([255, 255, 255], [0, 0, 0])).toBeCloseTo(21, 5)
+  it('is the same whichever colour comes first', () => {
+    expect(contrast([0, 0, 0], [255, 255, 255])).toBeCloseTo(contrast([255, 255, 255], [0, 0, 0]), 10)
+  })
+
+  it('spans 1 for identical colours to 21 for black on white', () => {
     expect(contrast([120, 120, 120], [120, 120, 120])).toBe(1)
+    expect(contrast([0, 0, 0], [255, 255, 255])).toBeCloseTo(21, 5)
   })
 })
 
@@ -37,13 +48,13 @@ describe('brandPalette', () => {
 
   it('derives inks that reach AA against both grounds, even from a pale neon', () => {
     const p = brandPalette('#ccff00')
-    expect(contrast(hexToRgb(p.inkLight)!, PAPER)).toBeGreaterThanOrEqual(4.5)
-    expect(contrast(hexToRgb(p.inkDark)!, COAL)).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(rgb(p.inkLight), PAPER)).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(rgb(p.inkDark), COAL)).toBeGreaterThanOrEqual(4.5)
   })
 
   it('leaves a colour that already reads AA on the light ground where it is', () => {
     const p = brandPalette('#1F6B49')
-    expect(contrast(hexToRgb(p.inkLight)!, hexToRgb(p.raw)!)).toBeLessThan(1.05)
+    expect(contrast(rgb(p.inkLight), rgb(p.raw))).toBeLessThan(1.05)
   })
 
   it('tints the raw colour at low alpha rather than painting it', () => {

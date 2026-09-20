@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { describe, expect, it } from 'vitest'
 import {
   hasStructuredHours,
   openStatus,
@@ -28,9 +28,14 @@ describe('parseOpeningHours', () => {
     expect(parseOpeningHours(raw)).toEqual({ days: { mon: lunchAndDinner, sun: [] }, note: 'Closed on holidays' })
   })
 
-  it('drops a period whose time is not HH:MM and keeps at most two per day', () => {
+  it('drops a period whose time is not HH:MM', () => {
+    const raw = JSON.stringify({ days: { tue: [{ open: '9:00', close: '12:00' }, { open: '12:00', close: '14:00' }] } })
+    expect(parseOpeningHours(raw).days.tue).toEqual([{ open: '12:00', close: '14:00' }])
+  })
+
+  it('keeps at most two periods per day', () => {
     const raw = JSON.stringify({
-      days: { tue: [{ open: '9:00', close: '12:00' }, { open: '12:00', close: '14:00' }, { open: '15:00', close: '18:00' }, { open: '19:00', close: '22:00' }] },
+      days: { tue: [{ open: '12:00', close: '14:00' }, { open: '15:00', close: '18:00' }, { open: '19:00', close: '22:00' }] },
     })
     expect(parseOpeningHours(raw).days.tue).toEqual([
       { open: '12:00', close: '14:00' },
@@ -61,8 +66,11 @@ describe('serializeOpeningHours', () => {
 })
 
 describe('hasStructuredHours', () => {
-  it('is false for a note-only value and true once any day is set, even to closed', () => {
+  it('is false for a note-only value', () => {
     expect(hasStructuredHours({ days: {}, note: 'call us' })).toBe(false)
+  })
+
+  it('is true once any day is set, even to closed', () => {
     expect(hasStructuredHours({ days: { sun: [] } })).toBe(true)
   })
 })
@@ -92,16 +100,9 @@ describe('summarizeOpeningHours', () => {
 })
 
 describe('openStatus', () => {
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
+  // openStatus takes the clock as a parameter, so a fixed local time is deterministic by itself.
   // 2026-09-21 is a Monday.
-  const at = (isoLocal: string) => {
-    vi.useFakeTimers()
-    vi.setSystemTime(new Date(isoLocal))
-    return new Date()
-  }
+  const at = (isoLocal: string) => new Date(isoLocal)
 
   it('is null when only a note exists', () => {
     expect(openStatus({ days: {}, note: 'call us' })).toBeNull()

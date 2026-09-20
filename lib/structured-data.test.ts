@@ -4,6 +4,9 @@ import { restaurantJsonLd } from './structured-data'
 
 const origin = 'https://foodify.app'
 
+/** The first dish of the first section: what most item-level assertions reach for. */
+const firstItem = (ld: ReturnType<typeof restaurantJsonLd>) => ld.hasMenu.hasMenuSection[0].hasMenuItem[0]
+
 describe('restaurantJsonLd', () => {
   it('identifies the restaurant by its public URL', () => {
     const ld = restaurantJsonLd(makeRestaurant(), [], [], origin)
@@ -41,22 +44,34 @@ describe('restaurantJsonLd', () => {
     expect(names).toEqual(['Desserts', 'Desserts · Ice cream'])
   })
 
-  it('drops an empty section and appends uncategorized dishes as "Other dishes"', () => {
+  it('drops a section with no dishes', () => {
     const cat = makeCategory({ subcategories: [makeSubcategory({ dishes: [] })] })
-    const sections = restaurantJsonLd(makeRestaurant(), [cat], [makeDish({ id: 'loose' })], origin).hasMenu.hasMenuSection
-    expect(sections.map((s) => s.name)).toEqual(['Other dishes'])
-    expect(sections[0].hasMenuItem[0].url).toBe('https://foodify.app/restaurant/dar-zitoun/dish/loose')
+    expect(restaurantJsonLd(makeRestaurant(), [cat], [], origin).hasMenu.hasMenuSection).toEqual([])
+  })
+
+  it('appends uncategorized dishes as "Other dishes" with their public URL', () => {
+    const ld = restaurantJsonLd(makeRestaurant(), [], [makeDish({ id: 'loose' })], origin)
+    expect(ld.hasMenu.hasMenuSection.map((s) => s.name)).toEqual(['Other dishes'])
+    expect(firstItem(ld).url).toBe('https://foodify.app/restaurant/dar-zitoun/dish/loose')
   })
 
   it('prices each item with two decimals and the restaurant currency', () => {
-    const item = restaurantJsonLd(makeRestaurant({ currency: 'MAD' }), [makeCategory()], [], origin).hasMenu.hasMenuSection[0].hasMenuItem[0]
+    const item = firstItem(restaurantJsonLd(makeRestaurant({ currency: 'MAD' }), [makeCategory()], [], origin))
     expect(item.offers).toEqual({ '@type': 'Offer', price: '12.50', priceCurrency: 'MAD' })
   })
 
-  it('maps stored dietary keys to schema.org diets and skips ones schema.org lacks', () => {
-    const dish = makeDish({ dietary: ['vegan', 'spicy', 'gluten_free'] })
-    const item = restaurantJsonLd(makeRestaurant(), [makeCategory({ subcategories: [makeSubcategory({ dishes: [dish] })] })], [], origin).hasMenu.hasMenuSection[0].hasMenuItem[0]
-    expect(item.suitableForDiet).toEqual(['https://schema.org/VeganDiet', 'https://schema.org/GlutenFreeDiet'])
+  const withDish = (dish: ReturnType<typeof makeDish>) =>
+    restaurantJsonLd(makeRestaurant(), [makeCategory({ subcategories: [makeSubcategory({ dishes: [dish] })] })], [], origin)
+
+  it('maps stored dietary keys to schema.org diets', () => {
+    expect(firstItem(withDish(makeDish({ dietary: ['vegan', 'gluten_free'] }))).suitableForDiet).toEqual([
+      'https://schema.org/VeganDiet',
+      'https://schema.org/GlutenFreeDiet',
+    ])
+  })
+
+  it('skips a dietary key schema.org has no diet for', () => {
+    expect(firstItem(withDish(makeDish({ dietary: ['spicy'] }))).suitableForDiet).toEqual([])
   })
 
   it('states calories only when they are known', () => {

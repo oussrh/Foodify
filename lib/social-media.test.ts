@@ -9,12 +9,16 @@ describe('parseSocialMedia', () => {
     expect(parseSocialMedia('  ')).toEqual(none)
   })
 
-  it('reads the JSON shape and strips a leading @', () => {
-    expect(parseSocialMedia('{"instagram":"@darzitoun","facebook":"dar.zitoun","twitter":""}')).toEqual({
+  it('reads the JSON shape, leaving an empty value null', () => {
+    expect(parseSocialMedia('{"instagram":"darzitoun","facebook":"dar.zitoun","twitter":""}')).toEqual({
       instagram: 'darzitoun',
       facebook: 'dar.zitoun',
       twitter: null,
     })
+  })
+
+  it('strips a leading @ from a handle', () => {
+    expect(parseSocialMedia('{"instagram":"@darzitoun"}').instagram).toBe('darzitoun')
   })
 
   it('accepts platform aliases as JSON keys', () => {

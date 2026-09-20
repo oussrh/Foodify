@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "next lint --dir app --dir components --dir lib --dir test --dir types --file auth.ts --file middleware.ts --file vitest.config.ts",
     "type-check": "tsc --noEmit",
     "postinstall": "prisma generate",
     "prisma": "prisma",

@@ -24,6 +24,7 @@ describe('verifyTOTP', () => {
 
   afterEach(() => {
     vi.useRealTimers()
+    vi.restoreAllMocks()
   })
 
   it('accepts the code generated for the same secret at the same time', () => {
@@ -38,8 +39,15 @@ describe('verifyTOTP', () => {
     expect(verifyTOTP(authenticator.generate('GEZDGNBVGY3TQOJQ'), secret)).toBe(false)
   })
 
-  it('returns false instead of throwing on garbage', () => {
+  it('is false for an empty or malformed code', () => {
     expect(verifyTOTP('', '')).toBe(false)
     expect(verifyTOTP('abc', 'not-base32!!')).toBe(false)
+  })
+
+  it('returns false instead of propagating an error from the library', () => {
+    vi.spyOn(authenticator, 'check').mockImplementation(() => {
+      throw new Error('bad secret')
+    })
+    expect(verifyTOTP('123456', secret)).toBe(false)
   })
 })

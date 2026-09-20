@@ -11,7 +11,6 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
-    include: ['lib/**/*.test.ts', 'test/**/*.test.ts'],
     coverage: {
       provider: 'v8',
       reportOnFailure: true,
@@ -27,7 +26,11 @@ export default defineConfig({
       thresholds: {
         // The shared layer. Set from `vitest run --coverage` on 2026-09-20; branches and
         // functions are what bind. Raise when the number does, never lower.
-        'lib/**': { branches: 79.7, functions: 79.4, lines: 92.5, statements: 92.4 },
+        'lib/**': { branches: 79.7, functions: 79.4, lines: 92.9, statements: 92.7 },
+        // Money display and the 2FA check get their own floor (TEST.4: per-file for money and
+        // legal logic), so a drop there cannot hide behind a gain elsewhere in lib/.
+        'lib/menu.ts': { branches: 85, functions: 63.6, lines: 86.2, statements: 88.8, perFile: true },
+        'lib/totp.ts': { branches: 100, functions: 100, lines: 100, statements: 100, perFile: true },
       },
     },
   },

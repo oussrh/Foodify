@@ -1,8 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { BRAND_IMAGE_LIMITS, uploadBrandImage, validateBrandImage } from './brand-upload'
+import { BRAND_IMAGE_LIMITS, uploadBrandImage, validateBrandImage, type BrandUploadAction } from './brand-upload'
 
-// The module reads publicEnv once at import; the tests decide per case whether direct upload is configured.
-const env = vi.hoisted(() => ({ cloudinaryCloudName: undefined as string | undefined, cloudinaryUploadPreset: undefined as string | undefined }))
+// uploadDirect reads publicEnv on every call, so mutating this hoisted object between tests is
+// enough: no re-import needed.
+const env = vi.hoisted((): { cloudinaryCloudName?: string; cloudinaryUploadPreset?: string } => ({}))
 vi.mock('@/lib/env', () => ({ publicEnv: env }))
 
 const file = (name: string, type: string, bytes: number) => new File([new Uint8Array(bytes)], name, { type })
@@ -43,46 +44,65 @@ describe('uploadBrandImage', () => {
     vi.restoreAllMocks()
   })
 
-  it('uploads straight to Cloudinary when the unsigned preset is configured', async () => {
+  const configured = () => {
     env.cloudinaryCloudName = 'demo'
     env.cloudinaryUploadPreset = 'unsigned'
-    const fetchMock = vi.fn().mockResolvedValue({ ok: true, json: async () => ({ secure_url: 'https://res.cloudinary.com/demo/logo.png' }) })
+  }
+  const cloudinaryAnswers = (response: Partial<Response>) => {
+    // The code under test reads only ok, status and json(); a Partial is the whole contract here.
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(response as Response)
     vi.stubGlobal('fetch', fetchMock)
-    const viaServer = vi.fn()
+    return fetchMock
+  }
+
+  it('uploads straight to Cloudinary when the unsigned preset is configured', async () => {
+    configured()
+    const fetchMock = cloudinaryAnswers({ ok: true, json: async () => ({ secure_url: 'https://res.cloudinary.com/demo/logo.png' }) })
+    const viaServer = vi.fn<BrandUploadAction>()
     const url = await uploadBrandImage(file('l.png', 'image/png', 10), 'logo', 'dar-zitoun', viaServer)
     expect(url).toBe('https://res.cloudinary.com/demo/logo.png')
     expect(viaServer).not.toHaveBeenCalled()
-    const [target, init] = fetchMock.mock.calls[0] as [string, { body: FormData }]
+    const [target, init] = fetchMock.mock.calls[0]
     expect(target).toBe('https://api.cloudinary.com/v1_1/demo/image/upload')
-    expect(init.body.get('folder')).toBe('restaurants/dar-zitoun/branding')
-    expect(init.body.get('public_id')).toBe('logo')
+    expect(init?.body).toBeInstanceOf(FormData)
+    if (init?.body instanceof FormData) {
+      expect(init.body.get('folder')).toBe('restaurants/dar-zitoun/branding')
+      expect(init.body.get('public_id')).toBe('logo')
+    }
   })
 
   it('falls back to the server action when the direct upload is rejected', async () => {
-    env.cloudinaryCloudName = 'demo'
-    env.cloudinaryUploadPreset = 'unsigned'
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false, status: 401 }))
-    const viaServer = vi.fn().mockResolvedValue({ success: true, logoUrl: 'https://cdn/logo.png' })
+    configured()
+    cloudinaryAnswers({ ok: false, status: 401 })
+    const viaServer = vi.fn<BrandUploadAction>().mockResolvedValue({ success: true, logoUrl: 'https://cdn/logo.png' })
     await expect(uploadBrandImage(file('l.png', 'image/png', 10), 'logo', 's', viaServer)).resolves.toBe('https://cdn/logo.png')
   })
 
-  it('falls back to the server action when direct upload is not configured, and picks the URL of its kind', async () => {
-    const viaServer = vi.fn().mockResolvedValue({ success: true, coverUrl: 'https://cdn/cover.jpg' })
-    const url = await uploadBrandImage(file('c.jpg', 'image/jpeg', 10), 'cover', 'dar-zitoun', viaServer)
-    expect(url).toBe('https://cdn/cover.jpg')
+  it('sends the file and the slug to the server action when direct upload is not configured', async () => {
+    const viaServer = vi.fn<BrandUploadAction>().mockResolvedValue({ success: true, coverUrl: 'https://cdn/cover.jpg' })
+    await uploadBrandImage(file('c.jpg', 'image/jpeg', 10), 'cover', 'dar-zitoun', viaServer)
     expect(viaServer).toHaveBeenCalledTimes(1)
-    const [body, slug] = viaServer.mock.calls[0] as [FormData, string]
+    const [body, slug] = viaServer.mock.calls[0]
     expect(slug).toBe('dar-zitoun')
-    expect((body.get('file') as File).name).toBe('c.jpg')
+    const sent = body.get('file')
+    expect(sent).toBeInstanceOf(File)
+    if (sent instanceof File) expect(sent.name).toBe('c.jpg')
+  })
+
+  it('returns the URL of the kind it uploaded from the server action answer', async () => {
+    const cover = vi.fn<BrandUploadAction>().mockResolvedValue({ success: true, coverUrl: 'https://cdn/cover.jpg' })
+    await expect(uploadBrandImage(file('c.jpg', 'image/jpeg', 10), 'cover', 's', cover)).resolves.toBe('https://cdn/cover.jpg')
+    const logo = vi.fn<BrandUploadAction>().mockResolvedValue({ success: true, logoUrl: 'https://cdn/logo.png' })
+    await expect(uploadBrandImage(file('l.png', 'image/png', 10), 'logo', 's', logo)).resolves.toBe('https://cdn/logo.png')
   })
 
   it('surfaces the server action error', async () => {
-    const viaServer = vi.fn().mockResolvedValue({ success: false, error: 'Invalid file type.' })
+    const viaServer = vi.fn<BrandUploadAction>().mockResolvedValue({ success: false, error: 'Invalid file type.' })
     await expect(uploadBrandImage(file('c.jpg', 'image/jpeg', 10), 'logo', 's', viaServer)).rejects.toThrow('Invalid file type.')
   })
 
   it('fails when the server action answers success without a URL', async () => {
-    const viaServer = vi.fn().mockResolvedValue({ success: true })
+    const viaServer = vi.fn<BrandUploadAction>().mockResolvedValue({ success: true })
     await expect(uploadBrandImage(file('c.jpg', 'image/jpeg', 10), 'logo', 's', viaServer)).rejects.toThrow('Upload returned no URL')
   })
 })
