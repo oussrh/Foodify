@@ -53,6 +53,11 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 | `lib/auth-guard.ts` | Needs a NextAuth session and Postgres; belongs to the integration suite |
 | `lib/emails/**` | HTML templates; presentational |
 
+## Contrast of the tokens
+
+`pnpm contrast` runs `test/contrast.test.ts` alone: every text-on-surface pair of the design tokens in
+`app/globals.css` at 4.5:1 and the focus ring at 3:1, in both themes; it is part of `pnpm test` too.
+
 ## Browser suite
 
 `pnpm e2e` runs Playwright (`playwright.config.ts`, specs in `e2e/`) against the production build
