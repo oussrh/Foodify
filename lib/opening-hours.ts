@@ -127,6 +127,26 @@ export interface OpenStatus {
   opensOn?: DayKey
 }
 
+/**
+ * The period open at `nowMin` (minutes since midnight): one of yesterday's that runs past
+ * midnight and has not closed yet, else one of today's. A period that closes past midnight is
+ * open from its start to the end of the day.
+ */
+function currentPeriod(yesterday: Period[], today: Period[], nowMin: number): Period | undefined {
+  const overnight = yesterday.find((p) => minutes(p.close) < minutes(p.open) && nowMin < minutes(p.close))
+  if (overnight) return overnight
+  return today.find((p) => {
+    const o = minutes(p.open)
+    const c = minutes(p.close)
+    return c < o ? nowMin >= o : nowMin >= o && nowMin < c
+  })
+}
+
+/** The earliest period opening after `after` minutes (any period when `after` is omitted). */
+function firstOpeningAfter(periods: Period[], after = -1): Period | undefined {
+  return periods.filter((p) => minutes(p.open) > after).sort((a, b) => minutes(a.open) - minutes(b.open))[0]
+}
+
 /** Whether the restaurant is open at `now` (device time; guests are on site). */
 export function openStatus(hours: OpeningHours, now = new Date()): OpenStatus | null {
   if (!hasStructuredHours(hours)) return null
@@ -136,25 +156,14 @@ export function openStatus(hours: OpeningHours, now = new Date()): OpenStatus | 
   const periodsOf = (offset: number) => hours.days[DAY_KEYS[(todayIndex + offset + 7) % 7]] ?? []
 
   // A period from yesterday that runs past midnight may still be open.
-  for (const p of periodsOf(-1)) {
-    const o = minutes(p.open)
-    const c = minutes(p.close)
-    if (c < o && nowMin < c) return { open: true, closesAt: p.close }
-  }
-  for (const p of periodsOf(0)) {
-    const o = minutes(p.open)
-    const c = minutes(p.close)
-    const inside = c < o ? nowMin >= o : nowMin >= o && nowMin < c
-    if (inside) return { open: true, closesAt: p.close }
-  }
+  const current = currentPeriod(periodsOf(-1), periodsOf(0), nowMin)
+  if (current) return { open: true, closesAt: current.close }
   // Next opening today
-  const later = periodsOf(0)
-    .filter((p) => minutes(p.open) > nowMin)
-    .sort((a, b) => minutes(a.open) - minutes(b.open))[0]
+  const later = firstOpeningAfter(periodsOf(0), nowMin)
   if (later) return { open: false, opensAt: later.open }
   // Next opening on a following day
   for (let offset = 1; offset <= 7; offset++) {
-    const first = [...periodsOf(offset)].sort((a, b) => minutes(a.open) - minutes(b.open))[0]
+    const first = firstOpeningAfter(periodsOf(offset))
     if (first) return { open: false, opensAt: first.open, opensOn: DAY_KEYS[(todayIndex + offset) % 7] }
   }
   return { open: false }

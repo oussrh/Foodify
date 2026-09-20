@@ -11,6 +11,31 @@ const EXPORTED_FN =
 export const lineAt = (text, index) => text.slice(0, index).split('\n').length
 
 /**
+ * The index of the quote that closes the string or template literal opened at `i` (an escaped
+ * quote does not close it), or `text.length` when none does.
+ * @param {string} text @param {number} i
+ */
+function stringEnd(text, i) {
+  const quote = text[i]
+  for (i++; i < text.length && text[i] !== quote; i++) if (text[i] === '\\') i++
+  return i
+}
+
+/**
+ * The index of the last character of the comment or string literal that starts at `i`, or null
+ * when none starts there. A line comment with no newline after it ends at -1, as `indexOf` says.
+ * @param {string} text @param {number} i
+ * @returns {number | null}
+ */
+function literalEnd(text, i) {
+  const ch = text[i]
+  if (ch === '/' && text[i + 1] === '/') return text.indexOf('\n', i)
+  if (ch === '/' && text[i + 1] === '*') return text.indexOf('*/', i) + 1
+  if (ch === "'" || ch === '"' || ch === '`') return stringEnd(text, i)
+  return null
+}
+
+/**
  * The index just past the bracket that closes the one at `open`, or -1. Strings, template
  * literals and comments are skipped so a brace in a message does not unbalance the count.
  * @param {string} text @param {number} open @param {string} pair the two brackets, e.g. "()"
@@ -19,13 +44,10 @@ export function closeOf(text, open, pair) {
   const [l, r] = pair
   let depth = 0
   for (let i = open; i < text.length; i++) {
-    const ch = text[i]
-    if (ch === '/' && text[i + 1] === '/') i = text.indexOf('\n', i)
-    else if (ch === '/' && text[i + 1] === '*') i = text.indexOf('*/', i) + 1
-    else if (ch === "'" || ch === '"' || ch === '`') {
-      for (i++; i < text.length && text[i] !== ch; i++) if (text[i] === '\\') i++
-    } else if (ch === l) depth++
-    else if (ch === r && --depth === 0) return i + 1
+    const skipTo = literalEnd(text, i)
+    if (skipTo !== null) i = skipTo
+    else if (text[i] === l) depth++
+    else if (text[i] === r && --depth === 0) return i + 1
     if (i < 0) return -1
   }
   return -1
@@ -67,39 +89,57 @@ export function functionAt(text, paren) {
   return { params: paramNames(text.slice(paren + 1, paramsEnd - 1)), body: text.slice(start.at, bodyEnd) }
 }
 
+// What a bracket does to the nesting depth of a parameter list; a type's angle brackets count too.
+const DEPTH_STEP = { '{': 1, '(': 1, '[': 1, '<': 1, '}': -1, ')': -1, ']': -1, '>': -1 }
+
+/**
+ * A parameter list split on the commas at depth zero, each part trimmed (an empty part for a
+ * trailing comma or an empty list).
+ * @param {string} params
+ */
+function topLevelParts(params) {
+  const parts = []
+  let depth = 0
+  let start = 0
+  for (let i = 0; i <= params.length; i++) {
+    const ch = params[i]
+    depth += DEPTH_STEP[ch] ?? 0
+    if ((ch === ',' && depth === 0) || i === params.length) {
+      parts.push(params.slice(start, i).trim())
+      start = i + 1
+    }
+  }
+  return parts
+}
+
+/**
+ * The names one parameter binds: the identifier of `a: T`, `b = 1` or `...rest`; every member
+ * of a destructured `{ params: p, x }` or `[a, b]` (the bound name, not the key).
+ * @param {string} part
+ */
+function boundNames(part) {
+  if (!part.startsWith('{') && !part.startsWith('[')) {
+    const m = part.match(/^(?:\.\.\.)?([A-Za-z_$][\w$]*)/)
+    return m ? [m[1]] : []
+  }
+  const names = []
+  const inner = part.slice(1, part.lastIndexOf(part[0] === '{' ? '}' : ']'))
+  for (const member of inner.split(',')) {
+    const m = member.trim().match(/^(?:\.\.\.)?(?:([A-Za-z_$][\w$]*)\s*:\s*)?([A-Za-z_$][\w$]*)/)
+    if (m) names.push(m[2])
+  }
+  return names
+}
+
 /**
  * The names a parameter list binds: `a: T`, `b = 1`, `...rest`, and the members of a
  * destructured `{ params: p, x }`. Split on the commas at depth zero.
  * @param {string} params
  */
 export function paramNames(params) {
-  const names = []
-  let depth = 0
-  let start = 0
-  const parts = []
-  for (let i = 0; i <= params.length; i++) {
-    const ch = params[i]
-    if (ch === '{' || ch === '(' || ch === '[' || ch === '<') depth++
-    else if (ch === '}' || ch === ')' || ch === ']' || ch === '>') depth--
-    else if ((ch === ',' && depth === 0) || i === params.length) {
-      parts.push(params.slice(start, i).trim())
-      start = i + 1
-    }
-  }
-  for (const part of parts) {
-    if (!part) continue
-    if (part.startsWith('{') || part.startsWith('[')) {
-      const inner = part.slice(1, part.lastIndexOf(part[0] === '{' ? '}' : ']'))
-      for (const member of inner.split(',')) {
-        const m = member.trim().match(/^(?:\.\.\.)?(?:([A-Za-z_$][\w$]*)\s*:\s*)?([A-Za-z_$][\w$]*)/)
-        if (m) names.push(m[2])
-      }
-    } else {
-      const m = part.match(/^(?:\.\.\.)?([A-Za-z_$][\w$]*)/)
-      if (m) names.push(m[1])
-    }
-  }
-  return names
+  return topLevelParts(params)
+    .filter(Boolean)
+    .flatMap((part) => boundNames(part))
 }
 
 /** The argument text of every zod parse call in a body. @param {string} body */

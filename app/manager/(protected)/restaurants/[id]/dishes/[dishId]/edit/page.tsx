@@ -2,7 +2,8 @@ import type { Route } from 'next'
 import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import EditDishForm, { type EditDishValues } from '@/components/edit-dish-form'
+import EditDishForm from '@/components/edit-dish-form'
+import { dishFormValues } from '@/components/forms/form-defaults'
 import IngredientManager from '@/components/ingredient-manager'
 import DishStatusManager from '@/components/dish-status-manager'
 import { PageHeader } from '@/components/shell/page-header'
@@ -33,21 +34,7 @@ export default async function EditDishPage({ params }: { params: Promise<{ id: s
     category.subcategories.map((sub) => ({ id: sub.id, nameEn: `${category.nameEn} → ${sub.nameEn}` })),
   )
 
-  const defaultValues: EditDishValues = {
-    nameEn: dish.nameEn,
-    nameFr: dish.nameFr,
-    descriptionEn: dish.descriptionEn,
-    descriptionFr: dish.descriptionFr,
-    price: dish.price.toFixed(2),
-    imageUrl: dish.imageUrl,
-    usdzUrl: dish.usdzUrl || '',
-    glbUrl: dish.glbUrl || '',
-    subcategoryId: dish.subcategoryId || '',
-    calories: dish.calories || undefined,
-    isMostPurchased: dish.isMostPurchased || false,
-    dietary: dish.dietary ?? [],
-    allergens: dish.allergens ?? [],
-  }
+  const defaultValues = dishFormValues(dish)
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">

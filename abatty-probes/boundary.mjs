@@ -10,6 +10,60 @@ const USE_SERVER = /^\s*(['"])use server\1/m
 const HTTP_METHOD = /^(GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS)$/
 const AUTHORIZE = /\bauthorize\s*\(/g
 
+/**
+ * Which boundary a file is, or null for an ordinary module: a route file (by path), a
+ * "use server" module, a file with an authorize() callback; a file can be several.
+ * @param {string} f @param {string} text
+ * @returns {{ isRoute: boolean, isAction: boolean, isAuth: boolean } | null}
+ */
+function boundaryOf(f, text) {
+  const isRoute = ROUTE_FILE.test(f)
+  const isAction = USE_SERVER.test(text)
+  const isAuth = AUTHORIZE.test(text)
+  AUTHORIZE.lastIndex = 0
+  return isRoute || isAction || isAuth ? { isRoute, isAction, isAuth } : null
+}
+
+/**
+ * What one exported function of a boundary file trusts, or null when it parses its input (or
+ * is not a handler): in a route file only the HTTP methods count, and one parse in the body
+ * covers every read of the request; in an action module every parameter must be named by a parse.
+ * @param {{ name: string, fn: { params: string[], body: string } }} exported
+ * @param {{ isRoute: boolean, isAction: boolean }} kind
+ * @returns {string | null}
+ */
+function exportedFinding({ name, fn }, { isRoute, isAction }) {
+  if (isRoute) {
+    const trusts = HTTP_METHOD.test(name) && READS_INPUT.test(fn.body) && parsedArguments(fn.body).length === 0
+    return trusts ? `${name} reads the request without a schema` : null
+  }
+  if (!isAction) return null
+  const missing = unparsedParams(fn.params, fn.body)
+  return missing.length ? `server action ${name}: no parse names ${missing.join(', ')}` : null
+}
+
+/**
+ * The findings of one boundary file: its exported functions, then every authorize() callback
+ * whose credentials no parse names.
+ * @param {string} f @param {string} text @param {{ isRoute: boolean, isAction: boolean, isAuth: boolean }} kind
+ */
+function fileFindings(f, text, kind) {
+  const findings = []
+  for (const { name, index, paren } of exportedFunctions(text)) {
+    const fn = functionAt(text, paren)
+    if (!fn) continue
+    const detail = exportedFinding({ name, fn }, kind)
+    if (detail) findings.push({ path: f, line: lineAt(text, index), detail })
+  }
+  if (kind.isAuth)
+    for (const m of text.matchAll(AUTHORIZE)) {
+      const fn = functionAt(text, m.index + m[0].length - 1)
+      if (fn && unparsedParams(fn.params, fn.body).length)
+        findings.push({ path: f, line: lineAt(text, m.index), detail: 'authorize() reads the credentials without a schema' })
+    }
+  return findings
+}
+
 /** @type {import("abatty").Probe} */
 export const unparsedBoundary = {
   metric: 'valid.unparsedBoundary',
@@ -27,31 +81,10 @@ export const unparsedBoundary = {
     for (const f of c.sourceFiles) {
       if (!/\.[jt]sx?$/.test(f)) continue
       const text = c.read(f)
-      const isRoute = ROUTE_FILE.test(f)
-      const isAction = USE_SERVER.test(text)
-      const isAuth = AUTHORIZE.test(text)
-      AUTHORIZE.lastIndex = 0
-      if (!isRoute && !isAction && !isAuth) continue
+      const kind = boundaryOf(f, text)
+      if (!kind) continue
       scanned++
-      for (const { name, index, paren } of exportedFunctions(text)) {
-        const fn = functionAt(text, paren)
-        if (!fn) continue
-        const line = lineAt(text, index)
-        if (isRoute) {
-          if (HTTP_METHOD.test(name) && READS_INPUT.test(fn.body) && parsedArguments(fn.body).length === 0)
-            findings.push({ path: f, line, detail: `${name} reads the request without a schema` })
-        } else if (isAction) {
-          const missing = unparsedParams(fn.params, fn.body)
-          if (missing.length)
-            findings.push({ path: f, line, detail: `server action ${name}: no parse names ${missing.join(', ')}` })
-        }
-      }
-      if (isAuth)
-        for (const m of text.matchAll(AUTHORIZE)) {
-          const fn = functionAt(text, m.index + m[0].length - 1)
-          if (fn && unparsedParams(fn.params, fn.body).length)
-            findings.push({ path: f, line: lineAt(text, m.index), detail: 'authorize() reads the credentials without a schema' })
-        }
+      findings.push(...fileFindings(f, text, kind))
     }
     return { scanned, findings }
   },

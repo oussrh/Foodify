@@ -34,21 +34,38 @@ function menuItem(dish: MenuDish, restaurant: MenuRestaurant, origin: string) {
   }
 }
 
-export function restaurantJsonLd(restaurant: MenuRestaurant, categories: MenuCategory[], uncategorized: MenuDish[], origin: string) {
-  const hours = parseOpeningHours(restaurant.openingHours)
-  const url = `${origin}/restaurant/${restaurant.slug}`
+/** One OpeningHoursSpecification per period of the structured hours; none for legacy free text. */
+function openingHoursSpecification(openingHours: MenuRestaurant['openingHours']) {
+  const hours = parseOpeningHours(openingHours)
+  if (!hasStructuredHours(hours)) return undefined
+  return DAY_KEYS.flatMap((day) =>
+    (hours.days[day] ?? []).map((p) => ({
+      '@type': 'OpeningHoursSpecification',
+      dayOfWeek: `https://schema.org/${SCHEMA_DAY[day]}`,
+      opens: p.open,
+      closes: p.close,
+    })),
+  )
+}
 
-  const openingHoursSpecification = hasStructuredHours(hours)
-    ? DAY_KEYS.flatMap((day) =>
-        (hours.days[day] ?? []).map((p) => ({
-          '@type': 'OpeningHoursSpecification',
-          dayOfWeek: `https://schema.org/${SCHEMA_DAY[day]}`,
-          opens: p.open,
-          closes: p.close,
-        })),
-      )
-    : undefined
+/** The PostalAddress, when a street or a city is known. */
+function postalAddress(restaurant: MenuRestaurant) {
+  if (!(restaurant.streetAddress || restaurant.city)) return undefined
+  return {
+    '@type': 'PostalAddress',
+    streetAddress: restaurant.streetAddress || undefined,
+    addressLocality: restaurant.city || undefined,
+    addressRegion: restaurant.state || undefined,
+    postalCode: restaurant.postalCode || undefined,
+    addressCountry: restaurant.country || undefined,
+  }
+}
 
+/**
+ * A MenuSection per subcategory that has dishes (named after the category alone when the
+ * subcategory repeats it), then "Other dishes" for the uncategorized ones.
+ */
+function menuSections(restaurant: MenuRestaurant, categories: MenuCategory[], uncategorized: MenuDish[], origin: string) {
   const sections = categories
     .flatMap((cat) =>
       cat.subcategories.map((sub) => ({
@@ -61,18 +78,11 @@ export function restaurantJsonLd(restaurant: MenuRestaurant, categories: MenuCat
   if (uncategorized.length > 0) {
     sections.push({ '@type': 'MenuSection', name: 'Other dishes', hasMenuItem: uncategorized.map((d) => menuItem(d, restaurant, origin)) })
   }
+  return sections
+}
 
-  const address =
-    restaurant.streetAddress || restaurant.city
-      ? {
-          '@type': 'PostalAddress',
-          streetAddress: restaurant.streetAddress || undefined,
-          addressLocality: restaurant.city || undefined,
-          addressRegion: restaurant.state || undefined,
-          postalCode: restaurant.postalCode || undefined,
-          addressCountry: restaurant.country || undefined,
-        }
-      : undefined
+export function restaurantJsonLd(restaurant: MenuRestaurant, categories: MenuCategory[], uncategorized: MenuDish[], origin: string) {
+  const url = `${origin}/restaurant/${restaurant.slug}`
 
   return {
     '@context': 'https://schema.org',
@@ -86,13 +96,13 @@ export function restaurantJsonLd(restaurant: MenuRestaurant, categories: MenuCat
     telephone: restaurant.phone ? restaurant.phone.replace(/[^\d+]/g, '') : undefined,
     email: restaurant.email || undefined,
     servesCuisine: restaurant.cuisineType || undefined,
-    address,
-    openingHoursSpecification,
+    address: postalAddress(restaurant),
+    openingHoursSpecification: openingHoursSpecification(restaurant.openingHours),
     hasMenu: {
       '@type': 'Menu',
       name: `${restaurant.name} menu`,
       inLanguage: ['en', 'fr'],
-      hasMenuSection: sections,
+      hasMenuSection: menuSections(restaurant, categories, uncategorized, origin),
     },
   }
 }
