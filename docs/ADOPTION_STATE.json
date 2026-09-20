@@ -1,0 +1,59 @@
+{
+  "startedAt": "2026-09-20T10:00:16Z",
+  "baseBranch": "main",
+  "phases": [
+    {
+      "id": 0,
+      "status": "in_progress",
+      "updatedAt": "2026-09-20T10:00:16Z"
+    },
+    {
+      "id": 1,
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "status": "pending"
+    },
+    {
+      "id": 3,
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "status": "pending"
+    },
+    {
+      "id": 5,
+      "status": "pending"
+    },
+    {
+      "id": 6,
+      "status": "pending"
+    },
+    {
+      "id": 7,
+      "status": "pending"
+    },
+    {
+      "id": 8,
+      "status": "pending"
+    },
+    {
+      "id": 9,
+      "status": "pending"
+    },
+    {
+      "id": 10,
+      "status": "pending"
+    },
+    {
+      "id": 11,
+      "status": "pending"
+    },
+    {
+      "id": 12,
+      "status": "pending"
+    }
+  ]
+}
