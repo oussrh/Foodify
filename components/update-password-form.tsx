@@ -2,7 +2,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 
@@ -53,7 +53,7 @@ export default function UpdatePasswordForm() {
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
+    control,
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
   
   const [loading, setLoading] = useState(false)
@@ -63,8 +63,8 @@ export default function UpdatePasswordForm() {
   const [showNewPassword, setShowNewPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
-  const password = watch('password') || ''
-  const confirmPassword = watch('confirm') || ''
+  const password = useWatch({ control, name: 'password' }) || ''
+  const confirmPassword = useWatch({ control, name: 'confirm' }) || ''
 
   // Password strength validation
   const passwordChecks = [

@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState, useCallback } from 'react'
@@ -109,7 +109,7 @@ export default function EditRestaurantForm({
     handleSubmit,
     formState: { errors, isSubmitting, isDirty },
     setValue,
-    watch,
+    control,
     reset,
     resetField,
   } = useForm<EditRestaurantValues>({ 
@@ -118,10 +118,9 @@ export default function EditRestaurantForm({
     mode: 'onChange'
   })
 
-  const logoUrl = watch('logoUrl')
-  const coverImageUrl = watch('coverImageUrl')
-  const googleFontUrl = watch('googleFontUrl')
-  const currentCurrencySymbol = watch('currencySymbol')
+  const values = useWatch({ control })
+  const { logoUrl, coverImageUrl, googleFontUrl } = values
+  const currentCurrencySymbol = values.currencySymbol
 
   // Uploads are saved the moment they finish, so they update the baseline instead of dirtying the form.
   const onBrandingChange = useCallback(
@@ -132,18 +131,18 @@ export default function EditRestaurantForm({
     [resetField, setValue],
   )
   const brandingValues = {
-    name: watch('name') || '',
-    tagline: watch('tagline') || '',
-    cuisineType: watch('cuisineType') || '',
-    city: watch('city') || '',
+    name: values.name || '',
+    tagline: values.tagline || '',
+    cuisineType: values.cuisineType || '',
+    city: values.city || '',
     currencySymbol: currentCurrencySymbol || '',
     logoUrl: logoUrl || '',
     coverImageUrl: coverImageUrl || '',
-    coverImageStyle: (watch('coverImageStyle') || 'cover') as 'cover' | 'repeat',
-    colorTheme: watch('colorTheme') || '',
-    fontFamily: watch('fontFamily') || '',
+    coverImageStyle: (values.coverImageStyle || 'cover') as 'cover' | 'repeat',
+    colorTheme: values.colorTheme || '',
+    fontFamily: values.fontFamily || '',
     googleFontUrl: googleFontUrl || '',
-    menuTheme: (watch('menuTheme') || 'system') as 'system' | 'light' | 'dark',
+    menuTheme: (values.menuTheme || 'system') as 'system' | 'light' | 'dark',
   }
   
   // Track form changes
@@ -461,17 +460,17 @@ export default function EditRestaurantForm({
         register={register as unknown as UseFormRegister<ContactFormValues>}
         errors={errors}
         values={{
-          name: watch('name') || '',
-          email: watch('email'),
-          phone: watch('phone'),
-          website: watch('website'),
-          streetAddress: watch('streetAddress'),
-          city: watch('city'),
-          state: watch('state'),
-          postalCode: watch('postalCode'),
-          country: watch('country'),
-          openingHours: watch('openingHours'),
-          socialMedia: watch('socialMedia'),
+          name: values.name || '',
+          email: values.email,
+          phone: values.phone,
+          website: values.website,
+          streetAddress: values.streetAddress,
+          city: values.city,
+          state: values.state,
+          postalCode: values.postalCode,
+          country: values.country,
+          openingHours: values.openingHours,
+          socialMedia: values.socialMedia,
         }}
         onChange={(field, value) => setValue(field, value, { shouldDirty: true })}
         disabled={isSubmitting}

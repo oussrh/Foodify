@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -45,7 +45,8 @@ export default function CreateClientForm({
     handleSubmit,
     formState: { errors },
     reset,
-    watch,
+    control,
+    getValues,
     setValue,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -65,8 +66,8 @@ export default function CreateClientForm({
     }
   };
 
-  const selectedRestaurants = watch('restaurantIds') || [];
-  const newRestaurantName = watch('restaurantName');
+  const selectedRestaurants = useWatch({ control, name: 'restaurantIds' }) || [];
+  const newRestaurantName = useWatch({ control, name: 'restaurantName' });
 
   // Ensure selectedRestaurants is always an array
   const safeSelectedRestaurants = Array.isArray(selectedRestaurants) ? selectedRestaurants : [];
@@ -204,7 +205,7 @@ export default function CreateClientForm({
                                         variant="outline"
                                         size="sm"
                                         onClick={() => {
-                                          const currentValues = watch('restaurantIds') || []
+                                          const currentValues = getValues('restaurantIds') || []
                                           const newValues = currentValues.filter(id => id !== restaurant.id)
                                           setValue('restaurantIds', newValues)
                                         }}
@@ -220,7 +221,7 @@ export default function CreateClientForm({
                                         variant="outline"
                                         size="sm"
                                         onClick={() => {
-                                          const currentValues = watch('restaurantIds') || []
+                                          const currentValues = getValues('restaurantIds') || []
                                           const newValues = [...currentValues, restaurant.id]
                                           setValue('restaurantIds', newValues)
                                         }}
@@ -281,7 +282,7 @@ export default function CreateClientForm({
                             variant="ghost"
                             size="sm"
                             onClick={() => {
-                              const currentValues = watch('restaurantIds') || []
+                              const currentValues = getValues('restaurantIds') || []
                               const newValues = currentValues.filter(currentId => currentId !== id)
                               setValue('restaurantIds', newValues)
                             }}

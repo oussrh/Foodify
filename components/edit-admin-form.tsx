@@ -1,6 +1,6 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -32,7 +32,7 @@ export default function EditAdminForm({
     register,
     handleSubmit,
     formState: { errors, isDirty },
-    watch,
+    control,
   } = useForm<EditAdminValues>({ resolver: zodResolver(schema), defaultValues })
 
   const onSubmit = async (data: EditAdminValues) => {
@@ -50,7 +50,7 @@ export default function EditAdminForm({
     }
   }
   
-  const currentEmail = watch('email')
+  const currentEmail = useWatch({ control, name: 'email' })
 
   return (
     <Card className="border-0">

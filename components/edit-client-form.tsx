@@ -1,7 +1,7 @@
 // PathFile: components/edit-client-form.tsx
 'use client'
 
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
@@ -66,7 +66,8 @@ export default function EditClientForm({
     register,
     handleSubmit,
     formState: { errors, isDirty },
-    watch,
+    control,
+    getValues,
     setValue,
   } = useForm<EditClientValues>({ 
     resolver: zodResolver(schema), 
@@ -88,12 +89,8 @@ export default function EditClientForm({
     }
   }
 
-  const currentEmail = watch('email')
-
-  // Fix for useMemo dependency issue - wrap selectedRestaurants in useMemo
-  const selectedRestaurants = useMemo(() => {
-    return watch('restaurantIds') || []
-  }, [watch])
+  const currentEmail = useWatch({ control, name: 'email' })
+  const selectedRestaurants = useWatch({ control, name: 'restaurantIds' }) || []
 
   // Filter restaurants based on search and toggle
   const filteredRestaurants = useMemo(() => {
@@ -384,7 +381,7 @@ export default function EditClientForm({
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                      const currentValues = watch('restaurantIds') || []
+                                      const currentValues = getValues('restaurantIds') || []
                                       const newValues = currentValues.filter(currentId => currentId !== restaurant.id)
                                       setValue('restaurantIds', newValues, { shouldDirty: true })
                                     }}
@@ -400,7 +397,7 @@ export default function EditClientForm({
                                     variant="outline"
                                     size="sm"
                                     onClick={() => {
-                                      const currentValues = watch('restaurantIds') || []
+                                      const currentValues = getValues('restaurantIds') || []
                                       const newValues = [...currentValues, restaurant.id]
                                       setValue('restaurantIds', newValues, { shouldDirty: true })
                                     }}
@@ -500,7 +497,7 @@ export default function EditClientForm({
                               variant="ghost"
                               size="sm"
                               onClick={() => {
-                                const currentValues = watch('restaurantIds') || []
+                                const currentValues = getValues('restaurantIds') || []
                                 const newValues = currentValues.filter(currentId => currentId !== restaurantId)
                                 setValue('restaurantIds', newValues, { shouldDirty: true })
                               }}

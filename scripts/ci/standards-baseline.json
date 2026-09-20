@@ -23,7 +23,7 @@
     "docs.danglingSource": 0,
     "docs.frontMatter": 0,
     "docs.indexDrift": 0,
-    "size.excessCode": 5184,
+    "size.excessCode": 5185,
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 13,
@@ -64,12 +64,12 @@
       "components/ar-viewer-client.tsx": 557,
       "components/branding/branding-panel.tsx": 37,
       "components/contact/contact-panel.tsx": 2,
-      "components/create-client-form.tsx": 86,
-      "components/create-dish-form.tsx": 120,
+      "components/create-client-form.tsx": 87,
+      "components/create-dish-form.tsx": 121,
       "components/create-restaurant-form.tsx": 295,
-      "components/edit-client-form.tsx": 282,
-      "components/edit-dish-form.tsx": 142,
-      "components/edit-restaurant-form.tsx": 220,
+      "components/edit-client-form.tsx": 281,
+      "components/edit-dish-form.tsx": 143,
+      "components/edit-restaurant-form.tsx": 219,
       "components/image-upload.tsx": 289,
       "components/ingredient-manager.tsx": 50,
       "components/manager-category-manager.tsx": 327,
@@ -158,6 +158,13 @@
     "valid.rawEnv": 1
   },
   "entries": {
+    "size.excessCode": {
+      "at": "2026-09-20",
+      "was": 5184,
+      "now": 5185,
+      "reason": "react-hook-form's watch() was an inline expression; the React Compiler-compatible useWatch is a hook and therefore a statement, one line in each of three forms already over budget (create-client, create-dish, edit-dish); the forms' split is phase 8",
+      "owner": "Oussama Rhoni"
+    },
     "size.overBudget": {
       "at": "2026-09-20",
       "was": 31,

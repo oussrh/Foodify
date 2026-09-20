@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -76,7 +76,7 @@ export default function CreateRestaurantForm() {
     handleSubmit,
     formState: { errors, isSubmitting },
     setValue,
-    watch,
+    control,
     reset,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -94,9 +94,9 @@ export default function CreateRestaurantForm() {
     mode: "onChange",
   });
 
-  const logoUrl = watch("logoUrl");
-  const coverImageUrl = watch("coverImageUrl");
-  const googleFontUrl = watch("googleFontUrl");
+  const logoUrl = useWatch({ control, name: "logoUrl" });
+  const coverImageUrl = useWatch({ control, name: "coverImageUrl" });
+  const googleFontUrl = useWatch({ control, name: "googleFontUrl" });
 
   const onSubmit = async (data: FormValues) => {
     try {

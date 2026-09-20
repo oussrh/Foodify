@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -70,12 +70,13 @@ export default function CreateDishForm({
     formState: { errors, isDirty },
     reset,
     setValue,
-    watch,
+    control,
     setError: setFormError,
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     mode: "onChange",
   });
+  const [dietary = [], allergens = [], nameEn] = useWatch({ control, name: ['dietary', 'allergens', 'nameEn'] })
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
@@ -289,8 +290,8 @@ export default function CreateDishForm({
 
               <div className="md:col-span-2">
                 <DietarySelect
-                  dietary={watch('dietary') || []}
-                  allergens={watch('allergens') || []}
+                  dietary={dietary}
+                  allergens={allergens}
                   onDietaryChange={(v) => setValue('dietary', v, { shouldDirty: true })}
                   onAllergensChange={(v) => setValue('allergens', v, { shouldDirty: true })}
                   disabled={isSubmitting}
@@ -396,7 +397,7 @@ export default function CreateDishForm({
           onClose={() => setPreviewModel(null)}
           modelUrl={previewModel.url}
           modelType={previewModel.type}
-          dishName={watch('nameEn') || 'Dish Preview'}
+          dishName={nameEn || 'Dish Preview'}
         />
       )}
     </div>
