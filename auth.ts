@@ -6,7 +6,7 @@ import ResendProvider from 'next-auth/providers/resend'
 import Credentials from 'next-auth/providers/credentials'
 import prisma from './lib/prisma'
 import bcrypt from 'bcryptjs'
-import { verifyTOTP } from './lib/totp'
+import { safeEqual, verifyTOTP } from './lib/totp'
 
 declare module 'next-auth' {
   interface User {
@@ -61,7 +61,7 @@ export const {
 
           if (user.emailOtpCode) {
             const expired = user.emailOtpExpires && user.emailOtpExpires < new Date()
-            if (!code || code !== user.emailOtpCode || expired) {
+            if (!code || !safeEqual(code, user.emailOtpCode) || expired) {
               throw new Error('Invalid two-factor code')
             }
             await prisma.user.update({

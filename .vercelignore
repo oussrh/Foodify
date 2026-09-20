@@ -1,6 +1,5 @@
 # FilePath: .vercelignore
 
-# Force fresh package installation
+# Build artefacts only; pnpm-lock.yaml must ship so Vercel installs are reproducible
 node_modules
 .next
-pnpm-lock.yaml

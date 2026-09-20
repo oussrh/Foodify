@@ -1,8 +1,10 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { requireRestaurantAccess, requireSuperAdmin } from '@/lib/auth-guard'
 
 export async function listRestaurants() {
+  await requireSuperAdmin()
   return prisma.restaurant.findMany({ orderBy: { createdAt: 'desc' } })
 }
 
@@ -38,6 +40,7 @@ export async function createRestaurant(data: {
   currency?: string
   currencySymbol?: string
 }) {
+  await requireSuperAdmin()
   return prisma.restaurant.create({ data })
 }
 
@@ -77,6 +80,7 @@ export async function updateRestaurant(
     currencySymbol?: string
   }
 ) {
+  await requireRestaurantAccess({ id })
   console.log('Updating restaurant with ID:', id)
   console.log('Update data:', JSON.stringify(data, null, 2))
   
@@ -93,10 +97,12 @@ export async function updateRestaurant(
 }
 
 export async function deleteRestaurant(id: string) {
+  await requireSuperAdmin()
   return prisma.restaurant.delete({ where: { id } })
 }
 
 export async function listRestaurantsForUser(userId: string) {
+  await requireSuperAdmin()
   return prisma.restaurant.findMany({
     where: { users: { some: { id: userId } } },
     orderBy: { createdAt: 'desc' },
@@ -104,6 +110,7 @@ export async function listRestaurantsForUser(userId: string) {
 }
 
 export async function uploadRestaurantLogo(formData: FormData, restaurantSlug: string) {
+  await requireRestaurantAccess({ slug: restaurantSlug })
   try {
     const { uploadLogo } = await import('@/lib/cloudinary')
     
@@ -141,6 +148,7 @@ export async function uploadRestaurantLogo(formData: FormData, restaurantSlug: s
 }
 
 export async function uploadRestaurantCover(formData: FormData, restaurantSlug: string) {
+  await requireRestaurantAccess({ slug: restaurantSlug })
   try {
     const { uploadCoverImage } = await import('@/lib/cloudinary')
     
