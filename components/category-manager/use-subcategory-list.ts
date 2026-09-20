@@ -9,6 +9,10 @@ import {
 } from "@/app/actions/menu-actions";
 import type { Category, Names, SubDrafts, Subcategory } from "./types";
 
+/**
+ * The subcategories inside the categories: the per-category add drafts, and the add, rename
+ * (on blur) and move up/down both portals do the same way.
+ */
 export function useSubcategoryList(
   categories: Category[],
   setCategories: Dispatch<SetStateAction<Category[]>>

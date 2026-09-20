@@ -3,10 +3,9 @@
 import type { CSSProperties } from 'react'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { cn } from '@/lib/utils'
-import type { Locale, MenuCategory, MenuDish, MenuRestaurant, Money } from '@/lib/menu'
+import { localName, type Locale, type MenuCategory, type MenuDish, type MenuRestaurant, type Money } from '@/lib/menu'
 import DishBody from '../dish-body'
 import { dishHref } from './menu-urls'
-import { localName } from './use-menu-filters'
 
 interface DishSheetProps {
   dish: MenuDish | null

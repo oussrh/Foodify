@@ -65,9 +65,7 @@ export function PasswordStrengthIndicator({ checks, score }: { checks: PasswordC
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {checks.map((check, index) => (
             <div key={index} className="flex items-center gap-2 p-2 rounded-lg transition-colors">
-              <div className={`shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
- check.test ? 'bg-muted' : 'bg-muted'
- }`}>
+              <div className="shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-colors bg-muted">
                 {check.test ? (
                   <Check className="h-3 w-3 text-success" />
                 ) : (

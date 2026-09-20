@@ -5,6 +5,11 @@
 import { useCallback, useEffect } from 'react'
 import { toast } from 'sonner'
 
+/**
+ * An edit form's keyboard: Ctrl+S saves and Escape discards, from anywhere on the page. The
+ * `save` it returns is the one the save bar calls too: refused with a toast when nothing changed,
+ * silently while a save is running. `submit` and `cancel` must be stable (memoised) references.
+ */
 export function useSaveShortcuts({
   hasUnsavedChanges,
   isSubmitting,

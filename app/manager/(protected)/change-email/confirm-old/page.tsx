@@ -16,11 +16,7 @@ export default async function ConfirmOldEmailPage({
       <div className="max-w-md w-full space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
- success
- ? ''
- : ''
- }`}>
+          <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
             {success ? (
               <CheckCircle className="h-8 w-8 text-white" />
             ) : (

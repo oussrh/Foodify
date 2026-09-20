@@ -12,7 +12,7 @@ export const shapeExemptions = {
   kind: 'ratchet',
   standard: ['CODE.2'],
   title: 'Files exempted from the function-shape rules',
-  why: 'A function over 60 lines (150 in a component), 4 parameters or complexity 12 is what an agent stops reading whole. The rules are at error everywhere except the files this list names; the list is written by a script from the findings and refused by the lint script when stale. The count is the number of files still exempted.',
+  why: 'A function over 60 lines (150 in a component), 4 parameters or complexity 12, or a file over 800 lines, is what an agent stops reading whole. The rules are at error everywhere except the files this list names; the list is written by a script from the findings and refused by the lint script when stale. The count is the number of files still exempted.',
   approximates: 'the length of scripts/ci/shape-exemptions.json; that the listed files still fail is the lint script\'s check (shape-exemptions.mjs --check), not this probe\'s',
   axis: 'navigability',
   lossAt: 50,

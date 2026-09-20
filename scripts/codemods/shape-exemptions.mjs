@@ -12,10 +12,12 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs'
 import { ESLint } from 'eslint'
 
 export const EXEMPTIONS_FILE = 'scripts/ci/shape-exemptions.json'
-export const SHAPE_RULES = ['max-lines-per-function', 'complexity', 'max-params']
+export const SHAPE_RULES = ['max-lines', 'max-lines-per-function', 'complexity', 'max-params']
 // The thresholds of the standard (size-limits.md): 60 lines, 150 in a component file, 4
-// parameters, complexity 12. Blank lines and comments do not count.
+// parameters, complexity 12, and the 800 raw lines no file crosses (the per-kind budgets are
+// the ratchet's size metrics). Blank lines and comments do not count in a function.
 export const SHAPE_RULE_CONFIG = {
+  'max-lines': ['error', { max: 800 }],
   'max-lines-per-function': ['error', { max: 60, skipBlankLines: true, skipComments: true, IIFEs: true }],
   complexity: ['error', { max: 12 }],
   'max-params': ['error', { max: 4 }],

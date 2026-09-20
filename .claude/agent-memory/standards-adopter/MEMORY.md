@@ -1,14 +1,14 @@
-- [Shared scratchpad](patterns_shared-scratchpad.md) — parallel agents share the session scratchpad; namespace scratch work per territory, never rm a shared folder
-- [Windows Bash tool](patterns_windows-bash-tool.md) — the Bash tool unescapes backslashes and rejects some heredocs; write source files with Write
-- [Render-diff proof](patterns_render-diff-proof.md) — SSR the HEAD copy vs the tree through vitest from the scratchpad; forced useState by index, mocked hooks, junction, negative control
-- [Render differential](patterns_render-differential.md) — recipe that proved ten component splits: HEAD copies via git archive, SSR both, diff
-- [Page render diff](patterns_page-render-diff.md) — proving a Next server-page split kept the DOM: render HEAD and tree versions of the async page
-- [Probe refactor](patterns_probe-refactor.md) — proving a refactor of abatty-probes/*.mjs kept every reading with a differential script
-- [Text-probe traps](patterns_text-probes.md) — `process.env` in a comment trips wholeEnv; a moved ts-expect-error regresses per file; exempt files hide shape errors, force the rules
-- [Shape seams](patterns_shape-seams.md) — the eslint override that measures exempted files, and the seams that took the admin forms/managers under the shape rules
-- [Component seams](patterns_component-seams.md) — seams that held for uploads/viewers/QR: one shared module per copied thing, a run-owning progress hook, word tables, effect builders
-- [Form split typing](patterns_form-split-typing.md) — react-hook-form register/setValue/control do not narrow to a subset type; pass registered props or use the exact schema type
-- [Nullish cluster](patterns_nullish-cluster.md) — twenty `?? ''` moved into a helper keep their complexity; the seam is elsewhere
-- [React Compiler refs](patterns_react-compiler-refs.md) — a hook returning refs inside its result object trips react-hooks/refs when passed as a prop; destructure
-- [Type-only cycles](patterns_type-only-cycles.md) — depcruise no-circular still fails a value import that closes a cycle through an import type; shared types in a leaf
-- [Mutation restore](patterns_mutation-restore.md) — restoring a mutation-tested file with `git checkout --` wipes the refactor in progress; undo the mutation itself
+- [Shared scratchpad](patterns_shared-scratchpad.md) - parallel agents share the session scratchpad; namespace scratch work per territory, never rm a shared folder
+- [Windows Bash tool](patterns_windows-bash-tool.md) - the Bash tool unescapes backslashes and rejects some heredocs; write source files with Write
+- [Render-diff proof](patterns_render-diff-proof.md) - SSR the HEAD copy vs the tree through vitest from the scratchpad; forced useState by index, mocked hooks, junction, negative control
+- [Render differential](patterns_render-differential.md) - recipe that proved ten component splits: HEAD copies via git archive, SSR both, diff
+- [Page render diff](patterns_page-render-diff.md) - proving a Next server-page split kept the DOM: render HEAD and tree versions of the async page
+- [Probe refactor](patterns_probe-refactor.md) - proving a refactor of abatty-probes/*.mjs kept every reading with a differential script
+- [Text-probe traps](patterns_text-probes.md) - `process.env` in a comment trips wholeEnv; a moved ts-expect-error regresses per file; exempt files hide shape errors, force the rules
+- [Shape seams](patterns_shape-seams.md) - the eslint override that measures exempted files, and the seams that took the admin forms/managers under the shape rules
+- [Component seams](patterns_component-seams.md) - seams that held for uploads/viewers/QR: one shared module per copied thing, a run-owning progress hook, word tables, effect builders
+- [Form split typing](patterns_form-split-typing.md) - react-hook-form register/setValue/control do not narrow to a subset type; pass registered props or use the exact schema type
+- [Nullish cluster](patterns_nullish-cluster.md) - twenty `?? ''` moved into a helper keep their complexity; the seam is elsewhere
+- [React Compiler refs](patterns_react-compiler-refs.md) - a hook returning refs inside its result object trips react-hooks/refs when passed as a prop; destructure
+- [Type-only cycles](patterns_type-only-cycles.md) - depcruise no-circular still fails a value import that closes a cycle through an import type; shared types in a leaf
+- [Mutation restore](patterns_mutation-restore.md) - restoring a mutation-tested file with `git checkout --` wipes the refactor in progress; undo the mutation itself

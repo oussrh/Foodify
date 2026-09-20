@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { hasAR, type Locale, type MenuCategory, type MenuDish } from '@/lib/menu'
+import { hasAR, type Locale, type MenuCategory, type MenuDish, localName } from '@/lib/menu'
 
 export interface Section {
   id: string
@@ -23,9 +23,6 @@ interface Filter {
   dietary: string[]
   query: string
 }
-
-/** A category or subcategory name in the guest's language. */
-export const localName = (locale: Locale, en: string, fr: string) => (locale === 'fr' ? fr : en)
 
 function matches(dish: MenuDish, { arOnly, dietary, query }: Filter): boolean {
   if (arOnly && !hasAR(dish)) return false

@@ -19,6 +19,7 @@ const BRANDING_TEXT_FIELDS = [
   'googleFontUrl',
 ] as const
 
+/** The branding panel's view of the settings form's watched values: every field with its empty default. */
 export function toBrandingValues(values: Partial<EditRestaurantValues>): BrandingValues {
   const text = {} as Record<(typeof BRANDING_TEXT_FIELDS)[number], string>
   for (const field of BRANDING_TEXT_FIELDS) text[field] = values[field] || ''
@@ -29,6 +30,7 @@ export function toBrandingValues(values: Partial<EditRestaurantValues>): Brandin
   }
 }
 
+/** The contact panel's view of the settings form's watched values: the contact fields as they are. */
 export function toContactValues(values: Partial<EditRestaurantValues>): ContactFormValues {
   return {
     name: values.name || '',

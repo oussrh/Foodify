@@ -4,6 +4,7 @@
 import { useState } from "react";
 import type { Category } from "./types";
 
+/** Which category cards are folded: one flag per category id, plus collapse-all and expand-all. */
 export function useCollapsed(categories: Category[]) {
   const [collapsedStates, setCollapsedStates] = useState<
     Record<string, boolean>

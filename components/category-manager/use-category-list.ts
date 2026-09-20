@@ -12,6 +12,11 @@ import {
 } from "@/app/actions/menu-actions";
 import type { Category, Names } from "./types";
 
+/**
+ * The categories of one restaurant as the manager holds them: the list, and the add, rename
+ * and drag-reorder both portals do the same way (the role-specific status and delete handlers
+ * stay in the entry component).
+ */
 export function useCategoryList(initialData: Category[], restaurantId: string) {
   const [categories, setCategories] = useState<Category[]>(initialData);
 

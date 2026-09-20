@@ -34,7 +34,7 @@ export default function ContactFields({ register, errors, phone, cleanedPhone, d
           <Label htmlFor="phone">Phone</Label>
           <Input id="phone" type="tel" inputMode="tel" autoComplete="tel" placeholder="+212 6 12 34 56 78" disabled={disabled} {...register('phone')} />
           {phone && cleanedPhone !== phone.trim() && (
-            <span className="text-xs text-muted-foreground">Guests will see: {cleanedPhone || '—'}</span>
+            <span className="text-xs text-muted-foreground">Guests will see: {cleanedPhone || 'not set'}</span>
           )}
         </div>
         <div className={FIELD}>

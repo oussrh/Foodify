@@ -53,7 +53,7 @@ export default function SocialLinks({ value, handles, onChange, disabled }: Soci
     <section className="flex flex-col gap-4">
       <div>
         <h2 className="text-base font-semibold">Social links</h2>
-        <p className="text-sm text-muted-foreground">Paste a handle or a full link — both work.</p>
+        <p className="text-sm text-muted-foreground">Paste a handle or a full link; both work.</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         {SOCIAL.map((s) => (

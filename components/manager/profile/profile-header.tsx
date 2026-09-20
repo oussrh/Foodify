@@ -19,11 +19,7 @@ export function ProfileHeader({ emailVerified }: { emailVerified: Date | null })
       </div>
         
       {/* Account Status Banner */}
-      <div className={`p-4 rounded-md border ${
-emailVerified 
-? 'bg-muted border-border' 
-: 'bg-muted border-border'
-}`}>
+      <div className="p-4 rounded-md border bg-muted border-border">
         <div className="flex items-center gap-3">
           {emailVerified ? (
             <CheckCircle className="h-5 w-5 text-success dark:text-muted-foreground" />

@@ -70,7 +70,7 @@ const config = [
   // Tests and fixtures describe a behaviour per block, not a function per concern; a spec's
   // describe body is one long arrow by design.
   { files: ['**/*.test.{ts,tsx}', 'e2e/**'], rules: { 'max-lines-per-function': 'off' } },
-  ...(shapeExemptions.length ? [{ files: shapeExemptions, rules: { 'max-lines-per-function': 'off', complexity: 'off', 'max-params': 'off' } }] : []),
+  ...(shapeExemptions.length ? [{ files: shapeExemptions, rules: { 'max-lines': 'off', 'max-lines-per-function': 'off', complexity: 'off', 'max-params': 'off' } }] : []),
   {
     // The presets scope their plugins to these extensions (no .cjs); overrides must match.
     files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'],

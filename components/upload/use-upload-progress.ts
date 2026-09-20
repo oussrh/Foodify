@@ -17,6 +17,13 @@ export interface UploadRun<T> {
   onSettled?: () => void
 }
 
+/**
+ * The state of one upload as the four upload components show it: a busy flag, a simulated
+ * progress bar (a random step toward 90% every `tickMs` while the request is pending, 100 when
+ * it resolves, reset a second after either outcome) and the success or error line. `track` runs
+ * the upload and then what the caller does with its result inside one try, so a failure anywhere
+ * shows the caller's message.
+ */
 export function useUploadProgress(tickMs: number) {
   const [isUploading, setIsUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)

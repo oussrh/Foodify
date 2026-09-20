@@ -21,6 +21,7 @@ function textColumns(restaurant: Restaurant): Record<TextColumn, string> {
   return out
 }
 
+/** A restaurant row as the settings form's default values: every nullable text column as '' (the inputs are controlled), the enums narrowed to what the form offers. */
 export function restaurantFormValues(restaurant: Restaurant): EditRestaurantValues {
   return {
     name: restaurant.name,
@@ -33,6 +34,7 @@ export function restaurantFormValues(restaurant: Restaurant): EditRestaurantValu
   }
 }
 
+/** A dish row as the edit form's default values: money as the two-decimal string, the assets as '' when unset. */
 export function dishFormValues(dish: Dish): EditDishValues {
   return {
     nameEn: dish.nameEn,
