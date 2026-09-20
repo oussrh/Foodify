@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, resolveInitialLocale } from './menu'
+import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, resolveInitialLocale, localName } from './menu'
 
 describe('formatPrice', () => {
   it('formats with the ISO code through Intl, French style in French', () => {
@@ -25,6 +25,11 @@ describe('labels', () => {
 
   it('echoes an unknown key rather than hiding it', () => {
     expect(dietaryLabel('keto', 'en')).toBe('keto')
+  })
+
+  it("picks a category name in the guest's language", () => {
+    expect(localName('fr', 'Starters', 'Entrées')).toBe('Entrées')
+    expect(localName('en', 'Starters', 'Entrées')).toBe('Starters')
   })
 })
 
