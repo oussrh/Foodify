@@ -137,8 +137,8 @@
     },
     {
       "id": 4,
-      "status": "in_progress",
-      "updatedAt": "2026-09-20T17:25:26Z",
+      "status": "done",
+      "updatedAt": "2026-09-20T18:28:40Z",
       "numbersBefore": {
         "rules": {
           "VALID-ZOD": "present (zod present; 40 boundaries unparsed)",
@@ -150,6 +150,23 @@
         "score": "65/100",
         "enforcedShare": "75% (39/52)",
         "readability": "84/100 (74 once the new metric is baselined)"
+      },
+      "numbersAfter": {
+        "rules": {
+          "VALID-ZOD": "present",
+          "VALID-ENV": "present (the measure counts playwright.config.ts's CI flag, a test-runner config outside the app)",
+          "DATA-TENANT": "n/a (decision recorded; the isolation test is phase 10's)"
+        },
+        "valid.rawEnv": "0, hard",
+        "valid.unparsedBoundary": "0, hard",
+        "size.excessCode": 5058,
+        "score": "66/100",
+        "enforcedShare": "75% (39/52)",
+        "readability": "90/100 (boundary-clarity 100)",
+        "switches": "pnpm run standards red on a planted process.env read, a planted destructuring, a planted unparsed action (declared, then expression-bodied arrow), green after each restore; probe controls 12/12",
+        "tests": "187 unit (23 files), 16 browser",
+        "valid.wholeEnv": "0, hard (2 on the day the probe was written)",
+        "ciRun": "https://github.com/oussrh/Foodify/actions/runs/35528976000 (branch: gate with build, 187 unit and 16 browser tests, changed-lines coverage, audit)"
       }
     },
     {
