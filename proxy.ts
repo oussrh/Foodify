@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-export function middleware(request: NextRequest) {
+// proxy.ts (Next 16: the middleware convention renamed; runs on the Node.js runtime)
+export function proxy(request: NextRequest) {
   const host = request.headers.get('host') || ''
   const url = request.nextUrl.clone()
 

@@ -25,11 +25,7 @@
     "components/ui/**": ["exports", "types"]
   },
   "ignoreFiles": [],
-  "ignoreDependencies": [
-    // consumed by `next lint` (legacy .eslintrc); remove once eslint.config.mjs exists
-    "eslint",
-    "eslint-config-next"
-  ],
+  "ignoreDependencies": [],
   "ignoreBinaries": [],
   "ignoreExportsUsedInFile": true,
   "rules": {

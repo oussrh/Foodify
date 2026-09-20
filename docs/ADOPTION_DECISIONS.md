@@ -54,3 +54,10 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Default taken**: `vitest` 5.0.1 and `@vitest/coverage-v8` 5.0.1 added as devDependencies in the phase commit, lockfile updated, `PRISMA_GENERATE_SKIP_AUTOINSTALL=true` set for the install.
 - **Alternative set aside**: waiting for a morning to install. The phase cannot start without a runner, and the user asked for the phase.
 - **Re-read when**: never; recorded so a night reading the range knows the install was a decision, not a drift.
+
+## 2026-09-20 · dependency upgrade · Next 16 lint presets at warn, ESLint held at 9
+
+- **Situation**: `eslint-config-next` 16 brings typescript-eslint and the React Compiler rules of `eslint-plugin-react-hooks` 7; on this tree they report 36 errors and 104 warnings that Next 15's `core-web-vitals` never checked (95 unused imports, 12 `any` the ratchet already counts, 20 compiler findings such as `setState` inside an effect). ESLint 10 cannot be used: the `react`, `jsx-a11y` and `import` plugins the preset depends on have no release that supports it.
+- **Default taken**: the presets are on in full; the five rules with new errors run at `warn` in `eslint.config.mjs` with the counts in the comment; three empty interfaces and one `@ts-ignore` fixed in the same commit; ESLint 9.39.5 (the `maintenance` tag) until the plugins move.
+- **Alternative set aside**: fixing the 32 semantic findings inside the upgrade. They are component work (several in `components/ar-viewer-client.tsx`, the file due for a split) with no browser suite to catch a behaviour change; that is phase 1 (lint to zero, then `--max-warnings=0`) and phase 9 (types).
+- **Re-read when**: phase 1 starts, and when `eslint-plugin-react` publishes ESLint 10 support.

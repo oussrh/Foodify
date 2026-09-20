@@ -1,4 +1,5 @@
 // next.config.js
+import { fileURLToPath } from 'node:url'
 
 const securityHeaders = [
   { key: 'X-Content-Type-Options', value: 'nosniff' },
@@ -8,15 +9,17 @@ const securityHeaders = [
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Enable experimental features introduced in Next.js 15
-  experimental: {
-    serverActions: {},
-    typedRoutes: true,
-  },
+  typedRoutes: true,
+  // This directory is the workspace: without it Next walks up to a stray lockfile in the home
+  // directory on the development machine and traces files from there.
+  outputFileTracingRoot: fileURLToPath(new URL('.', import.meta.url)),
   // Produce a standalone build for easier deployment
-  output: "standalone",
+  output: 'standalone',
   images: {
-    domains: ['res.cloudinary.com', 'api.qrserver.com'],
+    remotePatterns: [
+      { protocol: 'https', hostname: 'res.cloudinary.com' },
+      { protocol: 'https', hostname: 'api.qrserver.com' },
+    ],
   },
   async headers() {
     return [
@@ -26,6 +29,6 @@ const nextConfig = {
       { source: '/manager/:path*', headers: [{ key: 'X-Frame-Options', value: 'DENY' }] },
     ]
   },
-};
+}
 
-export default nextConfig;
+export default nextConfig

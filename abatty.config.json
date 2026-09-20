@@ -31,7 +31,7 @@
     "tests/",
     "e2e/",
     "auth.ts",
-    "middleware.ts"
+    "proxy.ts"
   ],
   "changelogRequiredFor": [
     ".github/",
@@ -40,7 +40,7 @@
     "lib/",
     "prisma/",
     "auth.ts",
-    "middleware.ts",
+    "proxy.ts",
     "next.config",
     "eslint.config",
     "tsconfig"

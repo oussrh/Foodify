@@ -19,6 +19,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Changed
 
+- Next.js 16.3.5: Turbopack builds, `proxy.ts` replaces `middleware.ts`, `typedRoutes` out of experimental, `images.remotePatterns` instead of `domains`, `outputFileTracingRoot` pinned to the project. `pnpm lint` is `eslint .` over an ESLint flat config (`eslint.config.mjs`: Next's core-web-vitals and TypeScript presets); the rules those presets add beyond Next 15 run at warn (137 findings on 2026-09-20, phases 1 and 9 drive them to zero). ESLint stays at 9.39: `eslint-config-next` 16 depends on `eslint-plugin-react`, `jsx-a11y` and `import` releases that do not support ESLint 10.
 - Dependencies to the latest of their current majors: `next` 15.5.25 (two unauthenticated RCEs, DoS, SSRF and middleware-bypass advisories closed), `next-auth` 5.0.0-beta.32 and `@auth/prisma-adapter` 2.11.3 (`@auth/core` 0.41.3: auth-check bypass and email-normalisation advisories closed), React 19.3, Prisma 6.19, zod 4.6, react-hook-form 7.88, Radix, resolvers, types and tooling. `abatty` pinned to commit 6fc516c (upstream HEAD spawns `.cmd` files without a shell again). Still open: `postcss` 8.4.31 pinned by Next 15 and `deepmerge-ts` by Prisma 6, both cleared by the next two majors.
 - CI passes the pushed range to the gate (on `main` the checkout left it empty, so the build suite was skipped) and runs the audit last, after the changed-lines coverage.
 - `abatty.config.json`: a change under `.github/` needs a changelog line, like source (CHANGE.1).
@@ -32,12 +33,14 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Removed
 
+- `.eslintrc.json` and `next lint` (gone in Next 16); the import graph's one known violation (root `middleware.ts` read as an orphan), fixed in the rule rather than carried.
 - `/api/seed`, `/api/setup`, `/api/deploy`.
 - Unused dependencies (`framer-motion`, `@headlessui/react`, `@dnd-kit/modifiers`, three Radix packages, `@tailwindcss/postcss`), unused UI primitives, and nine unused server-action exports (`listAdmins`, `deleteAdmin`, `listClients`, `deleteClient`, `listDishes`, `updateDishPrice`, `getDishDetails`, `listRestaurants`, `listRestaurantsForUser`).
 - `findBrandFont` (never called).
 
 ### Fixed
 
+- Three empty `interface X extends Y {}` in `components/ui/` are type aliases; the WebXR `@ts-ignore` says why it expects an error.
 - `no-debugger` is an ESLint error (the gate's lint control stayed green without it); knip also watches `src/` so the dead-code control is meaningful.
 - Placeholder credentials in `.env.example` and `DEPLOYMENT.md` use `<angle-bracket>` form; the real Cloudinary cloud name and API key are scrubbed from the example.
 - abatty runs on Windows: `patches/abatty@0.2.0.patch` gives its npm spawns a shell (Node ≥ 20.12 refuses `.cmd` files without one).

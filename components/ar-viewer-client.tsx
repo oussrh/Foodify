@@ -87,7 +87,7 @@ export default function ARViewerClient() {
       // Check for WebXR support with better error handling
       if ('xr' in navigator) {
         try {
-          // @ts-ignore
+          // @ts-expect-error lib.dom has no WebXR types; the feature test above guards the call
           const supported = await navigator.xr.isSessionSupported('immersive-ar')
           console.log('WebXR immersive-ar supported:', supported)
           setIsARSupported(supported)

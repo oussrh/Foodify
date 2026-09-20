@@ -40,6 +40,7 @@ module.exports = {
           "(^|/)tsconfig[.]json$",
           "(^|/)(?:babel|webpack|vite|vitest|next|playwright|drizzle|eslint|prettier)[.]config[.](?:js|cjs|mjs|ts|cts|mts|json)$",
           "(^|/)(?:app|pages)/.*(?:page|layout|route|loading|error|not-found|template|default|middleware|proxy|instrumentation)[.](?:js|jsx|ts|tsx)$", // framework entry points
+          "^(?:src/)?(?:proxy|middleware|instrumentation(?:-client)?)[.](?:js|ts)$", // Next root-level entry points, run by the framework
           "(^|/)scripts/", // run by name, not imported
         ],
       },

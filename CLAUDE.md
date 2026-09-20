@@ -42,7 +42,7 @@ pnpm prisma       # Access Prisma CLI
 
 ### Authentication & Security
 - NextAuth v5 with credentials + email OTP/TOTP 2FA
-- Role-based access control in `lib/auth-guard.ts` (`requireSuperAdmin`, `requireRestaurantAccess`, dish/category variants); `middleware.ts` only rewrites subdomains
+- Role-based access control in `lib/auth-guard.ts` (`requireSuperAdmin`, `requireRestaurantAccess`, dish/category variants); `proxy.ts` (Next 16's name for middleware) only rewrites subdomains
 - Prisma adapter for session management
 - MFA support for both admin and manager accounts
 
