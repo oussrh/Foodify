@@ -171,14 +171,25 @@
     },
     {
       "id": 5,
-      "status": "in_progress",
-      "updatedAt": "2026-09-20T18:38:57Z",
+      "status": "done",
+      "updatedAt": "2026-09-20T19:07:15Z",
       "numbersBefore": {
         "rules": "the pinned catalogue wires no CACHE-* check for this stack (abatty rules --phase 5: 0 rules)",
         "cacheLayers": "none in the application (no Redis/KV, no unstable_cache, no \"use cache\", no SWR); one HTTP Cache-Control (manifest route, public, max-age 3600, keyed by slug); one stray revalidatePath pair in updateRestaurant; the service worker caches the public menu per URL and build (PWA track)",
         "cachedAuthz": "the admin layout decides the role once per mount; 17 admin pages re-check nothing on client navigation (Next preserves layouts); manager pages scope every read by assignment",
         "score": "66/100",
         "enforcedShare": "75% (39/52)"
+      },
+      "numbersAfter": {
+        "outcome": "not applicable for server caches, held by a machine; the router cache invalidated by every restaurant write; the cached authorisation decision of the admin layout removed",
+        "cache.serverCacheUse": "0, hard (repository probe, 2 controls)",
+        "auth.unguardedAdminPage": "0, hard (repository probe, 2 controls; 17 pages guarded by codemod)",
+        "size.excessCode": "5068 (one raise, 5056 -> 5068, reason logged)",
+        "score": "66/100",
+        "enforcedShare": "75% (39/52)",
+        "readability": "90/100",
+        "switches": "pnpm run standards red on a planted export const revalidate in an admin page (HARD FAIL 1 / 0) and on a planted admin page without the guard (HARD FAIL 1 / 0), green after each removal; probe controls 16/16",
+        "tests": "195 unit (25 files), 16 browser"
       }
     },
     {
