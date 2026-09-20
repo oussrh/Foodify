@@ -23,7 +23,7 @@ function menuItem(dish: MenuDish, restaurant: MenuRestaurant, origin: string) {
     url: `${origin}/restaurant/${restaurant.slug}/dish/${dish.id}`,
     offers: {
       '@type': 'Offer',
-      price: dish.price.toFixed(2),
+      price: dish.price,
       priceCurrency: restaurant.currency || undefined,
     },
     nutrition: dish.calories !== null ? { '@type': 'NutritionInformation', calories: `${dish.calories} calories` } : undefined,

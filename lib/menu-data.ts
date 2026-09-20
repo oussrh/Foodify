@@ -11,7 +11,7 @@ export function serializeDish(dish: Dish & { ingredients: Ingredient[] }): MenuD
     nameFr: dish.nameFr,
     descriptionEn: dish.descriptionEn || null,
     descriptionFr: dish.descriptionFr || null,
-    price: Number(dish.price),
+    price: dish.price.toFixed(2),
     imageUrl: dish.imageUrl,
     usdzUrl: dish.usdzUrl || null,
     glbUrl: dish.glbUrl || null,

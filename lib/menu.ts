@@ -17,7 +17,8 @@ export interface MenuDish {
   nameFr: string
   descriptionEn: string | null
   descriptionFr: string | null
-  price: number
+  /** An exact two-fraction-digit decimal string, beside the restaurant's ISO 4217 code (API.1); never a float. */
+  price: string
   imageUrl: string
   usdzUrl: string | null
   glbUrl: string | null
@@ -113,7 +114,8 @@ export interface Money {
 }
 
 /** Locale-aware price: "12,99 €" in French, "€12.99" in English; falls back to the stored symbol. */
-export function formatPrice(price: number, money: Money): string {
+export function formatPrice(price: string, money: Money): string {
+  const amount = Number(price)
   if (money.code && /^[A-Z]{3}$/.test(money.code)) {
     try {
       return new Intl.NumberFormat(money.locale === 'fr' ? 'fr-FR' : 'en-GB', {
@@ -121,12 +123,12 @@ export function formatPrice(price: number, money: Money): string {
         currency: money.code,
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-      }).format(price)
+      }).format(amount)
     } catch {
       // unknown code: fall through
     }
   }
-  const n = new Intl.NumberFormat(money.locale === 'fr' ? 'fr-FR' : 'en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price)
+  const n = new Intl.NumberFormat(money.locale === 'fr' ? 'fr-FR' : 'en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(amount)
   return money.locale === 'fr' ? `${n} ${money.symbol}` : `${money.symbol}${n}`
 }
 
