@@ -47,6 +47,7 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Default taken**: the phase stays `in_progress` in `ADOPTION_STATE.json` with its numbers recorded. It closes when the first run's URL is in the progress log and the ratchet step has been seen red then green there; the audit step is red until the dependency upgrade, so the first green run follows that change.
 - **Alternative set aside**: marking it done on the local proof. A switch nobody watched fail in the place it guards is not flipped (§B.1.3).
 - **Re-read when**: the push lands and the run is read.
+- **Closed 2026-09-20**: red run 35510629826 (floor lowered on a throwaway branch), green run 35509687312 on `main`; phase 0 done.
 
 ## 2026-09-20 · phase 2 · two dev dependencies installed by day
 

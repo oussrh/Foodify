@@ -4,8 +4,8 @@
   "phases": [
     {
       "id": 0,
-      "status": "in_progress",
-      "updatedAt": "2026-09-20T10:13:07Z",
+      "status": "done",
+      "updatedAt": "2026-09-20T12:28:15Z",
       "numbersBefore": {
         "score": "55/100",
         "enforcedShare": "74% (35/47)",
@@ -27,9 +27,10 @@
         },
         "switch": "pnpm run -s standards -- --range main..HEAD: exit 3 with types.escapes floor 13->12, exit 0 restored"
       },
-      "remaining": "ratchet step seen red in CI on a lowered floor (throwaway branch push)",
       "firstRun": "https://github.com/oussrh/Foodify/actions/runs/35507179202",
-      "auditGreenRun": "https://github.com/oussrh/Foodify/actions/runs/35509687312"
+      "auditGreenRun": "https://github.com/oussrh/Foodify/actions/runs/35509687312",
+      "redRun": "https://github.com/oussrh/Foodify/actions/runs/35510629826",
+      "greenRun": "https://github.com/oussrh/Foodify/actions/runs/35509687312"
     },
     {
       "id": 1,
