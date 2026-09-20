@@ -3,12 +3,12 @@
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-import { Resend } from 'resend'
 import crypto from 'crypto'
 import {
   oldEmailConfirmationEmail,
   newEmailVerificationEmail,
 } from '@/lib/emails/change-email'
+import { sendMail } from '@/lib/mail'
 
 export async function initiateEmailChange(email: string, ip?: string) {
   const session = await auth()
@@ -42,15 +42,7 @@ export async function initiateEmailChange(email: string, ip?: string) {
     },
   })
 
-  if (process.env.RESEND_API_KEY) {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: process.env.RESEND_FROM!,
-      to: user.email,
-      subject: 'Confirm your email change',
-      html: oldEmailConfirmationEmail(token),
-    })
-  }
+  await sendMail({ to: user.email, subject: 'Confirm your email change', html: oldEmailConfirmationEmail(token) })
 }
 
 export async function confirmOldEmail(token: string) {
@@ -83,15 +75,7 @@ export async function confirmOldEmail(token: string) {
     data: { status: 'confirmed_old' },
   })
 
-  if (process.env.RESEND_API_KEY) {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: process.env.RESEND_FROM!,
-      to: user.newEmail,
-      subject: 'Verify your new email',
-      html: newEmailVerificationEmail(verifyToken),
-    })
-  }
+  await sendMail({ to: user.newEmail, subject: 'Verify your new email', html: newEmailVerificationEmail(verifyToken) })
 
   return true
 }

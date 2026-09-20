@@ -5,6 +5,7 @@ import { PrismaAdapter } from '@auth/prisma-adapter'
 import ResendProvider from 'next-auth/providers/resend'
 import Credentials from 'next-auth/providers/credentials'
 import prisma from './lib/prisma'
+import { serverEnv } from './lib/env'
 import bcrypt from 'bcryptjs'
 import { safeEqual, verifyTOTP } from './lib/totp'
 
@@ -36,10 +37,8 @@ export const {
 } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
-    ResendProvider({
-      apiKey: process.env.RESEND_API_KEY,
-      from: process.env.RESEND_FROM,
-    }),
+    // The key and sender come from the parsed environment, not a literal.
+    ResendProvider({ apiKey: serverEnv.resendApiKey, from: serverEnv.resendFrom }), // abatty:allow-secret
     Credentials({
       async authorize(credentials) {
         const { email, password, code, role } = credentials as Record<string, string>
@@ -133,5 +132,5 @@ export const {
     signIn: '/admin/login',
     error: '/admin/login',
   },
-  debug: process.env.NODE_ENV === 'development',
+  debug: serverEnv.isDevelopment,
 })

@@ -1,5 +1,7 @@
+import { serverEnv } from '@/lib/env'
+
 export function oldEmailConfirmationEmail(token: string) {
-  const url = `${process.env.NEXTAUTH_URL}/manager/change-email/confirm-old?token=${token}`
+  const url = `${serverEnv.authUrl}/manager/change-email/confirm-old?token=${token}`
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color:#f97316;">Confirm Email Change</h2>
@@ -13,7 +15,7 @@ export function oldEmailConfirmationEmail(token: string) {
 }
 
 export function newEmailVerificationEmail(token: string) {
-  const url = `${process.env.NEXTAUTH_URL}/manager/change-email/confirm-new?token=${token}`
+  const url = `${serverEnv.authUrl}/manager/change-email/confirm-new?token=${token}`
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color:#f97316;">Verify New Email</h2>

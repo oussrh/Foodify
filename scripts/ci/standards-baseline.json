@@ -1,7 +1,7 @@
 {
   "measuredAt": "2026-09-20",
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
-  "score": 74,
+  "score": 76,
   "hard": [
     "change.changelogMissing",
     "code.barrels",
@@ -27,7 +27,7 @@
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 1,
-    "valid.rawEnv": 36,
+    "valid.rawEnv": 18,
     "valid.unparsedBoundary": 40
   },
   "scanned": {
@@ -38,11 +38,11 @@
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 164,
-    "size.overBudget": 164,
-    "size.overRaw": 173,
-    "types.escapes": 164,
-    "valid.rawEnv": 163,
+    "size.excessCode": 165,
+    "size.overBudget": 165,
+    "size.overRaw": 174,
+    "types.escapes": 165,
+    "valid.rawEnv": 164,
     "valid.unparsedBoundary": 15
   },
   "debt": {
@@ -125,18 +125,12 @@
       "components/ar-viewer-client.tsx": 1
     },
     "valid.rawEnv": {
-      "app/actions/admin-auth-actions.ts": 3,
-      "app/actions/manager-auth-actions.ts": 3,
-      "app/actions/profile-actions.ts": 6,
       "app/admin/(protected)/restaurants/[id]/info/page.tsx": 1,
       "app/manager/(protected)/restaurants/[id]/info/page.tsx": 1,
-      "auth.ts": 3,
       "components/ar-file-upload.tsx": 4,
       "components/image-upload.tsx": 4,
       "components/restaurant-cover-upload.tsx": 4,
-      "components/restaurant-logo-upload.tsx": 4,
-      "lib/emails/change-email.ts": 2,
-      "lib/prisma.ts": 1
+      "components/restaurant-logo-upload.tsx": 4
     },
     "valid.unparsedBoundary": {
       "app/actions/admin-auth-actions.ts": 1,

@@ -46,4 +46,26 @@ describe('serverEnv', () => {
   it('carries the database URL for the Prisma adapter', async () => {
     expect((await load({ DATABASE_URL: 'postgresql://u:p@h/db' })).serverEnv.databaseUrl).toBe('postgresql://u:p@h/db')
   })
+
+  it('refuses to start without a database URL, on the first read', async () => {
+    const { serverEnv } = await load({ DATABASE_URL: '' })
+    expect(() => serverEnv.databaseUrl).toThrow(/DATABASE_URL/)
+  })
+
+  it('refuses a mail key without a sender, and a sender without a key', async () => {
+    const half = await load({ DATABASE_URL: 'postgresql://x', RESEND_API_KEY: 're_1', RESEND_FROM: '' })
+    expect(() => half.serverEnv.resendApiKey).toThrow(/RESEND_API_KEY and RESEND_FROM/)
+    const other = await load({ DATABASE_URL: 'postgresql://x', RESEND_API_KEY: '', RESEND_FROM: 'a@b.c' })
+    expect(() => other.serverEnv.resendFrom).toThrow(/RESEND_API_KEY and RESEND_FROM/)
+  })
+
+  it('links transactional mail to the auth origin, and to the public origin when none is set', async () => {
+    expect((await load({ DATABASE_URL: 'postgresql://x', NEXTAUTH_URL: 'https://admin.example' })).serverEnv.authUrl).toBe('https://admin.example')
+    expect((await load({ DATABASE_URL: 'postgresql://x', NEXTAUTH_URL: '', NEXT_PUBLIC_APP_URL: 'https://menu.example' })).serverEnv.authUrl).toBe('https://menu.example')
+  })
+
+  it('reads NODE_ENV once: development only when it says so', async () => {
+    expect((await load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'development' })).serverEnv.isDevelopment).toBe(true)
+    expect((await load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'test' })).serverEnv.isDevelopment).toBe(false)
+  })
 })

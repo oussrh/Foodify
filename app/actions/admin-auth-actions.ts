@@ -1,10 +1,10 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { Resend } from 'resend'
 import bcrypt from 'bcryptjs'
 import { randomInt } from 'crypto'
 import { superAdminOtpEmail } from '@/lib/emails/super-admin-otp-email'
+import { sendMail } from '@/lib/mail'
 
 export async function requestAdminOtp(email: string, password: string) {
   try {
@@ -29,16 +29,12 @@ export async function requestAdminOtp(email: string, password: string) {
       },
     })
     
-    if (process.env.RESEND_API_KEY) {
-      const resend = new Resend(process.env.RESEND_API_KEY)
-      await resend.emails.send({
-        from: process.env.RESEND_FROM!,
-        to: email,
-        subject: 'Your Foodify verification code',
-        html: superAdminOtpEmail(code),
-        text: `Your Foodify verification code is ${code}. This code will expire in 10 minutes.`,
-      })
-    }
+    await sendMail({
+      to: email,
+      subject: 'Your Foodify verification code',
+      html: superAdminOtpEmail(code),
+      text: `Your Foodify verification code is ${code}. This code will expire in 10 minutes.`,
+    })
     return { success: true }
   } catch (error) {
     console.error('Admin OTP request error:', error)
