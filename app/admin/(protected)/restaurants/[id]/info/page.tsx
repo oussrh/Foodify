@@ -1,17 +1,16 @@
 import prisma from '@/lib/prisma'
 import { publicEnv } from '@/lib/env'
-import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader, StatStrip } from '@/components/shell/page-header'
 import QRCodeDisplay from '@/components/qr-code-display'
 import { daysAgo } from '@/lib/time'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function RestaurantInfoPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireSuperAdminPage()
   const { id } = await params
-  const session = await auth()
-  if (!session?.user?.email) redirect('/admin/login')
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id } })
   if (!restaurant) redirect('/admin/restaurants')

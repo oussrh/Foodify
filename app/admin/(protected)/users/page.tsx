@@ -6,8 +6,10 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { EmptyState, PageHeader } from '@/components/shell/page-header'
 import { ManagerRowMenu } from '@/components/shell/user-row-menu'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function UsersPage({ searchParams }: { searchParams?: Promise<{ search?: string }> }) {
+  await requireSuperAdminPage()
   const sp = searchParams ? await searchParams : undefined
   const search = (sp?.search || '').trim()
 

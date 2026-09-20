@@ -7,8 +7,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { EmptyState, PageHeader, StatStrip } from '@/components/shell/page-header'
 import { RestaurantRowMenu } from '@/components/shell/row-actions'
 import { daysAgo } from '@/lib/time'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function AdminDashboard() {
+  await requireSuperAdminPage()
   const [restaurants, managers, admins, dishTotals, liveDishes, arDishes, views, recentManagers] = await Promise.all([
     prisma.restaurant.findMany({
       orderBy: { createdAt: 'desc' },

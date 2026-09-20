@@ -5,12 +5,14 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/shell/page-header'
 import RestaurantsList from '@/components/shell/restaurants-list'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function RestaurantsPage({
   searchParams,
 }: {
   searchParams?: Promise<{ search?: string }>
 }) {
+  await requireSuperAdminPage()
   const sp = searchParams ? await searchParams : undefined
   const search = (sp?.search || '').trim()
 

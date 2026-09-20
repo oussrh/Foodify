@@ -8,12 +8,14 @@ import { Badge } from '@/components/ui/badge'
 import { ArrowLeft, Shield, Crown, Calendar, Mail, BarChart3, Settings, Lightbulb, Star } from 'lucide-react'
 import { redirect } from 'next/navigation'
 import { daysSince } from '@/lib/time'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function EditAdminPage({ 
   params 
 }: { 
   params: Promise<{ id: string }> 
 }) {
+  await requireSuperAdminPage()
   const { id } = await params
   const admin = await prisma.user.findUnique({ where: { id } })
   

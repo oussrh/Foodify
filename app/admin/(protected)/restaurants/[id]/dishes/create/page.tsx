@@ -1,14 +1,13 @@
 import type { Route } from 'next'
 import prisma from '@/lib/prisma'
-import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import CreateDishForm from '@/components/create-dish-form'
 import { PageHeader } from '@/components/shell/page-header'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
 export default async function CreateDishPage({ params }: { params: Promise<{ id: string }> }) {
+  await requireSuperAdminPage()
   const { id } = await params
-  const session = await auth()
-  if (!session?.user?.email) redirect('/admin/login')
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id } })
   if (!restaurant) redirect('/admin/restaurants')

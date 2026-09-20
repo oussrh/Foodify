@@ -5,6 +5,7 @@
 // so each one must call one of these before touching the database.
 
 import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 
 export class AuthError extends Error {
@@ -45,6 +46,24 @@ export async function requireUser() {
 export async function requireSuperAdmin() {
   const user = await requireUser()
   if (user.role !== 'SUPER_ADMIN') throw new AuthError('Forbidden', 403)
+  return user
+}
+
+/**
+ * The super-admin check a page makes on every render. Next keeps a layout mounted across client
+ * navigations, so the admin layout's check runs once; a role change or a deletion after it is
+ * only seen here (CACHE.2: an authorisation decision is never cached). A page redirects where
+ * an action throws.
+ */
+export async function requireSuperAdminPage() {
+  let user: Awaited<ReturnType<typeof requireUser>>
+  try {
+    user = await requireUser()
+  } catch (error) {
+    if (!(error instanceof AuthError)) throw error
+    redirect('/admin/login')
+  }
+  if (user.role !== 'SUPER_ADMIN') redirect(user.role === 'RESTAURANT_ADMIN' ? '/manager' : '/')
   return user
 }
 

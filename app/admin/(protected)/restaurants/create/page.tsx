@@ -3,8 +3,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft, Building2, Plus, Sparkles } from 'lucide-react'
 import Link from 'next/link'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
-export default function CreateRestaurantPage() {
+export default async function CreateRestaurantPage() {
+  await requireSuperAdminPage()
   return (
     <div className="space-y-8">
       {/* Header */}

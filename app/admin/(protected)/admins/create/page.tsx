@@ -14,8 +14,10 @@ import {
   Mail,
   Settings
 } from 'lucide-react'
+import { requireSuperAdminPage } from '@/lib/auth-guard'
 
-export default function CreateAdminPage() {
+export default async function CreateAdminPage() {
+  await requireSuperAdminPage()
   return (
     <div className="space-y-8">
       {/* Header */}
