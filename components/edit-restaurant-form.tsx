@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState, useCallback } from 'react'
+import { cn } from '@/lib/utils'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -73,6 +74,26 @@ const schema = z.object({
 
 export type EditRestaurantValues = z.infer<typeof schema>
 
+type SettingsTab = 'general' | 'contact' | 'branding'
+
+const TABS: { key: SettingsTab; label: string; fields: (keyof EditRestaurantValues)[] }[] = [
+  {
+    key: 'general',
+    label: 'General',
+    fields: ['name', 'slug', 'tagline', 'description', 'cuisineType', 'priceRange', 'currency', 'currencySymbol', 'defaultLocale'],
+  },
+  {
+    key: 'contact',
+    label: 'Contact & hours',
+    fields: ['email', 'phone', 'website', 'streetAddress', 'city', 'state', 'postalCode', 'country', 'openingHours', 'socialMedia'],
+  },
+  {
+    key: 'branding',
+    label: 'Branding',
+    fields: ['logoUrl', 'colorTheme', 'secondaryColor', 'coverImageUrl', 'coverImageStyle', 'fontFamily', 'googleFontUrl'],
+  },
+]
+
 export default function EditRestaurantForm({
   id,
   defaultValues,
@@ -83,6 +104,19 @@ export default function EditRestaurantForm({
   const router = useRouter()
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  const [activeTab, setActiveTab] = useState<SettingsTab>('general')
+
+  // Keep the active tab in the URL so a reload (or a shared link) lands on the same section.
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('tab')
+    if (t && TABS.some((tab) => tab.key === t)) setActiveTab(t as SettingsTab)
+  }, [])
+  const showTab = useCallback((tab: SettingsTab) => {
+    setActiveTab(tab)
+    const url = new URL(window.location.href)
+    url.searchParams.set('tab', tab)
+    window.history.replaceState(window.history.state, '', url)
+  }, [])
   
   const {
     register,
@@ -167,6 +201,16 @@ export default function EditRestaurantForm({
     }
   }, [hasUnsavedChanges, reset, defaultValues])
   
+  // Validation errors on a hidden tab would be invisible: switch to the first tab that has one.
+  const onInvalid = useCallback(
+    (errs: Record<string, unknown>) => {
+      const bad = new Set(Object.keys(errs))
+      const tab = TABS.find((t) => t.fields.some((f) => bad.has(f)))
+      if (tab) showTab(tab.key)
+    },
+    [showTab],
+  )
+
   // Create a submit function that's always up to date
   const submitForm = useCallback(() => {
     if (!hasUnsavedChanges) {
@@ -178,8 +222,8 @@ export default function EditRestaurantForm({
       return
     }
     
-    handleSubmit(onSubmit)()
-  }, [handleSubmit, onSubmit, hasUnsavedChanges, isSubmitting])
+    handleSubmit(onSubmit, onInvalid)()
+  }, [handleSubmit, onSubmit, onInvalid, hasUnsavedChanges, isSubmitting])
   
   // Keyboard shortcuts
   useEffect(() => {
@@ -213,7 +257,33 @@ export default function EditRestaurantForm({
 
   return (
     <div className="relative">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
+      <div role="tablist" aria-label="Settings sections" className="scrollbar-none -mx-4 flex gap-1 overflow-x-auto border-b border-border px-4 md:mx-0 md:px-0">
+        {TABS.map((tab) => {
+          const hasError = tab.fields.some((field) => field in errors)
+          const active = activeTab === tab.key
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              role="tab"
+              id={`settings-tab-${tab.key}`}
+              aria-selected={active}
+              aria-controls={`settings-panel-${tab.key}`}
+              onClick={() => showTab(tab.key)}
+              className={cn(
+                '-mb-px flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 text-sm font-medium transition-colors',
+                active ? 'border-foreground text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground',
+              )}
+            >
+              {tab.label}
+              {hasError && <span className="h-1.5 w-1.5 rounded-full bg-destructive" aria-label="Has errors" />}
+            </button>
+          )
+        })}
+      </div>
+
+      <div role="tabpanel" id="settings-panel-general" aria-labelledby="settings-tab-general" hidden={activeTab !== 'general'} className="space-y-6">
       {/* Basic Information Section */}
       <Card className="border-border">
         <CardHeader className="">
@@ -375,7 +445,9 @@ export default function EditRestaurantForm({
           </div>
         </CardContent>
       </Card>
+      </div>
 
+      <div role="tabpanel" id="settings-panel-contact" aria-labelledby="settings-tab-contact" hidden={activeTab !== 'contact'} className="space-y-6">
       {/* Contact Information Section */}
       <Card className="border-border">
         <CardHeader className="">
@@ -515,6 +587,32 @@ export default function EditRestaurantForm({
         </CardContent>
       </Card>
 
+      {/* Social Media Section */}
+      <Card className="border-border">
+        <CardHeader className="">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Share2 className="h-5 w-5 text-muted-foreground" />
+            Social Media
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-2">
+            <Label htmlFor="socialMedia">Social Media Links</Label>
+            <Textarea
+              id="socialMedia"
+              {...register('socialMedia')}
+              placeholder="Facebook: https://facebook.com/yourrestaurant&#10;Instagram: https://instagram.com/yourrestaurant&#10;Twitter: https://twitter.com/yourrestaurant"
+              className="border-border min-h-[100px]"
+            />
+            <span className="text-xs text-muted-foreground">
+              Enter your social media links, one per line with platform name.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
+      </div>
+
+      <div role="tabpanel" id="settings-panel-branding" aria-labelledby="settings-tab-branding" hidden={activeTab !== 'branding'} className="space-y-6">
       {/* Branding & Design Section */}
       <Card className="border-border">
         <CardHeader className="">
@@ -648,30 +746,7 @@ export default function EditRestaurantForm({
           </div>
         </CardContent>
       </Card>
-
-      {/* Social Media Section */}
-      <Card className="border-border">
-        <CardHeader className="">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Share2 className="h-5 w-5 text-muted-foreground" />
-            Social Media
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="space-y-2">
-            <Label htmlFor="socialMedia">Social Media Links</Label>
-            <Textarea
-              id="socialMedia"
-              {...register('socialMedia')}
-              placeholder="Facebook: https://facebook.com/yourrestaurant&#10;Instagram: https://instagram.com/yourrestaurant&#10;Twitter: https://twitter.com/yourrestaurant"
-              className="border-border min-h-[100px]"
-            />
-            <span className="text-xs text-muted-foreground">
-              Enter your social media links, one per line with platform name.
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      </div>
 
       {/* Save bar: only when there is something to save */}
       {(hasUnsavedChanges || saveStatus === 'saving' || saveStatus === 'error') && (
