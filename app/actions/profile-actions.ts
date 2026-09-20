@@ -3,18 +3,20 @@
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
-import { Resend } from 'resend'
 import crypto from 'crypto'
 import {
   oldEmailConfirmationEmail,
   newEmailVerificationEmail,
 } from '@/lib/emails/change-email'
+import { sendMail } from '@/lib/mail'
+import { emailChange, emailToken, passwordChange, type PasswordChange } from '@/lib/schemas/user'
 
-export async function initiateEmailChange(email: string, ip?: string) {
+export async function initiateEmailChange(rawEmail: string) {
   const session = await auth()
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
+  const { email } = emailChange.parse({ email: rawEmail })
   const user = await prisma.user.findUnique({ where: { email: session.user.email } })
   if (!user) throw new Error('User not found')
 
@@ -38,22 +40,17 @@ export async function initiateEmailChange(email: string, ip?: string) {
       oldEmail: user.email,
       newEmail: email,
       status: 'pending',
-      ipAddress: ip,
     },
   })
 
-  if (process.env.RESEND_API_KEY) {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: process.env.RESEND_FROM!,
-      to: user.email,
-      subject: 'Confirm your email change',
-      html: oldEmailConfirmationEmail(token),
-    })
-  }
+  await sendMail({ to: user.email, subject: 'Confirm your email change', html: oldEmailConfirmationEmail(token) })
 }
 
-export async function confirmOldEmail(token: string) {
+export async function confirmOldEmail(rawToken: string) {
+  // A mangled link is the same "invalid or expired" as an unknown token, not a render error.
+  const parsed = emailToken.safeParse(rawToken)
+  if (!parsed.success) return null
+  const token = parsed.data
   const user = await prisma.user.findFirst({
     where: {
       emailChangeToken: token,
@@ -83,20 +80,15 @@ export async function confirmOldEmail(token: string) {
     data: { status: 'confirmed_old' },
   })
 
-  if (process.env.RESEND_API_KEY) {
-    const resend = new Resend(process.env.RESEND_API_KEY)
-    await resend.emails.send({
-      from: process.env.RESEND_FROM!,
-      to: user.newEmail,
-      subject: 'Verify your new email',
-      html: newEmailVerificationEmail(verifyToken),
-    })
-  }
+  await sendMail({ to: user.newEmail, subject: 'Verify your new email', html: newEmailVerificationEmail(verifyToken) })
 
   return true
 }
 
-export async function confirmNewEmail(token: string) {
+export async function confirmNewEmail(rawToken: string) {
+  const parsed = emailToken.safeParse(rawToken)
+  if (!parsed.success) return null
+  const token = parsed.data
   const user = await prisma.user.findFirst({
     where: {
       emailVerifyToken: token,
@@ -127,14 +119,19 @@ export async function confirmNewEmail(token: string) {
   return true
 }
 
-export async function updatePassword(password: string) {
+export async function updatePassword(raw: PasswordChange) {
   const session = await auth()
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
+  const { currentPassword, password } = passwordChange.parse(raw)
+  const user = await prisma.user.findUnique({ where: { email: session.user.email } })
+  if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+    throw new Error('Current password is incorrect')
+  }
   const passwordHash = await bcrypt.hash(password, 10)
   return prisma.user.update({
-    where: { email: session.user.email },
+    where: { id: user.id },
     data: { passwordHash },
   })
 }

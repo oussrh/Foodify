@@ -7,7 +7,10 @@
   // `npx knip --max-issues 0`; an existing repository starts at today's count held by the
   // ratchet as dead.knipIssues and drives it to zero. Cycles are left to dependency-cruiser.
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": [],
+  "entry": [
+    // loaded by name by abatty (abatty.config.json → ratchet.local); no plugin knows it
+    "abatty.probes.mjs"
+  ],
   "project": [
     "src/**/*.{ts,tsx}",
     "app/**/*.{ts,tsx}",

@@ -1,7 +1,7 @@
 {
   "measuredAt": "2026-09-20",
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
-  "score": 84,
+  "score": 90,
   "hard": [
     "change.changelogMissing",
     "code.barrels",
@@ -11,7 +11,10 @@
     "docs.citations",
     "docs.danglingSource",
     "docs.frontMatter",
-    "docs.indexDrift"
+    "docs.indexDrift",
+    "valid.rawEnv",
+    "valid.unparsedBoundary",
+    "valid.wholeEnv"
   ],
   "metrics": {
     "change.changelogMissing": 0,
@@ -23,25 +26,29 @@
     "docs.danglingSource": 0,
     "docs.frontMatter": 0,
     "docs.indexDrift": 0,
-    "size.excessCode": 5163,
+    "size.excessCode": 5056,
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 1,
-    "valid.rawEnv": 36
+    "valid.rawEnv": 0,
+    "valid.unparsedBoundary": 0,
+    "valid.wholeEnv": 0
   },
   "scanned": {
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 36,
+    "docs.citations": 45,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 163,
-    "size.overBudget": 163,
-    "size.overRaw": 172,
-    "types.escapes": 163,
-    "valid.rawEnv": 162
+    "size.excessCode": 173,
+    "size.overBudget": 173,
+    "size.overRaw": 182,
+    "types.escapes": 173,
+    "valid.rawEnv": 172,
+    "valid.unparsedBoundary": 15,
+    "valid.wholeEnv": 181
   },
   "debt": {
     "size.excessCode": {
@@ -59,26 +66,26 @@
       "app/restaurant/[slug]/page.tsx": 34,
       "components/3d-viewer-client.tsx": 151,
       "components/admin-category-manager.tsx": 411,
-      "components/ar-file-upload.tsx": 289,
+      "components/ar-file-upload.tsx": 286,
       "components/ar-model-preview.tsx": 113,
       "components/ar-viewer-client.tsx": 557,
       "components/branding/branding-panel.tsx": 38,
       "components/contact/contact-panel.tsx": 2,
-      "components/create-client-form.tsx": 87,
-      "components/create-dish-form.tsx": 121,
-      "components/create-restaurant-form.tsx": 295,
-      "components/edit-client-form.tsx": 281,
-      "components/edit-dish-form.tsx": 142,
-      "components/edit-restaurant-form.tsx": 213,
-      "components/image-upload.tsx": 289,
+      "components/create-client-form.tsx": 82,
+      "components/create-dish-form.tsx": 112,
+      "components/create-restaurant-form.tsx": 262,
+      "components/edit-client-form.tsx": 278,
+      "components/edit-dish-form.tsx": 130,
+      "components/edit-restaurant-form.tsx": 189,
+      "components/image-upload.tsx": 286,
       "components/ingredient-manager.tsx": 50,
       "components/manager-category-manager.tsx": 328,
       "components/menu/restaurant-page.tsx": 334,
       "components/qr-code-display.tsx": 160,
       "components/reset-admin-password-button.tsx": 108,
-      "components/restaurant-cover-upload.tsx": 131,
-      "components/restaurant-logo-upload.tsx": 117,
-      "components/update-password-form.tsx": 109
+      "components/restaurant-cover-upload.tsx": 128,
+      "components/restaurant-logo-upload.tsx": 114,
+      "components/update-password-form.tsx": 100
     },
     "size.overBudget": {
       "app/admin/(protected)/admins/[id]/edit/page.tsx": 1,
@@ -121,20 +128,6 @@
     },
     "types.escapes": {
       "components/ar-viewer-client.tsx": 1
-    },
-    "valid.rawEnv": {
-      "app/actions/admin-auth-actions.ts": 3,
-      "app/actions/manager-auth-actions.ts": 3,
-      "app/actions/profile-actions.ts": 6,
-      "app/admin/(protected)/restaurants/[id]/info/page.tsx": 1,
-      "app/manager/(protected)/restaurants/[id]/info/page.tsx": 1,
-      "auth.ts": 3,
-      "components/ar-file-upload.tsx": 4,
-      "components/image-upload.tsx": 4,
-      "components/restaurant-cover-upload.tsx": 4,
-      "components/restaurant-logo-upload.tsx": 4,
-      "lib/emails/change-email.ts": 2,
-      "lib/prisma.ts": 1
     }
   },
   "versions": {
@@ -151,16 +144,11 @@
     "size.overBudget": 1,
     "size.overRaw": 1,
     "types.escapes": 1,
-    "valid.rawEnv": 1
+    "valid.rawEnv": 1,
+    "valid.unparsedBoundary": 1,
+    "valid.wholeEnv": 1
   },
   "entries": {
-    "size.excessCode": {
-      "at": "2026-09-20",
-      "was": 5160,
-      "now": 5163,
-      "reason": "the hydration marker the browser suite waits on (two lines in the menu page) and lib/color split out of lib/brand-color (one import line in the branding panel)",
-      "owner": "Oussama Rhoni"
-    },
     "size.overBudget": {
       "at": "2026-09-20",
       "was": 31,

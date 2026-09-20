@@ -83,3 +83,39 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Default taken**: the rule's `ignoreNonDOM: true`, with the shadcn primitives that render DOM (Badge, the Card and Table parts, Button, Input, Textarea, Label, Link, Image) mapped so a `role` on them is still checked. The reviewer showed `<Badge role="stauts">` passed before the mapping; it fails after.
 - **Alternative set aside**: renaming the prop to `portal`. Seventeen files change; that is a codemod (CODE.11) and belongs with the shell work of phase 8, not inside the lint phase.
 - **Re-read when**: phase 8 touches the shells; rename then and drop the option.
+
+## 2026-09-20 · phase 4 · the shared schemas carry English sentences, not message keys
+
+- **Situation**: VALID.2 wants a shared schema to carry message keys so each side translates. The dashboards have one language and no message catalogue; the public menu's strings live in `lib/menu.ts` and no form there submits.
+- **Default taken**: the schemas in `lib/schemas/` carry the sentences the forms showed, once each (a rule that two forms worded differently now says one thing).
+- **Alternative set aside**: inventing a key catalogue for one language. It is the i18n work of the admin UI, not a validation fix.
+- **Re-read when**: an i18n layer reaches the dashboards; the sentences become keys in the same change.
+
+## 2026-09-20 · phase 4 · guard first, then parse
+
+- **Situation**: `docs/LESSONS.md` fixed the first statement of every server action as a guard after two months of unguarded endpoints; VALID.1 asks for a parse at the edge.
+- **Default taken**: the guard stays first and the parse is the next statement. Nothing runs between them, and a malformed id reaches the guard as the same "not found" it always was.
+- **Alternative set aside**: parsing before the guard, which would put a shape check in front of the one rule the lesson made unconditional.
+- **Re-read when**: a guard needs a parsed value it cannot get from the raw one.
+
+## 2026-09-20 · phase 4 · two password rules, on purpose
+
+- **Situation**: an admin sets a client's or admin's password at creation and on a reset (six characters, `FORCE_CHANGE` on the reset); a user changes their own on the profile page (eight characters with four classes).
+- **Default taken**: `password` (six) for what an admin sets, `passwordChange` (strong, with the current password verified) for what a user sets themselves. Each rule is one schema used by its form and its action.
+- **Alternative set aside**: one strong rule everywhere, which would break the reset button's fixed temporary password and change what admins may type today.
+- **Re-read when**: the reset flow generates its temporary password.
+
+## 2026-09-20 · phase 4 · the mail pair fails at boot, the rest stays optional
+
+- **Situation**: VALID.3 says tightening a value moves a failure from use to boot and is a decision. `RESEND_API_KEY` without `RESEND_FROM` used to fail at the first send with a provider error.
+- **Default taken**: `serverEnv` refuses a half-set mail pair, and a partial Cloudinary trio, on its first read; `DATABASE_URL` is required (the app cannot run without it); `NEXTAUTH_URL` stays optional, and a mail link uses it, else an explicitly set `NEXT_PUBLIC_APP_URL`, else the send fails (the reviewer caught the first draft falling back to the production literal, which would have mailed a preview's links to production; an unset value used to print `undefined/`).
+- **Alternative set aside**: `.url()` on the two URLs and a required `NEXTAUTH_URL`, which would decide how production dies without knowing what it sets.
+- **Re-read when**: the deployment's variables are inventoried (`vercel env`).
+
+## 2026-09-20 · phase 4 · DATA-TENANT reads n/a; the isolation test is phase 10's
+
+- **Situation**: the rule's probe looks for a tenant column and finds none: this schema scopes by `restaurantId`, and `lib/auth-guard.ts` scopes every action to it.
+- **Default taken**: recorded as the probe's blind spot, not as absence. The negative test on a real database (one restaurant's admin reading another's rows) belongs with the integration suite of phase 10.
+- **Alternative set aside**: a unit test against a mocked client, which cannot see a constraint or a query.
+- **Re-read when**: phase 10 opens; write the isolation test first.
+

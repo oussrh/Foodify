@@ -67,7 +67,6 @@ export default async function EditDishPage({ params }: { params: Promise<{ id: s
       <EditDishForm
         key={`${dish.id}-${dish.imageUrl}-${dish.usdzUrl}-${dish.glbUrl}`}
         id={dish.id}
-        restaurantId={restaurant.id}
         defaultValues={defaultValues}
         subcategories={subcategories}
         restaurantName={restaurant.name}

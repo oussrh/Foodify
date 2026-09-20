@@ -1,13 +1,13 @@
 // lib/cloudinary.ts
 import crypto from "crypto";
+import { serverEnv } from "@/lib/env";
 
 export async function uploadArAsset(fileUrl: string, restaurantSlug: string) {
-  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
-    process.env;
-
-  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+  const cloudinary = serverEnv.cloudinary;
+  if (!cloudinary) {
     throw new Error("Cloudinary environment variables are not set");
   }
+  const { cloudName: CLOUDINARY_CLOUD_NAME, apiKey: CLOUDINARY_API_KEY, apiSecret: CLOUDINARY_API_SECRET } = cloudinary;
 
   const timestamp = Math.floor(Date.now() / 1000);
   const folder = `restaurants/${restaurantSlug}`;
@@ -49,12 +49,11 @@ export async function uploadRestaurantAsset(
   restaurantSlug: string, 
   assetType: 'logo' | 'cover'
 ) {
-  const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
-    process.env;
-
-  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+  const cloudinary = serverEnv.cloudinary;
+  if (!cloudinary) {
     throw new Error("Cloudinary environment variables are not set");
   }
+  const { cloudName: CLOUDINARY_CLOUD_NAME, apiKey: CLOUDINARY_API_KEY, apiSecret: CLOUDINARY_API_SECRET } = cloudinary;
 
   const timestamp = Math.floor(Date.now() / 1000);
   const folder = `restaurants/${restaurantSlug}/branding`;

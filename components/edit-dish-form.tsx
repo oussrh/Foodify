@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import DietarySelect from '@/components/dietary-select'
 import { updateDish } from '@/app/actions/dish-actions'
+import { dishInput } from '@/lib/schemas/dish'
 import ARFileUpload from '@/components/ar-file-upload'
 import ARModelPreview from '@/components/ar-model-preview'
 import ImageUpload from '@/components/image-upload'
@@ -42,20 +43,9 @@ export interface EditDishValues {
   allergens?: string[]
 }
 
-const schema = z.object({
-  nameEn: z.string().min(1, "English name is required"),
-  nameFr: z.string().min(1, "French name is required"),
-  descriptionEn: z.string().optional(),
-  descriptionFr: z.string().optional(),
-  price: z.number().min(0, "Price must be greater than 0"),
-  imageUrl: z.string().min(1, "Image URL is required"),
-  usdzUrl: z.string().optional(),
-  glbUrl: z.string().optional(),
+const schema = dishInput.omit({ subcategoryId: true, calories: true }).extend({
   subcategoryId: z.string().optional(),
-  calories: z.number().optional(),
-  isMostPurchased: z.boolean().optional(),
-  dietary: z.array(z.string()).optional(),
-  allergens: z.array(z.string()).optional(),
+  calories: z.number().int('Calories must be a whole number').optional(),
 }).transform((data) => ({
   ...data,
   price: Number(data.price),
@@ -64,13 +54,11 @@ const schema = z.object({
 
 export default function EditDishForm({
   id,
-  restaurantId,
   defaultValues,
   subcategories,
   restaurantName,
 }: {
   id: string
-  restaurantId: string
   defaultValues: EditDishValues
   subcategories: Subcategory[]
   restaurantName?: string
@@ -133,7 +121,7 @@ export default function EditDishForm({
         finalData
       })
       
-      await updateDish(id, restaurantId, finalData)
+      await updateDish(id, finalData)
       
       setSaveStatus('saved')
       
@@ -160,7 +148,7 @@ export default function EditDishForm({
       
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
-  }, [id, restaurantId, imageUrl, usdzUrl, glbUrl, reset, router])
+  }, [id, imageUrl, usdzUrl, glbUrl, reset, router])
   
   // Handle cancel
   const handleCancel = useCallback(() => {

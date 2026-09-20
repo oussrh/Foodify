@@ -1,7 +1,6 @@
 "use client";
 
 import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createRestaurant } from "@/app/actions/restaurant-actions";
+import { restaurantInput, type RestaurantInput } from "@/lib/schemas/restaurant";
 import RestaurantLogoUpload from "@/components/restaurant-logo-upload";
 import RestaurantCoverUpload from "@/components/restaurant-cover-upload";
 import GoogleFontsSelector from "@/components/google-fonts-selector";
@@ -29,46 +29,9 @@ import {
   Monitor,
 } from "lucide-react";
 
-const schema = z.object({
-  name: z.string().min(1, "Name is required"),
-  slug: z
-    .string()
-    .min(1, "Slug is required")
-    .regex(
-      /^[a-z0-9-]+$/,
-      "Slug must contain only lowercase letters, numbers, and hyphens"
-    ),
-  email: z.string().email("Invalid email format").optional().or(z.literal("")),
-  phone: z.string().optional(),
-  tagline: z.string().optional(),
-  logoUrl: z.string().optional(),
-  colorTheme: z.string().optional(),
-  defaultLocale: z.enum(["en", "fr"]),
-  // Address fields
-  streetAddress: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  postalCode: z.string().optional(),
-  country: z.string().optional(),
-  // Business info fields
-  website: z.string().url("Invalid URL format").optional().or(z.literal("")),
-  description: z.string().optional(),
-  cuisineType: z.string().optional(),
-  priceRange: z.enum(["$", "$$", "$$$", "$$$$"]).optional(),
-  openingHours: z.string().optional(),
-  socialMedia: z.string().optional(),
-  // Design fields
-  coverImageUrl: z.string().url("Invalid URL format").optional().or(z.literal("")),
-  coverImageStyle: z.enum(["cover", "repeat"]).optional(),
-  secondaryColor: z.string().optional(),
-  fontFamily: z.string().optional(),
-  googleFontUrl: z.string().optional(),
-  // Business settings
-  currency: z.string().optional(),
-  currencySymbol: z.string().optional(),
-});
+const schema = restaurantInput;
 
-type FormValues = z.infer<typeof schema>;
+type FormValues = RestaurantInput;
 
 export default function CreateRestaurantForm() {
   const {

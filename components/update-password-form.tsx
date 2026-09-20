@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { updatePassword } from '@/app/actions/profile-actions'
+import { passwordChange } from '@/lib/schemas/user'
 import {
   Lock,
   Eye,
@@ -28,18 +29,8 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 
-const schema = z
-  .object({
-    currentPassword: z.string().min(1, 'Current password is required'),
-    password: z
-      .string()
-      .min(8, 'Password must be at least 8 characters')
-      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-      .regex(/[0-9]/, 'Password must contain at least one number')
-      .regex(/[^A-Za-z0-9]/, 'Password must contain at least one special character'),
-    confirm: z.string().min(1, 'Please confirm your password'),
-  })
+const schema = passwordChange
+  .extend({ confirm: z.string().min(1, 'Please confirm your password') })
   .refine((data) => data.password === data.confirm, {
     path: ['confirm'],
     message: 'Passwords do not match',
@@ -99,7 +90,7 @@ export default function UpdatePasswordForm() {
     setSuccess(false)
     
     try {
-      await updatePassword(data.password)
+      await updatePassword({ currentPassword: data.currentPassword, password: data.password })
       setSuccess(true)
       reset()
       setTimeout(() => setSuccess(false), 5000)

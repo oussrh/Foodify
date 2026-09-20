@@ -1,21 +1,18 @@
 'use client'
 
 import { useForm, useWatch } from 'react-hook-form'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { updateAdmin } from '@/app/actions/admin-user-actions'
+import { adminPatch, type AdminPatch } from '@/lib/schemas/user'
 import { Mail, Save, Check, AlertCircle, Shield, Edit } from 'lucide-react'
 import { useState } from 'react'
 
-const schema = z.object({
-  email: z.string().email(),
-})
-
-export type EditAdminValues = z.infer<typeof schema>
+const schema = adminPatch
+export type EditAdminValues = AdminPatch
 
 export default function EditAdminForm({
   id,

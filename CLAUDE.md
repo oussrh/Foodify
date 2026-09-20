@@ -79,7 +79,7 @@ All data mutations use Next.js server actions in `app/actions/`:
 - `restaurant-actions.ts` - Restaurant management
 - `admin-auth-actions.ts` - Admin authentication flows
 - Actions handle file uploads, database operations, and validation
-- Every export of a `'use server'` file is a public POST endpoint: the first line of each one is a guard from `lib/auth-guard.ts` (see `docs/LESSONS.md`). Unused exports are deleted, not kept "for later" — `knip` fails the gate on them.
+- Every export of a `'use server'` file is a public POST endpoint: the first line of each one is a guard from `lib/auth-guard.ts` (see `docs/LESSONS.md`), the next a zod parse of its arguments with a schema from `lib/schemas/` that the form validates with too (the ratchet's `valid.unparsedBoundary` is hard at zero). Unused exports are deleted, not kept "for later": `knip` fails the gate on them.
 
 ### Routing Structure
 ```

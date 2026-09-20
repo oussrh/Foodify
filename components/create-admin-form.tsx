@@ -1,22 +1,18 @@
 'use client'
 
 import { useForm } from 'react-hook-form'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { createAdmin } from '@/app/actions/admin-user-actions'
+import { adminInput, type AdminInput } from '@/lib/schemas/user'
 import { Mail, Lock, UserPlus, Check, AlertCircle, Shield } from 'lucide-react'
 import { useState } from 'react'
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-})
-
-type FormValues = z.infer<typeof schema>
+const schema = adminInput
+type FormValues = AdminInput
 
 export default function CreateAdminForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)

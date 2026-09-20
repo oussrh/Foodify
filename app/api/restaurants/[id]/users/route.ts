@@ -1,6 +1,8 @@
 import prisma from '@/lib/prisma'
 import { NextRequest } from 'next/server'
 import { authErrorResponse, requireSuperAdmin } from '@/lib/auth-guard'
+import { assignment, jsonBody } from '@/lib/schemas/assignment'
+import { uuid } from '@/lib/schemas/common'
 
 export async function POST(
   req: NextRequest,
@@ -12,14 +14,14 @@ export async function POST(
     return authErrorResponse(error)
   }
 
-  const { userIds } = await req.json()
-  const { id } = await params
-  if (!Array.isArray(userIds) || !userIds.every((u) => typeof u === 'string')) {
-    return new Response('Invalid userIds', { status: 400 })
-  }
+  const id = uuid.safeParse((await params).id)
+  if (!id.success) return new Response('Invalid id', { status: 400 })
+  const body = assignment('userIds').safeParse(await jsonBody(req))
+  if (!body.success) return new Response('Invalid userIds', { status: 400 })
+  const { userIds } = body.data
 
   await prisma.restaurant.update({
-    where: { id },
+    where: { id: id.data },
     data: {
       users: {
         set: userIds.map((id: string) => ({ id })),

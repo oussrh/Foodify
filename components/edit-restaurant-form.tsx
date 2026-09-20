@@ -14,6 +14,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { updateRestaurant } from '@/app/actions/restaurant-actions'
+import { restaurantPatch } from '@/lib/schemas/restaurant'
 import BrandingPanel from '@/components/branding/branding-panel'
 import ContactPanel, { type ContactFormValues } from '@/components/contact/contact-panel'
 import type { UseFormRegister } from 'react-hook-form'
@@ -26,38 +27,10 @@ import {
   Save,
 } from 'lucide-react'
 
-const schema = z.object({
-  name: z.string().min(1),
-  slug: z.string().min(1),
-  email: z.string().email().optional().or(z.literal("")),
-  phone: z.string().optional(),
-  tagline: z.string().optional(),
-  logoUrl: z.string().optional(),
-  colorTheme: z.string().optional().or(z.literal("")),
-  defaultLocale: z.enum(['en', 'fr']),
-  // Address fields
-  streetAddress: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  postalCode: z.string().optional(),
-  country: z.string().optional(),
-  // Business info fields
-  website: z.string().optional().or(z.literal("")).refine((val) => !val || z.string().url().safeParse(val).success, "Invalid URL format"),
-  description: z.string().optional(),
-  cuisineType: z.string().optional(),
-  priceRange: z.enum(["$", "$$", "$$$", "$$$$"]).optional().or(z.literal("")).or(z.undefined()),
-  openingHours: z.string().optional(),
-  socialMedia: z.string().optional(),
-  // Design fields
-  coverImageUrl: z.string().optional().or(z.literal("")).refine((val) => !val || z.string().url().safeParse(val).success, "Invalid URL format"),
-  coverImageStyle: z.enum(["cover", "repeat"]).optional().or(z.literal("")).or(z.undefined()),
-  secondaryColor: z.string().optional().or(z.literal("")),
-  fontFamily: z.string().optional(),
-  googleFontUrl: z.string().optional(),
-  menuTheme: z.enum(['system', 'light', 'dark']).optional(),
-  // Business settings
-  currency: z.string().optional(),
-  currencySymbol: z.string().optional(),
+// The settings form always carries the identity fields; two selects may hold "" until the submit drops it.
+const schema = restaurantPatch.required({ name: true, slug: true, defaultLocale: true }).extend({
+  priceRange: restaurantPatch.shape.priceRange.or(z.literal('')),
+  coverImageStyle: restaurantPatch.shape.coverImageStyle.or(z.literal('')),
 })
 
 export type EditRestaurantValues = z.infer<typeof schema>
