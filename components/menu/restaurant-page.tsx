@@ -2,25 +2,30 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import Image from 'next/image'
-import { Camera, Search, SlidersHorizontal, Utensils, X } from 'lucide-react'
-import { Sheet, SheetContent, SheetTitle } from '@/components/ui/sheet'
+import { Camera, Download, Search, Share2, SlidersHorizontal, Utensils, WifiOff, X } from 'lucide-react'
+import { toast } from 'sonner'
+import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
 import type { SocialHandles } from '@/lib/social-media'
 import {
   DIETARY_OPTIONS,
+  LOCALE_STORAGE_KEY,
   MENU_TEXT,
   hasAR,
+  resolveInitialLocale,
   type Locale,
   type MenuCategory,
   type MenuDish,
   type MenuRestaurant,
+  type Money,
 } from '@/lib/menu'
-import DishRow from './dish-row'
 import { dayName, openStatus, parseOpeningHours } from '@/lib/opening-hours'
+import DishRow from './dish-row'
 import DishBody from './dish-body'
 import MenuFooter from './menu-footer'
+import { usePwa } from './use-pwa'
 
 interface RestaurantPageProps {
   restaurant: MenuRestaurant
@@ -30,6 +35,8 @@ interface RestaurantPageProps {
   brandStyle: Record<string, string>
   /** Absolute origin used to build share links, e.g. https://foodify.app */
   origin: string
+  /** ?lang= from the URL, if any */
+  urlLang?: string | null
 }
 
 interface Section {
@@ -49,8 +56,10 @@ export default function RestaurantPage({
   social,
   brandStyle,
   origin,
+  urlLang,
 }: RestaurantPageProps) {
-  const [locale, setLocale] = useState<Locale>(restaurant.defaultLocale)
+  // Server renders the restaurant default (or ?lang=); the guest's remembered/browser language is applied after mount.
+  const [locale, setLocaleState] = useState<Locale>(urlLang === 'fr' || urlLang === 'en' ? urlLang : restaurant.defaultLocale)
   const [query, setQuery] = useState('')
   const [arOnly, setArOnly] = useState(false)
   const [dietary, setDietary] = useState<string[]>([])
@@ -59,6 +68,35 @@ export default function RestaurantPage({
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
   const [status, setStatus] = useState<ReturnType<typeof openStatus>>(null)
+  const { canInstall, install, online } = usePwa()
+
+  const t = MENU_TEXT[locale]
+  const heroRef = useRef<HTMLDivElement>(null)
+  const chipsRef = useRef<HTMLDivElement>(null)
+  const sectionRefs = useRef<Map<string, HTMLElement>>(new Map())
+
+  const name = (en: string, fr: string) => (locale === 'fr' ? fr : en)
+  const money: Money = { locale, symbol: restaurant.currencySymbol, code: restaurant.currency }
+
+  // ---- Language: resolve once on mount, remember choices, keep <html lang> honest ----
+  useEffect(() => {
+    setLocaleState(resolveInitialLocale(restaurant.defaultLocale, urlLang))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+  useEffect(() => {
+    document.documentElement.lang = locale
+  }, [locale])
+  const setLocale = (next: Locale) => {
+    setLocaleState(next)
+    try {
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, next)
+    } catch {
+      // storage unavailable
+    }
+    const url = new URL(window.location.href)
+    url.searchParams.set('lang', next)
+    window.history.replaceState(window.history.state, '', url)
+  }
 
   // Open/closed uses the guest's clock, so it is computed after mount and refreshed each minute.
   useEffect(() => {
@@ -68,13 +106,6 @@ export default function RestaurantPage({
     const id = setInterval(tick, 60_000)
     return () => clearInterval(id)
   }, [restaurant.openingHours])
-
-  const t = MENU_TEXT[locale]
-  const heroRef = useRef<HTMLDivElement>(null)
-  const chipsRef = useRef<HTMLDivElement>(null)
-  const sectionRefs = useRef<Map<string, HTMLElement>>(new Map())
-
-  const name = (en: string, fr: string) => (locale === 'fr' ? fr : en)
 
   // ---- Filtering -------------------------------------------------------------
   const matches = useCallback(
@@ -122,6 +153,7 @@ export default function RestaurantPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categories, uncategorizedDishes, matches, locale])
 
+  const totalMatches = useMemo(() => sections.reduce((n, s) => n + s.count, 0), [sections])
   const arCount = useMemo(() => {
     let n = 0
     for (const c of categories) for (const s of c.subcategories) for (const d of s.dishes) if (hasAR(d)) n++
@@ -130,6 +162,7 @@ export default function RestaurantPage({
   }, [categories, uncategorizedDishes])
 
   const activeFilterCount = dietary.length + (arOnly ? 1 : 0)
+  const isFiltering = activeFilterCount > 0 || query.trim().length > 0
   const clearFilters = () => {
     setArOnly(false)
     setDietary([])
@@ -215,9 +248,21 @@ export default function RestaurantPage({
     return null
   }
 
+  const shareMenu = async () => {
+    const url = `${origin}/restaurant/${restaurant.slug}?lang=${locale}`
+    try {
+      if (navigator.share) await navigator.share({ title: restaurant.name, text: t.menuOf(restaurant.name), url })
+      else {
+        await navigator.clipboard.writeText(url)
+        toast.success(t.linkCopied)
+      }
+    } catch {
+      // cancelled
+    }
+  }
+
   const hasResults = sections.length > 0
   const meta = [restaurant.cuisineType, restaurant.city].filter(Boolean).join(' · ')
-
   const themeClass = restaurant.menuTheme === 'system' ? '' : restaurant.menuTheme
 
   const pageStyle: CSSProperties = {
@@ -225,8 +270,25 @@ export default function RestaurantPage({
     ...(restaurant.fontFamily ? { fontFamily: `"${restaurant.fontFamily}", var(--font-sans), sans-serif` } : {}),
   }
 
+  const iconButton =
+    'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-input bg-card hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring'
+
   return (
-    <div className={cn('brand-scope min-h-screen bg-background text-foreground', themeClass)} style={pageStyle}>
+    <div lang={locale} className={cn('brand-scope min-h-screen bg-background text-foreground', themeClass)} style={pageStyle}>
+      <a
+        href="#menu"
+        className="sr-only z-50 rounded-md bg-foreground px-3 py-2 text-sm font-semibold text-background focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
+      >
+        {t.skipToMenu}
+      </a>
+
+      {!online && (
+        <div role="status" className="flex items-center justify-center gap-2 bg-warning/15 px-4 py-2 text-center text-xs font-medium text-warning">
+          <WifiOff className="h-3.5 w-3.5" />
+          {t.offline}
+        </div>
+      )}
+
       {/* Hero: the restaurant's photo and name, then it gets out of the way */}
       <div ref={heroRef} className="relative h-44 w-full overflow-hidden bg-muted sm:h-60 lg:h-72">
         {restaurant.coverImageUrl && restaurant.coverImageStyle === 'repeat' ? (
@@ -237,13 +299,21 @@ export default function RestaurantPage({
           <div className="absolute inset-0 bg-brand-tint" />
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/15 to-transparent" />
+        <button
+          type="button"
+          onClick={shareMenu}
+          aria-label={t.shareMenu}
+          className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur hover:bg-black/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-6 sm:top-4"
+        >
+          <Share2 className="h-4 w-4" />
+        </button>
         <div className="absolute inset-x-0 bottom-0 mx-auto flex max-w-5xl items-end gap-3 px-4 pb-4 sm:px-6 sm:pb-5">
           {restaurant.logoUrl ? (
             <span className="relative block h-12 w-12 shrink-0 overflow-hidden rounded-md bg-white sm:h-14 sm:w-14">
               <Image src={restaurant.logoUrl} alt="" fill sizes="56px" className="object-cover" />
             </span>
           ) : (
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-white/90 text-[#1B1A17] sm:h-14 sm:w-14">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-white/90 text-[#1B1A17] sm:h-14 sm:w-14" aria-hidden="true">
               <Utensils className="h-5 w-5" />
             </span>
           )}
@@ -253,7 +323,7 @@ export default function RestaurantPage({
               <p className="truncate text-[13px] text-white/85 sm:text-sm">{restaurant.tagline || meta}</p>
             )}
             {status && (
-              <p className="mt-0.5 flex items-center gap-1.5 text-[12px] font-medium text-white/90">
+              <p role="status" className="mt-0.5 flex items-center gap-1.5 text-[12px] font-medium text-white/90">
                 <span className={cn('h-1.5 w-1.5 rounded-full', status.open ? 'bg-[#4FB283]' : 'bg-white/60')} aria-hidden="true" />
                 {status.open
                   ? `${t.openNow} · ${t.closes} ${status.closesAt}`
@@ -267,19 +337,23 @@ export default function RestaurantPage({
       </div>
 
       {/* Sticky bar: search, language, filters, theme */}
-      <div className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:px-6">
-          {collapsed && (
-            <span className="hidden max-w-[28%] truncate text-sm font-semibold sm:block">{restaurant.name}</span>
+          {collapsed && restaurant.logoUrl && (
+            <span className="relative hidden h-8 w-8 shrink-0 overflow-hidden rounded-md sm:block" aria-hidden="true">
+              <Image src={restaurant.logoUrl} alt="" fill sizes="32px" className="object-cover" />
+            </span>
           )}
+          {collapsed && <span className="hidden max-w-[24%] truncate text-sm font-semibold sm:block">{restaurant.name}</span>}
           <label className="relative flex h-10 min-w-0 flex-1 items-center">
-            <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" />
+            <Search className="pointer-events-none absolute left-3 h-4 w-4 text-muted-foreground" aria-hidden="true" />
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={t.search}
               aria-label={t.search}
+              enterKeyHint="search"
               className="h-10 w-full rounded-md border border-input bg-card pl-9 pr-8 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
             {query && (
@@ -294,13 +368,15 @@ export default function RestaurantPage({
             )}
           </label>
 
-          <div role="group" aria-label="Language" className="flex h-10 shrink-0 rounded-md border border-input bg-card p-0.5">
+          <div role="group" aria-label="Language / Langue" className="flex h-10 shrink-0 rounded-md border border-input bg-card p-0.5">
             {(['en', 'fr'] as Locale[]).map((l) => (
               <button
                 key={l}
                 type="button"
+                lang={l}
                 onClick={() => setLocale(l)}
                 aria-pressed={locale === l}
+                aria-label={l === 'en' ? 'English' : 'Français'}
                 className={cn(
                   'rounded-[4px] px-2.5 text-xs font-semibold uppercase transition-colors',
                   locale === l ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground',
@@ -315,10 +391,8 @@ export default function RestaurantPage({
             type="button"
             onClick={() => setFiltersOpen(true)}
             aria-label={t.filters}
-            className={cn(
-              'relative inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-input bg-card hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-              activeFilterCount > 0 && 'border-brand text-brand',
-            )}
+            aria-haspopup="dialog"
+            className={cn(iconButton, 'relative', activeFilterCount > 0 && 'border-brand text-brand')}
           >
             <SlidersHorizontal className="h-4 w-4" />
             {activeFilterCount > 0 && (
@@ -333,23 +407,26 @@ export default function RestaurantPage({
 
         {/* Category chips */}
         {sections.length > 0 && (
-          <div ref={chipsRef} className="scrollbar-none mx-auto flex max-w-5xl gap-1.5 overflow-x-auto px-4 pb-2.5 sm:px-6">
+          <nav aria-label={t.categories} ref={chipsRef} className="scrollbar-none mx-auto flex max-w-5xl gap-1.5 overflow-x-auto px-4 pb-2.5 sm:px-6">
             {sections.map((s) => (
-              <button
+              <a
                 key={s.id}
-                type="button"
+                href={`#section-${s.id}`}
                 data-chip={s.id}
-                onClick={() => jumpTo(s.id)}
-                aria-current={activeSection === s.id ? 'true' : undefined}
+                onClick={(e) => {
+                  e.preventDefault()
+                  jumpTo(s.id)
+                }}
+                aria-current={activeSection === s.id ? 'location' : undefined}
                 className={cn(
-                  'h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-[13px] font-medium transition-colors',
+                  'h-8 shrink-0 whitespace-nowrap rounded-full border px-3 text-[13px] font-medium leading-[30px] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   activeSection === s.id
                     ? 'border-foreground bg-foreground text-background'
                     : 'border-border-strong bg-card text-foreground hover:bg-accent',
                 )}
               >
                 {s.name}
-              </button>
+              </a>
             ))}
             {arCount > 0 && (
               <button
@@ -357,25 +434,28 @@ export default function RestaurantPage({
                 onClick={() => setArOnly((v) => !v)}
                 aria-pressed={arOnly}
                 className={cn(
-                  'ml-auto inline-flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 text-[13px] font-semibold transition-colors',
+                  'ml-auto inline-flex h-8 shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 text-[13px] font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
                   arOnly ? 'bg-brand text-brand-on' : 'bg-brand-tint text-brand hover:opacity-90',
                 )}
               >
-                <Camera className="h-3.5 w-3.5" />
+                <Camera className="h-3.5 w-3.5" aria-hidden="true" />
                 {t.ar} · {arCount}
               </button>
             )}
-          </div>
+          </nav>
         )}
-      </div>
+      </header>
 
       {/* Menu */}
-      <main className="mx-auto max-w-5xl px-4 pb-8 sm:px-6">
+      <main id="menu" tabIndex={-1} className="mx-auto max-w-5xl px-4 pb-8 outline-none sm:px-6">
+        <p className="sr-only" role="status" aria-live="polite">
+          {isFiltering ? t.results(totalMatches) : ''}
+        </p>
         {!hasResults ? (
           <div className="flex flex-col items-center gap-3 py-20 text-center">
             <p className="text-lg font-semibold">{t.noResults}</p>
             <p className="text-sm text-muted-foreground">{t.noResultsHint}</p>
-            {(activeFilterCount > 0 || query) && (
+            {isFiltering && (
               <button type="button" onClick={clearFilters} className="mt-2 text-sm font-medium text-brand hover:underline">
                 {t.clear}
               </button>
@@ -386,6 +466,7 @@ export default function RestaurantPage({
             <section
               key={section.id}
               id={`section-${section.id}`}
+              aria-labelledby={`heading-${section.id}`}
               ref={(el) => {
                 if (el) sectionRefs.current.set(section.id, el)
                 else sectionRefs.current.delete(section.id)
@@ -393,7 +474,9 @@ export default function RestaurantPage({
               className="scroll-mt-[112px] pt-6"
             >
               <div className="flex items-baseline justify-between gap-3 pb-1">
-                <h2 className="text-lg font-semibold tracking-display sm:text-xl">{section.name}</h2>
+                <h2 id={`heading-${section.id}`} className="text-lg font-semibold tracking-display sm:text-xl">
+                  {section.name}
+                </h2>
                 <span className="tnum text-xs text-muted-foreground">
                   {section.count} {section.count === 1 ? t.dish : t.dishes}
                 </span>
@@ -403,14 +486,7 @@ export default function RestaurantPage({
                   {group.name && <h3 className="pb-1 pt-3 text-xs font-medium text-muted-foreground">{group.name}</h3>}
                   <ul className="md:grid md:grid-cols-2 md:gap-x-8 xl:grid-cols-3">
                     {group.dishes.map((dish) => (
-                      <DishRow
-                        key={dish.id}
-                        dish={dish}
-                        locale={locale}
-                        currency={restaurant.currencySymbol}
-                        href={dishHref(dish)}
-                        onOpen={showDish}
-                      />
+                      <DishRow key={dish.id} dish={dish} locale={locale} money={money} href={dishHref(dish)} onOpen={showDish} />
                     ))}
                   </ul>
                 </div>
@@ -429,17 +505,18 @@ export default function RestaurantPage({
           className={cn('mx-auto w-full max-w-lg overflow-y-auto p-0 sm:rounded-t-sheet', themeClass)}
           style={brandStyle as CSSProperties}
         >
-          <div className="brand-scope px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+          <div lang={locale} className="brand-scope px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
             <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-border-strong" aria-hidden="true" />
             {openDish && (
               <>
                 <SheetTitle className="sr-only">{locale === 'fr' ? openDish.nameFr : openDish.nameEn}</SheetTitle>
+                <SheetDescription className="sr-only">{breadcrumbFor(openDish) ?? restaurant.name}</SheetDescription>
                 <DishBody
                   dish={openDish}
                   locale={locale}
-                  currency={restaurant.currencySymbol}
+                  money={money}
                   breadcrumb={breadcrumbFor(openDish)}
-                  shareUrl={`${origin}${dishHref(openDish)}`}
+                  shareUrl={`${origin}${dishHref(openDish)}?lang=${locale}`}
                 />
               </>
             )}
@@ -450,14 +527,15 @@ export default function RestaurantPage({
       {/* Filters sheet */}
       <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
         <SheetContent side="bottom" className={cn('mx-auto w-full max-w-lg p-0 sm:rounded-t-sheet', themeClass)} style={brandStyle as CSSProperties}>
-          <div className="brand-scope flex flex-col gap-5 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
+          <div lang={locale} className="brand-scope flex flex-col gap-5 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
             <div className="mx-auto h-1 w-10 rounded-full bg-border-strong" aria-hidden="true" />
             <SheetTitle className="text-lg font-semibold tracking-display">{t.filters}</SheetTitle>
+            <SheetDescription className="sr-only">{t.dietary}</SheetDescription>
 
             {arCount > 0 && (
               <label className="flex items-center justify-between gap-4 text-sm">
                 <span className="flex items-center gap-2">
-                  <Camera className="h-4 w-4 text-brand" />
+                  <Camera className="h-4 w-4 text-brand" aria-hidden="true" />
                   {t.arOnly}
                 </span>
                 <Switch checked={arOnly} onCheckedChange={setArOnly} />
@@ -506,6 +584,20 @@ export default function RestaurantPage({
                 {t.done}
               </button>
             </div>
+
+            {canInstall && (
+              <button
+                type="button"
+                onClick={install}
+                className="flex items-center gap-3 rounded-md border border-border bg-card px-3 py-2.5 text-left hover:bg-accent"
+              >
+                <Download className="h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+                <span className="min-w-0">
+                  <span className="block text-sm font-medium">{t.install}</span>
+                  <span className="block text-xs text-muted-foreground">{t.installHint}</span>
+                </span>
+              </button>
+            )}
           </div>
         </SheetContent>
       </Sheet>

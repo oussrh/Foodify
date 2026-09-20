@@ -37,6 +37,7 @@ export function serializeRestaurant(restaurant: Restaurant): MenuRestaurant {
     fontFamily: restaurant.fontFamily,
     googleFontUrl: restaurant.googleFontUrl,
     currencySymbol: restaurant.currencySymbol || '$',
+    currency: restaurant.currency || null,
     cuisineType: restaurant.cuisineType,
     city: restaurant.city,
     streetAddress: restaurant.streetAddress,

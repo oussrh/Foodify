@@ -56,6 +56,8 @@ export interface MenuRestaurant {
   fontFamily: string | null
   googleFontUrl: string | null
   currencySymbol: string
+  /** ISO 4217 code when known (EUR, MAD, USD…); prices then use Intl formatting */
+  currency: string | null
   cuisineType: string | null
   city: string | null
   streetAddress: string | null
@@ -104,8 +106,47 @@ export function hasAR(dish: Pick<MenuDish, 'usdzUrl' | 'glbUrl'>): boolean {
   return Boolean(dish.usdzUrl || dish.glbUrl)
 }
 
-export function formatPrice(price: number, currency: string): string {
-  return `${currency}${price.toFixed(2)}`
+export interface Money {
+  locale: Locale
+  symbol: string
+  code: string | null
+}
+
+/** Locale-aware price: "12,99 €" in French, "€12.99" in English; falls back to the stored symbol. */
+export function formatPrice(price: number, money: Money): string {
+  if (money.code && /^[A-Z]{3}$/.test(money.code)) {
+    try {
+      return new Intl.NumberFormat(money.locale === 'fr' ? 'fr-FR' : 'en-GB', {
+        style: 'currency',
+        currency: money.code,
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }).format(price)
+    } catch {
+      // unknown code: fall through
+    }
+  }
+  const n = new Intl.NumberFormat(money.locale === 'fr' ? 'fr-FR' : 'en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(price)
+  return money.locale === 'fr' ? `${n} ${money.symbol}` : `${money.symbol}${n}`
+}
+
+export const LOCALE_STORAGE_KEY = 'foodify-menu-locale'
+
+/** Pick the first language: ?lang=, then a remembered choice, then the browser, then the restaurant default. */
+export function resolveInitialLocale(defaultLocale: Locale, urlLang?: string | null): Locale {
+  if (urlLang === 'en' || urlLang === 'fr') return urlLang
+  if (typeof window !== 'undefined') {
+    try {
+      const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY)
+      if (stored === 'en' || stored === 'fr') return stored
+    } catch {
+      // storage unavailable
+    }
+    const nav = (window.navigator.language || '').toLowerCase()
+    if (nav.startsWith('fr')) return 'fr'
+    if (nav.startsWith('en')) return 'en'
+  }
+  return defaultLocale
 }
 
 /** UI strings for the customer pages. Restaurant content is bilingual in the data; this covers the chrome. */
@@ -142,6 +183,14 @@ export const MENU_TEXT = {
     closedNow: 'Closed',
     closes: 'closes',
     opens: 'opens',
+    skipToMenu: 'Skip to menu',
+    categories: 'Categories',
+    results: (n: number) => (n === 1 ? '1 dish matches' : `${n} dishes match`),
+    shareMenu: 'Share this menu',
+    install: 'Add to home screen',
+    installHint: 'Opens like an app, works without signal.',
+    offline: 'You are offline — showing the menu as it was last loaded.',
+    menuOf: (name: string) => `Menu of ${name}`,
   },
   fr: {
     search: 'Rechercher',
@@ -175,6 +224,14 @@ export const MENU_TEXT = {
     closedNow: 'Fermé',
     closes: 'ferme à',
     opens: 'ouvre à',
+    skipToMenu: 'Aller au menu',
+    categories: 'Catégories',
+    results: (n: number) => (n === 1 ? '1 plat correspond' : `${n} plats correspondent`),
+    shareMenu: 'Partager ce menu',
+    install: 'Ajouter à l’écran d’accueil',
+    installHint: 'S’ouvre comme une app, fonctionne sans réseau.',
+    offline: 'Vous êtes hors ligne — menu affiché tel qu’il a été chargé.',
+    menuOf: (name: string) => `Menu de ${name}`,
   },
 } as const
 

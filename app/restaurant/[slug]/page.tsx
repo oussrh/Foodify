@@ -5,6 +5,7 @@ import RestaurantPage from '@/components/menu/restaurant-page'
 import { brandStyle } from '@/lib/brand-color'
 import { parseSocialMedia } from '@/lib/social-media'
 import { serializeDish, serializeRestaurant, siteOrigin } from '@/lib/menu-data'
+import { restaurantJsonLd } from '@/lib/structured-data'
 import type { MenuCategory } from '@/lib/menu'
 
 async function getRestaurantData(slug: string) {
@@ -40,23 +41,56 @@ async function getRestaurantData(slug: string) {
   return { restaurant, uncategorizedDishes }
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<{ lang?: string }> }
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
-  const restaurant = await prisma.restaurant.findUnique({ where: { slug }, select: { name: true, tagline: true } })
+  const restaurant = await prisma.restaurant.findUnique({
+    where: { slug },
+    select: { name: true, tagline: true, coverImageUrl: true, logoUrl: true, city: true, cuisineType: true, defaultLocale: true },
+  })
   if (!restaurant) return {}
+
+  const origin = siteOrigin()
+  const url = `${origin}/restaurant/${slug}`
+  const description =
+    restaurant.tagline || [restaurant.cuisineType, restaurant.city].filter(Boolean).join(' · ') || `Menu of ${restaurant.name}`
+  const image = restaurant.coverImageUrl || restaurant.logoUrl || `${origin}/icons/icon-512.png`
+  const appleIcon =
+    restaurant.logoUrl && restaurant.logoUrl.includes('/image/upload/')
+      ? restaurant.logoUrl.replace('/image/upload/', '/image/upload/w_180,h_180,c_lpad,b_white,f_png/')
+      : '/icons/apple-touch-icon.png'
+
   return {
     title: `${restaurant.name} · Menu`,
-    description: restaurant.tagline || `Menu of ${restaurant.name}`,
+    description,
+    metadataBase: new URL(origin),
+    alternates: { canonical: url, languages: { en: `${url}?lang=en`, fr: `${url}?lang=fr` } },
+    manifest: `/restaurant/${slug}/manifest`,
+    appleWebApp: { capable: true, title: restaurant.name, statusBarStyle: 'black-translucent' },
+    icons: { apple: appleIcon },
+    openGraph: {
+      type: 'website',
+      siteName: 'Foodify',
+      title: restaurant.name,
+      description,
+      url,
+      images: [{ url: image, alt: restaurant.name }],
+      locale: restaurant.defaultLocale === 'fr' ? 'fr_FR' : 'en_GB',
+    },
+    twitter: { card: 'summary_large_image', title: restaurant.name, description, images: [image] },
+    robots: { index: true, follow: true },
   }
 }
 
-export default async function RestaurantRoute({ params }: { params: Promise<{ slug: string }> }) {
+export default async function RestaurantRoute({ params, searchParams }: Props) {
   const { slug } = await params
+  const sp = searchParams ? await searchParams : undefined
   const data = await getRestaurantData(slug)
   if (!data) notFound()
 
   const { restaurant, uncategorizedDishes } = data
-
+  const menuRestaurant = serializeRestaurant(restaurant)
   const categories: MenuCategory[] = restaurant.categories.map((cat) => ({
     id: cat.id,
     nameEn: cat.nameEn,
@@ -68,17 +102,27 @@ export default async function RestaurantRoute({ params }: { params: Promise<{ sl
       dishes: sub.dishes.map(serializeDish),
     })),
   }))
+  const dishes = uncategorizedDishes.map(serializeDish)
+  const origin = siteOrigin()
+  const jsonLd = restaurantJsonLd(menuRestaurant, categories, dishes, origin)
 
   return (
     <>
-      {restaurant.googleFontUrl && <link href={restaurant.googleFontUrl} rel="stylesheet" />}
+      {restaurant.googleFontUrl && (
+        <>
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link href={restaurant.googleFontUrl} rel="stylesheet" />
+        </>
+      )}
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />
       <RestaurantPage
-        restaurant={serializeRestaurant(restaurant)}
+        restaurant={menuRestaurant}
         categories={categories}
-        uncategorizedDishes={uncategorizedDishes.map(serializeDish)}
+        uncategorizedDishes={dishes}
         social={parseSocialMedia(restaurant.socialMedia)}
         brandStyle={brandStyle(restaurant.colorTheme)}
-        origin={siteOrigin()}
+        origin={origin}
+        urlLang={sp?.lang ?? null}
       />
     </>
   )

@@ -12,18 +12,19 @@ import {
   hasAR,
   type Locale,
   type MenuDish,
+  type Money,
 } from '@/lib/menu'
 
 interface DishBodyProps {
   dish: MenuDish
   locale: Locale
-  currency: string
+  money: Money
   /** e.g. "Mains · Grills" */
   breadcrumb?: string | null
   shareUrl: string
 }
 
-export default function DishBody({ dish, locale, currency, breadcrumb, shareUrl }: DishBodyProps) {
+export default function DishBody({ dish, locale, money, breadcrumb, shareUrl }: DishBodyProps) {
   const t = MENU_TEXT[locale]
   const name = locale === 'fr' ? dish.nameFr : dish.nameEn
   const description = locale === 'fr' ? dish.descriptionFr : dish.descriptionEn
@@ -67,7 +68,7 @@ export default function DishBody({ dish, locale, currency, breadcrumb, shareUrl 
           {breadcrumb && <p className="mt-0.5 text-[13px] text-muted-foreground">{breadcrumb}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <span className="tnum text-lg font-semibold">{formatPrice(dish.price, currency)}</span>
+          <span className="tnum text-lg font-semibold">{formatPrice(dish.price, money)}</span>
           <button
             type="button"
             onClick={share}

@@ -2,18 +2,18 @@
 
 import Image from 'next/image'
 import { Camera } from 'lucide-react'
-import { MENU_TEXT, dietaryLabel, formatPrice, hasAR, type Locale, type MenuDish } from '@/lib/menu'
+import { MENU_TEXT, dietaryLabel, formatPrice, hasAR, type Locale, type MenuDish, type Money } from '@/lib/menu'
 
 interface DishRowProps {
   dish: MenuDish
   locale: Locale
-  currency: string
+  money: Money
   href: string
   onOpen: (dish: MenuDish) => void
 }
 
 /** One menu line: photo, name, one line of description, price. Dense on purpose. */
-export default function DishRow({ dish, locale, currency, href, onOpen }: DishRowProps) {
+export default function DishRow({ dish, locale, money, href, onOpen }: DishRowProps) {
   const t = MENU_TEXT[locale]
   const name = locale === 'fr' ? dish.nameFr : dish.nameEn
   const description = locale === 'fr' ? dish.descriptionFr : dish.descriptionEn
@@ -58,7 +58,7 @@ export default function DishRow({ dish, locale, currency, href, onOpen }: DishRo
           )}
         </span>
 
-        <span className="tnum self-start pt-0.5 text-[15px] font-semibold">{formatPrice(dish.price, currency)}</span>
+        <span className="tnum self-start pt-0.5 text-[15px] font-semibold">{formatPrice(dish.price, money)}</span>
       </a>
     </li>
   )

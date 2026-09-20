@@ -25,12 +25,20 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${dish.nameEn} · ${dish.restaurant.name}`,
     description: dish.descriptionEn || undefined,
-    openGraph: { images: [dish.imageUrl] },
+    openGraph: { images: [dish.imageUrl], type: 'website' },
+    twitter: { card: 'summary_large_image', images: [dish.imageUrl] },
   }
 }
 
-export default async function DishRoute({ params }: { params: Promise<{ slug: string; dishId: string }> }) {
+export default async function DishRoute({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string; dishId: string }>
+  searchParams?: Promise<{ lang?: string }>
+}) {
   const { slug, dishId } = await params
+  const sp = searchParams ? await searchParams : undefined
   const dish = await getDish(dishId, slug)
   if (!dish) notFound()
 
@@ -57,6 +65,7 @@ export default async function DishRoute({ params }: { params: Promise<{ slug: st
         breadcrumb={breadcrumb}
         brandStyle={brandStyle(restaurant.colorTheme)}
         shareUrl={`${siteOrigin()}/restaurant/${slug}/dish/${dish.id}`}
+        urlLang={sp?.lang ?? null}
       />
     </>
   )
