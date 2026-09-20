@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import { NextRequest } from 'next/server'
+import { ok, fail } from '@/lib/api'
 import { authErrorResponse, requireSuperAdmin } from '@/lib/auth-guard'
 import { assignment, jsonBody } from '@/lib/schemas/assignment'
 import { uuid } from '@/lib/schemas/common'
@@ -15,9 +16,9 @@ export async function POST(
   }
 
   const id = uuid.safeParse((await params).id)
-  if (!id.success) return new Response('Invalid id', { status: 400 })
+  if (!id.success) return fail('invalid_id', 'The path id is not a UUID', 400)
   const body = assignment('userIds').safeParse(await jsonBody(req))
-  if (!body.success) return new Response('Invalid userIds', { status: 400 })
+  if (!body.success) return fail('invalid_payload', 'userIds must be an array of UUIDs', 400, body.error.issues)
   const { userIds } = body.data
 
   await prisma.restaurant.update({
@@ -29,5 +30,5 @@ export async function POST(
     },
   })
 
-  return Response.json({ success: true })
+  return ok({ id: id.data, userIds })
 }

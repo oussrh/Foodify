@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { call } from '@/lib/api-client'
 
 export default function RemoveUserRestaurantButton({
   userId,
@@ -18,7 +19,7 @@ export default function RemoveUserRestaurantButton({
   const handleRemove = async () => {
     if (loading) return
     setLoading(true)
-    await fetch(`/api/users/${userId}/restaurants`, {
+    await call(`/api/users/${userId}/restaurants`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

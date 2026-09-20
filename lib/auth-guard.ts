@@ -7,6 +7,7 @@
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
+import { fail } from '@/lib/api'
 
 export class AuthError extends Error {
   status: 401 | 403
@@ -17,10 +18,10 @@ export class AuthError extends Error {
   }
 }
 
-/** Route-handler helper: maps an AuthError to a JSON response, rethrows anything else. */
+/** Route-handler helper: maps an AuthError to the envelope's failure, rethrows anything else. */
 export function authErrorResponse(error: unknown) {
   if (error instanceof AuthError) {
-    return Response.json({ error: error.message }, { status: error.status })
+    return fail(error.status === 401 ? 'unauthenticated' : 'forbidden', error.message, error.status)
   }
   throw error
 }

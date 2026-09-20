@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { call, callAll } from "@/lib/api-client";
 import {
   Dialog,
   DialogTrigger,
@@ -44,9 +45,7 @@ export default function AssignRestaurantsDialog({
 
   useEffect(() => {
     if (!open) return;
-    fetch("/api/restaurants")
-      .then((res) => res.json())
-      .then((data: Restaurant[]) => setRestaurants(data));
+    callAll<Restaurant>("/api/restaurants").then(setRestaurants);
   }, [open]);
 
   const filteredRestaurants = restaurants.filter((r: Restaurant) =>
@@ -61,7 +60,7 @@ export default function AssignRestaurantsDialog({
 
   const handleSave = async () => {
     setLoading(true);
-    await fetch(`/api/users/${userId}/restaurants`, {
+    await call(`/api/users/${userId}/restaurants`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ restaurantIds: selected }),
