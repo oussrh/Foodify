@@ -102,14 +102,14 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <ChefHat className="h-4 w-4 text-orange-500" />
-          <span className="text-sm font-medium text-gray-700">
+          <ChefHat className="h-4 w-4 text-warning" />
+          <span className="text-sm font-medium text-muted-foreground">
             {ingredients.length} ingredient{ingredients.length !== 1 ? 's' : ''}
           </span>
         </div>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-orange-500 hover:bg-orange-600 shadow-sm">
+            <Button size="sm" className="bg-muted0 hover:bg-primary">
               <Plus className="h-4 w-4 mr-2" />
               Add Ingredient
             </Button>
@@ -117,7 +117,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5 text-orange-500" />
+                <Plus className="h-5 w-5 text-warning" />
                 Add New Ingredient
               </DialogTitle>
             </DialogHeader>
@@ -130,7 +130,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
                     value={nameEn}
                     onChange={(e) => setNameEn(e.target.value)}
                     placeholder="e.g., Tomato"
-                    className="border-orange-200 focus:border-orange-400"
+                    className="border-border focus:border-border-strong"
                   />
                 </div>
                 <div className="space-y-2">
@@ -140,9 +140,9 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
                     value={nameFr}
                     onChange={(e) => setNameFr(e.target.value)}
                     placeholder="e.g., Tomate"
-                    className="border-orange-200 focus:border-orange-400"
+                    className="border-border focus:border-border-strong"
                   />
-                  <p className="text-xs text-gray-500">Optional - defaults to English name if empty</p>
+                  <p className="text-xs text-muted-foreground">Optional - defaults to English name if empty</p>
                 </div>
               </div>
               <div className="flex gap-3 justify-end">
@@ -152,7 +152,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
                 <Button 
                   onClick={handleAdd} 
                   disabled={loading || !nameEn.trim()}
-                  className="flex-1 bg-orange-500 hover:bg-orange-600"
+                  className="flex-1 bg-muted0 hover:bg-primary"
                 >
                   {loading ? (
                     <>
@@ -174,20 +174,20 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
 
       {/* Ingredients List */}
       {ingredients.length === 0 ? (
-        <div className="text-center py-12 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+        <div className="text-center py-12 border-2 border-dashed border-border rounded-md bg-muted">
           <div className="space-y-4">
-            <div className="mx-auto w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
-              <ChefHat className="h-8 w-8 text-orange-500" />
+            <div className="mx-auto w-16 h-16 bg-muted rounded-full flex items-center justify-center">
+              <ChefHat className="h-8 w-8 text-warning" />
             </div>
             <div className="space-y-2">
-              <p className="font-medium text-gray-900">No ingredients added yet</p>
-              <p className="text-sm text-gray-500 max-w-sm mx-auto">
+              <p className="font-medium text-foreground">No ingredients added yet</p>
+              <p className="text-sm text-muted-foreground max-w-sm mx-auto">
                 Add ingredients to help customers with allergies and dietary preferences make informed choices.
               </p>
             </div>
             <Button 
               onClick={() => setAddDialogOpen(true)}
-              className="bg-orange-500 hover:bg-orange-600"
+              className="bg-muted0 hover:bg-primary"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add First Ingredient
@@ -199,23 +199,23 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
           {ingredients.map((ingredient, index) => (
             <div 
               key={ingredient.id} 
-              className="group flex items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-orange-200 hover:bg-orange-50/30 transition-all duration-200"
+              className="group flex items-center justify-between p-4 border-2 border-border rounded-md hover:border-border hover:bg-muted transition-colors"
             >
               <div className="flex items-center gap-3 flex-1 min-w-0">
-                <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs font-medium text-orange-600">#{index + 1}</span>
+                <div className="w-8 h-8 bg-muted rounded-lg flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs font-medium text-warning">#{index + 1}</span>
                 </div>
                 <div className="flex items-center gap-2 flex-wrap">
                   <Badge 
                     variant="outline" 
-                    className="bg-white border-orange-200 text-orange-700 font-medium"
+                    className="bg-card border-border text-warning font-medium"
                   >
                     {ingredient.nameEn}
                   </Badge>
                   {ingredient.nameFr && ingredient.nameFr !== ingredient.nameEn && (
                     <Badge 
                       variant="secondary" 
-                      className="bg-blue-50 text-blue-700 border-blue-200"
+                      className="bg-muted text-muted-foreground border-border"
                     >
                       {ingredient.nameFr}
                     </Badge>
@@ -228,7 +228,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
                   size="sm"
                   onClick={() => openEditDialog(ingredient)}
                   disabled={loading}
-                  className="h-8 w-8 p-0 hover:bg-blue-100 hover:text-blue-600"
+                  className="h-8 w-8 p-0 hover:bg-muted hover:text-muted-foreground"
                 >
                   <Edit2 className="h-4 w-4" />
                 </Button>
@@ -237,7 +237,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
                   size="sm"
                   onClick={() => handleDelete(ingredient.id)}
                   disabled={loading}
-                  className="h-8 w-8 p-0 hover:bg-red-100 hover:text-red-600 text-gray-400"
+                  className="h-8 w-8 p-0 hover:bg-muted hover:text-destructive text-muted-foreground"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -252,7 +252,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Edit2 className="h-5 w-5 text-blue-500" />
+              <Edit2 className="h-5 w-5 text-muted-foreground" />
               Edit Ingredient
             </DialogTitle>
           </DialogHeader>
@@ -265,7 +265,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
                   value={nameEn}
                   onChange={(e) => setNameEn(e.target.value)}
                   placeholder="e.g., Tomato"
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                 />
               </div>
               <div className="space-y-2">
@@ -275,9 +275,9 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
                   value={nameFr}
                   onChange={(e) => setNameFr(e.target.value)}
                   placeholder="e.g., Tomate"
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                 />
-                <p className="text-xs text-gray-500">Optional - defaults to English name if empty</p>
+                <p className="text-xs text-muted-foreground">Optional - defaults to English name if empty</p>
               </div>
             </div>
             <div className="flex gap-3 justify-end">
@@ -291,7 +291,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
               <Button 
                 onClick={handleEdit} 
                 disabled={loading || !nameEn.trim()}
-                className="flex-1 bg-blue-500 hover:bg-blue-600"
+                className="flex-1 bg-muted0 hover:bg-primary"
               >
                 {loading ? (
                   <>

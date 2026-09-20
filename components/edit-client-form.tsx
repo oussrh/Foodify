@@ -129,7 +129,7 @@ export default function EditClientForm({
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 via-cyan-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
           <Users className="h-8 w-8 text-white" />
         </div>
         <div>
@@ -138,10 +138,10 @@ export default function EditClientForm({
         </div>
       </div>
 
-      <Card className="card-enhanced overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 text-white">
+      <Card className="overflow-hidden">
+        <CardHeader className="text-white">
           <CardTitle className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-lg">
+            <div className="p-2 bg-card/20 rounded-lg">
               <Mail className="h-5 w-5" />
             </div>
             <div>
@@ -156,26 +156,26 @@ export default function EditClientForm({
         <CardContent className="p-8">
           {/* Success Message */}
           {success && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 border border-green-200 dark:border-green-800 rounded-xl flex items-start gap-3 shadow-sm">
-              <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/50 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <div className="mb-6 p-4 border border-border rounded-md flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                <CheckCircle2 className="h-4 w-4 text-success dark:text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-green-800 dark:text-green-200">User updated successfully!</p>
-                <p className="text-xs text-green-600 dark:text-green-300 mt-1">All changes have been saved and applied.</p>
+                <p className="text-sm font-medium text-success">User updated successfully!</p>
+                <p className="text-xs text-success dark:text-muted-foreground mt-1">All changes have been saved and applied.</p>
               </div>
             </div>
           )}
 
           {/* Error Message */}
           {error && (
-            <div className="mb-6 p-4 bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 border border-red-200 dark:border-red-800 rounded-xl flex items-start gap-3 shadow-sm">
-              <div className="flex-shrink-0 w-8 h-8 bg-red-100 dark:bg-red-900/50 rounded-full flex items-center justify-center">
-                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+            <div className="mb-6 p-4 border border-border rounded-md flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                <AlertCircle className="h-4 w-4 text-destructive dark:text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-800 dark:text-red-200">{error}</p>
-                <p className="text-xs text-red-600 dark:text-red-300 mt-1">Please try again or contact support if the problem persists.</p>
+                <p className="text-sm font-medium text-destructive">{error}</p>
+                <p className="text-xs text-destructive dark:text-muted-foreground mt-1">Please try again or contact support if the problem persists.</p>
               </div>
             </div>
           )}
@@ -184,8 +184,8 @@ export default function EditClientForm({
             {/* Account Information */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 pb-3 border-b border-border">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                  <Shield className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                <div className="p-2 bg-muted rounded-lg">
+                  <Shield className="h-5 w-5 text-muted-foreground dark:text-muted-foreground" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-foreground">Account Information</h3>
@@ -203,13 +203,13 @@ export default function EditClientForm({
                   <Input 
                     id="email" 
                     {...register('email')} 
-                    className="input-enhanced h-12"
+                    className="h-12"
                     placeholder="admin@restaurant.com"
                     disabled={isSubmitting}
                   />
                   {hasEmailChanged && (
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 text-xs">
+                    <div className="absolute right-3 top-1/2 transform -/2">
+                      <Badge className="bg-muted text-warning dark:text-muted-foreground border-border text-xs">
                         <AlertCircle className="h-3 w-3 mr-1" />
                         Changed
                       </Badge>
@@ -218,19 +218,19 @@ export default function EditClientForm({
                 </div>
                 
                 {errors.email && (
-                  <div className="flex items-center gap-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                    <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-                    <p className="text-sm text-red-700 dark:text-red-300">{errors.email.message}</p>
+                  <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
+                    <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+                    <p className="text-sm text-destructive dark:text-muted-foreground">{errors.email.message}</p>
                   </div>
                 )}
                 
                 {hasEmailChanged && (
-                  <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                  <div className="p-4 border border-border rounded-md">
                     <div className="flex items-start gap-3">
-                      <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+                      <AlertCircle className="h-5 w-5 text-warning dark:text-muted-foreground mt-0.5" />
                       <div>
-                        <p className="text-sm font-medium text-amber-900 dark:text-amber-200">Email Address Change</p>
-                        <p className="text-sm text-amber-700 dark:text-amber-300 mt-1">
+                        <p className="text-sm font-medium text-warning">Email Address Change</p>
+                        <p className="text-sm text-warning dark:text-muted-foreground mt-1">
                           The user will need to log in with the new email address. They should update their saved login credentials.
                         </p>
                       </div>
@@ -244,8 +244,8 @@ export default function EditClientForm({
             <div className="space-y-6">
               <div className="flex items-center justify-between pb-3 border-b border-border">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                    <Building2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                  <div className="p-2 bg-muted rounded-lg">
+                    <Building2 className="h-5 w-5 text-muted-foreground dark:text-muted-foreground" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-foreground">Restaurant Assignment</h3>
@@ -257,7 +257,7 @@ export default function EditClientForm({
                   <DialogTrigger asChild>
                     <Button 
                       variant="outline" 
-                      className="border-2 border-purple-200 dark:border-purple-800 text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-900/20 hover:border-purple-300 dark:hover:border-purple-700 transition-all duration-200"
+                      className="border-2 border-border text-muted-foreground dark:text-muted-foreground hover:bg-muted hover:border-border dark: transition-colors"
                     >
                       <Settings className="h-4 w-4 mr-2" />
                       Manage Assignments
@@ -266,8 +266,8 @@ export default function EditClientForm({
                   <DialogContent className="max-w-4xl max-h-[85vh] overflow-hidden flex flex-col bg-background border-border">
                     <DialogHeader className="flex-shrink-0">
                       <DialogTitle className="flex items-center gap-3 text-xl text-foreground">
-                        <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                          <Building2 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        <div className="p-2 bg-muted rounded-lg">
+                          <Building2 className="h-5 w-5 text-muted-foreground dark:text-muted-foreground" />
                         </div>
                         <div>
                           <span>Manage Restaurant Assignments</span>
@@ -283,12 +283,12 @@ export default function EditClientForm({
                       <div className="flex-shrink-0 grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Search */}
                         <div className="relative">
-                          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                          <Search className="absolute left-3 top-1/2 transform -/2 text-muted-foreground h-4 w-4" />
                           <Input
                             placeholder="Search restaurants..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="input-enhanced pl-10 h-12"
+                            className="pl-10 h-12"
                           />
                         </div>
                         
@@ -299,7 +299,7 @@ export default function EditClientForm({
                             variant={showAssignedOnly ? "default" : "outline"}
                             onClick={() => setShowAssignedOnly(!showAssignedOnly)}
                             className={showAssignedOnly 
-                              ? "bg-purple-600 hover:bg-purple-700 text-white" 
+                              ? "bg-primary hover:bg-primary text-white" 
                               : "btn-outline"
                             }
                           >
@@ -315,19 +315,19 @@ export default function EditClientForm({
                       
                       {/* Assignment Summary */}
                       {(assignmentChanges.added.length > 0 || assignmentChanges.removed.length > 0) && (
-                        <div className="flex-shrink-0 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                        <div className="flex-shrink-0 p-4 border border-border rounded-md">
                           <div className="flex items-start gap-3">
-                            <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+                            <Sparkles className="h-5 w-5 text-muted-foreground dark:text-muted-foreground mt-0.5" />
                             <div className="flex-1">
-                              <p className="text-sm font-medium text-blue-900 dark:text-blue-200 mb-2">Pending Changes</p>
+                              <p className="text-sm font-medium text-muted-foreground mb-2">Pending Changes</p>
                               <div className="flex flex-wrap gap-2">
                                 {assignmentChanges.added.length > 0 && (
-                                  <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 text-xs">
+                                  <Badge className="bg-muted text-success dark:text-muted-foreground border-border text-xs">
                                     +{assignmentChanges.added.length} Added
                                   </Badge>
                                 )}
                                 {assignmentChanges.removed.length > 0 && (
-                                  <Badge className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800 text-xs">
+                                  <Badge className="bg-muted text-destructive dark:text-muted-foreground border-border text-xs">
                                     -{assignmentChanges.removed.length} Removed
                                   </Badge>
                                 )}
@@ -347,32 +347,32 @@ export default function EditClientForm({
                           return (
                             <div 
                               key={restaurant.id}
-                              className={`flex items-center justify-between p-4 border-2 rounded-xl transition-all duration-200 ${
-                                isAssigned 
-                                  ? 'bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border-purple-200 dark:border-purple-800' 
-                                  : 'bg-card border-border hover:bg-accent hover:border-accent-foreground/20'
-                              } ${isChanged ? 'ring-2 ring-amber-200 dark:ring-amber-800 ring-offset-2 dark:ring-offset-background' : ''}`}
+                              className={`flex items-center justify-between p-4 border-2 rounded-md transition-colors ${
+ isAssigned 
+ ? ' border-border' 
+ : 'bg-card border-border hover:bg-accent hover:border-accent-foreground/20'
+ } ${isChanged ? 'ring-2 ring-offset-2 dark:ring-offset-background' : ''}`}
                             >
                               <div className="flex-1">
                                 <div className="flex items-center gap-3">
                                   <div className={`p-2 rounded-lg ${
-                                    isAssigned ? 'bg-purple-100 dark:bg-purple-900/50' : 'bg-muted'
-                                  }`}>
+ isAssigned ? 'bg-muted' : 'bg-muted'
+ }`}>
                                     <Building2 className={`h-4 w-4 ${
-                                      isAssigned ? 'text-purple-600 dark:text-purple-400' : 'text-muted-foreground'
-                                    }`} />
+ isAssigned ? 'text-muted-foreground dark:text-muted-foreground' : 'text-muted-foreground'
+ }`} />
                                   </div>
                                   <div>
                                     <h4 className="font-medium text-foreground">{restaurant.name}</h4>
                                     <div className="flex items-center gap-2 mt-1">
                                       {isAssigned && (
-                                        <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 text-xs">
+                                        <Badge className="bg-muted text-muted-foreground dark:text-muted-foreground border-border text-xs">
                                           <Check className="h-3 w-3 mr-1" />
                                           Assigned
                                         </Badge>
                                       )}
                                       {isChanged && (
-                                        <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800 text-xs">
+                                        <Badge className="bg-muted text-warning dark:text-muted-foreground border-border text-xs">
                                           {isAssigned ? '✨ New Assignment' : '🗑️ Will be Removed'}
                                         </Badge>
                                       )}
@@ -392,7 +392,7 @@ export default function EditClientForm({
                                       const newValues = currentValues.filter(currentId => currentId !== restaurant.id)
                                       setValue('restaurantIds', newValues, { shouldDirty: true })
                                     }}
-                                    className="border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700"
+                                    className="border-border text-destructive dark:text-muted-foreground hover:bg-muted hover:border-border dark:"
                                     disabled={isSubmitting}
                                   >
                                     <X className="h-4 w-4 mr-1" />
@@ -408,7 +408,7 @@ export default function EditClientForm({
                                       const newValues = [...currentValues, restaurant.id]
                                       setValue('restaurantIds', newValues, { shouldDirty: true })
                                     }}
-                                    className="border-green-200 dark:border-green-800 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 hover:border-green-300 dark:hover:border-green-700"
+                                    className="border-border text-success dark:text-muted-foreground hover:bg-muted hover:border-border dark:"
                                     disabled={isSubmitting}
                                   >
                                     <Plus className="h-4 w-4 mr-1" />
@@ -443,7 +443,7 @@ export default function EditClientForm({
               {/* Current Assignments */}
               <div className="space-y-4">
                 {selectedRestaurants.length === 0 ? (
-                  <div className="p-8 bg-gradient-to-br from-muted/50 to-muted border-2 border-dashed border-border rounded-xl text-center">
+                  <div className="p-8 border-2 border-dashed border-border rounded-md text-center">
                     <Building2 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                     <h3 className="text-lg font-medium text-foreground mb-2">No restaurants assigned</h3>
                     <p className="text-sm text-muted-foreground mb-4">
@@ -452,7 +452,7 @@ export default function EditClientForm({
                     <Button
                       type="button"
                       onClick={() => setIsDialogOpen(true)}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
+                      className="bg-primary hover:bg-primary text-white"
                     >
                       <Plus className="h-4 w-4 mr-2" />
                       Assign Restaurants
@@ -477,20 +477,20 @@ export default function EditClientForm({
                         const isNewAssignment = !wasOriginallyAssigned
                         
                         return restaurant ? (
-                          <div key={restaurantId} className="flex items-center justify-between p-4 bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-800 rounded-xl shadow-sm">
+                          <div key={restaurantId} className="flex items-center justify-between p-4 border border-border rounded-md">
                             <div className="flex items-center gap-3">
-                              <div className="p-2 bg-purple-100 dark:bg-purple-900/50 rounded-lg">
-                                <Building2 className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                              <div className="p-2 bg-muted rounded-lg">
+                                <Building2 className="h-4 w-4 text-muted-foreground dark:text-muted-foreground" />
                               </div>
                               <div>
                                 <h4 className="font-medium text-foreground">{restaurant.name}</h4>
                                 <div className="flex items-center gap-2 mt-1">
-                                  <Badge className="bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 text-xs">
+                                  <Badge className="bg-muted text-muted-foreground dark:text-muted-foreground border-border text-xs">
                                     <Check className="h-3 w-3 mr-1" />
                                     Assigned
                                   </Badge>
                                   {isNewAssignment && (
-                                    <Badge className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-800 text-xs">
+                                    <Badge className="bg-muted text-success dark:text-muted-foreground border-border text-xs">
                                       <Sparkles className="h-3 w-3 mr-1" />
                                       New
                                     </Badge>
@@ -508,7 +508,7 @@ export default function EditClientForm({
                                 const newValues = currentValues.filter(currentId => currentId !== restaurantId)
                                 setValue('restaurantIds', newValues, { shouldDirty: true })
                               }}
-                              className="text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-700 dark:hover:text-red-300"
+                              className="text-destructive dark:text-muted-foreground hover:bg-muted hover:text-destructive dark:hover:text-muted-foreground"
                               disabled={isSubmitting}
                             >
                               <X className="h-4 w-4" />
@@ -527,7 +527,7 @@ export default function EditClientForm({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {isDirty && (
-                    <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400">
+                    <div className="flex items-center gap-2 text-warning dark:text-muted-foreground">
                       <AlertCircle className="h-4 w-4" />
                       <span className="text-sm font-medium">You have unsaved changes</span>
                     </div>
@@ -537,7 +537,7 @@ export default function EditClientForm({
                 <Button 
                   type="submit" 
                   disabled={isSubmitting || !isDirty}
-                  className="h-12 px-8 bg-gradient-to-r from-blue-600 via-cyan-500 to-indigo-600 hover:from-blue-700 hover:via-cyan-600 hover:to-indigo-700 disabled:opacity-50 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:hover:scale-100"
+                  className="h-12 px-8 disabled:opacity-50 text-white font-semibold rounded-md transition-colors transform hover:scale-[1.02] disabled:"
                 >
                   {isSubmitting ? (
                     <div className="flex items-center gap-3">
@@ -556,9 +556,9 @@ export default function EditClientForm({
               
               {/* Change Summary */}
               {isDirty && (assignmentChanges.added.length > 0 || assignmentChanges.removed.length > 0 || hasEmailChanged) && (
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
-                  <h4 className="text-sm font-medium text-blue-900 dark:text-blue-200 mb-2">Summary of Changes</h4>
-                  <div className="space-y-1 text-sm text-blue-800 dark:text-blue-300">
+                <div className="p-4 bg-muted border border-border rounded-md">
+                  <h4 className="text-sm font-medium text-muted-foreground mb-2">Summary of Changes</h4>
+                  <div className="space-y-1 text-sm text-muted-foreground dark:text-muted-foreground">
                     {hasEmailChanged && (
                       <p>• Email address will be updated</p>
                     )}

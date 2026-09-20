@@ -23,6 +23,10 @@ export async function createDish(
     usdzUrl: string
     glbUrl: string
     subcategoryId?: string | null
+    calories?: number | null
+    isMostPurchased?: boolean
+    dietary?: string[]
+    allergens?: string[]
   }
 ) {
   const count = await prisma.dish.count({ where: { restaurantId } })
@@ -60,6 +64,10 @@ export async function createDish(
       glbUrl,
       restaurantId,
       sortOrder: count,
+      calories: data.calories ?? null,
+      isMostPurchased: data.isMostPurchased ?? false,
+      dietary: data.dietary ?? [],
+      allergens: data.allergens ?? [],
     },
   })
 }
@@ -80,6 +88,8 @@ export async function updateDish(
     isActive?: boolean
     calories?: number | null
     isMostPurchased?: boolean
+    dietary?: string[]
+    allergens?: string[]
   }
 ) {
   const updatedData = { ...data }

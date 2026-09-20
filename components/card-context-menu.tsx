@@ -116,7 +116,7 @@ export function CardContextMenu({ children, className, triggerClassName, alwaysV
           alwaysVisible 
             ? "opacity-100" 
             : "opacity-0 group-hover:opacity-100",
-          isOpen && "opacity-100 bg-gray-100",
+          isOpen && "opacity-100 bg-muted",
           triggerClassName
         )}
       >
@@ -132,7 +132,7 @@ export function CardContextMenu({ children, className, triggerClassName, alwaysV
           <div
             ref={menuRef}
             className={cn(
-              "fixed z-50 min-w-[200px] rounded-md border bg-white p-1 shadow-lg",
+              "fixed z-50 min-w-[200px] rounded-md border bg-card p-1",
               "animate-in fade-in-0 zoom-in-95 duration-100",
               className
             )}
@@ -163,7 +163,7 @@ export function CardContextMenuItem({
     <div
       className={cn(
         "relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors",
-        "hover:bg-gray-100 focus:bg-gray-100 data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+        "hover:bg-muted focus:bg-muted data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
         className
       )}
       onClick={onClick}

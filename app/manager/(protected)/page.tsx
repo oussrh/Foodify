@@ -1,14 +1,10 @@
 import Link from 'next/link'
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Utensils, ChefHat, BarChart3, Eye, Plus, Settings } from 'lucide-react'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { EmptyState, PageHeader, StatStrip } from '@/components/shell/page-header'
+import { RestaurantRowMenu } from '@/components/shell/row-actions'
 
 export default async function ManagerDashboard() {
   const session = await auth()
@@ -16,125 +12,90 @@ export default async function ManagerDashboard() {
     throw new Error('Not authenticated')
   }
 
-  // Get restaurants for this manager
+  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+
   const restaurants = await prisma.restaurant.findMany({
     where: { users: { some: { email: session.user.email } } },
+    orderBy: { name: 'asc' },
     include: {
-      dishes: {
-        select: {
-          id: true,
-          isActive: true,
-          views: true,
-        }
-      },
-      categories: {
-        select: {
-          id: true,
-        }
-      }
-    }
+      dishes: { select: { id: true, isActive: true, usdzUrl: true, glbUrl: true } },
+      _count: { select: { categories: true } },
+    },
   })
 
-  // Calculate stats
-  const restaurantCount = restaurants.length
-  const totalDishes = restaurants.reduce((sum, r) => sum + r.dishes.length, 0)
-  const activeDishes = restaurants.reduce((sum, r) => sum + r.dishes.filter(d => d.isActive).length, 0)
-  const totalViews = restaurants.reduce((sum, r) => 
-    sum + r.dishes.reduce((dishSum, d) => dishSum + d.views.length, 0), 0)
-  const totalCategories = restaurants.reduce((sum, r) => sum + r.categories.length, 0)
+  const restaurantIds = restaurants.map((r) => r.id)
+  const [views, arViews] = await Promise.all([
+    prisma.dishView.count({ where: { viewedAt: { gte: since }, dish: { restaurantId: { in: restaurantIds } } } }),
+    prisma.dishView.count({ where: { viewedAt: { gte: since }, arViewed: true, dish: { restaurantId: { in: restaurantIds } } } }),
+  ])
 
-  const stats = [
-    { icon: Utensils, label: 'Restaurants', value: restaurantCount, href: '/manager/restaurants' },
-    { icon: ChefHat, label: 'Total Dishes', value: totalDishes, href: '#' },
-    { icon: BarChart3, label: 'Active Dishes', value: activeDishes, href: '#' },
-    { icon: Eye, label: 'Total Views', value: totalViews, href: '#' },
-  ]
+  const allDishes = restaurants.flatMap((r) => r.dishes)
+  const live = allDishes.filter((d) => d.isActive).length
+  const arReady = allDishes.filter((d) => d.usdzUrl || d.glbUrl).length
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back! Here&apos;s an overview of your restaurants.
-          </p>
-        </div>
-      </div>
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Overview" description={`Signed in as ${session.user.email}`} />
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map(({ icon: Icon, label, value, href }) => (
-          <Card key={label} className="cursor-pointer hover:shadow-md transition-shadow">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">{label}</CardTitle>
-              <Icon className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{value}</div>
-              <p className="text-xs text-muted-foreground">
-                {label === 'Restaurants' && restaurantCount === 1 ? 'restaurant' : 
-                 label === 'Total Dishes' ? 'across all restaurants' :
-                 label === 'Active Dishes' ? 'currently available' :
-                 'from all dishes'}
-              </p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <StatStrip
+        stats={[
+          { label: 'Restaurants', value: restaurants.length },
+          { label: 'Dishes', value: allDishes.length, hint: `${live} live` },
+          { label: 'AR ready', value: arReady },
+          { label: 'Menu views, 7 days', value: views.toLocaleString(), hint: arViews > 0 ? `${arViews} AR sessions` : undefined },
+        ]}
+      />
 
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {restaurants.map((restaurant) => (
-              <Card key={restaurant.id} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">{restaurant.name}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {restaurant.dishes.length} dishes • {restaurant.categories.length} categories
-                    </p>
-                  </div>
-                </div>
-                <div className="mt-4 flex gap-2">
-                  <Button size="sm" asChild>
-                    <Link href={`/manager/restaurants/${restaurant.id}/menu`}>
-                      <ChefHat className="h-4 w-4 mr-1" />
-                      Menu
+      {restaurants.length === 0 ? (
+        <EmptyState
+          title="No restaurant assigned yet"
+          description="Ask your Foodify administrator to add you to a restaurant. It will appear here as soon as they do."
+        />
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Restaurant</TableHead>
+              <TableHead className="hidden sm:table-cell">Categories</TableHead>
+              <TableHead>Dishes</TableHead>
+              <TableHead className="hidden md:table-cell">AR ready</TableHead>
+              <TableHead className="w-[1%] text-right">
+                <span className="sr-only">Actions</span>
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {restaurants.map((r) => {
+              const rLive = r.dishes.filter((d) => d.isActive).length
+              const rAr = r.dishes.filter((d) => d.usdzUrl || d.glbUrl).length
+              return (
+                <TableRow key={r.id}>
+                  <TableCell>
+                    <Link href={`/manager/restaurants/${r.id}/menu`} className="font-medium hover:underline">
+                      {r.name}
                     </Link>
-                  </Button>
-                  <Button size="sm" variant="outline" asChild>
-                    <Link href={`/manager/restaurants/${restaurant.id}/edit`}>
-                      <Settings className="h-4 w-4 mr-1" />
-                      Settings
-                    </Link>
-                  </Button>
-                </div>
-              </Card>
-            ))}
-          </div>
-          
-          {restaurants.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground mb-4">No restaurants assigned to your account.</p>
-              <p className="text-sm text-muted-foreground">Contact your administrator to get restaurant access.</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Recent Activity placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Activity</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Activity tracking coming soon...</p>
-        </CardContent>
-      </Card>
+                    <span className="block text-xs text-muted-foreground">/{r.slug}</span>
+                  </TableCell>
+                  <TableCell className="tnum hidden sm:table-cell">{r._count.categories}</TableCell>
+                  <TableCell className="tnum">
+                    {r.dishes.length}
+                    {r.dishes.length > 0 && <span className="text-muted-foreground"> · {rLive} live</span>}
+                  </TableCell>
+                  <TableCell className="tnum hidden md:table-cell">{rAr}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
+                        <Link href={`/manager/restaurants/${r.id}/menu`}>Menu</Link>
+                      </Button>
+                      <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} role="manager" slug={r.slug} />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
+          </TableBody>
+        </Table>
+      )}
     </div>
   )
 }

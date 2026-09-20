@@ -13,15 +13,15 @@ export default async function ConfirmOldEmailPage({
   const success = params.token ? await confirmOldEmail(params.token) : false
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-blue-900/20 dark:to-indigo-900/20 flex items-center justify-center p-6">
+    <div className="min-h-screen flex items-center justify-center p-6">
       <div className="max-w-md w-full space-y-6">
         {/* Header */}
         <div className="text-center space-y-3">
-          <div className={`mx-auto w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg ${
-            success 
-              ? 'bg-gradient-to-br from-blue-500 to-indigo-600' 
-              : 'bg-gradient-to-br from-red-500 to-pink-600'
-          }`}>
+          <div className={`mx-auto w-16 h-16 rounded-lg flex items-center justify-center ${
+ success 
+ ? '' 
+ : ''
+ }`}>
             {success ? (
               <CheckCircle className="h-8 w-8 text-white" />
             ) : (
@@ -34,15 +34,15 @@ export default async function ConfirmOldEmailPage({
         </div>
 
         {/* Content Card */}
-        <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
+        <div className="bg-card border border-border rounded-lg p-8">
           {success ? (
             <div className="space-y-6">
               {/* Success Content */}
               <div className="text-center space-y-4">
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                <div className="p-4 bg-muted border border-border rounded-md">
                   <div className="flex items-center gap-3 justify-center">
-                    <Mail className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-                    <span className="text-sm font-medium text-blue-800 dark:text-blue-200">
+                    <Mail className="h-5 w-5 text-muted-foreground dark:text-muted-foreground" />
+                    <span className="text-sm font-medium text-muted-foreground">
                       Old Email Verified!
                     </span>
                   </div>
@@ -59,35 +59,35 @@ export default async function ConfirmOldEmailPage({
               </div>
 
               {/* Next Steps */}
-              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+              <div className="p-4 bg-muted border border-border rounded-md">
                 <div className="flex items-center gap-2 mb-3">
-                  <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  <h3 className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                  <Clock className="h-4 w-4 text-warning dark:text-muted-foreground" />
+                  <h3 className="text-sm font-medium text-warning">
                     Next Steps:
                   </h3>
                 </div>
-                <ol className="text-sm text-amber-800 dark:text-amber-300 space-y-2">
+                <ol className="text-sm text-warning dark:text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-warning dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">1</span>
                     <span>Check your new email inbox for a confirmation message</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-warning dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">2</span>
                     <span>Click the verification link in that email</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-warning dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">3</span>
                     <span>Your email change will be complete</span>
                   </li>
                 </ol>
               </div>
 
               {/* Important Notice */}
-              <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-xl">
-                <h3 className="text-sm font-medium text-purple-900 dark:text-purple-200 mb-2">
+              <div className="p-4 bg-muted border border-border rounded-md">
+                <h3 className="text-sm font-medium text-muted-foreground mb-2">
                   Important:
                 </h3>
-                <ul className="text-sm text-purple-800 dark:text-purple-300 space-y-1">
+                <ul className="text-sm text-muted-foreground dark:text-muted-foreground space-y-1">
                   <li>• The confirmation link expires in 24 hours</li>
                   <li>• Check your spam/junk folder if you don&apos;t see the email</li>
                   <li>• You can still access your account with your current email</li>
@@ -95,7 +95,7 @@ export default async function ConfirmOldEmailPage({
               </div>
 
               {/* Action Button */}
-              <Button asChild className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white shadow-lg">
+              <Button asChild className="w-full h-12 bg-primary hover:bg-primary text-white">
                 <Link href="/manager/profile">
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Return to Profile
@@ -106,10 +106,10 @@ export default async function ConfirmOldEmailPage({
             <div className="space-y-6">
               {/* Error Content */}
               <div className="text-center space-y-4">
-                <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+                <div className="p-4 bg-muted border border-border rounded-md">
                   <div className="flex items-center gap-3 justify-center">
-                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                    <span className="text-sm font-medium text-red-800 dark:text-red-200">
+                    <AlertCircle className="h-5 w-5 text-destructive dark:text-muted-foreground" />
+                    <span className="text-sm font-medium text-destructive">
                       Verification Failed
                     </span>
                   </div>
@@ -126,11 +126,11 @@ export default async function ConfirmOldEmailPage({
               </div>
 
               {/* Help Section */}
-              <div className="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
-                <h3 className="text-sm font-medium text-amber-900 dark:text-amber-200 mb-2">
+              <div className="p-4 bg-muted border border-border rounded-md">
+                <h3 className="text-sm font-medium text-warning mb-2">
                   What can you do?
                 </h3>
-                <ul className="text-sm text-amber-800 dark:text-amber-300 space-y-1">
+                <ul className="text-sm text-warning dark:text-muted-foreground space-y-1">
                   <li>• Go back to your profile and start the email change process again</li>
                   <li>• Check if you have a more recent verification email</li>
                   <li>• Make sure you&apos;re clicking the correct link from your old email</li>
@@ -146,7 +146,7 @@ export default async function ConfirmOldEmailPage({
                     Back to Profile
                   </Link>
                 </Button>
-                <Button asChild className="flex-1 bg-blue-600 hover:bg-blue-700 text-white">
+                <Button asChild className="flex-1 bg-primary hover:bg-primary text-white">
                   <Link href="/manager/profile#change-email">
                     <ArrowRight className="h-4 w-4 mr-2" />
                     Try Again
@@ -159,20 +159,20 @@ export default async function ConfirmOldEmailPage({
 
         {/* Progress Indicator */}
         {success && (
-          <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+          <div className="bg-card border border-border rounded-md p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+              <span className="text-xs font-medium text-muted-foreground">
                 Email Change Progress
               </span>
               <span className="text-xs text-muted-foreground">1 of 2</span>
             </div>
             <div className="flex items-center gap-2">
               <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full" style={{ width: '50%' }}></div>
+                <div className="h-full rounded-full" style={{ width: '50%' }}></div>
               </div>
             </div>
             <div className="flex justify-between mt-2 text-xs">
-              <span className="text-blue-600 dark:text-blue-400 font-medium">✓ Old Email Verified</span>
+              <span className="text-muted-foreground dark:text-muted-foreground font-medium">✓ Old Email Verified</span>
               <span className="text-muted-foreground">New Email Pending</span>
             </div>
           </div>

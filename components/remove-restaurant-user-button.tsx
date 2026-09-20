@@ -33,8 +33,8 @@ export default function RemoveRestaurantUserButton({
     <span
       onClick={handleRemove}
       className={`flex items-center gap-2 w-full ${
-        loading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
-      }`}
+ loading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
+ }`}
     >
       Remove
     </span>

@@ -1,5 +1,4 @@
-import AdminHeader from '@/components/admin/header'
-import AdminSidebar from '@/components/admin/sidebar'
+import AppShell from '@/components/shell/app-shell'
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
@@ -11,13 +10,13 @@ interface LayoutProps {
 export default async function AdminLayout({ children }: LayoutProps) {
   const session = await auth()
 
-  if (!session?.user) {
+  if (!session?.user?.email) {
     redirect('/admin/login')
   }
 
   const user = await prisma.user.findUnique({
-    where: { email: session.user.email || undefined },
-    select: { role: true },
+    where: { email: session.user.email },
+    select: { role: true, email: true },
   })
 
   if (user?.role !== 'SUPER_ADMIN') {
@@ -27,13 +26,14 @@ export default async function AdminLayout({ children }: LayoutProps) {
     redirect('/')
   }
 
+  const restaurants = await prisma.restaurant.findMany({
+    select: { id: true, name: true },
+    orderBy: { name: 'asc' },
+  })
+
   return (
-    <div className="flex min-h-screen flex-col">
-      <AdminHeader />
-      <div className="flex flex-1">
-        <AdminSidebar className="hidden md:block" />
-        <main className="flex-1 p-6">{children}</main>
-      </div>
-    </div>
+    <AppShell role="admin" user={{ email: user.email }} restaurants={restaurants}>
+      {children}
+    </AppShell>
   )
 }

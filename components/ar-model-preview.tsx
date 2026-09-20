@@ -192,7 +192,7 @@ export default function ARModelPreview({
               </div>
             </DialogTitle>
             <div className="flex items-center gap-3">
-              <Badge variant="secondary" className="text-xs uppercase tracking-wider">
+              <Badge variant="secondary" className="text-xs">
                 {modelType === 'usdz' ? (
                   <div className="flex items-center gap-1">
                     <Smartphone className="h-3 w-3" />
@@ -215,9 +215,9 @@ export default function ARModelPreview({
         <div className="flex-1 relative overflow-hidden">
           {modelType === 'usdz' ? (
             // USDZ Preview (iOS-specific format)
-            <div className="h-full flex items-center justify-center bg-gradient-to-br from-background to-muted">
+            <div className="h-full flex items-center justify-center">
               <div className="text-center space-y-6 p-8 max-w-md">
-                <div className="w-24 h-24 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto shadow-lg">
+                <div className="w-24 h-24 rounded-lg flex items-center justify-center mx-auto">
                   <Camera className="h-12 w-12 text-white" />
                 </div>
                 
@@ -229,12 +229,12 @@ export default function ARModelPreview({
                   </p>
                 </div>
 
-                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl">
+                <div className="p-4 bg-muted border border-border rounded-md">
                   <div className="flex items-start gap-3">
-                    <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+                    <Info className="h-5 w-5 text-muted-foreground dark:text-muted-foreground mt-0.5 flex-shrink-0" />
                     <div className="text-sm">
-                      <p className="font-medium text-blue-900 dark:text-blue-200 mb-1">AR Quick Look Compatible</p>
-                      <p className="text-blue-800 dark:text-blue-300">
+                      <p className="font-medium text-muted-foreground mb-1">AR Quick Look Compatible</p>
+                      <p className="text-muted-foreground dark:text-muted-foreground">
                         Works on iPhone 6s and later, iPad (5th generation) and later
                       </p>
                     </div>
@@ -244,7 +244,7 @@ export default function ARModelPreview({
                 <div className="space-y-3">
                   <Button 
                     onClick={handleDownload}
-                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg"
+                    className="w-full h-12 text-white"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download USDZ File
@@ -259,9 +259,9 @@ export default function ARModelPreview({
             // GLB Preview (3D viewer)
             <div className="h-full relative bg-background">
               {isLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-muted/50 backdrop-blur-sm">
+                <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                   <div className="text-center space-y-4 p-8">
-                    <div className="w-16 h-16 bg-primary/20 rounded-2xl flex items-center justify-center mx-auto">
+                    <div className="w-16 h-16 bg-primary/20 rounded-lg flex items-center justify-center mx-auto">
                       <Loader2 className="h-8 w-8 animate-spin text-primary" />
                     </div>
                     <div className="space-y-2">
@@ -275,7 +275,7 @@ export default function ARModelPreview({
               {error && (
                 <div className="absolute inset-0 flex items-center justify-center bg-muted/50">
                   <div className="text-center space-y-4 p-8">
-                    <div className="w-16 h-16 bg-destructive/20 rounded-2xl flex items-center justify-center mx-auto">
+                    <div className="w-16 h-16 bg-destructive/20 rounded-lg flex items-center justify-center mx-auto">
                       <AlertCircle className="h-8 w-8 text-destructive" />
                     </div>
                     <div className="space-y-2">
@@ -300,7 +300,7 @@ export default function ARModelPreview({
                   
                   {/* Controls Overlay */}
                   <div className="absolute top-6 right-6">
-                    <div className="bg-card/90 backdrop-blur-xl rounded-xl p-4 space-y-3 shadow-lg border border-border min-w-[160px]">
+                    <div className="bg-card/90 rounded-md p-4 space-y-3 border border-border min-w-[160px]">
                       <div className="flex items-center justify-between">
                         <h4 className="text-sm font-semibold text-foreground flex items-center gap-2">
                           <Settings className="h-3 w-3" />
@@ -343,7 +343,7 @@ export default function ARModelPreview({
                   
                   {/* Instructions */}
                   <div className="absolute bottom-6 left-6">
-                    <div className="bg-card/90 backdrop-blur-xl rounded-xl p-4 shadow-lg border border-border max-w-xs">
+                    <div className="bg-card/90 rounded-md p-4 border border-border max-w-xs">
                       <h4 className="text-sm font-semibold text-foreground mb-3">How to Navigate</h4>
                       <div className="space-y-2 text-xs">
                         <div className="flex items-center gap-3 text-muted-foreground">
@@ -368,7 +368,7 @@ export default function ARModelPreview({
                       onClick={handleDownload}
                       variant="outline"
                       size="sm"
-                      className="bg-card/90 backdrop-blur-xl border-border"
+                      className="bg-card/90 border-border"
                     >
                       <Download className="h-4 w-4 mr-2" />
                       Download
@@ -382,7 +382,7 @@ export default function ARModelPreview({
                           'width=1200,height=800'
                         )
                       }}
-                      className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg"
+                      className="bg-primary hover:bg-primary/90 text-primary-foreground"
                       size="sm"
                     >
                       <ArrowUpRight className="h-4 w-4 mr-2" />

@@ -248,22 +248,22 @@ export default function RestaurantCoverUpload({
   if (!isCloudinaryConfigured) {
     return (
       <div className="space-y-4">
-        <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-sm">
+        <div className="p-6 border border-border rounded-md">
           <div className="flex items-start gap-4">
-            <div className="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-              <AlertCircle className="h-5 w-5 text-amber-600" />
+            <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+              <AlertCircle className="h-5 w-5 text-warning" />
             </div>
             <div className="flex-1">
-              <p className="text-lg font-semibold text-amber-900 mb-2">
+              <p className="text-lg font-semibold text-warning mb-2">
                 Configuration Required
               </p>
-              <div className="space-y-3 text-sm text-amber-800">
+              <div className="space-y-3 text-sm text-warning">
                 <p>To enable cover image uploads, please configure these environment variables:</p>
-                <div className="bg-amber-100/50 rounded-lg p-3 space-y-1 font-mono text-xs">
+                <div className="bg-muted rounded-lg p-3 space-y-1 font-mono text-xs">
                   <div>NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME</div>
                   <div>NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET</div>
                 </div>
-                <p className="text-amber-700">Contact your administrator to enable this feature.</p>
+                <p className="text-warning">Contact your administrator to enable this feature.</p>
               </div>
             </div>
           </div>
@@ -276,26 +276,26 @@ export default function RestaurantCoverUpload({
     <div className="space-y-6">
       {/* Success Message */}
       {success && (
-        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl flex items-start gap-3 shadow-sm">
-          <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle className="h-4 w-4 text-green-600" />
+        <div className="p-4 border border-border rounded-md flex items-start gap-3">
+          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+            <CheckCircle className="h-4 w-4 text-success" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-green-800">{success}</p>
-            <p className="text-xs text-green-600 mt-1">Your restaurant cover image is ready!</p>
+            <p className="text-sm font-medium text-success">{success}</p>
+            <p className="text-xs text-success mt-1">Your restaurant cover image is ready!</p>
           </div>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl flex items-start gap-3 shadow-sm">
-          <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-            <AlertCircle className="h-4 w-4 text-red-600" />
+        <div className="p-4 border border-border rounded-md flex items-start gap-3">
+          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+            <AlertCircle className="h-4 w-4 text-destructive" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-red-800">{error}</p>
-            <p className="text-xs text-red-600 mt-1">Please check your file and try again</p>
+            <p className="text-sm font-medium text-destructive">{error}</p>
+            <p className="text-xs text-destructive mt-1">Please check your file and try again</p>
           </div>
         </div>
       )}
@@ -303,21 +303,21 @@ export default function RestaurantCoverUpload({
       {/* Cover Upload Section */}
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-purple-100 rounded-lg">
-            <ImageIcon className="h-5 w-5 text-purple-600" />
+          <div className="p-2 bg-muted rounded-lg">
+            <ImageIcon className="h-5 w-5 text-muted-foreground" />
           </div>
           <div>
-            <h4 className="font-semibold text-gray-900">Restaurant Cover Image</h4>
-            <p className="text-sm text-gray-600">JPG, PNG, WebP, or SVG format (recommended size: 1200x400px)</p>
+            <h4 className="font-semibold text-foreground">Restaurant Cover Image</h4>
+            <p className="text-sm text-muted-foreground">JPG, PNG, WebP, or SVG format (recommended size: 1200x400px)</p>
           </div>
         </div>
         
         {currentCoverUrl ? (
           <div className="space-y-4">
-            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+            <div className="p-4 border border-border rounded-md">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0">
-                  <div className="w-24 h-16 rounded-lg overflow-hidden border-2 border-white shadow-md">
+                  <div className="w-24 h-16 rounded-lg overflow-hidden border-2 border-white">
                     <Image
                       src={currentCoverUrl}
                       alt={`${restaurantName} cover`}
@@ -328,8 +328,8 @@ export default function RestaurantCoverUpload({
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-green-900">Cover image uploaded successfully</p>
-                  <p className="text-xs text-green-600 break-all mt-1">{currentCoverUrl}</p>
+                  <p className="text-sm font-medium text-success">Cover image uploaded successfully</p>
+                  <p className="text-xs text-success break-all mt-1">{currentCoverUrl}</p>
                 </div>
               </div>
             </div>
@@ -338,7 +338,7 @@ export default function RestaurantCoverUpload({
                 variant="outline"
                 size="sm"
                 onClick={() => handlePreview(currentCoverUrl)}
-                className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                className="border-border text-muted-foreground hover:bg-muted"
                 disabled={disabled}
               >
                 <Eye className="h-4 w-4 mr-2" />
@@ -348,7 +348,7 @@ export default function RestaurantCoverUpload({
                 variant="outline"
                 size="sm"
                 onClick={() => downloadCover(currentCoverUrl)}
-                className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                className="border-border text-muted-foreground hover:bg-muted"
                 disabled={disabled}
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -358,7 +358,7 @@ export default function RestaurantCoverUpload({
                 variant="outline"
                 size="sm"
                 onClick={removeCover}
-                className="border-red-200 text-red-600 hover:bg-red-50"
+                className="border-border text-destructive hover:bg-muted"
                 disabled={disabled || isUploading}
               >
                 <X className="h-4 w-4 mr-2" />
@@ -367,7 +367,7 @@ export default function RestaurantCoverUpload({
             </div>
           </div>
         ) : (
-          <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-purple-400 hover:bg-purple-50/50 transition-all duration-200 group">
+          <div className="border-2 border-dashed border-border rounded-md p-8 text-center hover:border-border-strong hover:bg-muted transition-colors group">
             <input
               type="file"
               accept="image/jpeg,image/jpg,image/png,image/webp,image/svg+xml"
@@ -381,27 +381,27 @@ export default function RestaurantCoverUpload({
                 {isUploading ? (
                   <>
                     <div className="relative">
-                      <Loader2 className="h-10 w-10 text-purple-500 mx-auto animate-spin" />
-                      <div className="absolute inset-0 bg-purple-100 rounded-full opacity-20"></div>
+                      <Loader2 className="h-10 w-10 text-muted-foreground mx-auto animate-spin" />
+                      <div className="absolute inset-0 bg-muted rounded-full opacity-20"></div>
                     </div>
                     <div>
-                      <p className="text-sm text-purple-600 font-medium">Uploading cover image...</p>
-                      <div className="mt-2 w-full bg-purple-200 rounded-full h-2 max-w-xs mx-auto">
+                      <p className="text-sm text-muted-foreground font-medium">Uploading cover image...</p>
+                      <div className="mt-2 w-full bg-muted rounded-full h-2 max-w-xs mx-auto">
                         <div 
-                          className="bg-purple-600 h-2 rounded-full transition-all duration-300"
+                          className="bg-primary h-2 rounded-full transition-colors"
                           style={{ width: `${uploadProgress}%` }}
                         ></div>
                       </div>
-                      <p className="text-xs text-purple-500 mt-1">{Math.round(uploadProgress)}%</p>
+                      <p className="text-xs text-muted-foreground mt-1">{Math.round(uploadProgress)}%</p>
                     </div>
                   </>
                 ) : (
                   <>
-                    <CloudUpload className="h-10 w-10 text-gray-400 mx-auto group-hover:text-purple-500 transition-colors" />
+                    <CloudUpload className="h-10 w-10 text-muted-foreground mx-auto group-hover:text-muted-foreground transition-colors" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900 group-hover:text-purple-600">Upload restaurant cover image</p>
-                      <p className="text-xs text-gray-500 mt-1">Click to browse or drag and drop</p>
-                      <p className="text-xs text-purple-600 mt-2">Supports: JPG, PNG, WebP, SVG (max 10MB)</p>
+                      <p className="text-sm font-medium text-foreground group-hover:text-muted-foreground">Upload restaurant cover image</p>
+                      <p className="text-xs text-muted-foreground mt-1">Click to browse or drag and drop</p>
+                      <p className="text-xs text-muted-foreground mt-2">Supports: JPG, PNG, WebP, SVG (max 10MB)</p>
                     </div>
                   </>
                 )}
@@ -412,16 +412,16 @@ export default function RestaurantCoverUpload({
       </div>
 
       {/* File Format Info */}
-      <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-200 rounded-xl shadow-sm">
+      <div className="p-4 border border-border rounded-md">
         <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-            <Info className="h-4 w-4 text-purple-600" />
+          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-lg flex items-center justify-center">
+            <Info className="h-4 w-4 text-muted-foreground" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-semibold text-purple-900 mb-2">
+            <p className="text-sm font-semibold text-muted-foreground mb-2">
               Cover Image Requirements
             </p>
-            <div className="text-xs text-purple-700 space-y-1">
+            <div className="text-xs text-muted-foreground space-y-1">
               <p><strong>Formats:</strong> JPG, PNG, WebP, SVG</p>
               <p><strong>Size:</strong> Maximum 10MB</p>
               <p><strong>Recommended:</strong> 1200x400px for best display results</p>

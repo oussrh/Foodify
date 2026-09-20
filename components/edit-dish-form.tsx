@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import DietarySelect from '@/components/dietary-select'
 import { Badge } from '@/components/ui/badge'
 import { updateDish } from '@/app/actions/dish-actions'
 import ARFileUpload from '@/components/ar-file-upload'
@@ -44,6 +45,8 @@ export interface EditDishValues {
   subcategoryId?: string
   calories?: number
   isMostPurchased?: boolean
+  dietary?: string[]
+  allergens?: string[]
 }
 
 const schema = z.object({
@@ -58,6 +61,8 @@ const schema = z.object({
   subcategoryId: z.string().optional(),
   calories: z.number().optional(),
   isMostPurchased: z.boolean().optional(),
+  dietary: z.array(z.string()).optional(),
+  allergens: z.array(z.string()).optional(),
 }).transform((data) => ({
   ...data,
   price: Number(data.price),
@@ -213,68 +218,12 @@ export default function EditDishForm({
 
   return (
     <div className="space-y-8">
-      {/* Enhanced Status Indicator */}
-      <div className="flex items-center justify-between">
-        <div>
-          {hasUnsavedChanges ? (
-            <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 shadow-lg">
-              <AlertCircle className="h-3 w-3 mr-1" />
-              Unsaved changes
-              <kbd className="ml-2 px-1 py-0.5 text-xs bg-yellow-100 rounded">Ctrl+S</kbd>
-            </Badge>
-          ) : saveStatus === 'saved' ? (
-            <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 shadow-lg">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              All changes saved
-            </Badge>
-          ) : (
-            <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-300">
-              <CheckCircle className="h-3 w-3 mr-1" />
-              Up to date
-            </Badge>
-          )}
-        </div>
-        
-        {/* Enhanced Save Button */}
-        <Button
-          onClick={submitForm}
-          disabled={!hasUnsavedChanges || isSubmitting}
-          className={`transition-all duration-300 ${
-            hasUnsavedChanges
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white scale-105 hover:scale-110'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed scale-100'
-          }`}
-        >
-          {saveStatus === 'saving' ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-              Saving...
-            </>
-          ) : saveStatus === 'saved' ? (
-            <>
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Saved!
-            </>
-          ) : saveStatus === 'error' ? (
-            <>
-              <AlertCircle className="h-4 w-4 mr-2" />
-              Try Again
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 mr-2" />
-              {hasUnsavedChanges ? 'Save Changes' : 'No Changes'}
-            </>
-          )}
-        </Button>
-      </div>
-      
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
+        <Card className="border-0">
+          <CardHeader className="border-b">
             <CardTitle className="flex items-center gap-2">
-              <Edit className="h-5 w-5 text-blue-600" />
+              <Edit className="h-5 w-5 text-muted-foreground" />
               Edit Dish Information
             </CardTitle>
           </CardHeader>
@@ -282,38 +231,38 @@ export default function EditDishForm({
             {/* Names */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="nameEn" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Label htmlFor="nameEn" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Globe className="h-4 w-4" />
                   English Name
                 </Label>
                 <Input 
                   id="nameEn" 
                   {...register('nameEn')} 
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                   disabled={isSubmitting}
                 />
                 {errors.nameEn && (
-                  <p className="text-xs text-red-600 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
                     {errors.nameEn.message}
                   </p>
                 )}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="nameFr" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Label htmlFor="nameFr" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Globe className="h-4 w-4" />
                   French Name
                 </Label>
                 <Input 
                   id="nameFr" 
                   {...register('nameFr')} 
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                   disabled={isSubmitting}
                 />
                 {errors.nameFr && (
-                  <p className="text-xs text-red-600 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
                     {errors.nameFr.message}
                   </p>
                 )}
@@ -323,25 +272,25 @@ export default function EditDishForm({
             {/* Descriptions */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="descriptionEn" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="descriptionEn" className="text-sm font-medium text-muted-foreground">
                   English Description
                 </Label>
                 <Textarea 
                   id="descriptionEn" 
                   {...register('descriptionEn')} 
-                  className="border-blue-200 focus:border-blue-400 min-h-[100px]"
+                  className="border-border focus:border-border-strong min-h-[100px]"
                   disabled={isSubmitting}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="descriptionFr" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="descriptionFr" className="text-sm font-medium text-muted-foreground">
                   French Description
                 </Label>
                 <Textarea 
                   id="descriptionFr" 
                   {...register('descriptionFr')} 
-                  className="border-blue-200 focus:border-blue-400 min-h-[100px]"
+                  className="border-border focus:border-border-strong min-h-[100px]"
                   disabled={isSubmitting}
                 />
               </div>
@@ -350,7 +299,7 @@ export default function EditDishForm({
             {/* Price and Details */}
             <div className="grid md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="price" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Label htmlFor="price" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
                   Price
                 </Label>
@@ -359,39 +308,49 @@ export default function EditDishForm({
                   type="number" 
                   step="0.01" 
                   {...register('price', { valueAsNumber: true })} 
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                   disabled={isSubmitting}
                 />
                 {errors.price && (
-                  <p className="text-xs text-red-600 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
                     {errors.price.message}
                   </p>
                 )}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="calories" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="calories" className="text-sm font-medium text-muted-foreground">
                   Calories (optional)
                 </Label>
                 <Input 
                   id="calories" 
                   type="number" 
                   {...register('calories', { valueAsNumber: true })} 
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <DietarySelect
+                  dietary={watch('dietary') || []}
+                  allergens={watch('allergens') || []}
+                  onDietaryChange={(v) => setValue('dietary', v, { shouldDirty: true })}
+                  onAllergensChange={(v) => setValue('allergens', v, { shouldDirty: true })}
                   disabled={isSubmitting}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="subcategory" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Label htmlFor="subcategory" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Utensils className="h-4 w-4" />
                   Category
                 </Label>
                 <select
                   id="subcategory"
                   {...register('subcategoryId')}
-                  className="w-full border border-blue-200 focus:border-blue-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                  className="w-full border border-border focus:border-border-strong rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2"
                   disabled={isSubmitting}
                 >
                   <option value="">No category</option>
@@ -409,16 +368,16 @@ export default function EditDishForm({
             
             {/* Special Options */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">Special Options</Label>
+              <Label className="text-sm font-medium text-muted-foreground">Special Options</Label>
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     {...register('isMostPurchased')}
-                    className="rounded border-blue-200 text-blue-600 focus:ring-blue-400"
+                    className="rounded border-border text-muted-foreground"
                     disabled={isSubmitting}
                   />
-                  <span className="text-sm text-gray-700">Mark as Popular Dish</span>
+                  <span className="text-sm text-muted-foreground">Mark as Popular Dish</span>
                 </label>
               </div>
             </div>
@@ -447,31 +406,32 @@ export default function EditDishForm({
           onPreview={handlePreview}
         />
 
-        {/* Form Actions */}
-        <div className="flex items-center justify-between gap-4 pt-4 border-t border-gray-200">
-          <div className="flex items-center gap-3">
-            {hasUnsavedChanges && (
-              <Button 
-                type="button"
-                variant="outline"
-                onClick={handleCancel}
-                disabled={isSubmitting}
-                className="border-gray-300 text-gray-600 hover:bg-gray-50"
-              >
-                <X className="h-4 w-4 mr-2" />
-                Cancel Changes
+        {/* Save bar: only when there is something to save */}
+        {(hasUnsavedChanges || saveStatus === 'saving' || saveStatus === 'error') && (
+          <div className="sticky bottom-[72px] z-40 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sheet md:bottom-4">
+            <p className="text-sm text-muted-foreground">
+              {saveStatus === 'error' ? 'Could not save. Check the fields and try again.' : saveStatus === 'saving' ? 'Saving…' : 'You have unsaved changes.'}
+            </p>
+            <div className="flex gap-2">
+              <Button type="button" variant="ghost" onClick={handleCancel} disabled={isSubmitting}>
+                Discard
               </Button>
-            )}
+              <Button type="button" onClick={submitForm} disabled={isSubmitting}>
+                {saveStatus === 'saving' ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    Saving…
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    Save changes
+                  </>
+                )}
+              </Button>
+            </div>
           </div>
-          
-          <div className="flex items-center gap-2 text-sm text-gray-500">
-            <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Ctrl+S</kbd>
-            <span>to save</span>
-            <span>•</span>
-            <kbd className="px-2 py-1 bg-gray-100 rounded text-xs">Esc</kbd>
-            <span>to cancel</span>
-          </div>
-        </div>
+        )}
       </form>
       
       {/* AR Model Preview */}

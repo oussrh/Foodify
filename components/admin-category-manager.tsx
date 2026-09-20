@@ -257,10 +257,10 @@ export default function AdminCategoryManager({
   return (
     <div className="space-y-8">
       {/* Add Category */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
+      <Card className="border-0">
+        <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-2">
-            <FolderPlus className="h-5 w-5 text-blue-600" />
+            <FolderPlus className="h-5 w-5 text-muted-foreground" />
             Add New Category
           </CardTitle>
         </CardHeader>
@@ -268,28 +268,28 @@ export default function AdminCategoryManager({
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Name (English)</label>
+                <label className="text-sm font-medium text-muted-foreground">Name (English)</label>
                 <Input
                   placeholder="e.g., Appetizers"
                   value={newCat.en}
                   onChange={(e) => setNewCat({ ...newCat, en: e.target.value })}
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-700">Name (French)</label>
+                <label className="text-sm font-medium text-muted-foreground">Name (French)</label>
                 <Input
                   placeholder="e.g., Entrées"
                   value={newCat.fr}
                   onChange={(e) => setNewCat({ ...newCat, fr: e.target.value })}
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                 />
               </div>
             </div>
             <Button 
               onClick={handleAddCategory}
               disabled={!newCat.en || !newCat.fr}
-              className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600"
+              className=""
             >
               <Plus className="w-4 h-4 mr-2" />
               Add Category
@@ -309,11 +309,11 @@ export default function AdminCategoryManager({
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <Badge className="bg-blue-100 text-blue-700 border-blue-200">
+          <Badge className="bg-muted text-muted-foreground border-border">
             <Shield className="h-3 w-3 mr-1" />
             Admin Mode
           </Badge>
-          <span className="text-sm text-gray-500">Full control (create, edit, delete, deactivate)</span>
+          <span className="text-sm text-muted-foreground">Full control (create, edit, delete, deactivate)</span>
         </div>
       </div>
 
@@ -322,12 +322,12 @@ export default function AdminCategoryManager({
         <Card className="border-dashed border-2">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <div className="text-center space-y-4">
-              <div className="mx-auto h-16 w-16 rounded-full bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
-                <FolderPlus className="h-8 w-8 text-blue-600" />
+              <div className="mx-auto h-16 w-16 rounded-full flex items-center justify-center">
+                <FolderPlus className="h-8 w-8 text-muted-foreground" />
               </div>
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">No categories yet</h3>
-                <p className="text-gray-500 mt-1">
+                <h3 className="text-lg font-semibold text-foreground">No categories yet</h3>
+                <p className="text-muted-foreground mt-1">
                   Start organizing the menu by creating your first category
                 </p>
               </div>
@@ -433,8 +433,8 @@ function SortableCategory({
 
   return (
     <div ref={setNodeRef} style={style}>
-      <Card className={`border-0 shadow-lg ${isDragging ? "ring-2 ring-blue-400" : ""} ${category.isActive === false ? "opacity-60" : ""}`}>
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
+      <Card className={`border-0 ${isDragging ? "ring-2" : ""} ${category.isActive === false ? "opacity-60" : ""}`}>
+        <CardHeader className="border-b">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 flex-1">
               <Button
@@ -450,7 +450,7 @@ function SortableCategory({
                 )}
               </Button>
               <GripVertical
-                className="text-gray-400 flex-shrink-0 cursor-grab"
+                className="text-muted-foreground flex-shrink-0 cursor-grab"
                 {...attributes}
                 {...listeners}
               />
@@ -460,16 +460,16 @@ function SortableCategory({
                   <Input
                     value={editNames.en}
                     onChange={(e) => setEditNames({ ...editNames, en: e.target.value })}
-                    className="border-blue-200 focus:border-blue-400"
+                    className="border-border focus:border-border-strong"
                     placeholder="English name"
                   />
                   <Input
                     value={editNames.fr}
                     onChange={(e) => setEditNames({ ...editNames, fr: e.target.value })}
-                    className="border-blue-200 focus:border-blue-400"
+                    className="border-border focus:border-border-strong"
                     placeholder="French name"
                   />
-                  <Button size="sm" onClick={handleSaveEdit} className="bg-green-600 hover:bg-green-700">
+                  <Button size="sm" onClick={handleSaveEdit} className="bg-primary hover:bg-primary">
                     Save
                   </Button>
                   <Button size="sm" variant="outline" onClick={handleCancelEdit}>
@@ -479,12 +479,12 @@ function SortableCategory({
               ) : (
                 <div className="flex items-center gap-3 flex-1">
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{category.nameEn}</h3>
+                    <h3 className="font-semibold text-foreground">{category.nameEn}</h3>
                     {category.nameFr && (
-                      <p className="text-sm text-gray-500 italic">{category.nameFr}</p>
+                      <p className="text-sm text-muted-foreground italic">{category.nameFr}</p>
                     )}
                   </div>
-                  <Badge variant="outline" className="text-purple-600 border-purple-200">
+                  <Badge variant="outline" className="text-muted-foreground border-border">
                     {category.subcategories.length} sub{category.subcategories.length !== 1 ? 's' : ''}
                   </Badge>
                 </div>
@@ -494,26 +494,26 @@ function SortableCategory({
             {!editMode && (
               <div className="flex items-center gap-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-muted-foreground">
                     {category.isActive !== false ? 'Active' : 'Inactive'}
                   </span>
                   <Switch
                     checked={category.isActive !== false}
                     onCheckedChange={() => onToggleStatus(category.id)}
-                    className="data-[state=checked]:bg-green-600"
+                    className="data-[state=checked]:bg-primary"
                   />
                 </div>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setEditMode(true)}
-                  className="text-gray-500 hover:text-gray-700"
+                  className="text-muted-foreground hover:text-muted-foreground"
                 >
                   <Edit2 className="h-4 w-4" />
                 </Button>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50">
+                    <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-muted">
                       <Trash2 className="h-4 w-4" />
                     </Button>
                   </AlertDialogTrigger>
@@ -529,7 +529,7 @@ function SortableCategory({
                       <AlertDialogCancel>Cancel</AlertDialogCancel>
                       <AlertDialogAction 
                         onClick={() => onDelete(category.id)}
-                        className="bg-red-600 hover:bg-red-700"
+                        className="bg-destructive hover:bg-destructive/90"
                       >
                         Delete Permanently
                       </AlertDialogAction>
@@ -547,7 +547,7 @@ function SortableCategory({
             {category.subcategories.map((sub: Subcategory, i: number) => (
               <div
                 key={sub.id}
-                className={`flex items-center gap-3 p-3 border border-gray-200 rounded-lg ${sub.isActive === false ? "opacity-60" : ""}`}
+                className={`flex items-center gap-3 p-3 border border-border rounded-lg ${sub.isActive === false ? "opacity-60" : ""}`}
               >
                 <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Input
@@ -558,7 +558,7 @@ function SortableCategory({
                         fr: sub.nameFr,
                       })
                     }
-                    className="border-purple-200 focus:border-purple-400"
+                    className="border-border focus:border-border-strong"
                   />
                   <Input
                     defaultValue={sub.nameFr}
@@ -568,7 +568,7 @@ function SortableCategory({
                         fr: e.target.value,
                       })
                     }
-                    className="border-purple-200 focus:border-purple-400"
+                    className="border-border focus:border-border-strong"
                   />
                 </div>
                 
@@ -596,14 +596,14 @@ function SortableCategory({
                   
                   <div className="flex items-center gap-2">
                     {sub.isActive !== false ? (
-                      <Eye className="h-4 w-4 text-green-600" />
+                      <Eye className="h-4 w-4 text-success" />
                     ) : (
-                      <EyeOff className="h-4 w-4 text-gray-400" />
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
                     )}
                     <Switch
                       checked={sub.isActive !== false}
                       onCheckedChange={() => onToggleSubStatus(category.id, sub.id)}
-                      className="data-[state=checked]:bg-green-600"
+                      className="data-[state=checked]:bg-primary"
                     />
                   </div>
                   
@@ -612,7 +612,7 @@ function SortableCategory({
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="w-8 h-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                        className="w-8 h-8 text-destructive hover:text-destructive hover:bg-muted"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
@@ -629,7 +629,7 @@ function SortableCategory({
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction 
                           onClick={() => onDeleteSub(category.id, sub.id)}
-                          className="bg-red-600 hover:bg-red-700"
+                          className="bg-destructive hover:bg-destructive/90"
                         >
                           Delete Permanently
                         </AlertDialogAction>
@@ -641,11 +641,11 @@ function SortableCategory({
             ))}
 
             {/* Add subcategory */}
-            <div className="p-4 bg-purple-50 border-2 border-dashed border-purple-200 rounded-lg">
+            <div className="p-4 bg-muted border-2 border-dashed border-border rounded-lg">
               <div className="space-y-3">
                 <div className="flex items-center gap-2 mb-2">
-                  <Plus className="h-4 w-4 text-purple-600" />
-                  <span className="text-sm font-medium text-purple-700">Add Subcategory</span>
+                  <Plus className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium text-muted-foreground">Add Subcategory</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <Input
@@ -660,7 +660,7 @@ function SortableCategory({
                         },
                       }))
                     }
-                    className="border-purple-200 focus:border-purple-400"
+                    className="border-border focus:border-border-strong"
                   />
                   <Input
                     placeholder="Subcategory FR"
@@ -674,7 +674,7 @@ function SortableCategory({
                         },
                       }))
                     }
-                    className="border-purple-200 focus:border-purple-400"
+                    className="border-border focus:border-border-strong"
                   />
                 </div>
                 <Button
@@ -686,7 +686,7 @@ function SortableCategory({
                     })
                   }
                   disabled={!subDrafts[category.id]?.en || !subDrafts[category.id]?.fr}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-primary hover:bg-primary"
                 >
                   <Plus className="w-4 h-4 mr-1" />
                   Add Subcategory

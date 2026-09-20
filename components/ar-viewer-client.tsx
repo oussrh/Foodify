@@ -43,8 +43,9 @@ export default function ARViewerClient() {
   const searchParams = useSearchParams()
   const modelUrl = searchParams.get('model')
   const dishName = searchParams.get('name') || 'Dish'
+  const initialMode: ViewMode = searchParams.get('mode') === 'ar' ? 'ar' : '3d'
   
-  const [viewMode, setViewMode] = useState<ViewMode>('3d')
+  const [viewMode, setViewMode] = useState<ViewMode>(initialMode)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isARSupported, setIsARSupported] = useState(false)
@@ -190,9 +191,10 @@ export default function ARViewerClient() {
     }
   }, [resetControlsTimer])
 
-  // Create or update the model-viewer element
+  // Create or update the model-viewer element.
+  // Depends on isLoading because the container div is only mounted once the loading screen is gone.
   useEffect(() => {
-    if (modelViewerLoaded && containerRef.current && modelUrl) {
+    if (modelViewerLoaded && !isLoading && containerRef.current && modelUrl) {
       const modelViewer = document.createElement('model-viewer')
       
       // Set base attributes
@@ -239,11 +241,12 @@ export default function ARViewerClient() {
         modelViewer.setAttribute('ar-scale', 'auto')
         modelViewer.setAttribute('ar-placement', 'floor')
 
-        // Performance optimizations for faster AR loading
+        // Show the model as soon as it loads so users get a preview behind the AR button
         modelViewer.setAttribute('loading', 'eager')
-        modelViewer.setAttribute('reveal', 'interaction')
-        modelViewer.setAttribute('interaction-prompt', 'none')
-        modelViewer.setAttribute('preload', '')
+        modelViewer.setAttribute('reveal', 'auto')
+
+        // Use estimated real-world lighting from the camera feed in WebXR sessions
+        modelViewer.setAttribute('xr-environment', '')
 
         // Enhanced AR camera settings for better mobile experience
         modelViewer.setAttribute('camera-controls', 'enable-pan')
@@ -332,7 +335,7 @@ export default function ARViewerClient() {
       if (viewMode === 'ar') {
         const arButton = document.createElement('button')
         arButton.setAttribute('slot', 'ar-button')
-        arButton.className = 'absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-6 py-3 md:px-8 md:py-4 rounded-2xl shadow-2xl font-semibold flex items-center gap-2 md:gap-3 transition-all duration-300 transform hover:scale-105 border border-white/20 backdrop-blur-sm text-sm md:text-base active:scale-95 touch-manipulation z-10'
+        arButton.className = 'absolute bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-700 hover:via-pink-700 hover:to-indigo-700 text-white px-7 py-4 md:px-8 rounded-full shadow-2xl font-semibold flex items-center gap-2 md:gap-3 whitespace-nowrap transition-all duration-300 transform hover:scale-105 ring-2 ring-white/40 backdrop-blur-sm text-base active:scale-95 touch-manipulation z-10'
         
         // Enhanced mobile feedback and camera preparation
         arButton.addEventListener('touchstart', async () => {
@@ -423,7 +426,7 @@ export default function ARViewerClient() {
       
       modelViewerRef.current = modelViewer as ModelViewer
     }
-  }, [modelViewerLoaded, modelUrl, dishName, arMode, viewMode])
+  }, [modelViewerLoaded, isLoading, modelUrl, dishName, arMode, viewMode])
 
   // Switch view mode
   const switchViewMode = (mode: ViewMode) => {
@@ -603,12 +606,12 @@ export default function ARViewerClient() {
             variant="ghost" 
             className="backdrop-blur-xl bg-card/50 border border-border/50 hover:bg-accent"
           >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            <ArrowLeft className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
           
-          <div className="text-center">
-            <h1 className="text-foreground font-bold text-xl">{dishName}</h1>
+          <div className="text-center min-w-0 px-2">
+            <h1 className="text-foreground font-bold text-lg md:text-xl truncate">{dishName}</h1>
             <div className="flex items-center gap-2 justify-center mt-2">
               <Badge className={`text-xs ${
                 viewMode === 'ar' 
@@ -674,7 +677,7 @@ export default function ARViewerClient() {
       </div>
 
       {/* View Mode Toggle */}
-      <div className={`absolute top-20 left-1/2 transform -translate-x-1/2 z-20 transition-all duration-300 ${
+      <div className={`absolute top-20 left-1/2 transform -translate-x-1/2 w-max z-20 transition-all duration-300 ${
         showControls ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
       }`}>
         <div className="flex items-center gap-2 bg-card/90 backdrop-blur-xl rounded-2xl p-2 border border-border shadow-lg">
@@ -735,8 +738,28 @@ export default function ARViewerClient() {
         )}
       </div>
 
-      {/* Controls Overlay */}
-      <div className={`absolute bottom-8 right-8 space-y-3 z-20 transition-all duration-300 ${
+      {/* Compact Controls (mobile / tablet) - stays clear of the centered AR button */}
+      <div className={`lg:hidden absolute bottom-6 right-4 z-20 transition-all duration-300 ${
+        showControls ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
+      }`}>
+        <div className="flex flex-col gap-1 bg-card/90 backdrop-blur-xl rounded-2xl p-1.5 border border-border shadow-2xl">
+          <Button variant="ghost" size="icon" onClick={resetView} aria-label="Reset view">
+            <RotateCcw className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={zoomIn} aria-label="Zoom in">
+            <ZoomIn className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={zoomOut} aria-label="Zoom out">
+            <ZoomOut className="h-5 w-5" />
+          </Button>
+          <Button variant="ghost" size="icon" onClick={() => setShowControls(false)} aria-label="Hide controls">
+            <Eye className="h-5 w-5" />
+          </Button>
+        </div>
+      </div>
+
+      {/* Controls Overlay (desktop) */}
+      <div className={`hidden lg:block absolute bottom-8 right-8 space-y-3 z-20 transition-all duration-300 ${
         showControls ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'
       }`}>
         <div className="bg-card/90 backdrop-blur-xl rounded-2xl p-6 border border-border shadow-2xl min-w-[240px]">
@@ -797,51 +820,51 @@ export default function ARViewerClient() {
             <div className="text-muted-foreground text-xs space-y-2">
               {viewMode === 'ar' ? (
                 <>
-                  <p className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <Camera className="h-3 w-3" />
                     </div>
                     Tap &ldquo;Open AR Camera&rdquo; to start
-                  </p>
-                  <p className="flex items-center gap-3">
+                  </div>
+                  <div className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <ScanLine className="h-3 w-3" />
                     </div>
                     Point at flat surface (table/floor)
-                  </p>
-                  <p className="flex items-center gap-3">
+                  </div>
+                  <div className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <View className="h-3 w-3" />
                     </div>
                     Tap to place dish in real world
-                  </p>
+                  </div>
                 </>
               ) : (
                 <>
-                  <p className="flex items-center gap-3">
+                  <div className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <RotateCcw className="h-3 w-3" />
                     </div>
                     Drag to rotate model horizontally
-                  </p>
-                  <p className="flex items-center gap-3">
+                  </div>
+                  <div className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <Box className="h-3 w-3" />
                     </div>
                     Pinch or scroll to zoom in/out
-                  </p>
-                  <p className="flex items-center gap-3">
+                  </div>
+                  <div className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <View className="h-3 w-3" />
                     </div>
                     View from top, sides, and angles
-                  </p>
-                  <p className="flex items-center gap-3">
+                  </div>
+                  <div className="flex items-center gap-3">
                     <div className="w-5 h-5 bg-muted rounded-md flex items-center justify-center">
                       <Camera className="h-3 w-3" />
                     </div>
                     Switch to AR mode for camera
-                  </p>
+                  </div>
                 </>
               )}
             </div>
@@ -849,11 +872,11 @@ export default function ARViewerClient() {
         </div>
       </div>
 
-      {/* Mode Info */}
-      <div className={`absolute bottom-8 left-6 z-20 transition-all duration-300 ${
+      {/* Mode Info (desktop) */}
+      <div className={`hidden lg:block absolute bottom-8 left-6 z-20 transition-all duration-300 ${
         showControls ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
       }`}>
-        <div className={`rounded-2xl p-4 backdrop-blur-xl border shadow-2xl max-w-sm ${
+        <div className={`rounded-2xl p-4 backdrop-blur-xl border shadow-2xl max-w-xs ${
           viewMode === 'ar'
             ? (isARSupported || arMode 
                 ? 'bg-purple-500/20 border-purple-500/30' 
@@ -904,7 +927,7 @@ export default function ARViewerClient() {
 
       {/* Show controls hint */}
       {!showControls && (
-        <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 z-10">
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
           <div className="bg-card/80 backdrop-blur-xl rounded-full px-4 py-2 border border-border">
             <p className="text-muted-foreground text-xs flex items-center gap-2">
               <Eye className="h-3 w-3" />

@@ -3,333 +3,146 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+  Design tokens ("Quiet Plate").
+  One warm neutral ground, one accent (Basil), hairlines instead of shadows.
+  Values are HSL components so Tailwind alpha modifiers (bg-primary/10) keep working.
+*/
 @layer base {
   :root {
-    /* Light mode colors */
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --background: 60 17% 97.6%;        /* Paper   #FAFAF8 */
+    --foreground: 45 8% 9.8%;          /* Ink     #1B1A17 */
+    --card: 0 0% 100%;                 /* Surface #FFFFFF */
+    --card-foreground: 45 8% 9.8%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 142.1 76.2% 36.3%;
-    --primary-foreground: 355.7 100% 97.3%;
-    --secondary: 210 40% 98%;
-    --secondary-foreground: 222.2 84% 4.9%;
-    --muted: 210 40% 98%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 98%;
-    --accent-foreground: 222.2 84% 4.9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142.1 76.2% 36.3%;
-    --radius: 0.75rem;
-    
-    /* Enhanced gradient variables */
-    --gradient-primary: linear-gradient(135deg, hsl(142.1 76.2% 36.3%) 0%, hsl(160 84% 39%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(217.2 32.6% 17.5%) 0%, hsl(222.2 84% 4.9%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(210 40% 98%) 0%, hsl(220 14.3% 95.9%) 100%);
-    
-    /* Enhanced shadow variables */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
-    
-    /* Animation variables */
-    --transition-fast: 150ms;
-    --transition-normal: 250ms;
-    --transition-slow: 350ms;
+    --popover-foreground: 45 8% 9.8%;
+    --primary: 153 55% 27%;            /* Basil   #1F6B49 */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 51 20% 93%;           /* #F1F0EA */
+    --secondary-foreground: 45 8% 9.8%;
+    --muted: 51 20% 93%;
+    --muted-foreground: 53 4% 40%;     /* #6B6A62 */
+    --accent: 51 20% 93%;
+    --accent-foreground: 45 8% 9.8%;
+    --destructive: 8 59% 44.5%;        /* #B4412F */
+    --destructive-foreground: 0 0% 100%;
+    --success: 153 55% 27%;
+    --warning: 42 100% 30%;            /* #9A6B00 */
+    --border: 47 15% 88.4%;            /* Line    #E6E4DD */
+    --border-strong: 49 11% 80.6%;     /* #D3D1C8 */
+    --input: 49 11% 80.6%;
+    --ring: 153 55% 27%;
+
+    /* Radius encodes hierarchy: controls 6, cards 10, sheets 16. */
+    --radius: 10px;
+    --radius-control: 6px;
+    --radius-sheet: 16px;
+
+    /* Elevation is reserved for layers that float. */
+    --shadow-sheet: 0 12px 32px rgb(27 26 23 / 0.14), 0 1px 2px rgb(27 26 23 / 0.06);
+    --shadow-popover: 0 8px 24px rgb(27 26 23 / 0.12), 0 1px 2px rgb(27 26 23 / 0.06);
   }
 
   .dark {
-    /* Dark mode colors */
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 142.1 70.6% 45.3%;
-    --primary-foreground: 144.9 80.4% 10%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142.4 71.8% 29.2%;
-    
-    /* Enhanced gradient variables for dark mode */
-    --gradient-primary: linear-gradient(135deg, hsl(142.1 70.6% 45.3%) 0%, hsl(160 70% 50%) 100%);
-    --gradient-secondary: linear-gradient(135deg, hsl(217.2 32.6% 17.5%) 0%, hsl(222.2 84% 4.9%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(217.2 32.6% 17.5%) 0%, hsl(220 16% 22%) 100%);
-    
-    /* Enhanced shadow variables for dark mode */
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.4), 0 1px 2px -1px rgb(0 0 0 / 0.4);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
-    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.4), 0 8px 10px -6px rgb(0 0 0 / 0.4);
-    --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+    --background: 40 8% 7.3%;          /* Coal    #141311 */
+    --foreground: 47 22% 92%;          /* Milk    #EFEDE6 */
+    --card: 45 7% 10.6%;               /* #1D1C19 */
+    --card-foreground: 47 22% 92%;
+    --popover: 45 7% 10.6%;
+    --popover-foreground: 47 22% 92%;
+    --primary: 151.5 39% 50.4%;        /* Basil   #4FB283 */
+    --primary-foreground: 40 8% 7.3%;
+    --secondary: 40 4.5% 13%;          /* #232220 */
+    --secondary-foreground: 47 22% 92%;
+    --muted: 40 4.5% 13%;
+    --muted-foreground: 50 6% 58%;     /* #9A988E */
+    --accent: 40 4.5% 13%;
+    --accent-foreground: 47 22% 92%;
+    --destructive: 9.5 68% 62%;        /* #E0705B */
+    --destructive-foreground: 40 8% 7.3%;
+    --success: 151.5 39% 50.4%;
+    --warning: 41 71% 58%;             /* #E0B04A */
+    --border: 48 6% 16%;               /* #2B2A26 */
+    --border-strong: 50 5.5% 21.6%;    /* #3A3934 */
+    --input: 50 5.5% 21.6%;
+    --ring: 151.5 39% 50.4%;
+
+    --shadow-sheet: 0 12px 32px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-popover: 0 8px 24px rgb(0 0 0 / 0.45), 0 1px 2px rgb(0 0 0 / 0.4);
+  }
+
+  /*
+    Restaurant brand colour. The page sets the four *-light / *-dark values inline
+    (see lib/brand-color.ts); this maps them to the single --brand-* set the
+    components read, per theme.
+  */
+  .brand-scope {
+    --brand-ink: var(--brand-ink-light, hsl(var(--primary)));
+    --brand-tint: var(--brand-tint-light, hsl(var(--primary) / 0.1));
+    --brand-on: var(--brand-on-light, #ffffff);
+  }
+  .dark .brand-scope {
+    --brand-ink: var(--brand-ink-dark, hsl(var(--primary)));
+    --brand-tint: var(--brand-tint-dark, hsl(var(--primary) / 0.14));
+    --brand-on: var(--brand-on-dark, #141311);
   }
 
   * {
     @apply border-border;
   }
 
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    transition: background-color var(--transition-normal) ease, color var(--transition-normal) ease;
   }
 
-  /* Enhanced scrollbar styles */
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.18);
+  }
+
   ::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
-
   ::-webkit-scrollbar-track {
-    @apply bg-muted;
+    background: transparent;
   }
-
   ::-webkit-scrollbar-thumb {
-    @apply bg-muted-foreground/30 rounded-full;
-    transition: background-color var(--transition-fast) ease;
+    @apply bg-muted-foreground/25 rounded-full;
   }
-
   ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/50;
-  }
-
-  .dark ::-webkit-scrollbar-thumb {
     @apply bg-muted-foreground/40;
   }
 
-  .dark ::-webkit-scrollbar-thumb:hover {
-    @apply bg-muted-foreground/60;
-  }
-}
-
-@layer components {
-  /* Enhanced button variants */
-  .btn-primary {
-    @apply bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg;
-    transition: all var(--transition-normal) ease;
-  }
-
-  .btn-secondary {
-    @apply bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm hover:shadow-md;
-    transition: all var(--transition-normal) ease;
-  }
-
-  .btn-ghost {
-    @apply text-foreground hover:bg-accent hover:text-accent-foreground;
-    transition: all var(--transition-fast) ease;
-  }
-
-  .btn-outline {
-    @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground;
-    transition: all var(--transition-fast) ease;
-  }
-
-  /* Enhanced card styles */
-  .card-enhanced {
-    @apply bg-card text-card-foreground border shadow-md rounded-lg;
-    transition: all var(--transition-normal) ease;
-  }
-
-  .card-enhanced:hover {
-    @apply shadow-lg;
-    transform: translateY(-1px);
-  }
-
-  .card-glass {
-    @apply bg-background/80 backdrop-blur-sm border border-border/50;
-    transition: all var(--transition-normal) ease;
-  }
-
-  /* Enhanced input styles */
-  .input-enhanced {
-    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background;
-    @apply file:border-0 file:bg-transparent file:text-sm file:font-medium;
-    @apply placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
-    @apply disabled:cursor-not-allowed disabled:opacity-50;
-    transition: all var(--transition-fast) ease;
-  }
-
-  /* Enhanced navigation styles */
-  .nav-link {
-    @apply flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-muted-foreground;
-    @apply hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground;
-    @apply transition-all duration-200 ease-in-out;
-  }
-
-  .nav-link.active {
-    @apply bg-accent text-accent-foreground font-semibold;
-  }
-
-  .nav-link:hover {
-    transform: translateX(2px);
-  }
-
-  /* Enhanced gradient backgrounds */
-  .bg-gradient-primary {
-    background: var(--gradient-primary);
-  }
-
-  .bg-gradient-secondary {
-    background: var(--gradient-secondary);
-  }
-
-  .bg-gradient-accent {
-    background: var(--gradient-accent);
-  }
-
-  /* Loading spinner */
-  .spinner {
-    @apply animate-spin rounded-full border-2 border-current border-t-transparent;
-  }
-
-  /* Enhanced focus styles */
-  .focus-enhanced:focus {
-    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
-  }
-
-  /* Text selection */
-  ::selection {
-    @apply bg-primary/20 text-primary-foreground;
-  }
-
-  .dark ::selection {
-    @apply bg-primary/30;
-  }
-
-  /* Enhanced table styles */
-  .table-enhanced {
-    @apply w-full border-collapse;
-  }
-
-  .table-enhanced th {
-    @apply border-b border-border bg-muted/50 px-4 py-3 text-left text-sm font-semibold text-muted-foreground;
-  }
-
-  .table-enhanced td {
-    @apply border-b border-border px-4 py-3 text-sm;
-  }
-
-  .table-enhanced tr:hover {
-    @apply bg-muted/50;
-  }
-
-  /* Enhanced badge styles */
-  .badge-primary {
-    @apply inline-flex items-center rounded-full bg-primary px-2.5 py-0.5 text-xs font-medium text-primary-foreground;
-  }
-
-  .badge-secondary {
-    @apply inline-flex items-center rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground;
-  }
-
-  .badge-outline {
-    @apply inline-flex items-center rounded-full border border-current px-2.5 py-0.5 text-xs font-medium;
-  }
-
-  /* Enhanced modal/dialog styles */
-  .modal-overlay {
-    @apply fixed inset-0 z-50 bg-background/80 backdrop-blur-sm;
-    animation: fadeIn var(--transition-normal) ease;
-  }
-
-  .modal-content {
-    @apply fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2;
-    @apply bg-background p-6 shadow-2xl rounded-lg border;
-    animation: slideIn var(--transition-normal) ease;
-  }
-
-  /* Animations */
-  @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-
-  @keyframes slideIn {
-    from { 
-      opacity: 0; 
-      transform: translate(-50%, -50%) scale(0.95);
-    }
-    to { 
-      opacity: 1; 
-      transform: translate(-50%, -50%) scale(1);
-    }
-  }
-
-  @keyframes slideUp {
-    from { 
-      opacity: 0; 
-      transform: translateY(10px);
-    }
-    to { 
-      opacity: 1; 
-      transform: translateY(0);
-    }
-  }
-
-  .animate-slide-up {
-    animation: slideUp var(--transition-normal) ease;
-  }
-
-  /* Enhanced accessibility */
-  .sr-only {
-    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
-    clip: rect(0, 0, 0, 0);
-  }
-
-  /* High contrast mode support */
-  @media (prefers-contrast: high) {
-    .card-enhanced {
-      @apply border-2;
-    }
-    
-    .btn-outline {
-      @apply border-2;
-    }
-    
-    .input-enhanced {
-      @apply border-2;
-    }
-  }
-
-  /* Reduced motion support */
   @media (prefers-reduced-motion: reduce) {
-    * {
+    *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
+}
 
-  /* Print styles */
-  @media print {
-    .no-print {
-      display: none !important;
-    }
-    
-    body {
-      @apply text-black bg-white;
-    }
-    
-    .card-enhanced {
-      @apply border border-gray-300 shadow-none;
-    }
+@layer utilities {
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
   }
 }

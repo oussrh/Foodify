@@ -215,10 +215,10 @@ export default function EditRestaurantForm({
     <div className="relative">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Basic Information Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Building2 className="h-5 w-5 text-blue-600" />
+            <Building2 className="h-5 w-5 text-muted-foreground" />
             Basic Information
           </CardTitle>
         </CardHeader>
@@ -232,10 +232,10 @@ export default function EditRestaurantForm({
               <Input
                 id="name"
                 {...register('name')}
-                className="border-gray-300"
+                className="border-border"
               />
               {errors.name && (
-                <span className="text-sm text-red-500">{errors.name.message}</span>
+                <span className="text-sm text-destructive">{errors.name.message}</span>
               )}
             </div>
 
@@ -247,10 +247,10 @@ export default function EditRestaurantForm({
               <Input
                 id="slug"
                 {...register('slug')}
-                className="font-mono border-gray-300"
+                className="font-mono border-border"
               />
               {errors.slug && (
-                <span className="text-sm text-red-500">{errors.slug.message}</span>
+                <span className="text-sm text-destructive">{errors.slug.message}</span>
               )}
             </div>
           </div>
@@ -260,7 +260,7 @@ export default function EditRestaurantForm({
             <Input
               id="tagline"
               {...register('tagline')}
-              className="border-gray-300"
+              className="border-border"
             />
           </div>
 
@@ -269,7 +269,7 @@ export default function EditRestaurantForm({
             <Textarea
               id="description"
               {...register('description')}
-              className="border-gray-300 min-h-[100px]"
+              className="border-border min-h-[100px]"
             />
           </div>
 
@@ -282,7 +282,7 @@ export default function EditRestaurantForm({
               <Input
                 id="cuisineType"
                 {...register('cuisineType')}
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
 
@@ -292,7 +292,7 @@ export default function EditRestaurantForm({
                 Price Range
               </Label>
               <Select onValueChange={(value) => setValue('priceRange', value as "$" | "$$" | "$$$" | "$$$$", { shouldDirty: true })} defaultValue={defaultValues.priceRange}>
-                <SelectTrigger className="border-gray-300">
+                <SelectTrigger className="border-border">
                   <SelectValue placeholder="Select price range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -323,7 +323,7 @@ export default function EditRestaurantForm({
                 const newSymbol = symbols[value] || value;
                 setValue("currencySymbol", newSymbol, { shouldDirty: true });
               }} defaultValue={defaultValues.currency || "USD"}>
-                <SelectTrigger className="border-gray-300">
+                <SelectTrigger className="border-border">
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
@@ -350,9 +350,9 @@ export default function EditRestaurantForm({
                 value={currentCurrencySymbol || ''}
                 readOnly
                 placeholder="$"
-                className="border-gray-300 font-mono bg-gray-50 cursor-not-allowed"
+                className="border-border font-mono bg-muted cursor-not-allowed"
               />
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 Automatically set based on selected currency
               </span>
             </div>
@@ -364,7 +364,7 @@ export default function EditRestaurantForm({
           <div className="space-y-2">
             <Label htmlFor="defaultLocale">Default Language</Label>
             <Select onValueChange={(value) => setValue('defaultLocale', value as 'en' | 'fr', { shouldDirty: true })} defaultValue={defaultValues.defaultLocale}>
-              <SelectTrigger className="border-gray-300">
+              <SelectTrigger className="border-border">
                 <SelectValue placeholder="Select default language" />
               </SelectTrigger>
               <SelectContent>
@@ -377,10 +377,10 @@ export default function EditRestaurantForm({
       </Card>
 
       {/* Contact Information Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Phone className="h-5 w-5 text-green-600" />
+            <Phone className="h-5 w-5 text-success" />
             Contact Information
           </CardTitle>
         </CardHeader>
@@ -395,10 +395,10 @@ export default function EditRestaurantForm({
                 id="email"
                 type="email"
                 {...register('email')}
-                className="border-gray-300"
+                className="border-border"
               />
               {errors.email && (
-                <span className="text-sm text-red-500">{errors.email.message}</span>
+                <span className="text-sm text-destructive">{errors.email.message}</span>
               )}
             </div>
 
@@ -411,7 +411,7 @@ export default function EditRestaurantForm({
                 id="phone"
                 type="tel"
                 {...register('phone')}
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
           </div>
@@ -425,20 +425,20 @@ export default function EditRestaurantForm({
               id="website"
               type="url"
               {...register('website')}
-              className="border-gray-300"
+              className="border-border"
             />
             {errors.website && (
-              <span className="text-sm text-red-500">{errors.website.message}</span>
+              <span className="text-sm text-destructive">{errors.website.message}</span>
             )}
           </div>
         </CardContent>
       </Card>
 
       {/* Address Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <MapPin className="h-5 w-5 text-orange-600" />
+            <MapPin className="h-5 w-5 text-warning" />
             Address Information
           </CardTitle>
         </CardHeader>
@@ -448,7 +448,7 @@ export default function EditRestaurantForm({
             <Input
               id="streetAddress"
               {...register('streetAddress')}
-              className="border-gray-300"
+              className="border-border"
             />
           </div>
 
@@ -458,7 +458,7 @@ export default function EditRestaurantForm({
               <Input
                 id="city"
                 {...register('city')}
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
 
@@ -467,7 +467,7 @@ export default function EditRestaurantForm({
               <Input
                 id="state"
                 {...register('state')}
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
 
@@ -476,7 +476,7 @@ export default function EditRestaurantForm({
               <Input
                 id="postalCode"
                 {...register('postalCode')}
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
           </div>
@@ -486,17 +486,17 @@ export default function EditRestaurantForm({
             <Input
               id="country"
               {...register('country')}
-              className="border-gray-300"
+              className="border-border"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Operating Hours Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Clock className="h-5 w-5 text-purple-600" />
+            <Clock className="h-5 w-5 text-muted-foreground" />
             Operating Hours
           </CardTitle>
         </CardHeader>
@@ -506,9 +506,9 @@ export default function EditRestaurantForm({
             <Textarea
               id="openingHours"
               {...register('openingHours')}
-              className="border-gray-300 min-h-[80px]"
+              className="border-border min-h-[80px]"
             />
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               Enter your operating hours. Use line breaks for different days.
             </span>
           </div>
@@ -516,10 +516,10 @@ export default function EditRestaurantForm({
       </Card>
 
       {/* Branding & Design Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Palette className="h-5 w-5 text-indigo-600" />
+            <Palette className="h-5 w-5 text-muted-foreground" />
             Branding & Design
           </CardTitle>
         </CardHeader>
@@ -554,13 +554,13 @@ export default function EditRestaurantForm({
                   type="color"
                   value={watch('colorTheme') || '#3B82F6'}
                   onChange={(e) => setValue('colorTheme', e.target.value, { shouldDirty: true })}
-                  className="h-12 w-20 border-gray-300"
+                  className="h-12 w-20 border-border"
                 />
                 <Input
                   type="text"
                   {...register('colorTheme')}
                   placeholder="#3B82F6"
-                  className="flex-1 border-gray-300 font-mono"
+                  className="flex-1 border-border font-mono"
                 />
               </div>
             </div>
@@ -573,13 +573,13 @@ export default function EditRestaurantForm({
                   type="color"
                   value={watch('secondaryColor') || '#6B7280'}
                   onChange={(e) => setValue('secondaryColor', e.target.value, { shouldDirty: true })}
-                  className="h-12 w-20 border-gray-300"
+                  className="h-12 w-20 border-border"
                 />
                 <Input
                   type="text"
                   {...register('secondaryColor')}
                   placeholder="#6B7280"
-                  className="flex-1 border-gray-300 font-mono"
+                  className="flex-1 border-border font-mono"
                 />
               </div>
             </div>
@@ -625,20 +625,20 @@ export default function EditRestaurantForm({
               Cover Image Background Style
             </Label>
             <Select onValueChange={(value) => setValue("coverImageStyle", value as "cover" | "repeat", { shouldDirty: true })} defaultValue={defaultValues.coverImageStyle || "cover"}>
-              <SelectTrigger className="border-gray-300">
+              <SelectTrigger className="border-border">
                 <SelectValue placeholder="Select background style" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="cover">
                   <div className="space-y-1">
                     <div className="font-medium">Cover (Recommended)</div>
-                    <div className="text-xs text-gray-500">Image fills the entire background area</div>
+                    <div className="text-xs text-muted-foreground">Image fills the entire background area</div>
                   </div>
                 </SelectItem>
                 <SelectItem value="repeat">
                   <div className="space-y-1">
                     <div className="font-medium">Repeat Pattern</div>
-                    <div className="text-xs text-gray-500">Image repeats as a pattern/texture</div>
+                    <div className="text-xs text-muted-foreground">Image repeats as a pattern/texture</div>
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -650,10 +650,10 @@ export default function EditRestaurantForm({
       </Card>
 
       {/* Social Media Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Share2 className="h-5 w-5 text-pink-600" />
+            <Share2 className="h-5 w-5 text-muted-foreground" />
             Social Media
           </CardTitle>
         </CardHeader>
@@ -663,87 +663,42 @@ export default function EditRestaurantForm({
             <Textarea
               id="socialMedia"
               {...register('socialMedia')}
-              className="border-gray-300 min-h-[100px]"
+              placeholder="Facebook: https://facebook.com/yourrestaurant&#10;Instagram: https://instagram.com/yourrestaurant&#10;Twitter: https://twitter.com/yourrestaurant"
+              className="border-border min-h-[100px]"
             />
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               Enter your social media links, one per line with platform name.
             </span>
           </div>
         </CardContent>
       </Card>
 
-      {/* Floating Action Buttons - Always visible */}
-      <div className="fixed bottom-6 right-6 z-50 flex gap-3 transition-all duration-300">
-        <Button
-          type="button"
-          variant="outline"
-          size="lg"
-          onClick={handleCancel}
-          disabled={!hasUnsavedChanges}
-          className={`shadow-2xl border-2 bg-white transition-all duration-200 min-w-[120px] ${
-            hasUnsavedChanges 
-              ? 'border-red-300 hover:border-red-400 hover:bg-red-50 text-red-700' 
-              : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'
-          }`}
-        >
-          <X className="h-4 w-4 mr-2" />
-          Cancel
-        </Button>
-        <Button
-          type="button"
-          size="lg"
-          disabled={isSubmitting || !hasUnsavedChanges}
-          onClick={submitForm}
-          className={`shadow-2xl transition-all duration-200 border-0 min-w-[140px] ${
-            hasUnsavedChanges
-              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white scale-105 hover:scale-110'
-              : 'bg-gray-300 text-gray-500 cursor-not-allowed scale-100'
-          }`}
-        >
-          {saveStatus === 'saving' ? (
-            <>
-              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-              Saving...
-            </>
-          ) : saveStatus === 'saved' ? (
-            <>
-              <CheckCircle className="h-4 w-4 mr-2" />
-              Saved!
-            </>
-          ) : saveStatus === 'error' ? (
-            <>
-              <AlertCircle className="h-4 w-4 mr-2" />
-              Try Again
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4 mr-2" />
-              {hasUnsavedChanges ? 'Save Changes' : 'No Changes'}
-            </>
-          )}
-        </Button>
-      </div>
-      
-      {/* Status indicator */}
-      <div className="fixed top-12 right-4 z-40">
-        {hasUnsavedChanges ? (
-          <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-300 shadow-lg">
-            <AlertCircle className="h-3 w-3 mr-1" />
-            Unsaved changes
-            <kbd className="ml-2 px-1 py-0.5 text-xs bg-yellow-100 rounded">Ctrl+S</kbd>
-          </Badge>
-        ) : saveStatus === 'saved' ? (
-          <Badge variant="outline" className="bg-green-50 text-green-700 border-green-300 shadow-lg">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            All changes saved
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="bg-gray-50 text-gray-600 border-gray-300 shadow-lg">
-            <CheckCircle className="h-3 w-3 mr-1" />
-            Ready to edit
-          </Badge>
-        )}
-      </div>
+      {/* Save bar: only when there is something to save */}
+      {(hasUnsavedChanges || saveStatus === 'saving' || saveStatus === 'error') && (
+        <div className="sticky bottom-[72px] z-40 mt-6 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sheet md:bottom-4">
+          <p className="text-sm text-muted-foreground">
+            {saveStatus === 'error' ? 'Could not save. Check the fields and try again.' : saveStatus === 'saving' ? 'Saving…' : 'You have unsaved changes.'}
+          </p>
+          <div className="flex gap-2">
+            <Button type="button" variant="ghost" onClick={handleCancel} disabled={isSubmitting}>
+              Discard
+            </Button>
+            <Button type="button" onClick={submitForm} disabled={isSubmitting}>
+              {saveStatus === 'saving' ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Saving…
+                </>
+              ) : (
+                <>
+                  <Save className="h-4 w-4" />
+                  Save changes
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
     </form>
     </div>
   )

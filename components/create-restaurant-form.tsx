@@ -112,10 +112,10 @@ export default function CreateRestaurantForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Basic Information Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Building2 className="h-5 w-5 text-blue-600" />
+            <Building2 className="h-5 w-5 text-muted-foreground" />
             Basic Information
           </CardTitle>
         </CardHeader>
@@ -130,10 +130,10 @@ export default function CreateRestaurantForm() {
                 id="name"
                 {...register("name")}
                 placeholder="Enter restaurant name"
-                className="border-gray-300"
+                className="border-border"
               />
               {errors.name && (
-                <span className="text-sm text-red-500">{errors.name.message}</span>
+                <span className="text-sm text-destructive">{errors.name.message}</span>
               )}
             </div>
 
@@ -146,12 +146,12 @@ export default function CreateRestaurantForm() {
                 id="slug"
                 {...register("slug")}
                 placeholder="my-restaurant"
-                className="font-mono border-gray-300"
+                className="font-mono border-border"
               />
               {errors.slug && (
-                <span className="text-sm text-red-500">{errors.slug.message}</span>
+                <span className="text-sm text-destructive">{errors.slug.message}</span>
               )}
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 Used in your restaurant&apos;s URL (yourslug.foodify.com)
               </span>
             </div>
@@ -163,7 +163,7 @@ export default function CreateRestaurantForm() {
               id="tagline"
               {...register("tagline")}
               placeholder="Delicious food, unforgettable experience"
-              className="border-gray-300"
+              className="border-border"
             />
           </div>
 
@@ -173,7 +173,7 @@ export default function CreateRestaurantForm() {
               id="description"
               {...register("description")}
               placeholder="Tell customers about your restaurant..."
-              className="border-gray-300 min-h-[100px]"
+              className="border-border min-h-[100px]"
             />
           </div>
 
@@ -187,7 +187,7 @@ export default function CreateRestaurantForm() {
                 id="cuisineType"
                 {...register("cuisineType")}
                 placeholder="Italian, French, American..."
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
 
@@ -197,7 +197,7 @@ export default function CreateRestaurantForm() {
                 Price Range
               </Label>
               <Select onValueChange={(value) => setValue("priceRange", value as "$" | "$$" | "$$$" | "$$$$")} defaultValue="$">
-                <SelectTrigger className="border-gray-300">
+                <SelectTrigger className="border-border">
                   <SelectValue placeholder="Select price range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -227,7 +227,7 @@ export default function CreateRestaurantForm() {
                 };
                 setValue("currencySymbol", symbols[value] || value);
               }} defaultValue="USD">
-                <SelectTrigger className="border-gray-300">
+                <SelectTrigger className="border-border">
                   <SelectValue placeholder="Select currency" />
                 </SelectTrigger>
                 <SelectContent>
@@ -253,9 +253,9 @@ export default function CreateRestaurantForm() {
                 id="currencySymbol"
                 {...register("currencySymbol")}
                 placeholder="$"
-                className="border-gray-300 font-mono"
+                className="border-border font-mono"
               />
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 This symbol will be displayed with prices
               </span>
             </div>
@@ -264,7 +264,7 @@ export default function CreateRestaurantForm() {
           <div className="space-y-2">
             <Label htmlFor="defaultLocale">Default Language</Label>
             <Select onValueChange={(value) => setValue("defaultLocale", value as "en" | "fr")} defaultValue="en">
-              <SelectTrigger className="border-gray-300">
+              <SelectTrigger className="border-border">
                 <SelectValue placeholder="Select default language" />
               </SelectTrigger>
               <SelectContent>
@@ -277,10 +277,10 @@ export default function CreateRestaurantForm() {
       </Card>
 
       {/* Contact Information Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-green-50 to-emerald-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Phone className="h-5 w-5 text-green-600" />
+            <Phone className="h-5 w-5 text-success" />
             Contact Information
           </CardTitle>
         </CardHeader>
@@ -296,10 +296,10 @@ export default function CreateRestaurantForm() {
                 type="email"
                 {...register("email")}
                 placeholder="contact@restaurant.com"
-                className="border-gray-300"
+                className="border-border"
               />
               {errors.email && (
-                <span className="text-sm text-red-500">{errors.email.message}</span>
+                <span className="text-sm text-destructive">{errors.email.message}</span>
               )}
             </div>
 
@@ -313,7 +313,7 @@ export default function CreateRestaurantForm() {
                 type="tel"
                 {...register("phone")}
                 placeholder="+1 (555) 123-4567"
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
           </div>
@@ -328,20 +328,20 @@ export default function CreateRestaurantForm() {
               type="url"
               {...register("website")}
               placeholder="https://www.yourrestaurant.com"
-              className="border-gray-300"
+              className="border-border"
             />
             {errors.website && (
-              <span className="text-sm text-red-500">{errors.website.message}</span>
+              <span className="text-sm text-destructive">{errors.website.message}</span>
             )}
           </div>
         </CardContent>
       </Card>
 
       {/* Address Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-orange-50 to-red-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <MapPin className="h-5 w-5 text-orange-600" />
+            <MapPin className="h-5 w-5 text-warning" />
             Address Information
           </CardTitle>
         </CardHeader>
@@ -352,7 +352,7 @@ export default function CreateRestaurantForm() {
               id="streetAddress"
               {...register("streetAddress")}
               placeholder="123 Main Street"
-              className="border-gray-300"
+              className="border-border"
             />
           </div>
 
@@ -363,7 +363,7 @@ export default function CreateRestaurantForm() {
                 id="city"
                 {...register("city")}
                 placeholder="New York"
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
 
@@ -373,7 +373,7 @@ export default function CreateRestaurantForm() {
                 id="state"
                 {...register("state")}
                 placeholder="NY"
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
 
@@ -383,7 +383,7 @@ export default function CreateRestaurantForm() {
                 id="postalCode"
                 {...register("postalCode")}
                 placeholder="10001"
-                className="border-gray-300"
+                className="border-border"
               />
             </div>
           </div>
@@ -394,17 +394,17 @@ export default function CreateRestaurantForm() {
               id="country"
               {...register("country")}
               placeholder="United States"
-              className="border-gray-300"
+              className="border-border"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Operating Hours Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-purple-50 to-pink-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Clock className="h-5 w-5 text-purple-600" />
+            <Clock className="h-5 w-5 text-muted-foreground" />
             Operating Hours
           </CardTitle>
         </CardHeader>
@@ -415,9 +415,9 @@ export default function CreateRestaurantForm() {
               id="openingHours"
               {...register("openingHours")}
               placeholder="Mon-Fri: 9:00 AM - 10:00 PM&#10;Sat-Sun: 10:00 AM - 11:00 PM"
-              className="border-gray-300 min-h-[80px]"
+              className="border-border min-h-[80px]"
             />
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               Enter your operating hours. Use line breaks for different days.
             </span>
           </div>
@@ -425,10 +425,10 @@ export default function CreateRestaurantForm() {
       </Card>
 
       {/* Branding & Design Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Palette className="h-5 w-5 text-indigo-600" />
+            <Palette className="h-5 w-5 text-muted-foreground" />
             Branding & Design
           </CardTitle>
         </CardHeader>
@@ -474,13 +474,13 @@ export default function CreateRestaurantForm() {
                   id="colorTheme"
                   type="color"
                   {...register("colorTheme")}
-                  className="h-12 w-20 border-gray-300"
+                  className="h-12 w-20 border-border"
                 />
                 <Input
                   type="text"
                   {...register("colorTheme")}
                   placeholder="#3B82F6"
-                  className="flex-1 border-gray-300 font-mono"
+                  className="flex-1 border-border font-mono"
                 />
               </div>
             </div>
@@ -492,13 +492,13 @@ export default function CreateRestaurantForm() {
                   id="secondaryColor"
                   type="color"
                   {...register("secondaryColor")}
-                  className="h-12 w-20 border-gray-300"
+                  className="h-12 w-20 border-border"
                 />
                 <Input
                   type="text"
                   {...register("secondaryColor")}
                   placeholder="#6B7280"
-                  className="flex-1 border-gray-300 font-mono"
+                  className="flex-1 border-border font-mono"
                 />
               </div>
             </div>
@@ -523,20 +523,20 @@ export default function CreateRestaurantForm() {
               Cover Image Background Style
             </Label>
             <Select onValueChange={(value) => setValue("coverImageStyle", value as "cover" | "repeat")} defaultValue="cover">
-              <SelectTrigger className="border-gray-300">
+              <SelectTrigger className="border-border">
                 <SelectValue placeholder="Select background style" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="cover">
                   <div className="space-y-1">
                     <div className="font-medium">Cover (Recommended)</div>
-                    <div className="text-xs text-gray-500">Image fills the entire background area</div>
+                    <div className="text-xs text-muted-foreground">Image fills the entire background area</div>
                   </div>
                 </SelectItem>
                 <SelectItem value="repeat">
                   <div className="space-y-1">
                     <div className="font-medium">Repeat Pattern</div>
-                    <div className="text-xs text-gray-500">Image repeats as a pattern/texture</div>
+                    <div className="text-xs text-muted-foreground">Image repeats as a pattern/texture</div>
                   </div>
                 </SelectItem>
               </SelectContent>
@@ -546,10 +546,10 @@ export default function CreateRestaurantForm() {
       </Card>
 
       {/* Social Media Section */}
-      <Card className="border-gray-200">
-        <CardHeader className="bg-gradient-to-r from-pink-50 to-rose-50">
+      <Card className="border-border">
+        <CardHeader className="">
           <CardTitle className="flex items-center gap-2 text-lg">
-            <Share2 className="h-5 w-5 text-pink-600" />
+            <Share2 className="h-5 w-5 text-muted-foreground" />
             Social Media
           </CardTitle>
         </CardHeader>
@@ -560,9 +560,9 @@ export default function CreateRestaurantForm() {
               id="socialMedia"
               {...register("socialMedia")}
               placeholder="Facebook: https://facebook.com/yourrestaurant&#10;Instagram: https://instagram.com/yourrestaurant&#10;Twitter: https://twitter.com/yourrestaurant"
-              className="border-gray-300 min-h-[100px]"
+              className="border-border min-h-[100px]"
             />
-            <span className="text-xs text-gray-500">
+            <span className="text-xs text-muted-foreground">
               Enter your social media links, one per line with platform name.
             </span>
           </div>
@@ -574,7 +574,7 @@ export default function CreateRestaurantForm() {
         <Button 
           type="submit" 
           disabled={isSubmitting} 
-          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-8 py-3 text-lg font-medium shadow-lg"
+          className="text-white px-8 py-3 text-lg font-medium"
         >
           {isSubmitting ? "Creating Restaurant..." : "Create Restaurant"}
         </Button>

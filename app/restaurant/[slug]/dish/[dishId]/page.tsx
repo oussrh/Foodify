@@ -1,101 +1,63 @@
 import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
-import ImprovedDishDetail from '@/components/improved-dish-detail'
-import { PublicThemeProvider } from '@/components/public-theme-provider'
+import type { Metadata } from 'next'
+import DishPage from '@/components/menu/dish-page'
+import { brandStyle } from '@/lib/brand-color'
+import { serializeDish, serializeRestaurant, siteOrigin } from '@/lib/menu-data'
 
-async function getDishData(dishId: string, restaurantSlug: string) {
+async function getDish(dishId: string, slug: string) {
   const dish = await prisma.dish.findUnique({
     where: { id: dishId },
     include: {
       ingredients: true,
-      subcategory: {
-        include: {
-          category: {
-            include: {
-              restaurant: true
-            }
-          }
-        }
-      },
-      restaurant: true
-    }
+      restaurant: true,
+      subcategory: { include: { category: true } },
+    },
   })
-
-  if (!dish || dish.restaurant?.slug !== restaurantSlug) {
-    return null
-  }
-
+  if (!dish || !dish.isActive || dish.restaurant.slug !== slug) return null
   return dish
 }
 
-export default async function DishPage({ 
-  params 
-}: { 
-  params: Promise<{ slug: string; dishId: string }> 
-}) {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string; dishId: string }> }): Promise<Metadata> {
   const { slug, dishId } = await params
-  const dish = await getDishData(dishId, slug)
-  
-  if (!dish) {
-    notFound()
+  const dish = await getDish(dishId, slug)
+  if (!dish) return {}
+  return {
+    title: `${dish.nameEn} · ${dish.restaurant.name}`,
+    description: dish.descriptionEn || undefined,
+    openGraph: { images: [dish.imageUrl] },
   }
+}
 
-  if (!dish.restaurant) {
-    notFound()
-  }
+export default async function DishRoute({ params }: { params: Promise<{ slug: string; dishId: string }> }) {
+  const { slug, dishId } = await params
+  const dish = await getDish(dishId, slug)
+  if (!dish) notFound()
 
-  const restaurant = dish.restaurant
-
-  // Serialize data for client components (convert Decimal to number)
-  const serializedDish = {
-    id: dish.id,
-    nameEn: dish.nameEn,
-    nameFr: dish.nameFr,
-    descriptionEn: dish.descriptionEn,
-    descriptionFr: dish.descriptionFr,
-    imageUrl: dish.imageUrl,
-    price: Number(dish.price),
-    calories: dish.calories ? Number(dish.calories) : null,
-    usdzUrl: dish.usdzUrl,
-    glbUrl: dish.glbUrl,
-    isMostPurchased: dish.isMostPurchased,
-    ingredients: dish.ingredients
-  }
-
-  const serializedRestaurant = {
-    id: restaurant.id,
-    name: restaurant.name,
-    slug: restaurant.slug,
-    defaultLocale: restaurant.defaultLocale,
-    fontFamily: restaurant.fontFamily,
-    colorTheme: restaurant.colorTheme,
-    secondaryColor: restaurant.secondaryColor,
-    currencySymbol: restaurant.currencySymbol,
-    googleFontUrl: restaurant.googleFontUrl
-  }
-
-  const serializedSubcategory = dish.subcategory ? {
-    nameEn: dish.subcategory.nameEn,
-    nameFr: dish.subcategory.nameFr
-  } : null
+  const restaurant = serializeRestaurant(dish.restaurant)
+  const breadcrumb = dish.subcategory
+    ? {
+        en:
+          dish.subcategory.nameEn.toLowerCase() === dish.subcategory.category.nameEn.toLowerCase()
+            ? dish.subcategory.category.nameEn
+            : `${dish.subcategory.category.nameEn} · ${dish.subcategory.nameEn}`,
+        fr:
+          dish.subcategory.nameFr.toLowerCase() === dish.subcategory.category.nameFr.toLowerCase()
+            ? dish.subcategory.category.nameFr
+            : `${dish.subcategory.category.nameFr} · ${dish.subcategory.nameFr}`,
+      }
+    : null
 
   return (
     <>
-      {/* Load Google Font if specified */}
-      {restaurant.googleFontUrl && (
-        <link
-          href={restaurant.googleFontUrl}
-          rel="stylesheet"
-        />
-      )}
-
-      <PublicThemeProvider>
-        <ImprovedDishDetail
-          dish={serializedDish}
-          restaurant={serializedRestaurant}
-          subcategory={serializedSubcategory}
-        />
-      </PublicThemeProvider>
+      {restaurant.googleFontUrl && <link href={restaurant.googleFontUrl} rel="stylesheet" />}
+      <DishPage
+        dish={serializeDish(dish)}
+        restaurant={restaurant}
+        breadcrumb={breadcrumb}
+        brandStyle={brandStyle(restaurant.colorTheme)}
+        shareUrl={`${siteOrigin()}/restaurant/${slug}/dish/${dish.id}`}
+      />
     </>
   )
 }

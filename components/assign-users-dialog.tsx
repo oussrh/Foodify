@@ -70,7 +70,7 @@ export default function AssignUsersDialog({
       <DialogTrigger asChild>
         <Button variant="default">Add User</Button>
       </DialogTrigger>
-      <DialogContent className="bg-white">
+      <DialogContent className="bg-card">
         <DialogHeader>
           <DialogTitle className="text-lg font-bold">Assign Users</DialogTitle>
         </DialogHeader>

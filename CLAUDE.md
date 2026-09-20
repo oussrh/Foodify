@@ -60,9 +60,16 @@ Key models and relationships:
 - Upload handling in `lib/cloudinary.ts` and `components/ar-file-upload.tsx`
 
 ### Component Architecture
-- shadcn/ui components in `components/ui/`
-- Feature-specific components for forms, management, and AR viewing
-- Separate admin/manager component variations (e.g., `admin-dish-actions.tsx` vs `dish-actions.tsx`)
+- shadcn/ui primitives in `components/ui/` (restyled: hairline cards, no default shadows, `Table` for lists)
+- `components/shell/` — the one admin/manager shell (`app-shell.tsx`: desktop rail, top bar with restaurant switcher, phone bottom tabs) plus `PageHeader`/`StatStrip`/`EmptyState`, list tables and row-action menus. Both protected layouts use it; role changes data scope, not components.
+- `components/menu/` — customer-facing menu (`restaurant-page.tsx`, `dish-row.tsx`, `dish-body.tsx`, `dish-page.tsx`, `menu-footer.tsx`, `ar-launch-button.tsx`). Types, dietary/allergen vocab and UI strings live in `lib/menu.ts`; Prisma → plain serializers in `lib/menu-data.ts`.
+- `components/auth/sign-in-flow.tsx` — the single two-step (password → emailed code) sign-in used by all admin/manager auth routes.
+- Feature forms (`create-*-form.tsx`, `edit-*-form.tsx`, category managers, uploads) are shared by both roles.
+
+### Design system ("Quiet Plate")
+- Tokens in `app/globals.css` (warm neutral ground, one accent "Basil", light + dark); radius encodes hierarchy (`rounded-sm` controls, `rounded-lg` cards, `rounded-sheet` sheets); shadows only on floating layers (`shadow-sheet`, `shadow-popover`).
+- Font is Instrument Sans via `next/font` (`--font-sans`). Do not reintroduce Tailwind colour utilities (`bg-blue-500`, `text-gray-600`…) or gradients on chrome; use `primary`, `muted`, `success`, `warning`, `destructive`.
+- Restaurant brand colours are never painted raw under text: `lib/brand-color.ts` derives a contrast-safe ink + tint, exposed as `text-brand`, `bg-brand`, `bg-brand-tint`, `text-brand-on` inside a `.brand-scope` element.
 
 ### Server Actions Pattern
 All data mutations use Next.js server actions in `app/actions/`:
@@ -119,6 +126,7 @@ CLOUDINARY_API_SECRET="..."
 - All user-facing content has `nameEn`/`nameFr` and `descriptionEn`/`descriptionFr` fields
 - Components handle locale switching
 - Default locale set per restaurant
+- Dietary attributes and allergens are real data (`Dish.dietary`, `Dish.allergens`, string arrays keyed by `DIETARY_OPTIONS`/`ALLERGEN_OPTIONS` in `lib/menu.ts`) — never infer them from dish names
 
 ### State Management
 - Server state via server actions and database

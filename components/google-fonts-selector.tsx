@@ -92,11 +92,11 @@ export default function GoogleFontsSelector({
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'sans-serif': return 'bg-blue-50 text-blue-700 border-blue-200'
-      case 'serif': return 'bg-purple-50 text-purple-700 border-purple-200'
-      case 'handwriting': return 'bg-pink-50 text-pink-700 border-pink-200'
-      case 'display': return 'bg-orange-50 text-orange-700 border-orange-200'
-      default: return 'bg-gray-50 text-gray-700 border-gray-200'
+      case 'sans-serif': return 'bg-muted text-muted-foreground border-border'
+      case 'serif': return 'bg-muted text-muted-foreground border-border'
+      case 'handwriting': return 'bg-muted text-muted-foreground border-border'
+      case 'display': return 'bg-muted text-warning border-border'
+      default: return 'bg-muted text-muted-foreground border-border'
     }
   }
 
@@ -110,7 +110,7 @@ export default function GoogleFontsSelector({
         </Label>
         
         <Select onValueChange={handleFontSelect} value={selectedFont} disabled={disabled}>
-          <SelectTrigger className="border-gray-300">
+          <SelectTrigger className="border-border">
             <SelectValue placeholder="Select a font family" />
           </SelectTrigger>
           <SelectContent className="max-h-60">
@@ -132,7 +132,7 @@ export default function GoogleFontsSelector({
 
       {/* Preview Section */}
       {selectedFont && (
-        <Card className="p-4 bg-gradient-to-r from-gray-50 to-slate-50 border-gray-200">
+        <Card className="p-4 border-border">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label className="flex items-center gap-2 text-sm font-medium">
@@ -140,7 +140,7 @@ export default function GoogleFontsSelector({
                 Font Preview
               </Label>
               <div className="flex items-center gap-2">
-                <span className="text-xs text-gray-500">Current:</span>
+                <span className="text-xs text-muted-foreground">Current:</span>
                 <span className={`px-2 py-1 text-xs rounded border ${getCategoryColor(POPULAR_FONTS.find(f => f.name === selectedFont)?.category || '')}`}>
                   {selectedFont}
                 </span>
@@ -151,24 +151,24 @@ export default function GoogleFontsSelector({
               placeholder="Type to preview font..."
               value={previewText}
               onChange={(e) => setPreviewText(e.target.value)}
-              className="border-gray-300"
+              className="border-border"
             />
             
-            <div className="space-y-3 p-4 bg-white rounded-lg border">
+            <div className="space-y-3 p-4 bg-card rounded-lg border">
               <div 
-                className="text-2xl font-semibold text-gray-900"
+                className="text-2xl font-semibold text-foreground"
                 style={{ fontFamily: selectedFont }}
               >
                 {previewText}
               </div>
               <div 
-                className="text-base text-gray-700"
+                className="text-base text-muted-foreground"
                 style={{ fontFamily: selectedFont }}
               >
                 Welcome to our restaurant! Discover our delicious menu with AR experience.
               </div>
               <div 
-                className="text-sm text-gray-600"
+                className="text-sm text-muted-foreground"
                 style={{ fontFamily: selectedFont }}
               >
                 Perfect for headings, body text, and menu items.
@@ -180,13 +180,13 @@ export default function GoogleFontsSelector({
 
       {/* Custom URL Input */}
       <div className="space-y-3">
-        <Label className="text-sm font-medium text-gray-700">
+        <Label className="text-sm font-medium text-muted-foreground">
           Or enter custom Google Fonts URL
         </Label>
         <div className="flex gap-2">
           <Input
             placeholder="https://fonts.googleapis.com/css2?family=..."
-            className="border-gray-300 font-mono text-sm"
+            className="border-border font-mono text-sm"
             disabled={disabled}
             onChange={(e) => handleCustomUrl(e.target.value)}
           />
@@ -194,16 +194,16 @@ export default function GoogleFontsSelector({
             <Search className="h-4 w-4" />
           </Button>
         </div>
-        <p className="text-xs text-gray-500">
-          Visit <a href="https://fonts.google.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Google Fonts</a> to find more fonts and get the URL
+        <p className="text-xs text-muted-foreground">
+          Visit <a href="https://fonts.google.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:underline">Google Fonts</a> to find more fonts and get the URL
         </p>
       </div>
 
       {/* Selected Font Info */}
       {selectedFont && (
-        <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <Check className="h-4 w-4 text-green-600" />
-          <span className="text-sm text-green-700">
+        <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
+          <Check className="h-4 w-4 text-success" />
+          <span className="text-sm text-success">
             Font &ldquo;{selectedFont}&rdquo; will be applied to your restaurant page
           </span>
         </div>

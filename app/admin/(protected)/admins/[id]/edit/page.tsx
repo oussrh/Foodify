@@ -40,9 +40,9 @@ export default async function EditAdminPage({
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="border-b border-gray-200 pb-6">
+      <div className="border-b border-border pb-6">
         <div className="flex items-center gap-4 mb-4">
-          <Button variant="ghost" size="sm" asChild className="hover:bg-red-50">
+          <Button variant="ghost" size="sm" asChild className="hover:bg-muted">
             <Link href="/admin/admins">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Admins
@@ -51,25 +51,25 @@ export default async function EditAdminPage({
         </div>
         <div className="flex items-start justify-between">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-gradient-to-br from-red-100 to-pink-100 rounded-xl">
-              <Shield className="h-8 w-8 text-red-600" />
+            <div className="p-3 rounded-md">
+              <Shield className="h-8 w-8 text-destructive" />
             </div>
             <div className="flex-1">
-              <h1 className="text-3xl font-bold tracking-tight text-gray-900 mb-2">Edit Administrator</h1>
-              <div className="flex items-center gap-2 text-gray-600">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground mb-2">Edit Administrator</h1>
+              <div className="flex items-center gap-2 text-muted-foreground">
                 <span className="font-medium">{admin.email}</span>
                 <span>•</span>
                 <span>Super Administrator</span>
                 <span>•</span>
                 <span>{adminAge} days old</span>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Manage administrator account details and system access
               </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Badge className="bg-red-100 text-red-700 border-red-200">
+            <Badge className="bg-muted text-destructive border-border">
               <Crown className="h-3 w-3 mr-1" />
               Super Admin Portal
             </Badge>
@@ -86,49 +86,49 @@ export default async function EditAdminPage({
         {/* Right Column - Admin Info & Actions */}
         <div className="space-y-6">
           {/* Admin Overview */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-red-50 to-pink-50 border-b">
+          <Card className="border-0">
+            <CardHeader className="border-b">
               <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-red-600" />
+                <BarChart3 className="h-5 w-5 text-destructive" />
                 Administrator Overview
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div className="grid grid-cols-1 gap-4">
-                <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
-                  <div className="text-2xl font-bold text-red-700 mb-1">FULL</div>
-                  <div className="text-xs text-red-600">System Access</div>
+                <div className="text-center p-4 bg-muted rounded-lg border border-border">
+                  <div className="text-2xl font-bold text-destructive mb-1">FULL</div>
+                  <div className="text-xs text-destructive">System Access</div>
                   <div className="mt-2">
-                    <Shield className="h-6 w-6 text-red-500 mx-auto" />
+                    <Shield className="h-6 w-6 text-destructive mx-auto" />
                   </div>
                 </div>
               </div>
               
-              <div className="space-y-3 pt-3 border-t border-gray-200">
-                <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm text-gray-600 flex items-center gap-2">
+              <div className="space-y-3 pt-3 border-t border-border">
+                <div className="flex justify-between items-center py-2 px-3 bg-muted rounded-lg">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <Calendar className="h-4 w-4" />
                     Created
                   </span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-foreground">
                     {new Date(admin.createdAt).toLocaleDateString()}
                   </span>
                 </div>
-                <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm text-gray-600 flex items-center gap-2">
+                <div className="flex justify-between items-center py-2 px-3 bg-muted rounded-lg">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <Mail className="h-4 w-4" />
                     Role
                   </span>
-                  <Badge className="bg-red-100 text-red-700 border-red-200">
+                  <Badge className="bg-muted text-destructive border-border">
                     Super Administrator
                   </Badge>
                 </div>
-                <div className="flex justify-between items-center py-2 px-3 bg-gray-50 rounded-lg">
-                  <span className="text-sm text-gray-600 flex items-center gap-2">
+                <div className="flex justify-between items-center py-2 px-3 bg-muted rounded-lg">
+                  <span className="text-sm text-muted-foreground flex items-center gap-2">
                     <Crown className="h-4 w-4" />
                     Account Age
                   </span>
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="text-sm font-medium text-foreground">
                     {adminAge} days
                   </span>
                 </div>
@@ -137,10 +137,10 @@ export default async function EditAdminPage({
           </Card>
 
           {/* Quick Actions */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-purple-50 to-indigo-50 border-b">
+          <Card className="border-0">
+            <CardHeader className="border-b">
               <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5 text-purple-600" />
+                <Settings className="h-5 w-5 text-muted-foreground" />
                 Quick Actions
               </CardTitle>
             </CardHeader>
@@ -152,7 +152,7 @@ export default async function EditAdminPage({
               <Button 
                 asChild 
                 variant="outline"
-                className="w-full justify-start border-red-200 text-red-600 hover:bg-red-50"
+                className="w-full justify-start border-border text-destructive hover:bg-muted"
               >
                 <Link href="/admin/admins">
                   <Shield className="h-4 w-4 mr-3" />
@@ -163,34 +163,34 @@ export default async function EditAdminPage({
           </Card>
 
           {/* Administrator Privileges */}
-          <Card className="border-0 shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-amber-50 to-yellow-50 border-b">
+          <Card className="border-0">
+            <CardHeader className="border-b">
               <CardTitle className="flex items-center gap-2">
-                <Lightbulb className="h-5 w-5 text-amber-600" />
+                <Lightbulb className="h-5 w-5 text-warning" />
                 Administrator Privileges
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6 space-y-4">
               <div className="space-y-3">
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Full System Control</p>
-                    <p className="text-xs text-gray-500">Complete access to all restaurants, users, and settings</p>
+                    <p className="text-sm font-medium text-foreground">Full System Control</p>
+                    <p className="text-xs text-muted-foreground">Complete access to all restaurants, users, and settings</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">User Management</p>
-                    <p className="text-xs text-gray-500">Create, edit, and delete administrator accounts</p>
+                    <p className="text-sm font-medium text-foreground">User Management</p>
+                    <p className="text-xs text-muted-foreground">Create, edit, and delete administrator accounts</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
-                  <Star className="h-4 w-4 text-yellow-500 mt-0.5 flex-shrink-0" />
+                  <Star className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Restaurant Control</p>
-                    <p className="text-xs text-gray-500">Manage all restaurant data, menus, and configurations</p>
+                    <p className="text-sm font-medium text-foreground">Restaurant Control</p>
+                    <p className="text-xs text-muted-foreground">Manage all restaurant data, menus, and configurations</p>
                   </div>
                 </div>
               </div>

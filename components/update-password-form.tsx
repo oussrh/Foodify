@@ -83,9 +83,9 @@ export default function UpdatePasswordForm() {
     strengthScore >= 1 ? 'Weak' : 'Very Weak'
 
   const strengthColor = 
-    strengthScore === 5 ? 'text-green-600 bg-green-100 border-green-200' :
-    strengthScore >= 3 ? 'text-yellow-600 bg-yellow-100 border-yellow-200' :
-    strengthScore >= 1 ? 'text-orange-600 bg-orange-100 border-orange-200' : 'text-red-600 bg-red-100 border-red-200'
+    strengthScore === 5 ? 'text-success bg-muted border-border' :
+    strengthScore >= 3 ? 'text-warning bg-muted border-border' :
+    strengthScore >= 1 ? 'text-warning bg-muted border-border' : 'text-destructive bg-muted border-border'
 
   const strengthIcon = 
     strengthScore === 5 ? <Shield className="h-3 w-3" /> :
@@ -116,37 +116,37 @@ export default function UpdatePasswordForm() {
     <div className="space-y-8">
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 via-purple-600 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
           <KeyRound className="h-8 w-8 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Update Password</h2>
-          <p className="text-gray-600">Keep your account secure with a strong password</p>
+          <h2 className="text-2xl font-bold text-foreground">Update Password</h2>
+          <p className="text-muted-foreground">Keep your account secure with a strong password</p>
         </div>
       </div>
 
       {/* Success Message */}
       {success && (
-        <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl flex items-start gap-3 shadow-sm">
-          <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle2 className="h-4 w-4 text-green-600" />
+        <div className="p-4 border border-border rounded-md flex items-start gap-3">
+          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+            <CheckCircle2 className="h-4 w-4 text-success" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-green-800">Password updated successfully!</p>
-            <p className="text-xs text-green-600 mt-1">Your account is now more secure and protected</p>
+            <p className="text-sm font-medium text-success">Password updated successfully!</p>
+            <p className="text-xs text-success mt-1">Your account is now more secure and protected</p>
           </div>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl flex items-start gap-3 shadow-sm">
-          <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-            <AlertCircle className="h-4 w-4 text-red-600" />
+        <div className="p-4 border border-border rounded-md flex items-start gap-3">
+          <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+            <AlertCircle className="h-4 w-4 text-destructive" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium text-red-800">{error}</p>
-            <p className="text-xs text-red-600 mt-1">Please verify your information and try again</p>
+            <p className="text-sm font-medium text-destructive">{error}</p>
+            <p className="text-xs text-destructive mt-1">Please verify your information and try again</p>
           </div>
         </div>
       )}
@@ -154,8 +154,8 @@ export default function UpdatePasswordForm() {
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         {/* Current Password */}
         <div className="space-y-3">
-          <Label htmlFor="currentPassword" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-            <Lock className="h-4 w-4 text-gray-500" />
+          <Label htmlFor="currentPassword" className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Lock className="h-4 w-4 text-muted-foreground" />
             Current Password
           </Label>
           <div className="relative group">
@@ -163,29 +163,29 @@ export default function UpdatePasswordForm() {
               id="currentPassword" 
               type={showCurrentPassword ? 'text' : 'password'}
               {...register('currentPassword')}
-              className="pl-4 pr-12 h-12 border-2 border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 rounded-xl transition-all duration-200 group-hover:border-gray-300"
+              className="pl-4 pr-12 h-12 border-2 border-border focus:border-border-strong focus:ring-4 rounded-md transition-colors group-hover:border-border"
               placeholder="Enter your current password"
             />
             <button
               type="button"
               onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+              className="absolute right-4 top-1/2 transform -/2 text-muted-foreground hover:text-muted-foreground transition-colors p-1 rounded-lg hover:bg-muted"
             >
               {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
           {errors.currentPassword && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-              <p className="text-sm text-red-700">{errors.currentPassword.message}</p>
+            <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
+              <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive">{errors.currentPassword.message}</p>
             </div>
           )}
         </div>
 
         {/* New Password */}
         <div className="space-y-3">
-          <Label htmlFor="password" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-            <Shield className="h-4 w-4 text-gray-500" />
+          <Label htmlFor="password" className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
             New Password
           </Label>
           <div className="relative group">
@@ -193,29 +193,29 @@ export default function UpdatePasswordForm() {
               id="password" 
               type={showNewPassword ? 'text' : 'password'}
               {...register('password')}
-              className="pl-4 pr-12 h-12 border-2 border-gray-200 focus:border-blue-400 focus:ring-4 focus:ring-blue-100 rounded-xl transition-all duration-200 group-hover:border-gray-300"
+              className="pl-4 pr-12 h-12 border-2 border-border focus:border-border-strong focus:ring-4 rounded-md transition-colors group-hover:border-border"
               placeholder="Enter your new password"
             />
             <button
               type="button"
               onClick={() => setShowNewPassword(!showNewPassword)}
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+              className="absolute right-4 top-1/2 transform -/2 text-muted-foreground hover:text-muted-foreground transition-colors p-1 rounded-lg hover:bg-muted"
             >
               {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
           </div>
           {errors.password && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-              <p className="text-sm text-red-700">{errors.password.message}</p>
+            <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
+              <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive">{errors.password.message}</p>
             </div>
           )}
 
           {/* Password Strength Indicator */}
           {password && (
-            <div className="space-y-4 p-4 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl border border-gray-200 shadow-sm">
+            <div className="space-y-4 p-4 rounded-md border border-border">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700">Password strength</span>
+                <span className="text-sm font-medium text-muted-foreground">Password strength</span>
                 <div className={`flex items-center gap-1 px-3 py-1 rounded-full border text-xs font-medium ${strengthColor}`}>
                   {strengthIcon}
                   {strengthLevel}
@@ -224,17 +224,17 @@ export default function UpdatePasswordForm() {
               
               {/* Strength Progress Bar */}
               <div className="space-y-2">
-                <div className="flex justify-between text-xs text-gray-500">
+                <div className="flex justify-between text-xs text-muted-foreground">
                   <span>Weak</span>
                   <span>Strong</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <div 
-                    className={`h-3 rounded-full transition-all duration-500 ease-out ${
-                      strengthScore === 5 ? 'bg-gradient-to-r from-green-500 to-emerald-500' :
-                      strengthScore >= 3 ? 'bg-gradient-to-r from-yellow-500 to-orange-500' :
-                      strengthScore >= 1 ? 'bg-gradient-to-r from-orange-500 to-red-500' : 'bg-red-500'
-                    }`}
+                    className={`h-3 rounded-full transition-colors ${
+ strengthScore === 5 ? '' :
+ strengthScore >= 3 ? '' :
+ strengthScore >= 1 ? '' : 'bg-muted0'
+ }`}
                     style={{ width: `${(strengthScore / 5) * 100}%` }}
                   ></div>
                 </div>
@@ -242,20 +242,20 @@ export default function UpdatePasswordForm() {
 
               {/* Password Requirements */}
               <div className="space-y-3">
-                <p className="text-sm font-medium text-gray-700">Requirements</p>
+                <p className="text-sm font-medium text-muted-foreground">Requirements</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {passwordChecks.map((check, index) => (
                     <div key={index} className="flex items-center gap-2 p-2 rounded-lg transition-colors">
-                      <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-all duration-200 ${
-                        check.test ? 'bg-green-100 scale-110' : 'bg-gray-100'
-                      }`}>
+                      <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center transition-colors ${
+ check.test ? 'bg-muted' : 'bg-muted'
+ }`}>
                         {check.test ? (
-                          <Check className="h-3 w-3 text-green-600" />
+                          <Check className="h-3 w-3 text-success" />
                         ) : (
-                          <X className="h-3 w-3 text-gray-400" />
+                          <X className="h-3 w-3 text-muted-foreground" />
                         )}
                       </div>
-                      <span className={`text-sm transition-colors duration-200 ${check.test ? 'text-green-700 font-medium' : 'text-gray-600'}`}>
+                      <span className={`text-sm transition-colors duration-200 ${check.test ? 'text-success font-medium' : 'text-muted-foreground'}`}>
                         {check.label}
                       </span>
                     </div>
@@ -268,8 +268,8 @@ export default function UpdatePasswordForm() {
 
         {/* Confirm Password */}
         <div className="space-y-3">
-          <Label htmlFor="confirm" className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-            <Shield className="h-4 w-4 text-gray-500" />
+          <Label htmlFor="confirm" className="text-sm font-semibold text-foreground flex items-center gap-2">
+            <Shield className="h-4 w-4 text-muted-foreground" />
             Confirm New Password
           </Label>
           <div className="relative group">
@@ -277,38 +277,38 @@ export default function UpdatePasswordForm() {
               id="confirm" 
               type={showConfirmPassword ? 'text' : 'password'}
               {...register('confirm')}
-              className={`pl-4 pr-12 h-12 border-2 focus:ring-4 focus:ring-blue-100 rounded-xl transition-all duration-200 group-hover:border-gray-300 ${
-                confirmPassword && passwordsMatch 
-                  ? 'border-green-300 focus:border-green-400' 
-                  : confirmPassword && !passwordsMatch 
-                    ? 'border-red-300 focus:border-red-400' 
-                    : 'border-gray-200 focus:border-blue-400'
-              }`}
+              className={`pl-4 pr-12 h-12 border-2 focus:ring-4 rounded-md transition-colors group-hover:border-border ${
+ confirmPassword && passwordsMatch 
+ ? 'border-border focus:border-border-strong' 
+ : confirmPassword && !passwordsMatch 
+ ? 'border-border focus:border-border-strong' 
+ : 'border-border focus:border-border-strong'
+ }`}
               placeholder="Confirm your new password"
             />
-            <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+            <div className="absolute right-4 top-1/2 transform -/2 flex items-center gap-1">
               {confirmPassword && passwordsMatch && (
-                <CheckCircle className="h-4 w-4 text-green-500" />
+                <CheckCircle className="h-4 w-4 text-success" />
               )}
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100"
+                className="text-muted-foreground hover:text-muted-foreground transition-colors p-1 rounded-lg hover:bg-muted"
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
             </div>
           </div>
           {errors.confirm && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-              <p className="text-sm text-red-700">{errors.confirm.message}</p>
+            <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
+              <AlertCircle className="h-4 w-4 text-destructive flex-shrink-0" />
+              <p className="text-sm text-destructive">{errors.confirm.message}</p>
             </div>
           )}
           {confirmPassword && passwordsMatch && !errors.confirm && (
-            <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-200 rounded-lg">
-              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
-              <p className="text-sm text-green-700 font-medium">Passwords match perfectly!</p>
+            <div className="flex items-center gap-2 p-3 bg-muted border border-border rounded-lg">
+              <CheckCircle className="h-4 w-4 text-success flex-shrink-0" />
+              <p className="text-sm text-success font-medium">Passwords match perfectly!</p>
             </div>
           )}
         </div>
@@ -318,7 +318,7 @@ export default function UpdatePasswordForm() {
           <Button 
             type="submit" 
             disabled={loading || strengthScore < 5}
-            className="w-full h-12 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 hover:from-blue-700 hover:via-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:hover:scale-100"
+            className="w-full h-12 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold rounded-md transition-colors transform hover:scale-[1.02] disabled:"
             size="lg"
           >
             {loading ? (
@@ -336,18 +336,18 @@ export default function UpdatePasswordForm() {
           </Button>
           
           {strengthScore < 5 && password && (
-            <div className="flex items-center gap-2 justify-center p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <AlertTriangle className="h-4 w-4 text-amber-600" />
-              <p className="text-sm text-amber-700 font-medium">
+            <div className="flex items-center gap-2 justify-center p-3 bg-muted border border-border rounded-lg">
+              <AlertTriangle className="h-4 w-4 text-warning" />
+              <p className="text-sm text-warning font-medium">
                 Please meet all password requirements to continue
               </p>
             </div>
           )}
 
           {strengthScore === 5 && !passwordsMatch && confirmPassword && (
-            <div className="flex items-center gap-2 justify-center p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <Info className="h-4 w-4 text-blue-600" />
-              <p className="text-sm text-blue-700 font-medium">
+            <div className="flex items-center gap-2 justify-center p-3 bg-muted border border-border rounded-lg">
+              <Info className="h-4 w-4 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground font-medium">
                 Please ensure both passwords match
               </p>
             </div>
@@ -356,28 +356,28 @@ export default function UpdatePasswordForm() {
       </form>
 
       {/* Security Tips */}
-      <div className="p-6 bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 border border-blue-200 rounded-xl shadow-sm">
+      <div className="p-6 border border-border rounded-md">
         <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-            <Shield className="h-5 w-5 text-blue-600" />
+          <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+            <Shield className="h-5 w-5 text-muted-foreground" />
           </div>
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-blue-900 mb-3">Security Best Practices</h3>
-            <ul className="space-y-2 text-sm text-blue-800">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-3">Security Best Practices</h3>
+            <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
+                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                 <span>Use a unique password that you don&apos;t use anywhere else</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
+                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                 <span>Consider using a password manager to generate and store strong passwords</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
+                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                 <span>Never share your password with anyone</span>
               </li>
               <li className="flex items-start gap-2">
-                <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-2 flex-shrink-0"></span>
+                <span className="w-1.5 h-1.5 bg-primary rounded-full mt-2 flex-shrink-0"></span>
                 <span>Change your password if you suspect it has been compromised</span>
               </li>
             </ul>

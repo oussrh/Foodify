@@ -137,7 +137,7 @@ export default function ResetAdminPasswordButton({
         {className?.includes('flex-1') ? (
           <Button
             variant="outline"
-            className="w-full justify-start border-orange-200 text-orange-600 hover:bg-orange-50 hover:border-orange-300 transition-all duration-200"
+            className="w-full justify-start border-border text-warning hover:bg-muted hover:border-border transition-colors"
             disabled={loading}
           >
             <Key className="h-4 w-4 mr-2" />
@@ -145,9 +145,9 @@ export default function ResetAdminPasswordButton({
           </Button>
         ) : (
           <span
-            className={`flex items-center gap-2 w-full cursor-pointer hover:bg-gray-100 px-2 py-1 rounded transition-colors duration-200 ${className} ${
-              loading ? "opacity-50 pointer-events-none" : ""
-            }`}
+            className={`flex items-center gap-2 w-full cursor-pointer hover:bg-muted px-2 py-1 rounded transition-colors duration-200 ${className} ${
+ loading ? "opacity-50 pointer-events-none" : ""
+ }`}
           >
             <Key className="h-4 w-4" />
             <span>Reset Password</span>
@@ -157,24 +157,24 @@ export default function ResetAdminPasswordButton({
       
       <DialogContent className="max-w-lg">
         <DialogHeader className="text-center space-y-3">
-          <div className="mx-auto w-16 h-16 bg-gradient-to-br from-orange-500 via-red-500 to-pink-600 rounded-2xl flex items-center justify-center shadow-lg">
+          <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
             <Key className="h-8 w-8 text-white" />
           </div>
-          <DialogTitle className="text-2xl font-bold text-gray-900">
+          <DialogTitle className="text-2xl font-bold text-foreground">
             Reset Administrator Password
           </DialogTitle>
-          <p className="text-gray-600">Generate a new secure password for this administrator</p>
+          <p className="text-muted-foreground">Generate a new secure password for this administrator</p>
         </DialogHeader>
         
         <div className="space-y-6 mt-6">
           {error && (
-            <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <X className="h-4 w-4 text-red-600" />
+            <div className="p-4 border border-border rounded-md flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                <X className="h-4 w-4 text-destructive" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-800">{error}</p>
-                <p className="text-xs text-red-600 mt-1">Please try again or contact support if the problem persists</p>
+                <p className="text-sm font-medium text-destructive">{error}</p>
+                <p className="text-xs text-destructive mt-1">Please try again or contact support if the problem persists</p>
               </div>
             </div>
           )}
@@ -182,14 +182,14 @@ export default function ResetAdminPasswordButton({
           {!success ? (
             <>
               {/* Warning Section */}
-              <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+              <div className="p-4 border border-border rounded-md">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
-                    <AlertTriangle className="h-4 w-4 text-amber-600" />
+                  <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                    <AlertTriangle className="h-4 w-4 text-warning" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-amber-900 mb-1">Important Security Notice</p>
-                    <p className="text-sm text-amber-800">
+                    <p className="text-sm font-medium text-warning mb-1">Important Security Notice</p>
+                    <p className="text-sm text-warning">
                       This will generate a new random password for the administrator. 
                       The admin will be required to change their password on the next login.
                     </p>
@@ -198,27 +198,27 @@ export default function ResetAdminPasswordButton({
               </div>
               
               {/* Security Features */}
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl">
+              <div className="p-4 border border-border rounded-md">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <Shield className="h-4 w-4 text-blue-600" />
+                  <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                    <Shield className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-900 mb-2">Security Features</p>
+                    <p className="text-sm font-medium text-muted-foreground mb-2">Security Features</p>
                     <div className="grid grid-cols-2 gap-2">
-                      <div className="flex items-center gap-1 text-xs text-blue-700">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Lock className="h-3 w-3" />
                         <span>12-character length</span>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-blue-700">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <RefreshCw className="h-3 w-3" />
                         <span>Cryptographically random</span>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-blue-700">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <UserCheck className="h-3 w-3" />
                         <span>Forced password change</span>
                       </div>
-                      <div className="flex items-center gap-1 text-xs text-blue-700">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         <Clock className="h-3 w-3" />
                         <span>Immediate activation</span>
                       </div>
@@ -230,14 +230,14 @@ export default function ResetAdminPasswordButton({
           ) : (
             <>
               {/* Success Message */}
-              <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+              <div className="p-4 border border-border rounded-md">
                 <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                    <CheckCircle2 className="h-4 w-4 text-success" />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-green-800 mb-1">Password Reset Successfully!</p>
-                    <p className="text-sm text-green-700">
+                    <p className="text-sm font-medium text-success mb-1">Password Reset Successfully!</p>
+                    <p className="text-sm text-success">
                       The administrator&apos;s password has been reset. They will be required to change it on their next login.
                     </p>
                   </div>
@@ -245,14 +245,14 @@ export default function ResetAdminPasswordButton({
               </div>
               
               {/* New Password Display */}
-              <div className="p-4 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl">
+              <div className="p-4 border border-border rounded-md">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                  <p className="text-sm font-semibold text-foreground flex items-center gap-2">
                     <Lock className="h-4 w-4" />
                     New Temporary Password
                   </p>
                   <div className="flex items-center gap-2">
-                    <Badge className="bg-green-100 text-green-700 border-green-200 text-xs">
+                    <Badge className="bg-muted text-success border-border text-xs">
                       Strong ({passwordStrength}/5)
                     </Badge>
                   </div>
@@ -261,14 +261,14 @@ export default function ResetAdminPasswordButton({
                 <div className="space-y-3">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 relative">
-                      <code className="block p-3 bg-white border-2 border-gray-200 rounded-lg text-sm font-mono break-all pr-10">
+                      <code className="block p-3 bg-card border-2 border-border rounded-lg text-sm font-mono break-all pr-10">
                         {showPassword ? newPassword : '••••••••••••'}
                       </code>
                       <Button
                         onClick={() => setShowPassword(!showPassword)}
                         variant="ghost"
                         size="sm"
-                        className="absolute right-1 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        className="absolute right-1 top-1/2 transform -/2 text-muted-foreground hover:text-muted-foreground"
                       >
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
@@ -277,20 +277,20 @@ export default function ResetAdminPasswordButton({
                       onClick={copyToClipboard}
                       variant="outline" 
                       size="sm"
-                      className={`transition-all duration-200 ${
-                        copied 
-                          ? "border-green-200 text-green-600 bg-green-50" 
-                          : "border-blue-200 text-blue-600 hover:bg-blue-50"
-                      }`}
+                      className={`transition-colors ${
+ copied 
+ ? "border-border text-success bg-muted" 
+ : "border-border text-muted-foreground hover:bg-muted"
+ }`}
                     >
                       {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                     </Button>
                   </div>
                   
                   {copied && (
-                    <div className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg">
-                      <CheckCircle2 className="h-4 w-4 text-green-600" />
-                      <p className="text-sm text-green-700 font-medium">Password copied to clipboard!</p>
+                    <div className="flex items-center gap-2 p-2 bg-muted border border-border rounded-lg">
+                      <CheckCircle2 className="h-4 w-4 text-success" />
+                      <p className="text-sm text-success font-medium">Password copied to clipboard!</p>
                     </div>
                   )}
                 </div>
@@ -298,25 +298,25 @@ export default function ResetAdminPasswordButton({
 
               {/* Password Strength Indicator */}
               {newPassword && (
-                <div className="p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl">
+                <div className="p-4 border border-border rounded-md">
                   <div className="flex items-center gap-2 mb-2">
-                    <Shield className="h-4 w-4 text-purple-600" />
-                    <span className="text-sm font-medium text-purple-900">Password Analysis</span>
+                    <Shield className="h-4 w-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-muted-foreground">Password Analysis</span>
                   </div>
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="flex items-center gap-1 text-purple-700">
+                    <div className="flex items-center gap-1 text-muted-foreground">
                       <Check className="h-3 w-3" />
                       <span>{newPassword.length} characters</span>
                     </div>
-                    <div className="flex items-center gap-1 text-purple-700">
+                    <div className="flex items-center gap-1 text-muted-foreground">
                       <Check className="h-3 w-3" />
                       <span>Mixed case letters</span>
                     </div>
-                    <div className="flex items-center gap-1 text-purple-700">
+                    <div className="flex items-center gap-1 text-muted-foreground">
                       <Check className="h-3 w-3" />
                       <span>Numbers included</span>
                     </div>
-                    <div className="flex items-center gap-1 text-purple-700">
+                    <div className="flex items-center gap-1 text-muted-foreground">
                       <Check className="h-3 w-3" />
                       <span>Special characters</span>
                     </div>
@@ -325,12 +325,12 @@ export default function ResetAdminPasswordButton({
               )}
 
               {/* Security Instructions */}
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-200 rounded-xl">
+              <div className="p-4 border border-border rounded-md">
                 <div className="flex items-start gap-3">
-                  <Mail className="h-4 w-4 text-blue-600 mt-0.5" />
+                  <Mail className="h-4 w-4 text-muted-foreground mt-0.5" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-900 mb-1">Next Steps</p>
-                    <ul className="text-sm text-blue-700 space-y-1">
+                    <p className="text-sm font-medium text-muted-foreground mb-1">Next Steps</p>
+                    <ul className="text-sm text-muted-foreground space-y-1">
                       <li>• Share this password securely with the administrator</li>
                       <li>• Recommend using encrypted communication</li>
                       <li>• Admin must change password on first login</li>
@@ -350,14 +350,14 @@ export default function ResetAdminPasswordButton({
                 variant="outline" 
                 onClick={handleClose}
                 disabled={loading}
-                className="border-gray-200 hover:bg-gray-50"
+                className="border-border hover:bg-muted"
               >
                 Cancel
               </Button>
               <Button 
                 onClick={handleReset}
                 disabled={loading}
-                className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 hover:from-orange-600 hover:via-red-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:hover:scale-100"
+                className="transition-colors transform hover:scale-[1.02] disabled:"
               >
                 {loading ? (
                   <div className="flex items-center gap-2">
@@ -375,7 +375,7 @@ export default function ResetAdminPasswordButton({
           ) : (
             <Button 
               onClick={handleClose}
-              className="w-full h-12 bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 hover:from-green-600 hover:via-emerald-600 hover:to-teal-600 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] text-white font-semibold"
+              className="w-full h-12 transition-colors transform hover:scale-[1.02] text-white font-semibold"
             >
               <CheckCircle2 className="h-5 w-5 mr-2" />
               <span>Done</span>

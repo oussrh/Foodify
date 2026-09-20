@@ -51,7 +51,7 @@ export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: Ad
       <AlertDialogTrigger asChild>
         <Button 
           variant="destructive" 
-          className="w-full bg-red-600 hover:bg-red-700"
+          className="w-full bg-destructive hover:bg-destructive/90"
           size="sm"
           disabled={loading}
         >
@@ -63,11 +63,11 @@ export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: Ad
       <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-red-100 rounded-full">
-              <AlertTriangle className="h-6 w-6 text-red-600" />
+            <div className="p-2 bg-muted rounded-full">
+              <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
             <div>
-              <AlertDialogTitle className="text-lg font-semibold text-gray-900">
+              <AlertDialogTitle className="text-lg font-semibold text-foreground">
                 Delete Restaurant
               </AlertDialogTitle>
             </div>
@@ -75,14 +75,14 @@ export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: Ad
         </AlertDialogHeader>
         
         <div className="space-y-4">
-          <AlertDialogDescription className="text-gray-600 leading-relaxed">
-            Are you sure you want to permanently delete <span className="font-semibold text-gray-900">&ldquo;{restaurantName}&rdquo;</span>?
+          <AlertDialogDescription className="text-muted-foreground leading-relaxed">
+            Are you sure you want to permanently delete <span className="font-semibold text-foreground">&ldquo;{restaurantName}&rdquo;</span>?
           </AlertDialogDescription>
           
-          <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div className="p-3 bg-muted border border-border rounded-lg">
             <div className="flex items-start gap-2">
-              <AlertTriangle className="h-4 w-4 text-red-500 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-red-700">
+              <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 flex-shrink-0" />
+              <div className="text-sm text-destructive">
                 <strong>Warning:</strong> This action cannot be undone. All restaurant data including menus, dishes, users, categories, and customer data will be permanently removed.
               </div>
             </div>
@@ -99,7 +99,7 @@ export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: Ad
           <AlertDialogAction
             onClick={handleDelete}
             disabled={loading}
-            className="flex-1 bg-red-600 hover:bg-red-700 focus:ring-red-600"
+            className="flex-1 bg-destructive hover:bg-destructive/90"
           >
             {loading ? (
               <>

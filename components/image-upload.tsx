@@ -263,39 +263,39 @@ export default function ImageUpload({
       <div className="space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="mx-auto w-16 h-16 bg-amber-500/20 rounded-2xl flex items-center justify-center">
-            <AlertCircle className="h-8 w-8 text-amber-600" />
+          <div className="mx-auto w-16 h-16 bg-muted0/20 rounded-lg flex items-center justify-center">
+            <AlertCircle className="h-8 w-8 text-warning" />
           </div>
-          <h2 className="text-xl font-bold text-gray-900">Image Upload Unavailable</h2>
-          <p className="text-gray-600">Configuration required to enable this feature</p>
+          <h2 className="text-xl font-bold text-foreground">Image Upload Unavailable</h2>
+          <p className="text-muted-foreground">Configuration required to enable this feature</p>
         </div>
 
-        <Card className="border-0 shadow-xl overflow-hidden">
-          <CardHeader className="bg-gradient-to-r from-amber-500 to-orange-500 text-white">
+        <Card className="border-0 overflow-hidden">
+          <CardHeader className="text-white">
             <CardTitle className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-lg">
+              <div className="p-2 bg-card/20 rounded-lg">
                 <ImageIcon className="h-5 w-5" />
               </div>
               <span>Dish Image Upload</span>
             </CardTitle>
           </CardHeader>
           <CardContent className="p-8">
-            <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl">
+            <div className="p-6 border border-border rounded-md">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                  <AlertCircle className="h-5 w-5 text-amber-600" />
+                <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+                  <AlertCircle className="h-5 w-5 text-warning" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-lg font-semibold text-amber-900 mb-2">
+                  <p className="text-lg font-semibold text-warning mb-2">
                     Configuration Required
                   </p>
-                  <div className="space-y-3 text-sm text-amber-800">
+                  <div className="space-y-3 text-sm text-warning">
                     <p>To enable image uploads, please configure these environment variables:</p>
-                    <div className="bg-amber-100/50 rounded-lg p-3 space-y-1 font-mono text-xs">
+                    <div className="bg-muted rounded-lg p-3 space-y-1 font-mono text-xs">
                       <div>NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME</div>
                       <div>NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET</div>
                     </div>
-                    <p className="text-amber-700">Contact your administrator to enable this feature.</p>
+                    <p className="text-warning">Contact your administrator to enable this feature.</p>
                   </div>
                 </div>
               </div>
@@ -310,19 +310,19 @@ export default function ImageUpload({
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
           <Camera className="h-8 w-8 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Dish Image Upload</h2>
-          <p className="text-gray-600">Add beautiful images to showcase your dishes</p>
+          <h2 className="text-2xl font-bold text-foreground">Dish Image Upload</h2>
+          <p className="text-muted-foreground">Add beautiful images to showcase your dishes</p>
         </div>
       </div>
 
-      <Card className="border-0 shadow-xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600 text-white">
+      <Card className="border-0 overflow-hidden">
+        <CardHeader className="text-white">
           <CardTitle className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-lg">
+            <div className="p-2 bg-card/20 rounded-lg">
               <ImageIcon className="h-5 w-5" />
             </div>
             <div>
@@ -337,26 +337,26 @@ export default function ImageUpload({
         <CardContent className="p-8 space-y-8">
           {/* Success Message */}
           {success && (
-            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl flex items-start gap-3 shadow-sm">
-              <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle2 className="h-4 w-4 text-green-600" />
+            <div className="p-4 border border-border rounded-md flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                <CheckCircle2 className="h-4 w-4 text-success" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-green-800">{success}</p>
-                <p className="text-xs text-green-600 mt-1">Your image is ready to use!</p>
+                <p className="text-sm font-medium text-success">{success}</p>
+                <p className="text-xs text-success mt-1">Your image is ready to use!</p>
               </div>
             </div>
           )}
 
           {/* Error Message */}
           {error && (
-            <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl flex items-start gap-3 shadow-sm">
-              <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <AlertCircle className="h-4 w-4 text-red-600" />
+            <div className="p-4 border border-border rounded-md flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                <AlertCircle className="h-4 w-4 text-destructive" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-800">{error}</p>
-                <p className="text-xs text-red-600 mt-1">Please check your file and try again</p>
+                <p className="text-sm font-medium text-destructive">{error}</p>
+                <p className="text-xs text-destructive mt-1">Please check your file and try again</p>
               </div>
             </div>
           )}
@@ -366,32 +366,32 @@ export default function ImageUpload({
             {currentImageUrl ? (
               /* Image Preview */
               <div className="space-y-4">
-                <div className="relative w-full h-64 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl overflow-hidden shadow-inner">
+                <div className="relative w-full h-64 rounded-lg overflow-hidden">
                   <Image
                     src={currentImageUrl}
                     alt="Dish preview"
                     fill
-                    className="object-cover transition-transform duration-300 hover:scale-105"
+                    className="object-cover transition-transform duration-300"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                   <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-colors duration-300" />
                   
                   {/* Image overlay with info */}
                   <div className="absolute bottom-4 left-4 right-4">
-                    <div className="bg-white/90 backdrop-blur-sm rounded-xl p-3 shadow-lg">
+                    <div className="bg-card/90 rounded-md p-3">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                          <CheckCircle className="h-4 w-4 text-green-600" />
-                          <span className="text-sm font-medium text-gray-900">Image uploaded</span>
+                          <CheckCircle className="h-4 w-4 text-success" />
+                          <span className="text-sm font-medium text-foreground">Image uploaded</span>
                         </div>
                         <div className="flex items-center gap-1">
                           {imageInfo.format && (
-                            <Badge className="bg-blue-100 text-blue-700 border-blue-200 text-xs">
+                            <Badge className="bg-muted text-muted-foreground border-border text-xs">
                               {imageInfo.format}
                             </Badge>
                           )}
                           {imageInfo.dimensions && (
-                            <Badge className="bg-purple-100 text-purple-700 border-purple-200 text-xs">
+                            <Badge className="bg-muted text-muted-foreground border-border text-xs">
                               {imageInfo.dimensions}
                             </Badge>
                           )}
@@ -406,7 +406,7 @@ export default function ImageUpload({
                   <Button
                     variant="outline"
                     onClick={handlePreview}
-                    className="border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
+                    className="border-border text-muted-foreground hover:bg-muted hover:border-border"
                   >
                     <Eye className="h-4 w-4 mr-2" />
                     Preview
@@ -414,7 +414,7 @@ export default function ImageUpload({
                   <Button
                     variant="outline"
                     onClick={downloadImage}
-                    className="border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300"
+                    className="border-border text-muted-foreground hover:bg-muted hover:border-border"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Download
@@ -422,7 +422,7 @@ export default function ImageUpload({
                   <Button
                     variant="outline"
                     onClick={triggerFileSelect}
-                    className="border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300"
+                    className="border-border text-success hover:bg-muted hover:border-border"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Replace
@@ -430,7 +430,7 @@ export default function ImageUpload({
                   <Button
                     variant="outline"
                     onClick={removeImage}
-                    className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                    className="border-border text-destructive hover:bg-muted hover:border-border"
                   >
                     <X className="h-4 w-4 mr-2" />
                     Remove
@@ -439,12 +439,12 @@ export default function ImageUpload({
 
                 {/* Image Details */}
                 {(imageInfo.dimensions || imageInfo.size) && (
-                  <div className="p-4 bg-gradient-to-r from-gray-50 to-slate-50 border border-gray-200 rounded-xl">
+                  <div className="p-4 border border-border rounded-md">
                     <div className="flex items-center gap-2 mb-2">
-                      <Info className="h-4 w-4 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-800">Image Details</span>
+                      <Info className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium text-foreground">Image Details</span>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm text-muted-foreground">
                       {imageInfo.dimensions && (
                         <div>
                           <span className="font-medium">Dimensions:</span>
@@ -473,13 +473,13 @@ export default function ImageUpload({
             ) : (
               /* Upload Area */
               <div 
-                className={`border-2 border-dashed rounded-2xl p-12 text-center transition-all duration-300 ${
-                  isDragOver 
-                    ? 'border-blue-400 bg-blue-50' 
-                    : isUploading 
-                      ? 'border-purple-400 bg-purple-50'
-                      : 'border-gray-300 hover:border-blue-400 hover:bg-blue-50/50'
-                }`}
+                className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${
+ isDragOver 
+ ? 'border-border-strong bg-muted' 
+ : isUploading 
+ ? 'border-border-strong bg-muted'
+ : 'border-border hover:border-border-strong hover:bg-muted'
+ }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
@@ -498,35 +498,35 @@ export default function ImageUpload({
                   {isUploading ? (
                     <>
                       <div className="relative">
-                        <Loader2 className="h-16 w-16 text-purple-500 mx-auto animate-spin" />
-                        <div className="absolute inset-0 bg-purple-100 rounded-full opacity-20"></div>
+                        <Loader2 className="h-16 w-16 text-muted-foreground mx-auto animate-spin" />
+                        <div className="absolute inset-0 bg-muted rounded-full opacity-20"></div>
                       </div>
                       <div>
-                        <p className="text-lg font-medium text-purple-600 mb-2">Uploading image...</p>
-                        <div className="w-full max-w-xs mx-auto bg-purple-200 rounded-full h-3 overflow-hidden">
+                        <p className="text-lg font-medium text-muted-foreground mb-2">Uploading image...</p>
+                        <div className="w-full max-w-xs mx-auto bg-muted rounded-full h-3 overflow-hidden">
                           <div 
-                            className="bg-purple-600 h-3 rounded-full transition-all duration-300"
+                            className="bg-primary h-3 rounded-full transition-colors"
                             style={{ width: `${uploadProgress}%` }}
                           ></div>
                         </div>
-                        <p className="text-sm text-purple-500 mt-2">{Math.round(uploadProgress)}% complete</p>
+                        <p className="text-sm text-muted-foreground mt-2">{Math.round(uploadProgress)}% complete</p>
                       </div>
                     </>
                   ) : (
                     <>
                       <div className="relative">
                         <CloudUpload className={`h-16 w-16 mx-auto transition-colors ${
-                          isDragOver ? 'text-blue-500' : 'text-gray-400'
-                        }`} />
+ isDragOver ? 'text-muted-foreground' : 'text-muted-foreground'
+ }`} />
                         {isDragOver && (
-                          <div className="absolute inset-0 bg-blue-100 rounded-full opacity-20 animate-pulse"></div>
+                          <div className="absolute inset-0 bg-muted rounded-full opacity-20"></div>
                         )}
                       </div>
                       <div>
-                        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                        <h3 className="text-xl font-semibold text-foreground mb-2">
                           {isDragOver ? 'Drop your image here' : 'Upload Dish Image'}
                         </h3>
-                        <p className="text-gray-600 mb-4">
+                        <p className="text-muted-foreground mb-4">
                           {isDragOver 
                             ? 'Release to upload your image' 
                             : 'Drag and drop an image file, or click to browse'
@@ -534,13 +534,13 @@ export default function ImageUpload({
                         </p>
                         <Button
                           onClick={triggerFileSelect}
-                          className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-lg hover:shadow-xl transition-all duration-300"
+                          className="transition-colors"
                           disabled={isUploading}
                         >
                           <Upload className="h-4 w-4 mr-2" />
                           Choose Image
                         </Button>
-                        <p className="text-xs text-gray-500 mt-4">
+                        <p className="text-xs text-muted-foreground mt-4">
                           Supports: JPG, PNG, WebP, GIF (max 10MB)
                         </p>
                       </div>
@@ -552,22 +552,22 @@ export default function ImageUpload({
           </div>
 
           {/* Image Requirements */}
-          <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
+          <div className="p-6 border border-border rounded-md">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                <FileImage className="h-5 w-5 text-blue-600" />
+              <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+                <FileImage className="h-5 w-5 text-muted-foreground" />
               </div>
               <div className="flex-1">
-                <p className="text-lg font-semibold text-blue-900 mb-3">
+                <p className="text-lg font-semibold text-muted-foreground mb-3">
                   Image Requirements & Tips
                 </p>
                 <div className="grid md:grid-cols-2 gap-4 text-sm">
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-blue-800">
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <Zap className="h-4 w-4" />
                       <span className="font-medium">Technical Requirements</span>
                     </div>
-                    <ul className="space-y-1 text-blue-700 ml-6">
+                    <ul className="space-y-1 text-muted-foreground ml-6">
                       <li>• Format: JPG, PNG, WebP, or GIF</li>
                       <li>• Maximum size: 10MB</li>
                       <li>• Minimum: 400×300 pixels</li>
@@ -575,11 +575,11 @@ export default function ImageUpload({
                     </ul>
                   </div>
                   <div className="space-y-2">
-                    <div className="flex items-center gap-2 text-blue-800">
+                    <div className="flex items-center gap-2 text-muted-foreground">
                       <Sparkles className="h-4 w-4" />
                       <span className="font-medium">Best Practices</span>
                     </div>
-                    <ul className="space-y-1 text-blue-700 ml-6">
+                    <ul className="space-y-1 text-muted-foreground ml-6">
                       <li>• Use good lighting and clear focus</li>
                       <li>• Show the complete dish</li>
                       <li>• Use appetizing angles</li>
@@ -587,8 +587,8 @@ export default function ImageUpload({
                     </ul>
                   </div>
                 </div>
-                <div className="mt-4 p-3 bg-blue-100/50 rounded-lg">
-                  <p className="text-sm text-blue-800">
+                <div className="mt-4 p-3 bg-muted rounded-lg">
+                  <p className="text-sm text-muted-foreground">
                     <strong>Storage:</strong> Images will be organized in &apos;{restaurantName.replace(/\s+/g, '_').toLowerCase()}/dishes&apos; folder
                   </p>
                 </div>

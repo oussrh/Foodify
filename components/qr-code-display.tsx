@@ -46,9 +46,9 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
   const [previewMode, setPreviewMode] = useState<'small' | 'large'>('small')
   
   // Generate QR code URL using a QR code service with enhanced styling
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}&color=4f46e5&bgcolor=ffffff&qzone=2&format=png`
-  const qrCodeLargeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(url)}&color=4f46e5&bgcolor=ffffff&qzone=2&format=png`
-  const qrCodeDownloadUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(url)}&color=4f46e5&bgcolor=ffffff&qzone=2&format=png`
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(url)}&color=1b1a17&bgcolor=ffffff&qzone=2&format=png`
+  const qrCodeLargeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=600x600&data=${encodeURIComponent(url)}&color=1b1a17&bgcolor=ffffff&qzone=2&format=png`
+  const qrCodeDownloadUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1200x1200&data=${encodeURIComponent(url)}&color=1b1a17&bgcolor=ffffff&qzone=2&format=png`
 
   const copyToClipboard = useCallback(async () => {
     try {
@@ -130,7 +130,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
       {/* Main QR Code Display */}
       <div className="text-center space-y-3">
         <div className="relative group">
-          <div className="bg-white p-4 rounded-2xl shadow-2xl inline-block ring-4 ring-white/20 transition-all duration-300 group-hover:shadow-3xl group-hover:scale-105">
+          <div className="bg-card p-4 rounded-lg inline-block ring-4 ring-white/20 transition-colors group-hover:shadow-3xl">
             <div className="relative">
               <Image
                 src={qrCodeUrl}
@@ -140,11 +140,11 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
                 className="w-24 h-24 lg:w-32 lg:h-32 transition-transform duration-300"
                 priority
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-blue-500/10 to-transparent rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
           </div>
           {/* Floating badge */}
-          <div className="absolute -top-2 -right-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full p-2 shadow-lg">
+          <div className="absolute -top-2 -right-2 rounded-full p-2">
             <Sparkles className="h-3 w-3 text-white" />
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
           <Button 
             variant="outline" 
             size="sm"
-            className="mt-3 bg-background/50 border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-all duration-300 shadow-lg hover:shadow-xl"
+            className="mt-3 bg-background/50 border-border text-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
           >
             <QrCode className="h-4 w-4 mr-2" />
             QR Details
@@ -174,7 +174,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
         
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="text-center space-y-3">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-500 rounded-2xl flex items-center justify-center shadow-lg">
+            <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
               <QrCode className="h-8 w-8 text-white" />
             </div>
             <DialogTitle className="text-2xl font-bold text-foreground">
@@ -191,7 +191,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
                   variant={previewMode === 'small' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setPreviewMode('small')}
-                  className={previewMode === 'small' ? 'bg-purple-600' : ''}
+                  className={previewMode === 'small' ? 'bg-primary' : ''}
                 >
                   Small
                 </Button>
@@ -199,24 +199,24 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
                   variant={previewMode === 'large' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setPreviewMode('large')}
-                  className={previewMode === 'large' ? 'bg-purple-600' : ''}
+                  className={previewMode === 'large' ? 'bg-primary' : ''}
                 >
                   Large
                 </Button>
               </div>
               
               <div className="relative inline-block">
-                <div className="bg-white p-6 rounded-2xl shadow-2xl border-4 border-gray-100">
+                <div className="bg-card p-6 rounded-lg border-4 border-border">
                   <Image
                     src={previewMode === 'large' ? qrCodeLargeUrl : qrCodeUrl}
                     alt={`QR Code for ${restaurantName} digital menu`}
                     width={previewMode === 'large' ? 400 : 300}
                     height={previewMode === 'large' ? 400 : 300}
-                    className={`${previewMode === 'large' ? 'w-80 h-80' : 'w-60 h-60'} transition-all duration-300`}
+                    className={`${previewMode === 'large' ? 'w-80 h-80' : 'w-60 h-60'} transition-colors`}
                   />
                 </div>
                 {/* Corner decoration */}
-                <div className="absolute -top-3 -right-3 bg-gradient-to-r from-green-400 to-blue-500 rounded-full p-2 shadow-lg">
+                <div className="absolute -top-3 -right-3 rounded-full p-2">
                   <CheckCircle2 className="h-4 w-4 text-white" />
                 </div>
               </div>
@@ -224,42 +224,42 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
             
             {/* Features Grid */}
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-950/30 dark:to-pink-950/30 border border-purple-200 dark:border-purple-800 rounded-xl">
-                <h4 className="font-semibold text-purple-900 dark:text-purple-100 mb-3 flex items-center gap-2">
+              <div className="p-4 border border-border rounded-md">
+                <h4 className="font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <Users className="h-4 w-4" />
                   Customer Experience
                 </h4>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
                     <Smartphone className="h-4 w-4" />
                     <span>Mobile-optimized digital menu</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
                     <Camera className="h-4 w-4" />
                     <span>Interactive AR dish visualization</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-purple-700 dark:text-purple-300">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
                     <Zap className="h-4 w-4" />
                     <span>Real-time menu updates</span>
                   </div>
                 </div>
               </div>
 
-              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
-                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+              <div className="p-4 border border-border rounded-md">
+                <h4 className="font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <Star className="h-4 w-4" />
                   Business Benefits
                 </h4>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
                     <Globe className="h-4 w-4" />
                     <span>Contactless menu access</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
                     <CheckCircle className="h-4 w-4" />
                     <span>Instant menu updates</span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-blue-700 dark:text-blue-300">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
                     <Eye className="h-4 w-4" />
                     <span>Enhanced customer engagement</span>
                   </div>
@@ -268,7 +268,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
             </div>
             
             {/* URL Display */}
-            <div className="p-4 bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-900/30 dark:to-slate-900/30 border border-gray-200 dark:border-gray-800 rounded-xl">
+            <div className="p-4 border border-border rounded-md">
               <div className="flex items-center justify-between mb-3">
                 <p className="text-sm font-semibold text-foreground flex items-center gap-2">
                   <Globe className="h-4 w-4" />
@@ -278,7 +278,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
                   variant="ghost"
                   size="sm"
                   onClick={openMenuPreview}
-                  className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                  className="text-muted-foreground hover:text-muted-foreground hover:bg-muted"
                 >
                   <Eye className="h-4 w-4 mr-1" />
                   Preview
@@ -292,11 +292,11 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
                   variant="outline"
                   size="sm"
                   onClick={copyToClipboard}
-                  className={`transition-all duration-200 ${
-                    copied 
-                      ? "border-green-200 text-green-600 bg-green-50" 
-                      : "border-gray-200 hover:border-blue-300 hover:bg-blue-50"
-                  }`}
+                  className={`transition-colors ${
+ copied 
+ ? "border-border text-success bg-muted" 
+ : "border-border hover:border-border hover:bg-muted"
+ }`}
                 >
                   {copied ? (
                     <CheckCircle className="h-4 w-4" />
@@ -306,9 +306,9 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
                 </Button>
               </div>
               {copied && (
-                <div className="flex items-center gap-2 mt-2 p-2 bg-green-50 border border-green-200 rounded-lg">
-                  <CheckCircle className="h-4 w-4 text-green-600" />
-                  <p className="text-sm text-green-700 font-medium">URL copied to clipboard!</p>
+                <div className="flex items-center gap-2 mt-2 p-2 bg-muted border border-border rounded-lg">
+                  <CheckCircle className="h-4 w-4 text-success" />
+                  <p className="text-sm text-success font-medium">URL copied to clipboard!</p>
                 </div>
               )}
             </div>
@@ -318,7 +318,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
               <Button
                 onClick={downloadQRCode}
                 disabled={isDownloading}
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="text-white transition-colors"
               >
                 {isDownloading ? (
                   <>
@@ -336,7 +336,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
               <Button
                 onClick={shareMenu}
                 variant="outline"
-                className="border-green-200 text-green-600 hover:bg-green-50 hover:border-green-300 transition-all duration-200"
+                className="border-border text-success hover:bg-muted hover:border-border transition-colors"
               >
                 <Share2 className="h-4 w-4 mr-2" />
                 Share Menu
@@ -345,7 +345,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
               <Button
                 onClick={openMenuPreview}
                 variant="outline"
-                className="border-purple-200 text-purple-600 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200"
+                className="border-border text-muted-foreground hover:bg-muted hover:border-border transition-colors"
               >
                 <Eye className="h-4 w-4 mr-2" />
                 Preview Menu
@@ -354,37 +354,37 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
             
             {/* Enhanced Instructions */}
             <div className="grid md:grid-cols-2 gap-4">
-              <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 rounded-xl">
-                <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
+              <div className="p-4 border border-border rounded-md">
+                <h4 className="font-semibold text-muted-foreground mb-3 flex items-center gap-2">
                   <Printer className="h-4 w-4" />
                   Setup Instructions
                 </h4>
-                <ol className="text-sm text-blue-700 dark:text-blue-300 space-y-2">
+                <ol className="text-sm text-muted-foreground dark:text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">1</span>
                     <span>Download the HD QR code</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">2</span>
                     <span>Print and place on tables or entrance</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">3</span>
                     <span>Customers scan to access digital menu</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                    <span className="flex-shrink-0 w-5 h-5 bg-muted text-muted-foreground dark:text-muted-foreground rounded-full flex items-center justify-center text-xs font-bold">4</span>
                     <span>They can explore dishes in AR</span>
                   </li>
                 </ol>
               </div>
 
-              <div className="p-4 bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-950/30 dark:to-emerald-950/30 border border-green-200 dark:border-green-800 rounded-xl">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-3 flex items-center gap-2">
+              <div className="p-4 border border-border rounded-md">
+                <h4 className="font-semibold text-success mb-3 flex items-center gap-2">
                   <Info className="h-4 w-4" />
                   Marketing Tips
                 </h4>
-                <ul className="text-sm text-green-700 dark:text-green-300 space-y-2">
+                <ul className="text-sm text-success dark:text-muted-foreground space-y-2">
                   <li className="flex items-start gap-2">
                     <MessageSquare className="h-4 w-4 mt-0.5 flex-shrink-0" />
                     <span>Add &ldquo;Scan for AR Menu&rdquo; signage</span>
@@ -406,7 +406,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
             </div>
 
             {/* Technical Info */}
-            <div className="p-4 bg-muted border border-border rounded-xl">
+            <div className="p-4 bg-muted border border-border rounded-md">
               <h4 className="font-medium text-foreground mb-2 flex items-center gap-2">
                 <Info className="h-4 w-4" />
                 Technical Information

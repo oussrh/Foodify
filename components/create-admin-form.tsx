@@ -47,49 +47,49 @@ export default function CreateAdminForm() {
   }
 
   return (
-    <Card className="border-0 shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-red-50 to-pink-50 border-b">
+    <Card className="border-0">
+      <CardHeader className="border-b">
         <CardTitle className="flex items-center gap-2">
-          <UserPlus className="h-5 w-5 text-red-600" />
+          <UserPlus className="h-5 w-5 text-destructive" />
           Create New Administrator
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
         {success && (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
-            <Check className="h-4 w-4 text-green-600" />
-            <span className="text-sm text-green-700 font-medium">Administrator created successfully!</span>
+          <div className="mb-6 p-4 bg-muted border border-border rounded-lg flex items-center gap-2">
+            <Check className="h-4 w-4 text-success" />
+            <span className="text-sm text-success font-medium">Administrator created successfully!</span>
           </div>
         )}
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
-            <AlertCircle className="h-4 w-4 text-red-600" />
-            <span className="text-sm text-red-700 font-medium">{error}</span>
+          <div className="mb-6 p-4 bg-muted border border-border rounded-lg flex items-center gap-2">
+            <AlertCircle className="h-4 w-4 text-destructive" />
+            <span className="text-sm text-destructive font-medium">{error}</span>
           </div>
         )}
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Account Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Account Information</h3>
+            <h3 className="text-lg font-semibold text-foreground border-b pb-2">Account Information</h3>
             
             {/* Email */}
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Label htmlFor="email" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Mail className="h-4 w-4" />
                 Email Address
               </Label>
               <Input 
                 id="email" 
                 {...register('email')} 
-                className="border-red-200 focus:border-red-400"
+                className="border-border focus:border-border-strong"
                 placeholder="admin@foodify.com"
                 disabled={isSubmitting}
               />
               {errors.email && (
-                <p className="text-xs text-red-600 flex items-center gap-1">
-                  <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                <p className="text-xs text-destructive flex items-center gap-1">
+                  <span className="w-1 h-1 bg-destructive rounded-full"></span>
                   {errors.email.message}
                 </p>
               )}
@@ -97,7 +97,7 @@ export default function CreateAdminForm() {
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+              <Label htmlFor="password" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                 <Lock className="h-4 w-4" />
                 Password
               </Label>
@@ -105,13 +105,13 @@ export default function CreateAdminForm() {
                 id="password" 
                 type="password" 
                 {...register('password')} 
-                className="border-red-200 focus:border-red-400"
+                className="border-border focus:border-border-strong"
                 placeholder="Minimum 6 characters"
                 disabled={isSubmitting}
               />
               {errors.password && (
-                <p className="text-xs text-red-600 flex items-center gap-1">
-                  <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                <p className="text-xs text-destructive flex items-center gap-1">
+                  <span className="w-1 h-1 bg-destructive rounded-full"></span>
                   {errors.password.message}
                 </p>
               )}
@@ -120,14 +120,14 @@ export default function CreateAdminForm() {
 
           {/* Administrator Privileges */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Administrator Privileges</h3>
+            <h3 className="text-lg font-semibold text-foreground border-b pb-2">Administrator Privileges</h3>
             
-            <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <div className="p-4 bg-muted border border-border rounded-lg">
               <div className="flex items-center gap-2 mb-3">
-                <Shield className="h-5 w-5 text-red-600" />
-                <span className="text-sm font-medium text-red-900">Super Administrator Access</span>
+                <Shield className="h-5 w-5 text-destructive" />
+                <span className="text-sm font-medium text-destructive">Super Administrator Access</span>
               </div>
-              <div className="space-y-2 text-sm text-red-700">
+              <div className="space-y-2 text-sm text-destructive">
                 <p>• Full access to all restaurants and menus</p>
                 <p>• Ability to create and manage admin accounts</p>
                 <p>• Access to all user data and system settings</p>
@@ -135,18 +135,18 @@ export default function CreateAdminForm() {
               </div>
             </div>
             
-            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
-              <p className="text-sm text-amber-700">
+            <div className="p-3 bg-muted border border-border rounded-lg">
+              <p className="text-sm text-warning">
                 <strong>Important:</strong> Only create administrator accounts for trusted personnel who require full system access.
               </p>
             </div>
           </div>
 
-          <div className="pt-4 border-t border-gray-200 flex gap-3">
+          <div className="pt-4 border-t border-border flex gap-3">
             <Button 
               type="submit" 
               disabled={isSubmitting || !isDirty}
-              className="flex-1 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 disabled:opacity-50"
+              className="flex-1 disabled:opacity-50"
             >
               {isSubmitting ? (
                 <div className="flex items-center gap-2">
@@ -162,7 +162,7 @@ export default function CreateAdminForm() {
             </Button>
             
             {isDirty && (
-              <div className="flex items-center text-sm text-amber-600">
+              <div className="flex items-center text-sm text-warning">
                 <AlertCircle className="h-4 w-4 mr-1" />
                 Unsaved changes
               </div>

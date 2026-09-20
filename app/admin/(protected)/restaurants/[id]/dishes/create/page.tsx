@@ -1,47 +1,35 @@
-import Link from 'next/link'
+import type { Route } from 'next'
 import prisma from '@/lib/prisma'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import CreateDishForm from '@/components/create-dish-form'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
-import { buttonVariants } from '@/components/ui/button'
+import { PageHeader } from '@/components/shell/page-header'
 
-export default async function CreateDishPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
+export default async function CreateDishPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
+  const session = await auth()
+  if (!session?.user?.email) redirect('/admin/login')
+
   const restaurant = await prisma.restaurant.findUnique({ where: { id } })
-  if (!restaurant) {
-    return <div className="py-12 text-center text-muted-foreground">Restaurant not found</div>
-  }
-  const subcategories = await prisma.menuSubcategory.findMany({
-    where: { category: { restaurantId: restaurant.id } },
-    orderBy: { nameEn: 'asc' },
+  if (!restaurant) redirect('/admin/restaurants')
+
+  const categories = await prisma.menuCategory.findMany({
+    where: { restaurantId: restaurant.id },
+    include: { subcategories: { orderBy: { sortOrder: 'asc' } } },
+    orderBy: { sortOrder: 'asc' },
   })
+  const subcategories = categories.flatMap((category) =>
+    category.subcategories.map((sub) => ({ id: sub.id, nameEn: `${category.nameEn} → ${sub.nameEn}` })),
+  )
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-semibold tracking-tight">Create Dish</h2>
-        <Link
-          href={`/admin/restaurants/${restaurant.id}/dishes`}
-          className={buttonVariants({ variant: 'outline' })}
-        >
-          Back to Dishes
-        </Link>
-      </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>New Dish Details</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CreateDishForm 
-            restaurantId={restaurant.id} 
-            subcategories={subcategories}
-            restaurantName={restaurant.name}
-          />
-        </CardContent>
-      </Card>
+    <div className="mx-auto flex max-w-3xl flex-col gap-6">
+      <PageHeader
+        title="New dish"
+        description={`It appears on ${restaurant.name}'s menu as soon as it is saved and live.`}
+        back={{ href: `/admin/restaurants/${restaurant.id}/dishes` as Route, label: 'All dishes' }}
+      />
+      <CreateDishForm restaurantId={restaurant.id} subcategories={subcategories} restaurantName={restaurant.name} />
     </div>
   )
 }

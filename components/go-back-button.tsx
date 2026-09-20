@@ -17,9 +17,9 @@ export default function GoBackButton() {
   return (
     <button 
       onClick={handleGoBack}
-      className="group inline-flex items-center gap-3 bg-white/80 hover:bg-white text-gray-700 hover:text-gray-900 px-8 py-4 rounded-2xl font-semibold transition-all duration-300 transform hover:scale-105 border border-gray-200/50 hover:border-gray-300 shadow-lg hover:shadow-xl backdrop-blur-sm"
+      className="group inline-flex items-center gap-3 bg-card/80 hover:bg-card text-muted-foreground hover:text-foreground px-8 py-4 rounded-lg font-semibold transition-colors transform border border-border/50 hover:border-border"
     >
-      <ArrowLeft className="h-5 w-5 transition-transform group-hover:-translate-x-1" />
+      <ArrowLeft className="h-5 w-5 transition-transform" />
       Go Back
     </button>
   )

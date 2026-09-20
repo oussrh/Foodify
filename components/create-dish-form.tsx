@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import DietarySelect from "@/components/dietary-select";
 import { Badge } from "@/components/ui/badge";
 import { createDish } from "@/app/actions/dish-actions";
 import ARFileUpload from "@/components/ar-file-upload";
@@ -48,6 +49,8 @@ const schema = z.object({
   subcategoryId: z.string().optional(),
   calories: z.string().optional(),
   isMostPurchased: z.boolean().optional(),
+  dietary: z.array(z.string()).optional(),
+  allergens: z.array(z.string()).optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -116,6 +119,8 @@ export default function CreateDishForm({
       usdzUrl: usdzUrl || '',
       glbUrl: glbUrl || '',
       isMostPurchased: data.isMostPurchased || false,
+      dietary: data.dietary || [],
+      allergens: data.allergens || [],
     }
     
     console.log('Create dish form submission data:', {
@@ -150,26 +155,26 @@ export default function CreateDishForm({
     <div className="space-y-8">
       {/* Success Message */}
       {success && (
-        <div className="p-4 bg-green-50 border border-green-200 rounded-lg flex items-center gap-2">
-          <CheckCircle className="h-4 w-4 text-green-600" />
-          <span className="text-sm text-green-700 font-medium">Dish created successfully!</span>
+        <div className="p-4 bg-muted border border-border rounded-lg flex items-center gap-2">
+          <CheckCircle className="h-4 w-4 text-success" />
+          <span className="text-sm text-success font-medium">Dish created successfully!</span>
         </div>
       )}
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
-          <AlertCircle className="h-4 w-4 text-red-600" />
-          <span className="text-sm text-red-700 font-medium">{error}</span>
+        <div className="p-4 bg-muted border border-border rounded-lg flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-destructive" />
+          <span className="text-sm text-destructive font-medium">{error}</span>
         </div>
       )}
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
-        <Card className="border-0 shadow-lg">
-          <CardHeader className="bg-gradient-to-r from-blue-50 to-cyan-50 border-b">
+        <Card className="border-0">
+          <CardHeader className="border-b">
             <CardTitle className="flex items-center gap-2">
-              <ChefHat className="h-5 w-5 text-blue-600" />
+              <ChefHat className="h-5 w-5 text-muted-foreground" />
               Basic Information
             </CardTitle>
           </CardHeader>
@@ -177,40 +182,40 @@ export default function CreateDishForm({
             {/* Names */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="nameEn" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Label htmlFor="nameEn" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Globe className="h-4 w-4" />
                   English Name
                 </Label>
                 <Input 
                   id="nameEn" 
                   {...register("nameEn")} 
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                   placeholder="Enter dish name in English"
                   disabled={isSubmitting}
                 />
                 {errors.nameEn && (
-                  <p className="text-xs text-red-600 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
                     {errors.nameEn.message}
                   </p>
                 )}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="nameFr" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Label htmlFor="nameFr" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Globe className="h-4 w-4" />
                   French Name
                 </Label>
                 <Input 
                   id="nameFr" 
                   {...register("nameFr")} 
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                   placeholder="Entrez le nom du plat en français"
                   disabled={isSubmitting}
                 />
                 {errors.nameFr && (
-                  <p className="text-xs text-red-600 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
                     {errors.nameFr.message}
                   </p>
                 )}
@@ -220,26 +225,26 @@ export default function CreateDishForm({
             {/* Descriptions */}
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="descriptionEn" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="descriptionEn" className="text-sm font-medium text-muted-foreground">
                   English Description
                 </Label>
                 <Textarea 
                   id="descriptionEn" 
                   {...register("descriptionEn")} 
-                  className="border-blue-200 focus:border-blue-400 min-h-[100px]"
+                  className="border-border focus:border-border-strong min-h-[100px]"
                   placeholder="Describe the dish in English"
                   disabled={isSubmitting}
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="descriptionFr" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="descriptionFr" className="text-sm font-medium text-muted-foreground">
                   French Description
                 </Label>
                 <Textarea 
                   id="descriptionFr" 
                   {...register("descriptionFr")} 
-                  className="border-blue-200 focus:border-blue-400 min-h-[100px]"
+                  className="border-border focus:border-border-strong min-h-[100px]"
                   placeholder="Décrivez le plat en français"
                   disabled={isSubmitting}
                 />
@@ -249,7 +254,7 @@ export default function CreateDishForm({
             {/* Price and Details */}
             <div className="grid md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="price" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Label htmlFor="price" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <DollarSign className="h-4 w-4" />
                   Price
                 </Label>
@@ -258,47 +263,57 @@ export default function CreateDishForm({
                   type="number" 
                   step="0.01" 
                   {...register("price")} 
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                   placeholder="0.00"
                   disabled={isSubmitting}
                 />
                 {errors.price && (
-                  <p className="text-xs text-red-600 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
                     {errors.price.message}
                   </p>
                 )}
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="calories" className="text-sm font-medium text-gray-700">
+                <Label htmlFor="calories" className="text-sm font-medium text-muted-foreground">
                   Calories (optional)
                 </Label>
                 <Input 
                   id="calories" 
                   type="number" 
                   {...register("calories")} 
-                  className="border-blue-200 focus:border-blue-400"
+                  className="border-border focus:border-border-strong"
                   placeholder="250"
                   disabled={isSubmitting}
                 />
                 {errors.calories && (
-                  <p className="text-xs text-red-600 flex items-center gap-1">
-                    <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
                     {errors.calories.message}
                   </p>
                 )}
               </div>
+
+              <div className="md:col-span-2">
+                <DietarySelect
+                  dietary={watch('dietary') || []}
+                  allergens={watch('allergens') || []}
+                  onDietaryChange={(v) => setValue('dietary', v, { shouldDirty: true })}
+                  onAllergensChange={(v) => setValue('allergens', v, { shouldDirty: true })}
+                  disabled={isSubmitting}
+                />
+              </div>
               
               <div className="space-y-2">
-                <Label htmlFor="subcategory" className="text-sm font-medium text-gray-700 flex items-center gap-2">
+                <Label htmlFor="subcategory" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Utensils className="h-4 w-4" />
                   Category
                 </Label>
                 <select
                   id="subcategory"
                   {...register("subcategoryId")}
-                  className="w-full border border-blue-200 focus:border-blue-400 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400/20"
+                  className="w-full border border-border focus:border-border-strong rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2"
                   disabled={isSubmitting}
                 >
                   <option value="">No category</option>
@@ -316,16 +331,16 @@ export default function CreateDishForm({
             
             {/* Special Options */}
             <div className="space-y-3">
-              <Label className="text-sm font-medium text-gray-700">Special Options</Label>
+              <Label className="text-sm font-medium text-muted-foreground">Special Options</Label>
               <div className="flex items-center gap-4">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
                     type="checkbox"
                     {...register("isMostPurchased")}
-                    className="rounded border-blue-200 text-blue-600 focus:ring-blue-400"
+                    className="rounded border-border text-muted-foreground"
                     disabled={isSubmitting}
                   />
-                  <span className="text-sm text-gray-700">Mark as Popular Dish</span>
+                  <span className="text-sm text-muted-foreground">Mark as Popular Dish</span>
                 </label>
               </div>
             </div>
@@ -355,11 +370,11 @@ export default function CreateDishForm({
         />
 
         {/* Submit Button */}
-        <div className="flex items-center gap-4 pt-4 border-t border-gray-200">
+        <div className="flex items-center gap-4 pt-4 border-t border-border">
           <Button 
             type="submit" 
             disabled={isSubmitting || !isDirty}
-            className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 disabled:opacity-50"
+            className="flex-1 disabled:opacity-50"
             size="lg"
           >
             {isSubmitting ? (
@@ -376,7 +391,7 @@ export default function CreateDishForm({
           </Button>
           
           {isDirty && (
-            <div className="flex items-center text-sm text-amber-600">
+            <div className="flex items-center text-sm text-warning">
               <AlertCircle className="h-4 w-4 mr-1" />
               Unsaved changes
             </div>

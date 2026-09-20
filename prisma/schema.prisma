@@ -125,6 +125,8 @@ model Dish {
   calories        Int?
   isMostPurchased Boolean          @default(false)
   sortOrder       Int
+  dietary         String[]         @default([])
+  allergens       String[]         @default([])
   createdAt       DateTime         @default(now())
   ingredients     Ingredient[]
   views           DishView[]

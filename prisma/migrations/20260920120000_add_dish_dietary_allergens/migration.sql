@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Dish" ADD COLUMN "dietary" TEXT[] DEFAULT ARRAY[]::TEXT[];
+ALTER TABLE "Dish" ADD COLUMN "allergens" TEXT[] DEFAULT ARRAY[]::TEXT[];

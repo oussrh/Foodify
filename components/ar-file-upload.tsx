@@ -226,19 +226,19 @@ export default function ARFileUpload({
     <div className="space-y-6">
       {/* Header Section */}
       <div className="text-center space-y-3">
-        <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-500 via-pink-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+        <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
           <Camera className="h-8 w-8 text-white" />
         </div>
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">AR Model Management</h2>
-          <p className="text-gray-600">Upload 3D models to enable AR experiences for your dishes</p>
+          <h2 className="text-2xl font-bold text-foreground">AR Model Management</h2>
+          <p className="text-muted-foreground">Upload 3D models to enable AR experiences for your dishes</p>
         </div>
       </div>
 
-      <Card className="border-0 shadow-xl overflow-hidden">
-        <CardHeader className="bg-gradient-to-r from-purple-600 via-pink-500 to-indigo-600 text-white">
+      <Card className="border-0 overflow-hidden">
+        <CardHeader className="text-white">
           <CardTitle className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-lg">
+            <div className="p-2 bg-card/20 rounded-lg">
               <Camera className="h-5 w-5" />
             </div>
             <div>
@@ -253,48 +253,48 @@ export default function ARFileUpload({
         <CardContent className="p-8 space-y-8">
           {/* Success Message */}
           {success && (
-            <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl flex items-start gap-3 shadow-sm">
-              <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+            <div className="p-4 border border-border rounded-md flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                <CheckCircle className="h-4 w-4 text-success" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-green-800">{success}</p>
-                <p className="text-xs text-green-600 mt-1">Your AR experience is ready!</p>
+                <p className="text-sm font-medium text-success">{success}</p>
+                <p className="text-xs text-success mt-1">Your AR experience is ready!</p>
               </div>
             </div>
           )}
 
           {/* Error Message */}
           {error && (
-            <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border border-red-200 rounded-xl flex items-start gap-3 shadow-sm">
-              <div className="flex-shrink-0 w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                <AlertCircle className="h-4 w-4 text-red-600" />
+            <div className="p-4 border border-border rounded-md flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-muted rounded-full flex items-center justify-center">
+                <AlertCircle className="h-4 w-4 text-destructive" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-red-800">{error}</p>
-                <p className="text-xs text-red-600 mt-1">Please check your file and try again</p>
+                <p className="text-sm font-medium text-destructive">{error}</p>
+                <p className="text-xs text-destructive mt-1">Please check your file and try again</p>
               </div>
             </div>
           )}
 
           {/* Configuration Notice */}
           {!isCloudinaryConfigured && (
-            <div className="p-6 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-sm">
+            <div className="p-6 border border-border rounded-md">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-amber-100 rounded-xl flex items-center justify-center">
-                  <AlertCircle className="h-5 w-5 text-amber-600" />
+                <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+                  <AlertCircle className="h-5 w-5 text-warning" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-lg font-semibold text-amber-900 mb-2">
+                  <p className="text-lg font-semibold text-warning mb-2">
                     Configuration Required
                   </p>
-                  <div className="space-y-3 text-sm text-amber-800">
+                  <div className="space-y-3 text-sm text-warning">
                     <p>To enable AR file uploads, please configure these environment variables:</p>
-                    <div className="bg-amber-100/50 rounded-lg p-3 space-y-1 font-mono text-xs">
+                    <div className="bg-muted rounded-lg p-3 space-y-1 font-mono text-xs">
                       <div>NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME</div>
                       <div>NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET</div>
                     </div>
-                    <p className="text-amber-700">Contact your administrator to enable this feature.</p>
+                    <p className="text-warning">Contact your administrator to enable this feature.</p>
                   </div>
                 </div>
               </div>
@@ -303,32 +303,32 @@ export default function ARFileUpload({
 
           {/* File Format Info */}
           {isCloudinaryConfigured && (
-            <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-200 rounded-xl shadow-sm">
+            <div className="p-6 border border-border rounded-md">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
-                  <Info className="h-5 w-5 text-blue-600" />
+                <div className="flex-shrink-0 w-10 h-10 bg-muted rounded-md flex items-center justify-center">
+                  <Info className="h-5 w-5 text-muted-foreground" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-lg font-semibold text-blue-900 mb-3">
+                  <p className="text-lg font-semibold text-muted-foreground mb-3">
                     AR Model Requirements
                   </p>
                   <div className="grid md:grid-cols-2 gap-4 text-sm">
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-blue-800">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Apple className="h-4 w-4" />
                         <span className="font-medium">USDZ Format</span>
                       </div>
-                      <p className="text-blue-700">iOS devices (iPhone/iPad) - Apple&apos;s AR Quick Look</p>
+                      <p className="text-muted-foreground">iOS devices (iPhone/iPad) - Apple&apos;s AR Quick Look</p>
                     </div>
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-blue-800">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Globe className="h-4 w-4" />
                         <span className="font-medium">GLB Format</span>
                       </div>
-                      <p className="text-blue-700">Android and web browsers - WebXR compatible</p>
+                      <p className="text-muted-foreground">Android and web browsers - WebXR compatible</p>
                     </div>
                   </div>
-                  <div className="mt-4 p-3 bg-blue-100/50 rounded-lg space-y-1 text-sm text-blue-800">
+                  <div className="mt-4 p-3 bg-muted rounded-lg space-y-1 text-sm text-muted-foreground">
                     <p><strong>File size:</strong> Maximum 50MB per file</p>
                     <p><strong>Storage:</strong> Files organized in &apos;{restaurantName.replace(/\s+/g, '_').toLowerCase()}/ar&apos;</p>
                   </div>
@@ -344,15 +344,15 @@ export default function ARFileUpload({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Smartphone className="h-5 w-5 text-blue-600" />
+                    <div className="p-2 bg-muted rounded-lg">
+                      <Smartphone className="h-5 w-5 text-muted-foreground" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">iOS AR Model</h4>
-                      <p className="text-sm text-gray-600">USDZ format</p>
+                      <h4 className="font-semibold text-foreground">iOS AR Model</h4>
+                      <p className="text-sm text-muted-foreground">USDZ format</p>
                     </div>
                   </div>
-                  <Badge className="bg-blue-100 text-blue-700 border-blue-200 flex items-center gap-1">
+                  <Badge className="bg-muted text-muted-foreground border-border flex items-center gap-1">
                     <Apple className="h-3 w-3" />
                     iOS Only
                   </Badge>
@@ -360,12 +360,12 @@ export default function ARFileUpload({
                 
                 {currentUsdzUrl ? (
                   <div className="space-y-4">
-                    <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                    <div className="p-4 border border-border rounded-md">
                       <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                        <CheckCircle className="h-5 w-5 text-success mt-0.5" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-green-900">USDZ model uploaded</p>
-                          <p className="text-xs text-green-600 break-all mt-1">{currentUsdzUrl}</p>
+                          <p className="text-sm font-medium text-success">USDZ model uploaded</p>
+                          <p className="text-xs text-success break-all mt-1">{currentUsdzUrl}</p>
                         </div>
                       </div>
                     </div>
@@ -374,7 +374,7 @@ export default function ARFileUpload({
                         variant="outline"
                         size="sm"
                         onClick={() => handlePreview(currentUsdzUrl, 'usdz')}
-                        className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                        className="border-border text-muted-foreground hover:bg-muted"
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Preview
@@ -383,7 +383,7 @@ export default function ARFileUpload({
                         variant="outline"
                         size="sm"
                         onClick={() => downloadFile(currentUsdzUrl, 'usdz')}
-                        className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                        className="border-border text-muted-foreground hover:bg-muted"
                       >
                         <Download className="h-4 w-4 mr-2" />
                         Download
@@ -392,7 +392,7 @@ export default function ARFileUpload({
                         variant="outline"
                         size="sm"
                         onClick={() => removeFile('usdz')}
-                        className="border-red-200 text-red-600 hover:bg-red-50"
+                        className="border-border text-destructive hover:bg-muted"
                       >
                         <X className="h-4 w-4 mr-2" />
                         Remove
@@ -400,7 +400,7 @@ export default function ARFileUpload({
                     </div>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-blue-400 hover:bg-blue-50/50 transition-all duration-200 group">
+                  <div className="border-2 border-dashed border-border rounded-md p-8 text-center hover:border-border-strong hover:bg-muted transition-colors group">
                     <input
                       type="file"
                       accept=".usdz"
@@ -414,27 +414,27 @@ export default function ARFileUpload({
                         {isUploading && uploadType === 'usdz' ? (
                           <>
                             <div className="relative">
-                              <Loader2 className="h-10 w-10 text-blue-500 mx-auto animate-spin" />
-                              <div className="absolute inset-0 bg-blue-100 rounded-full opacity-20"></div>
+                              <Loader2 className="h-10 w-10 text-muted-foreground mx-auto animate-spin" />
+                              <div className="absolute inset-0 bg-muted rounded-full opacity-20"></div>
                             </div>
                             <div>
-                              <p className="text-sm text-blue-600 font-medium">Uploading USDZ...</p>
-                              <div className="mt-2 w-full bg-blue-200 rounded-full h-2">
+                              <p className="text-sm text-muted-foreground font-medium">Uploading USDZ...</p>
+                              <div className="mt-2 w-full bg-muted rounded-full h-2">
                                 <div 
-                                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                  className="bg-primary h-2 rounded-full transition-colors"
                                   style={{ width: `${uploadProgress}%` }}
                                 ></div>
                               </div>
-                              <p className="text-xs text-blue-500 mt-1">{Math.round(uploadProgress)}%</p>
+                              <p className="text-xs text-muted-foreground mt-1">{Math.round(uploadProgress)}%</p>
                             </div>
                           </>
                         ) : (
                           <>
-                            <CloudUpload className="h-10 w-10 text-gray-400 mx-auto group-hover:text-blue-500 transition-colors" />
+                            <CloudUpload className="h-10 w-10 text-muted-foreground mx-auto group-hover:text-muted-foreground transition-colors" />
                             <div>
-                              <p className="text-sm font-medium text-gray-900 group-hover:text-blue-600">Upload USDZ file</p>
-                              <p className="text-xs text-gray-500 mt-1">Click to browse or drag and drop</p>
-                              <p className="text-xs text-blue-600 mt-2">For iOS AR Quick Look</p>
+                              <p className="text-sm font-medium text-foreground group-hover:text-muted-foreground">Upload USDZ file</p>
+                              <p className="text-xs text-muted-foreground mt-1">Click to browse or drag and drop</p>
+                              <p className="text-xs text-muted-foreground mt-2">For iOS AR Quick Look</p>
                             </div>
                           </>
                         )}
@@ -448,15 +448,15 @@ export default function ARFileUpload({
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <Monitor className="h-5 w-5 text-green-600" />
+                    <div className="p-2 bg-muted rounded-lg">
+                      <Monitor className="h-5 w-5 text-success" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Web AR Model</h4>
-                      <p className="text-sm text-gray-600">GLB format</p>
+                      <h4 className="font-semibold text-foreground">Web AR Model</h4>
+                      <p className="text-sm text-muted-foreground">GLB format</p>
                     </div>
                   </div>
-                  <Badge className="bg-green-100 text-green-700 border-green-200 flex items-center gap-1">
+                  <Badge className="bg-muted text-success border-border flex items-center gap-1">
                     <Globe className="h-3 w-3" />
                     All Devices
                   </Badge>
@@ -464,12 +464,12 @@ export default function ARFileUpload({
                 
                 {currentGlbUrl ? (
                   <div className="space-y-4">
-                    <div className="p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                    <div className="p-4 border border-border rounded-md">
                       <div className="flex items-start gap-3">
-                        <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
+                        <CheckCircle className="h-5 w-5 text-success mt-0.5" />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-green-900">GLB model uploaded</p>
-                          <p className="text-xs text-green-600 break-all mt-1">{currentGlbUrl}</p>
+                          <p className="text-sm font-medium text-success">GLB model uploaded</p>
+                          <p className="text-xs text-success break-all mt-1">{currentGlbUrl}</p>
                         </div>
                       </div>
                     </div>
@@ -478,7 +478,7 @@ export default function ARFileUpload({
                         variant="outline"
                         size="sm"
                         onClick={() => handlePreview(currentGlbUrl, 'glb')}
-                        className="border-blue-200 text-blue-600 hover:bg-blue-50"
+                        className="border-border text-muted-foreground hover:bg-muted"
                       >
                         <Eye className="h-4 w-4 mr-2" />
                         Preview
@@ -487,7 +487,7 @@ export default function ARFileUpload({
                         variant="outline"
                         size="sm"
                         onClick={() => downloadFile(currentGlbUrl, 'glb')}
-                        className="border-purple-200 text-purple-600 hover:bg-purple-50"
+                        className="border-border text-muted-foreground hover:bg-muted"
                       >
                         <Download className="h-4 w-4 mr-2" />
                         Download
@@ -496,7 +496,7 @@ export default function ARFileUpload({
                         variant="outline"
                         size="sm"
                         onClick={() => removeFile('glb')}
-                        className="border-red-200 text-red-600 hover:bg-red-50"
+                        className="border-border text-destructive hover:bg-muted"
                       >
                         <X className="h-4 w-4 mr-2" />
                         Remove
@@ -504,7 +504,7 @@ export default function ARFileUpload({
                     </div>
                   </div>
                 ) : (
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:border-green-400 hover:bg-green-50/50 transition-all duration-200 group">
+                  <div className="border-2 border-dashed border-border rounded-md p-8 text-center hover:border-border-strong hover:bg-muted transition-colors group">
                     <input
                       type="file"
                       accept=".glb"
@@ -518,27 +518,27 @@ export default function ARFileUpload({
                         {isUploading && uploadType === 'glb' ? (
                           <>
                             <div className="relative">
-                              <Loader2 className="h-10 w-10 text-green-500 mx-auto animate-spin" />
-                              <div className="absolute inset-0 bg-green-100 rounded-full opacity-20"></div>
+                              <Loader2 className="h-10 w-10 text-success mx-auto animate-spin" />
+                              <div className="absolute inset-0 bg-muted rounded-full opacity-20"></div>
                             </div>
                             <div>
-                              <p className="text-sm text-green-600 font-medium">Uploading GLB...</p>
+                              <p className="text-sm text-success font-medium">Uploading GLB...</p>
                               <div className="mt-2 w-full bg-green-200 rounded-full h-2">
                                 <div 
-                                  className="bg-green-600 h-2 rounded-full transition-all duration-300"
+                                  className="bg-primary h-2 rounded-full transition-colors"
                                   style={{ width: `${uploadProgress}%` }}
                                 ></div>
                               </div>
-                              <p className="text-xs text-green-500 mt-1">{Math.round(uploadProgress)}%</p>
+                              <p className="text-xs text-success mt-1">{Math.round(uploadProgress)}%</p>
                             </div>
                           </>
                         ) : (
                           <>
-                            <CloudUpload className="h-10 w-10 text-gray-400 mx-auto group-hover:text-green-500 transition-colors" />
+                            <CloudUpload className="h-10 w-10 text-muted-foreground mx-auto group-hover:text-success transition-colors" />
                             <div>
-                              <p className="text-sm font-medium text-gray-900 group-hover:text-green-600">Upload GLB file</p>
-                              <p className="text-xs text-gray-500 mt-1">Click to browse or drag and drop</p>
-                              <p className="text-xs text-green-600 mt-2">For web and Android AR</p>
+                              <p className="text-sm font-medium text-foreground group-hover:text-success">Upload GLB file</p>
+                              <p className="text-xs text-muted-foreground mt-1">Click to browse or drag and drop</p>
+                              <p className="text-xs text-success mt-2">For web and Android AR</p>
                             </div>
                           </>
                         )}
@@ -551,39 +551,39 @@ export default function ARFileUpload({
           ) : (
             /* Fallback message when Cloudinary is not configured */
             <div className="text-center py-12">
-              <div className="mx-auto w-20 h-20 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
-                <CloudUpload className="h-10 w-10 text-gray-400" />
+              <div className="mx-auto w-20 h-20 bg-muted rounded-lg flex items-center justify-center mb-4">
+                <CloudUpload className="h-10 w-10 text-muted-foreground" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">AR Upload Unavailable</h3>
-              <p className="text-sm text-gray-500">Cloudinary configuration required to enable this feature</p>
+              <h3 className="text-lg font-medium text-foreground mb-2">AR Upload Unavailable</h3>
+              <p className="text-sm text-muted-foreground">Cloudinary configuration required to enable this feature</p>
             </div>
           )}
 
           {/* Upload Status */}
           {(currentUsdzUrl || currentGlbUrl) && (
-            <div className="p-6 bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 border border-purple-200 rounded-xl shadow-sm">
+            <div className="p-6 border border-border rounded-md">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
+                <div className="flex-shrink-0 w-12 h-12 rounded-md flex items-center justify-center">
                   <Zap className="h-6 w-6 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-purple-900 mb-2">
+                  <h3 className="text-lg font-semibold text-muted-foreground mb-2">
                     🎉 AR Experience Ready!
                   </h3>
                   <div className="space-y-2 text-sm">
                     {currentUsdzUrl && (
-                      <div className="flex items-center gap-2 text-purple-700">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Apple className="h-4 w-4" />
                         <span>iOS AR Quick Look available</span>
                       </div>
                     )}
                     {currentGlbUrl && (
-                      <div className="flex items-center gap-2 text-purple-700">
+                      <div className="flex items-center gap-2 text-muted-foreground">
                         <Globe className="h-4 w-4" />
                         <span>Web AR experience available</span>
                       </div>
                     )}
-                    <p className="text-purple-600 font-medium mt-3">
+                    <p className="text-muted-foreground font-medium mt-3">
                       Customers can now view this dish in augmented reality!
                     </p>
                   </div>
