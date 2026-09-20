@@ -1,3 +1,12 @@
+---
+title: "Documentation index"
+description: "Every document under docs/, what it is for, its category and status (DOC.3); the ratchet fails on a document missing from this table."
+category: governance
+status: living
+audience: ["developer", "agent"]
+tags: ["index", "docs"]
+---
+
 # Documentation index
 
 Every document under docs/ is listed here (DOC.3): what it is for, its category and status.

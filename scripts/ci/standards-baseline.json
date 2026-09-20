@@ -1,7 +1,7 @@
 {
   "measuredAt": "2026-09-20",
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
-  "score": 82,
+  "score": 83,
   "hard": [
     "change.changelogMissing",
     "code.barrels",
@@ -10,6 +10,7 @@
     "docs.behindCode",
     "docs.citations",
     "docs.danglingSource",
+    "docs.frontMatter",
     "docs.indexDrift"
   ],
   "metrics": {
@@ -20,7 +21,7 @@
     "docs.behindCode": 0,
     "docs.citations": 0,
     "docs.danglingSource": 0,
-    "docs.frontMatter": 2,
+    "docs.frontMatter": 0,
     "docs.indexDrift": 0,
     "size.excessCode": 5307,
     "size.overBudget": 34,
@@ -31,22 +32,18 @@
   "scanned": {
     "code.barrels": 0,
     "context.overCap": 1,
-    "docs.behindCode": 0,
-    "docs.citations": 13,
-    "docs.danglingSource": 0,
-    "docs.frontMatter": 5,
-    "docs.indexDrift": 4,
+    "docs.behindCode": 1,
+    "docs.citations": 17,
+    "docs.danglingSource": 2,
+    "docs.frontMatter": 6,
+    "docs.indexDrift": 5,
     "size.excessCode": 157,
     "size.overBudget": 157,
-    "size.overRaw": 160,
+    "size.overRaw": 162,
     "types.escapes": 157,
     "valid.rawEnv": 156
   },
   "debt": {
-    "docs.frontMatter": {
-      "docs/LESSONS.md": 1,
-      "docs/README.md": 1
-    },
     "size.excessCode": {
       "app/admin/(protected)/admins/[id]/edit/page.tsx": 91,
       "app/admin/(protected)/admins/create/page.tsx": 40,

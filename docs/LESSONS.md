@@ -1,3 +1,13 @@
+---
+title: "Lessons"
+description: "What we learned the hard way, one entry per lesson, newest first; every line added to CLAUDE.md traces back to an entry here."
+category: governance
+status: living
+audience: ["developer", "agent"]
+tags: ["lessons", "context"]
+related: ["./README.md", "../CLAUDE.md"]
+---
+
 # Lessons
 
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
