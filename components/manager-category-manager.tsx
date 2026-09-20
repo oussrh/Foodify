@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   createCategory,
   updateCategory,
@@ -68,6 +68,7 @@ export default function ManagerCategoryManager({
   initialData: Category[];
   restaurantId: string;
 }) {
+  const ids = useId()
   const [categories, setCategories] = useState<Category[]>(initialData);
   const [newCat, setNewCat] = useState({ en: "", fr: "" });
   const [subDrafts, setSubDrafts] = useState<
@@ -239,8 +240,8 @@ export default function ManagerCategoryManager({
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Name (English)</label>
-                <Input
+                <label htmlFor={`${ids}-en`} className="text-sm font-medium text-muted-foreground">Name (English)</label>
+                <Input id={`${ids}-en`}
                   placeholder="e.g., Appetizers"
                   value={newCat.en}
                   onChange={(e) => setNewCat({ ...newCat, en: e.target.value })}
@@ -248,8 +249,8 @@ export default function ManagerCategoryManager({
                 />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Name (French)</label>
-                <Input
+                <label htmlFor={`${ids}-fr`} className="text-sm font-medium text-muted-foreground">Name (French)</label>
+                <Input id={`${ids}-fr`}
                   placeholder="e.g., Entrées"
                   value={newCat.fr}
                   onChange={(e) => setNewCat({ ...newCat, fr: e.target.value })}

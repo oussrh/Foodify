@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { brandPalette, brandStyle, contrast, hexToRgb } from './brand-color'
+import { brandPalette, brandStyle } from './brand-color'
+import { contrast, hexToRgb } from './color'
 
 type RGB = [number, number, number]
 const PAPER: RGB = [250, 250, 248]
@@ -11,30 +12,6 @@ function rgb(hex: string): RGB {
   if (!value) throw new Error(`palette emitted a non-hex colour: ${hex}`)
   return value
 }
-
-describe('hexToRgb', () => {
-  it('reads six-digit and three-digit hex, with or without the hash', () => {
-    expect(hexToRgb('#1F6B49')).toEqual([31, 107, 73])
-    expect(hexToRgb('fff')).toEqual([255, 255, 255])
-  })
-
-  it('returns null for anything that is not a hex colour', () => {
-    expect(hexToRgb('#12345')).toBeNull()
-    expect(hexToRgb('rgb(1,2,3)')).toBeNull()
-    expect(hexToRgb('')).toBeNull()
-  })
-})
-
-describe('contrast', () => {
-  it('is the same whichever colour comes first', () => {
-    expect(contrast([0, 0, 0], [255, 255, 255])).toBeCloseTo(contrast([255, 255, 255], [0, 0, 0]), 10)
-  })
-
-  it('spans 1 for identical colours to 21 for black on white', () => {
-    expect(contrast([120, 120, 120], [120, 120, 120])).toBe(1)
-    expect(contrast([0, 0, 0], [255, 255, 255])).toBeCloseTo(21, 5)
-  })
-})
 
 describe('brandPalette', () => {
   it('normalises the stored colour to #rrggbb', () => {

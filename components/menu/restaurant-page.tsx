@@ -1,7 +1,8 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { useMenuLocale } from './use-menu-locale'
+import { useClientValue } from '@/components/use-client-value'
 import { flushSync } from 'react-dom'
 import Image from 'next/image'
 import { Camera, Check, Download, Search, Share2, SlidersHorizontal, Utensils, WifiOff, X } from 'lucide-react'
@@ -53,6 +54,9 @@ export default function RestaurantPage({
   urlFilter,
 }: RestaurantPageProps) {
   const [locale, chooseLocale] = useMenuLocale(restaurant.defaultLocale, urlLang)
+  // Rendered only after hydration: the rows are plain links until React attaches to them, and the
+  // browser suite waits for this before it clicks.
+  const hydrated = useClientValue(() => true, false)
   const [query, setQuery] = useState('')
   const [arOnly, setArOnly] = useState(urlFilter === 'ar')
   const [dietary, setDietary] = useState<string[]>([])
@@ -85,10 +89,10 @@ export default function RestaurantPage({
   // Sections are found by their ids (set below) from the scroll listener and the jump handler.
   const sectionEl = (id: string) => document.getElementById(`section-${id}`)
 
+  // The offer is made once per waiting version, in the language of that moment.
+  const offerUpdate = useEffectEvent(() => toast(t.updateAvailable, { duration: Infinity, action: { label: t.refresh, onClick: () => applyUpdate() } }))
   useEffect(() => {
-    if (!updateReady) return
-    toast(t.updateAvailable, { duration: Infinity, action: { label: t.refresh, onClick: () => applyUpdate() } })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (updateReady) offerUpdate()
   }, [updateReady])
 
   const name = (en: string, fr: string) => (locale === 'fr' ? fr : en)
@@ -290,7 +294,7 @@ export default function RestaurantPage({
     'inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md border border-input bg-card hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring'
 
   return (
-    <div lang={locale} className={cn('brand-scope min-h-screen bg-background text-foreground', themeClass)} style={pageStyle}>
+    <div lang={locale} data-hydrated={hydrated || undefined} className={cn('brand-scope min-h-screen bg-background text-foreground', themeClass)} style={pageStyle}>
       <a
         href="#menu"
         className="sr-only z-50 rounded-md bg-foreground px-3 py-2 text-sm font-semibold text-background focus:not-sr-only focus:fixed focus:left-3 focus:top-3"

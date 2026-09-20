@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useClientValue } from '@/components/use-client-value'
 import { useRouter } from 'next/navigation'
 import type { Route } from 'next'
@@ -69,6 +69,11 @@ export default function SignInFlow({ role, initialStep = 'credentials' }: SignIn
   useEffect(() => {
     if (pending && initialStep === 'code' && (!pending.email || !pending.password)) router.replace(cfg.login)
   }, [pending, initialStep, cfg, router])
+
+  const codeRef = useRef<HTMLInputElement>(null)
+  useEffect(() => {
+    if (step === 'code' && initialStep !== 'code') codeRef.current?.focus()
+  }, [step, initialStep])
 
   useEffect(() => {
     if (step !== 'code') return
@@ -218,7 +223,7 @@ export default function SignInFlow({ role, initialStep = 'credentials' }: SignIn
                 pattern="[0-9]{6}"
                 maxLength={6}
                 required
-                autoFocus
+                ref={codeRef}
                 value={code}
                 onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
                 className="tnum h-12 text-center text-2xl tracking-[0.4em]"

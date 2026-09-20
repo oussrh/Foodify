@@ -434,10 +434,10 @@ export default function CreateRestaurantForm() {
         <CardContent className="p-6 space-y-6">
           {/* Logo Upload */}
           <div className="space-y-4">
-            <Label className="flex items-center gap-2">
+            <p className="flex items-center gap-2 text-sm font-medium leading-none">
               <ImageIcon className="h-4 w-4" />
               Restaurant Logo
-            </Label>
+            </p>
             <RestaurantLogoUpload
               restaurantSlug=""
               restaurantName="New Restaurant"
@@ -449,10 +449,10 @@ export default function CreateRestaurantForm() {
 
           {/* Cover Image Upload */}
           <div className="space-y-4">
-            <Label className="flex items-center gap-2">
+            <p className="flex items-center gap-2 text-sm font-medium leading-none">
               <ImageIcon className="h-4 w-4" />
               Restaurant Cover Image
-            </Label>
+            </p>
             <RestaurantCoverUpload
               restaurantSlug=""
               restaurantName="New Restaurant"

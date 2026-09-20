@@ -9,3 +9,5 @@ generated/
 tsconfig.tsbuildinfo
 .serena/
 .claude/settings.local.json
+test-results/
+playwright-report/

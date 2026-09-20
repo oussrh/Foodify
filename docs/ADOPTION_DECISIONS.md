@@ -69,3 +69,17 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Default taken**: TypeScript stays 5.9.3 (`typescript-eslint` peers `<6.1.0`; knip and dependency-cruiser use the same API); ESLint 9.39.5 (`eslint-plugin-react`, `jsx-a11y`, `import` have no ESLint 10 release); Prisma 7.10 (8 is a release candidate); `@types/node` 24 (CI and Vercel run Node 22/24; types track the runtime, not the newest Node). `abatty` pinned to 6fc516c (upstream HEAD spawns `.cmd` without a shell, EINVAL on Node >= 20.12).
 - **Alternative set aside**: forcing them with overrides or `--force`. A type-checker, a linter and a query-engine RC are not places to run ahead of the tools that consume them.
 - **Re-read when**: `typescript-eslint` accepts TypeScript 6/7, `eslint-plugin-react` publishes ESLint 10 support, Prisma 8 ships, abatty fixes its Windows spawn.
+
+## 2026-09-20 · phase 3 · the input border reads 1.46:1 on the light ground
+
+- **Situation**: `test/contrast.test.ts` computes contrast from the tokens. Every text pair passes AA in both themes once `--warning` (light) is darkened two points (it read 4.11:1 on `--muted`, where badges paint it); the focus ring passes 3:1; `--input` on `--background` reads below the 3:1 WCAG 1.4.11 asks for a control's boundary (the test prints the figures).
+- **Default taken**: the input pair is pinned at what it measures in each theme so it cannot fall further; the target is written beside it.
+- **Alternative set aside**: darkening `--input` in this phase. It is a token of the Quiet Plate design system (hairline fields on a paper ground, with a 3:1 focus ring and a white field surface); the change is a design decision to take with the branding preview open, not a lint fix.
+- **Re-read when**: the token moves; raise the floor to 3 in the same change.
+
+## 2026-09-20 · phase 3 · `aria-role` ignores non-DOM components; the prop rename is deferred
+
+- **Situation**: `role="admin" | "manager"` is this app's portal prop on five of its own components (`SignInFlow`, `AppShell`, `RestaurantRowMenu`, `DishesList`, `RestaurantsList`) with twelve call sites; `jsx-a11y/aria-role` reads it as an invalid ARIA role.
+- **Default taken**: the rule's `ignoreNonDOM: true`, with the shadcn primitives that render DOM (Badge, the Card and Table parts, Button, Input, Textarea, Label, Link, Image) mapped so a `role` on them is still checked. The reviewer showed `<Badge role="stauts">` passed before the mapping; it fails after.
+- **Alternative set aside**: renaming the prop to `portal`. Seventeen files change; that is a codemod (CODE.11) and belongs with the shell work of phase 8, not inside the lint phase.
+- **Re-read when**: phase 8 touches the shells; rename then and drop the option.

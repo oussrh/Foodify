@@ -13,7 +13,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
 
@@ -82,17 +81,16 @@ export default function AssignUsersDialog({
         />
         <div className="max-h-64 overflow-y-auto flex flex-col gap-2 mt-2">
           {filteredUsers.map((u: User) => (
-            <div
+            <label
               key={u.id}
               className="flex items-center space-x-3 px-2 py-2 rounded hover:bg-muted cursor-pointer"
-              onClick={() => toggle(u.id)}
             >
               <Checkbox
                 checked={selected.includes(u.id)}
                 onCheckedChange={() => toggle(u.id)}
               />
-              <Label className="text-sm">{u.email}</Label>
-            </div>
+              <span className="text-sm font-medium leading-none">{u.email}</span>
+            </label>
           ))}
         </div>
         <DialogFooter className="mt-4">
