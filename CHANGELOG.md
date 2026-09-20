@@ -21,6 +21,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Changed
 
+- `pnpm lint` is `eslint . --max-warnings=0` and the tree has zero findings: the twelve `any`s are typed (Prisma rows infer their own types, the JWT carries `role` by declaration, model-viewer's AR events are `CustomEvent`s), which also brought `types.escapes` 13 → 1; the ESLint config no longer holds any preset rule at warn.
 - The eight forms subscribe to their fields with `useWatch` and read them in handlers with `getValues` instead of `watch()`, which the React Compiler cannot memoise (the client form's never-updating `useMemo` over `watch` went with it). Compiling the forms exposed four more mount-effect patterns, fixed the same way: `hasUnsavedChanges` is `isDirty` in the dish and restaurant forms (every place that cleared it also reset the form), the settings tab comes from the URL as a client value, and new default values reach the dish form's asset fields during render, with only the form reset left in the effect. `DishStatusManager` no longer takes `restaurantId`.
 - The React Compiler rules of `react-hooks` 7 are met: the theme toggle, the AR launch button, the menu and dish pages (language detection), the sign-in flow (pending credentials, the code countdown), the font picker (selection derived from the saved URL, a font counts as loaded when its stylesheet has), the AR preview (the `<model-viewer>` element read from the custom-element registry) and `usePwa` (connectivity as a store, the precache list and update callback through `useEffectEvent`) no longer set state synchronously in effects, read refs during render or call a function before its declaration; the menu finds its sections by id instead of a ref map.
 - `otplib` 13 (`verifySync`; it refuses secrets under 16 bytes, which no stored secret and no code hits: a future enrolment uses `generateSecret()`), `resend` 6, `lucide-react` 1.47 (brand logos are gone from Lucide: the Instagram, Facebook and X glyphs the footer and the contact panel show now live in `components/social-icons.tsx`, the Lucide 0.525 shapes under its ISC licence). Held back with the reason recorded: TypeScript 7 (typescript-eslint supports `<6.1`), ESLint 10 (see above), Prisma 8 (a release candidate), `@types/node` 26 (the runtime is Node 22/24).
@@ -50,6 +51,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Fixed
 
+- The manager profile's "view restaurant" link pointed at `/manager/restaurants/[id]`, a route with no page (an `as any` on the href hid it from the typed routes); it opens the restaurant's info page.
 - The back button navigates through Next's router instead of assigning `window.location`.
 - Three empty `interface X extends Y {}` in `components/ui/` are type aliases; the WebXR `@ts-ignore` says why it expects an error.
 - `no-debugger` is an ESLint error (the gate's lint control stayed green without it); knip also watches `src/` so the dead-code control is meaningful.

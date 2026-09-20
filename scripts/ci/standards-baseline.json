@@ -1,7 +1,7 @@
 {
   "measuredAt": "2026-09-20",
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
-  "score": 83,
+  "score": 84,
   "hard": [
     "change.changelogMissing",
     "code.barrels",
@@ -26,7 +26,7 @@
     "size.excessCode": 5178,
     "size.overBudget": 34,
     "size.overRaw": 1,
-    "types.escapes": 13,
+    "types.escapes": 1,
     "valid.rawEnv": 36
   },
   "scanned": {
@@ -120,11 +120,7 @@
       "components/ar-viewer-client.tsx": 1
     },
     "types.escapes": {
-      "app/admin/(protected)/users/[id]/edit/page.tsx": 6,
-      "app/admin/(protected)/users/create/page.tsx": 1,
-      "app/manager/(protected)/profile/page.tsx": 1,
-      "auth.ts": 2,
-      "components/ar-viewer-client.tsx": 3
+      "components/ar-viewer-client.tsx": 1
     },
     "valid.rawEnv": {
       "app/actions/admin-auth-actions.ts": 3,

@@ -409,7 +409,7 @@ export default async function ProfilePage() {
                           )}
                         </div>
                       </div>
-                      <Link href={`/manager/restaurants/${restaurant.id}` as any}>
+                      <Link href={`/manager/restaurants/${restaurant.id}/info`}>
                         <Button variant="outline" size="sm" className="opacity-0 group-hover:opacity-100 transition-colors">
                           <Eye className="h-4 w-4 mr-2" />
                           View

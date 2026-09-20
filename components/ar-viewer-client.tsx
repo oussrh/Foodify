@@ -305,12 +305,12 @@ export default function ARViewerClient() {
       
       // Add AR-specific event listeners
       if (viewMode === 'ar') {
-        modelViewer.addEventListener('ar-status', (event: any) => {
-          console.log('AR status:', event.detail.status)
-          if (event.detail.status === 'session-started') {
-            console.log('AR session started successfully')
+        modelViewer.addEventListener('ar-status', (event) => {
+          const { status } = (event as CustomEvent<{ status: string }>).detail
+          console.log('AR status:', status)
+          if (status === 'session-started') {
             toast.success('AR camera activated!')
-          } else if (event.detail.status === 'failed') {
+          } else if (status === 'failed') {
             console.error('AR session failed')
             toast.error('AR camera failed to start. Please check permissions.')
           }
@@ -322,8 +322,8 @@ export default function ARViewerClient() {
         
         // Handle WebXR session events
         if (arMode === 'webxr') {
-          modelViewer.addEventListener('ar-tracking', (event: any) => {
-            console.log('AR tracking status:', event.detail)
+          modelViewer.addEventListener('ar-tracking', (event) => {
+            console.log('AR tracking status:', (event as CustomEvent<{ status: string }>).detail)
           })
         }
       }
