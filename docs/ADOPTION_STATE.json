@@ -109,7 +109,16 @@
     },
     {
       "id": 3,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-20T15:03:48Z",
+      "numbersBefore": {
+        "rules": {
+          "A11Y-LINT": "missing",
+          "TEST-E2E": "missing",
+          "A11Y-CONTRAST": "missing"
+        },
+        "jsxA11yFindings": "not measured"
+      }
     },
     {
       "id": 4,
