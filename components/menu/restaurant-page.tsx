@@ -1,8 +1,9 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
+import { flushSync } from 'react-dom'
 import Image from 'next/image'
-import { Camera, Download, Search, Share2, SlidersHorizontal, Utensils, WifiOff, X } from 'lucide-react'
+import { Camera, Check, Download, Search, Share2, SlidersHorizontal, Utensils, WifiOff, X } from 'lucide-react'
 import { toast } from 'sonner'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
@@ -37,6 +38,8 @@ interface RestaurantPageProps {
   origin: string
   /** ?lang= from the URL, if any */
   urlLang?: string | null
+  /** ?filter= from the URL (manifest shortcuts use filter=ar) */
+  urlFilter?: string | null
 }
 
 interface Section {
@@ -57,23 +60,46 @@ export default function RestaurantPage({
   brandStyle,
   origin,
   urlLang,
+  urlFilter,
 }: RestaurantPageProps) {
   // Server renders the restaurant default (or ?lang=); the guest's remembered/browser language is applied after mount.
   const [locale, setLocaleState] = useState<Locale>(urlLang === 'fr' || urlLang === 'en' ? urlLang : restaurant.defaultLocale)
   const [query, setQuery] = useState('')
-  const [arOnly, setArOnly] = useState(false)
+  const [arOnly, setArOnly] = useState(urlFilter === 'ar')
   const [dietary, setDietary] = useState<string[]>([])
   const [filtersOpen, setFiltersOpen] = useState(false)
   const [openDish, setOpenDish] = useState<MenuDish | null>(null)
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
   const [status, setStatus] = useState<ReturnType<typeof openStatus>>(null)
-  const { canInstall, install, online } = usePwa()
+  const [transitionDishId, setTransitionDishId] = useState<string | null>(null)
+
+  // Everything the service worker should keep so this menu opens with no signal.
+  const precacheUrls = useMemo(() => {
+    const img = (src: string, w: number) => `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=75`
+    const urls = [`/restaurant/${restaurant.slug}`, `/restaurant/${restaurant.slug}/manifest`]
+    if (restaurant.logoUrl) urls.push(img(restaurant.logoUrl, 256))
+    if (restaurant.coverImageUrl) urls.push(restaurant.coverImageUrl)
+    const dishes = [...categories.flatMap((c) => c.subcategories.flatMap((s) => s.dishes)), ...uncategorizedDishes]
+    for (const d of dishes) urls.push(img(d.imageUrl, 640))
+    return urls
+  }, [restaurant, categories, uncategorizedDishes])
+
+  const { installPlatform, install, online, offlineReady, updateReady, applyUpdate } = usePwa({
+    precacheUrls,
+    onUpdate: () => window.location.reload(),
+  })
 
   const t = MENU_TEXT[locale]
   const heroRef = useRef<HTMLDivElement>(null)
   const chipsRef = useRef<HTMLDivElement>(null)
   const sectionRefs = useRef<Map<string, HTMLElement>>(new Map())
+
+  useEffect(() => {
+    if (!updateReady) return
+    toast(t.updateAvailable, { duration: Infinity, action: { label: t.refresh, onClick: () => applyUpdate() } })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [updateReady])
 
   const name = (en: string, fr: string) => (locale === 'fr' ? fr : en)
   const money: Money = { locale, symbol: restaurant.currencySymbol, code: restaurant.currency }
@@ -222,7 +248,16 @@ export default function RestaurantPage({
   }, [])
 
   const showDish = (dish: MenuDish) => {
-    setOpenDish(dish)
+    const open = () => setOpenDish(dish)
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    const vt = (document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } }).startViewTransition
+    if (vt && !reduce) {
+      // Shared-element morph: the row thumbnail grows into the sheet photo.
+      flushSync(() => setTransitionDishId(dish.id))
+      vt.call(document, () => flushSync(open)).finished.finally(() => setTransitionDishId(null))
+    } else {
+      open()
+    }
     try {
       window.history.pushState({ foodifyDish: dish.id }, '')
     } catch {
@@ -303,7 +338,7 @@ export default function RestaurantPage({
           type="button"
           onClick={shareMenu}
           aria-label={t.shareMenu}
-          className="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur hover:bg-black/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-6 sm:top-4"
+          className="absolute right-3 top-[calc(12px+env(safe-area-inset-top))] inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur hover:bg-black/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white sm:right-6 sm:top-[calc(16px+env(safe-area-inset-top))]"
         >
           <Share2 className="h-4 w-4" />
         </button>
@@ -337,7 +372,7 @@ export default function RestaurantPage({
       </div>
 
       {/* Sticky bar: search, language, filters, theme */}
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/85">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 pt-[env(safe-area-inset-top)] backdrop-blur supports-[backdrop-filter]:bg-background/85">
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4 sm:px-6">
           {collapsed && restaurant.logoUrl && (
             <span className="relative hidden h-8 w-8 shrink-0 overflow-hidden rounded-md sm:block" aria-hidden="true">
@@ -486,7 +521,15 @@ export default function RestaurantPage({
                   {group.name && <h3 className="pb-1 pt-3 text-xs font-medium text-muted-foreground">{group.name}</h3>}
                   <ul className="md:grid md:grid-cols-2 md:gap-x-8 xl:grid-cols-3">
                     {group.dishes.map((dish) => (
-                      <DishRow key={dish.id} dish={dish} locale={locale} money={money} href={dishHref(dish)} onOpen={showDish} />
+                      <DishRow
+                        key={dish.id}
+                        dish={dish}
+                        locale={locale}
+                        money={money}
+                        href={dishHref(dish)}
+                        onOpen={showDish}
+                        transitioning={transitionDishId === dish.id && openDish === null}
+                      />
                     ))}
                   </ul>
                 </div>
@@ -515,6 +558,7 @@ export default function RestaurantPage({
                   dish={openDish}
                   locale={locale}
                   money={money}
+                  photoTransition
                   breadcrumb={breadcrumbFor(openDish)}
                   shareUrl={`${origin}${dishHref(openDish)}?lang=${locale}`}
                 />
@@ -585,7 +629,7 @@ export default function RestaurantPage({
               </button>
             </div>
 
-            {canInstall && (
+            {installPlatform === 'prompt' && (
               <button
                 type="button"
                 onClick={install}
@@ -597,6 +641,21 @@ export default function RestaurantPage({
                   <span className="block text-xs text-muted-foreground">{t.installHint}</span>
                 </span>
               </button>
+            )}
+            {installPlatform === 'ios' && (
+              <p className="flex items-start gap-3 rounded-md border border-border bg-card px-3 py-2.5 text-xs text-muted-foreground">
+                <Download className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
+                <span>
+                  <span className="block text-sm font-medium text-foreground">{t.install}</span>
+                  {t.installIos}
+                </span>
+              </p>
+            )}
+            {offlineReady && (
+              <p className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Check className="h-3.5 w-3.5 text-success" aria-hidden="true" />
+                {t.offlineReady}
+              </p>
             )}
           </div>
         </SheetContent>

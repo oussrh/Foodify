@@ -143,6 +143,18 @@
   }
 }
 
+/* Shared-element transition when a dish opens from the menu (browsers without support just skip it). */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+}
+::view-transition-old(dish-photo),
+::view-transition-new(dish-photo) {
+  animation-duration: 280ms;
+  animation-timing-function: cubic-bezier(0.2, 0, 0, 1);
+  mix-blend-mode: normal;
+}
+
 @layer utilities {
   .tnum {
     font-variant-numeric: tabular-nums;

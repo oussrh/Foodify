@@ -22,9 +22,11 @@ interface DishBodyProps {
   /** e.g. "Mains · Grills" */
   breadcrumb?: string | null
   shareUrl: string
+  /** Set inside the sheet so the row thumbnail can morph into this photo */
+  photoTransition?: boolean
 }
 
-export default function DishBody({ dish, locale, money, breadcrumb, shareUrl }: DishBodyProps) {
+export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, photoTransition }: DishBodyProps) {
   const t = MENU_TEXT[locale]
   const name = locale === 'fr' ? dish.nameFr : dish.nameEn
   const description = locale === 'fr' ? dish.descriptionFr : dish.descriptionEn
@@ -45,7 +47,7 @@ export default function DishBody({ dish, locale, money, breadcrumb, shareUrl }: 
 
   return (
     <article className="flex flex-col gap-4">
-      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-muted">
+      <div className="relative aspect-[4/3] w-full overflow-hidden rounded-lg bg-muted" style={photoTransition ? { viewTransitionName: 'dish-photo' } : undefined}>
         <Image
           src={dish.imageUrl}
           alt={name}

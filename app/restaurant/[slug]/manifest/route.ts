@@ -23,26 +23,53 @@ export async function GET(_req: Request, { params }: { params: Promise<{ slug: s
   const { slug } = await params
   const restaurant = await prisma.restaurant.findUnique({
     where: { slug },
-    select: { name: true, tagline: true, logoUrl: true, colorTheme: true, menuTheme: true, defaultLocale: true },
+    select: {
+      name: true,
+      tagline: true,
+      logoUrl: true,
+      colorTheme: true,
+      menuTheme: true,
+      defaultLocale: true,
+      cuisineType: true,
+      _count: { select: { dishes: { where: { isActive: true, OR: [{ usdzUrl: { not: '' } }, { glbUrl: { not: '' } }] } } } },
+    },
   })
   if (!restaurant) return new NextResponse('Not found', { status: 404 })
 
   const palette = brandPalette(restaurant.colorTheme)
   const dark = restaurant.menuTheme === 'dark'
+  const base = `/restaurant/${slug}`
+  const icons = iconSet(restaurant.logoUrl)
+  const shortcutIcon = [{ src: icons[0].src, sizes: '192x192', type: 'image/png' }]
+
+  const shortcuts = [
+    ...(restaurant._count.dishes > 0
+      ? [{ name: 'AR dishes', short_name: 'AR', description: 'Dishes you can see on your table', url: `${base}?filter=ar&source=shortcut`, icons: shortcutIcon }]
+      : []),
+    { name: 'English', short_name: 'EN', url: `${base}?lang=en&source=shortcut`, icons: shortcutIcon },
+    { name: 'Français', short_name: 'FR', url: `${base}?lang=fr&source=shortcut`, icons: shortcutIcon },
+  ]
 
   const manifest = {
-    id: `/restaurant/${slug}`,
+    id: base,
     name: restaurant.name,
     short_name: restaurant.name.length > 12 ? restaurant.name.slice(0, 12).trim() : restaurant.name,
-    description: restaurant.tagline || `Menu of ${restaurant.name}`,
-    start_url: `/restaurant/${slug}?source=pwa`,
-    scope: `/restaurant/${slug}`,
+    description: restaurant.tagline || [restaurant.cuisineType, `Menu of ${restaurant.name}`].filter(Boolean).join(' · '),
+    start_url: `${base}?source=pwa`,
+    scope: base,
     display: 'standalone',
+    display_override: ['standalone', 'minimal-ui'],
     orientation: 'portrait',
     lang: restaurant.defaultLocale,
+    dir: 'ltr',
+    categories: ['food', 'lifestyle'],
     background_color: dark ? '#141311' : '#FAFAF8',
     theme_color: dark ? palette.inkDark : palette.inkLight,
-    icons: iconSet(restaurant.logoUrl),
+    icons,
+    shortcuts,
+    // Tapping the icon focuses the menu that is already open instead of opening a second one.
+    launch_handler: { client_mode: ['navigate-existing', 'auto'] },
+    prefer_related_applications: false,
   }
 
   return NextResponse.json(manifest, {

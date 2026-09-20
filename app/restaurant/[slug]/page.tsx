@@ -1,8 +1,8 @@
 import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import RestaurantPage from '@/components/menu/restaurant-page'
-import { brandStyle } from '@/lib/brand-color'
+import { brandPalette, brandStyle } from '@/lib/brand-color'
 import { parseSocialMedia } from '@/lib/social-media'
 import { serializeDish, serializeRestaurant, siteOrigin } from '@/lib/menu-data'
 import { restaurantJsonLd } from '@/lib/structured-data'
@@ -41,7 +41,7 @@ async function getRestaurantData(slug: string) {
   return { restaurant, uncategorizedDishes }
 }
 
-type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<{ lang?: string }> }
+type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<{ lang?: string; filter?: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -83,6 +83,22 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+/** Browser chrome takes the brand colour (or the dark ground when the menu is forced dark). */
+export async function generateViewport({ params }: Props): Promise<Viewport> {
+  const { slug } = await params
+  const restaurant = await prisma.restaurant.findUnique({ where: { slug }, select: { colorTheme: true, menuTheme: true } })
+  const palette = brandPalette(restaurant?.colorTheme)
+  if (restaurant?.menuTheme === 'dark') return { themeColor: '#141311', viewportFit: 'cover' }
+  if (restaurant?.menuTheme === 'light') return { themeColor: palette.inkLight, viewportFit: 'cover' }
+  return {
+    themeColor: [
+      { media: '(prefers-color-scheme: light)', color: palette.inkLight },
+      { media: '(prefers-color-scheme: dark)', color: '#141311' },
+    ],
+    viewportFit: 'cover',
+  }
+}
+
 export default async function RestaurantRoute({ params, searchParams }: Props) {
   const { slug } = await params
   const sp = searchParams ? await searchParams : undefined
@@ -108,6 +124,7 @@ export default async function RestaurantRoute({ params, searchParams }: Props) {
 
   return (
     <>
+      <link rel="preconnect" href="https://res.cloudinary.com" />
       {restaurant.googleFontUrl && (
         <>
           <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -123,6 +140,7 @@ export default async function RestaurantRoute({ params, searchParams }: Props) {
         brandStyle={brandStyle(restaurant.colorTheme)}
         origin={origin}
         urlLang={sp?.lang ?? null}
+        urlFilter={sp?.filter ?? null}
       />
     </>
   )

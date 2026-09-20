@@ -191,6 +191,10 @@ export const MENU_TEXT = {
     installHint: 'Opens like an app, works without signal.',
     offline: 'You are offline — showing the menu as it was last loaded.',
     menuOf: (name: string) => `Menu of ${name}`,
+    installIos: 'On iPhone: tap Share, then “Add to Home Screen”.',
+    offlineReady: 'Saved on this device — opens without signal.',
+    updateAvailable: 'This menu has been updated.',
+    refresh: 'Refresh',
   },
   fr: {
     search: 'Rechercher',
@@ -232,6 +236,10 @@ export const MENU_TEXT = {
     installHint: 'S’ouvre comme une app, fonctionne sans réseau.',
     offline: 'Vous êtes hors ligne — menu affiché tel qu’il a été chargé.',
     menuOf: (name: string) => `Menu de ${name}`,
+    installIos: 'Sur iPhone : touchez Partager, puis « Sur l’écran d’accueil ».',
+    offlineReady: 'Enregistré sur cet appareil — s’ouvre sans réseau.',
+    updateAvailable: 'Ce menu a été mis à jour.',
+    refresh: 'Actualiser',
   },
 } as const
 

@@ -10,10 +10,12 @@ interface DishRowProps {
   money: Money
   href: string
   onOpen: (dish: MenuDish) => void
+  /** Names the thumbnail for the shared-element transition into the sheet */
+  transitioning?: boolean
 }
 
 /** One menu line: photo, name, one line of description, price. Dense on purpose. */
-export default function DishRow({ dish, locale, money, href, onOpen }: DishRowProps) {
+export default function DishRow({ dish, locale, money, href, onOpen, transitioning }: DishRowProps) {
   const t = MENU_TEXT[locale]
   const name = locale === 'fr' ? dish.nameFr : dish.nameEn
   const description = locale === 'fr' ? dish.descriptionFr : dish.descriptionEn
@@ -31,7 +33,7 @@ export default function DishRow({ dish, locale, money, href, onOpen }: DishRowPr
         }}
         className="grid w-full grid-cols-[76px_1fr_auto] items-center gap-3 py-3 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-md"
       >
-        <span className="relative block h-[76px] w-[76px] overflow-hidden rounded-md bg-muted">
+        <span className="relative block h-[76px] w-[76px] overflow-hidden rounded-md bg-muted" style={transitioning ? { viewTransitionName: 'dish-photo' } : undefined}>
           <Image src={dish.imageUrl} alt="" fill sizes="76px" className="object-cover" />
           {hasAR(dish) && (
             <span className="absolute bottom-1 left-1 inline-flex items-center gap-0.5 rounded-full bg-white/92 px-1.5 py-0.5 text-[10px] font-bold text-[#1B1A17]">
