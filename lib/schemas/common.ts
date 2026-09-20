@@ -8,6 +8,7 @@ import { z } from 'zod'
 /** Every row id is a v4 UUID (Prisma's `@default(uuid())`; verified over the live data on 2026-09-20). */
 export const uuid = z.uuid()
 export const email = z.email('Please enter a valid email address')
+/** What an admin sets for someone else, at creation or on a reset: temporary, hence short. A user's own change is `passwordChange`. */
 export const password = z.string().min(6, 'Password must be at least 6 characters')
 export const bilingualName = z.object({
   nameEn: z.string().min(1, 'English name is required'),

@@ -19,6 +19,7 @@ export type ClientInput = z.infer<typeof clientInput>
 export type ClientPatch = z.infer<typeof clientPatch>
 
 export const emailChange = z.object({ email })
+export type EmailChange = z.infer<typeof emailChange>
 /** The signed-in user's own change: the current password, then a strong new one (an admin-set one is temporary and only six characters). */
 export const passwordChange = z.object({
   currentPassword: z.string().min(1, 'Current password is required'),
@@ -39,6 +40,7 @@ export const emailToken = z.string().regex(/^[0-9a-f]{64}$/, 'Invalid token')
  * the real gate, and a stricter shape would tell a caller which addresses are worth trying.
  */
 export const otpRequest = z.object({ email: z.string().min(1), password: z.string().min(1) })
+export type OtpRequest = z.infer<typeof otpRequest>
 /** What NextAuth's credentials provider receives; `role` is the portal the sign-in page serves. */
 export const credentials = z.object({
   email: z.string().min(1),

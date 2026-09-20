@@ -6,6 +6,11 @@ import { serverEnv } from '@/lib/env'
 
 export type Mail = { to: string; subject: string; html: string; text?: string }
 
+/**
+ * Sends, or reports that it could not. The result is the caller's to act on: the sign-in and
+ * change-email flows keep going without mail (a code or link nobody receives is a dead end the
+ * user sees), which is the local setup, not a silent production failure the env refuses.
+ */
 export async function sendMail(mail: Mail): Promise<{ sent: boolean }> {
   const { resendApiKey, resendFrom } = serverEnv
   if (!resendApiKey || !resendFrom) return { sent: false }

@@ -11,7 +11,7 @@ import {
 import { sendMail } from '@/lib/mail'
 import { emailChange, emailToken, passwordChange, type PasswordChange } from '@/lib/schemas/user'
 
-export async function initiateEmailChange(rawEmail: string, ip?: string) {
+export async function initiateEmailChange(rawEmail: string) {
   const session = await auth()
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
@@ -40,7 +40,6 @@ export async function initiateEmailChange(rawEmail: string, ip?: string) {
       oldEmail: user.email,
       newEmail: email,
       status: 'pending',
-      ipAddress: ip,
     },
   })
 
@@ -48,7 +47,10 @@ export async function initiateEmailChange(rawEmail: string, ip?: string) {
 }
 
 export async function confirmOldEmail(rawToken: string) {
-  const token = emailToken.parse(rawToken)
+  // A mangled link is the same "invalid or expired" as an unknown token, not a render error.
+  const parsed = emailToken.safeParse(rawToken)
+  if (!parsed.success) return null
+  const token = parsed.data
   const user = await prisma.user.findFirst({
     where: {
       emailChangeToken: token,
@@ -84,7 +86,9 @@ export async function confirmOldEmail(rawToken: string) {
 }
 
 export async function confirmNewEmail(rawToken: string) {
-  const token = emailToken.parse(rawToken)
+  const parsed = emailToken.safeParse(rawToken)
+  if (!parsed.success) return null
+  const token = parsed.data
   const user = await prisma.user.findFirst({
     where: {
       emailVerifyToken: token,

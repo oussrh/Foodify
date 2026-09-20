@@ -41,6 +41,7 @@ export const restaurantPatch = restaurantInput.partial().extend({ menuTheme: z.e
 export type RestaurantInput = z.infer<typeof restaurantInput>
 export type RestaurantPatch = z.infer<typeof restaurantPatch>
 
+/** A slug as a lookup key (the uploads name their restaurant by it): whatever is stored, not the rule a new one must meet. */
 export const slug = z.string().min(1)
 
 const IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml']

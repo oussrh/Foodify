@@ -45,7 +45,7 @@ export interface EditDishValues {
 
 const schema = dishInput.omit({ subcategoryId: true, calories: true }).extend({
   subcategoryId: z.string().optional(),
-  calories: z.number().optional(),
+  calories: z.number().int('Calories must be a whole number').optional(),
 }).transform((data) => ({
   ...data,
   price: Number(data.price),
@@ -54,13 +54,11 @@ const schema = dishInput.omit({ subcategoryId: true, calories: true }).extend({
 
 export default function EditDishForm({
   id,
-  restaurantId,
   defaultValues,
   subcategories,
   restaurantName,
 }: {
   id: string
-  restaurantId: string
   defaultValues: EditDishValues
   subcategories: Subcategory[]
   restaurantName?: string
@@ -123,7 +121,7 @@ export default function EditDishForm({
         finalData
       })
       
-      await updateDish(id, restaurantId, finalData)
+      await updateDish(id, finalData)
       
       setSaveStatus('saved')
       
@@ -150,7 +148,7 @@ export default function EditDishForm({
       
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
-  }, [id, restaurantId, imageUrl, usdzUrl, glbUrl, reset, router])
+  }, [id, imageUrl, usdzUrl, glbUrl, reset, router])
   
   // Handle cancel
   const handleCancel = useCallback(() => {

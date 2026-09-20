@@ -64,10 +64,12 @@ export async function requireRestaurantAccess(where: { id: string } | { slug: st
   return user
 }
 
+/** Grants on the dish's own restaurant and says which one it is, so a caller never has to be trusted for it. */
 export async function requireDishAccess(dishId: string) {
   const dish = await prisma.dish.findUnique({ where: { id: dishId }, select: { restaurantId: true } })
   if (!dish) throw new AuthError('Forbidden', 403)
-  return requireRestaurantAccess({ id: dish.restaurantId })
+  await requireRestaurantAccess({ id: dish.restaurantId })
+  return { restaurantId: dish.restaurantId }
 }
 
 export async function requireIngredientAccess(ingredientId: string) {

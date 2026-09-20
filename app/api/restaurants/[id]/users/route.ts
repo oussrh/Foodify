@@ -1,10 +1,8 @@
 import prisma from '@/lib/prisma'
 import { NextRequest } from 'next/server'
-import { z } from 'zod'
 import { authErrorResponse, requireSuperAdmin } from '@/lib/auth-guard'
+import { assignment, jsonBody } from '@/lib/schemas/assignment'
 import { uuid } from '@/lib/schemas/common'
-
-const assignment = z.object({ userIds: z.array(uuid) })
 
 export async function POST(
   req: NextRequest,
@@ -16,15 +14,14 @@ export async function POST(
     return authErrorResponse(error)
   }
 
-  const body = assignment.safeParse(await req.json().catch(() => null))
-  if (!body.success) {
-    return new Response('Invalid userIds', { status: 400 })
-  }
+  const id = uuid.safeParse((await params).id)
+  if (!id.success) return new Response('Invalid id', { status: 400 })
+  const body = assignment('userIds').safeParse(await jsonBody(req))
+  if (!body.success) return new Response('Invalid userIds', { status: 400 })
   const { userIds } = body.data
-  const id = uuid.parse((await params).id)
 
   await prisma.restaurant.update({
-    where: { id },
+    where: { id: id.data },
     data: {
       users: {
         set: userIds.map((id: string) => ({ id })),

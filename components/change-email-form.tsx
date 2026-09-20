@@ -8,10 +8,10 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { initiateEmailChange } from '@/app/actions/profile-actions'
-import { emailChange } from '@/lib/schemas/user'
+import { emailChange, type EmailChange } from '@/lib/schemas/user'
 
 const schema = emailChange
-type FormValues = { email: string }
+type FormValues = EmailChange
 
 export default function ChangeEmailForm({ disabled = false }: { disabled?: boolean }) {
   const {

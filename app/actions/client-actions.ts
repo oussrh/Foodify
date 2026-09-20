@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guard'
 import { password, uuid } from '@/lib/schemas/common'
 import { clientInput, clientPatch, type ClientInput, type ClientPatch } from '@/lib/schemas/user'
+import { slugify } from '@/lib/slug'
 
 export async function createClient(raw: ClientInput) {
   await requireSuperAdmin()
@@ -16,7 +17,7 @@ export async function createClient(raw: ClientInput) {
     const restaurant = await prisma.restaurant.create({
       data: {
         name: data.restaurantName,
-        slug: data.restaurantName.toLowerCase().replace(/\s+/g, '-'),
+        slug: slugify(data.restaurantName),
         defaultLocale: 'en',
       },
     })

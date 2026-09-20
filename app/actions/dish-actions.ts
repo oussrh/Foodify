@@ -62,10 +62,9 @@ export async function createDish(rawRestaurantId: string, raw: DishInput) {
   })
 }
 
-export async function updateDish(rawId: string, rawRestaurantId: string, raw: DishPatch) {
-  await requireDishAccess(rawId)
+export async function updateDish(rawId: string, raw: DishPatch) {
+  const { restaurantId } = await requireDishAccess(rawId)
   const id = uuid.parse(rawId)
-  const restaurantId = uuid.parse(rawRestaurantId)
   const data = dishPatch.parse(raw)
   const updatedData = { ...data }
   

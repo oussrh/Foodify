@@ -108,7 +108,7 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 ## 2026-09-20 · phase 4 · the mail pair fails at boot, the rest stays optional
 
 - **Situation**: VALID.3 says tightening a value moves a failure from use to boot and is a decision. `RESEND_API_KEY` without `RESEND_FROM` used to fail at the first send with a provider error.
-- **Default taken**: `serverEnv` refuses a half-set mail pair on its first read; `DATABASE_URL` is required (the app cannot run without it); `NEXTAUTH_URL` stays optional with the public origin as fallback for mail links, where an unset value used to print `undefined/`.
+- **Default taken**: `serverEnv` refuses a half-set mail pair, and a partial Cloudinary trio, on its first read; `DATABASE_URL` is required (the app cannot run without it); `NEXTAUTH_URL` stays optional, and a mail link uses it, else an explicitly set `NEXT_PUBLIC_APP_URL`, else the send fails (the reviewer caught the first draft falling back to the production literal, which would have mailed a preview's links to production; an unset value used to print `undefined/`).
 - **Alternative set aside**: `.url()` on the two URLs and a required `NEXTAUTH_URL`, which would decide how production dies without knowing what it sets.
 - **Re-read when**: the deployment's variables are inventoried (`vercel env`).
 

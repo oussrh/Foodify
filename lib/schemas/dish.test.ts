@@ -6,7 +6,7 @@ const dish = { nameEn: 'Grilled Chicken', nameFr: 'Poulet grillé', price: 12.5,
 describe('dish schemas', () => {
   it('accepts the seed dish and refuses a negative price', () => {
     expect(dishInput.safeParse(dish).success).toBe(true)
-    expect(dishInput.safeParse({ ...dish, price: -1 }).error?.issues[0].message).toBe('Price must be a valid number greater than 0')
+    expect(dishInput.safeParse({ ...dish, price: -1 }).error?.issues[0].message).toBe('Price must be a number, 0 or more')
   })
 
   it('only stores dietary and allergen keys the menu can label', () => {

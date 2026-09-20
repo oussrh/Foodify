@@ -14,7 +14,7 @@ const allergenKey = keyOf(ALLERGEN_OPTIONS, 'allergen')
 export const dishInput = bilingualName.extend({
   descriptionEn: z.string().optional(),
   descriptionFr: z.string().optional(),
-  price: z.number().min(0, 'Price must be a valid number greater than 0'),
+  price: z.number().min(0, 'Price must be a number, 0 or more'),
   imageUrl: z.string().min(1, 'Image URL is required'),
   usdzUrl: z.string().optional(),
   glbUrl: z.string().optional(),
