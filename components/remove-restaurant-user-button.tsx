@@ -30,13 +30,13 @@ export default function RemoveRestaurantUserButton({
   }
 
   return (
-    <span
+    <button
+      type="button"
       onClick={handleRemove}
-      className={`flex items-center gap-2 w-full ${
- loading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
- }`}
+      disabled={loading}
+      className="flex items-center gap-2 w-full text-left disabled:opacity-50"
     >
       Remove
-    </span>
+    </button>
   )
 }

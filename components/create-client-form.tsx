@@ -143,10 +143,10 @@ export default function CreateClientForm({
             
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <Label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <p className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Building2 className="h-4 w-4" />
                   Restaurant Assignments
-                </Label>
+                </p>
                 {restaurants.length > 0 && (
                   <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                     <DialogTrigger asChild>

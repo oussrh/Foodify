@@ -23,7 +23,7 @@
     "docs.danglingSource": 0,
     "docs.frontMatter": 0,
     "docs.indexDrift": 0,
-    "size.excessCode": 5158,
+    "size.excessCode": 5160,
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 1,
@@ -33,7 +33,7 @@
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 31,
+    "docs.citations": 32,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
@@ -58,7 +58,7 @@
       "app/manager/(protected)/restaurants/[id]/dishes/page.tsx": 3,
       "app/restaurant/[slug]/page.tsx": 34,
       "components/3d-viewer-client.tsx": 151,
-      "components/admin-category-manager.tsx": 410,
+      "components/admin-category-manager.tsx": 411,
       "components/ar-file-upload.tsx": 289,
       "components/ar-model-preview.tsx": 113,
       "components/ar-viewer-client.tsx": 557,
@@ -72,7 +72,7 @@
       "components/edit-restaurant-form.tsx": 213,
       "components/image-upload.tsx": 289,
       "components/ingredient-manager.tsx": 50,
-      "components/manager-category-manager.tsx": 327,
+      "components/manager-category-manager.tsx": 328,
       "components/menu/restaurant-page.tsx": 332,
       "components/qr-code-display.tsx": 160,
       "components/reset-admin-password-button.tsx": 108,
@@ -154,6 +154,13 @@
     "valid.rawEnv": 1
   },
   "entries": {
+    "size.excessCode": {
+      "at": "2026-09-20",
+      "was": 5158,
+      "now": 5160,
+      "reason": "a label must name its control: the two category managers each gain the useId() line that gives their inputs ids; the two files are near-duplicates that phase 8 merges",
+      "owner": "Oussama Rhoni"
+    },
     "size.overBudget": {
       "at": "2026-09-20",
       "was": 31,

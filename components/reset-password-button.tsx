@@ -22,14 +22,14 @@ export default function ResetPasswordButton({
   };
 
   return (
-    <span
+    <button
+      type="button"
       onClick={handleClick}
-      className={`flex items-center gap-2 w-full ${className} ${
- loading ? "opacity-50 pointer-events-none" : "cursor-pointer"
- }`}
+      disabled={loading}
+      className={`flex items-center gap-2 w-full text-left disabled:opacity-50 ${className}`}
     >
       <RotateCcw className="h-4 w-4" />
       <span>Reset Password</span>
-    </span>
+    </button>
   );
 }
