@@ -6,6 +6,7 @@ import ResendProvider from 'next-auth/providers/resend'
 import Credentials from 'next-auth/providers/credentials'
 import prisma from './lib/prisma'
 import { serverEnv } from './lib/env'
+import { credentials as credentialsSchema } from './lib/schemas/user'
 import bcrypt from 'bcryptjs'
 import { safeEqual, verifyTOTP } from './lib/totp'
 
@@ -40,8 +41,10 @@ export const {
     // The key and sender come from the parsed environment, not a literal.
     ResendProvider({ apiKey: serverEnv.resendApiKey, from: serverEnv.resendFrom }), // abatty:allow-secret
     Credentials({
-      async authorize(credentials) {
-        const { email, password, code, role } = credentials as Record<string, string>
+      async authorize(raw) {
+        const parsed = credentialsSchema.safeParse(raw)
+        if (!parsed.success) return null
+        const { email, password, code, role } = parsed.data
         
         try {
           const user = await prisma.user.findUnique({ where: { email } })
@@ -56,11 +59,10 @@ export const {
             return null
           }
 
-          // Check role if specified (convert role check to match your schema)
+          // The portal the sign-in page serves; a super admin may use either.
           if (role) {
-            const expectedRole = role === 'ADMIN' ? 'SUPER_ADMIN' : role
-            if (user.role !== expectedRole && user.role !== 'SUPER_ADMIN') {
-              console.log('Role mismatch for user:', email, 'expected:', expectedRole, 'actual:', user.role)
+            if (user.role !== role && user.role !== 'SUPER_ADMIN') {
+              console.log('Role mismatch for user:', email, 'expected:', role, 'actual:', user.role)
               throw new Error('Unauthorized role')
             }
           }
