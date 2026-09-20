@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { EmptyState, PageHeader, StatStrip } from '@/components/shell/page-header'
 import { RestaurantRowMenu } from '@/components/shell/row-actions'
+import { daysAgo } from '@/lib/time'
 
 export default async function AdminDashboard() {
-  const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-
   const [restaurants, managers, admins, dishTotals, liveDishes, arDishes, views, recentManagers] = await Promise.all([
     prisma.restaurant.findMany({
       orderBy: { createdAt: 'desc' },
@@ -22,7 +21,7 @@ export default async function AdminDashboard() {
     prisma.dish.count(),
     prisma.dish.count({ where: { isActive: true } }),
     prisma.dish.count({ where: { OR: [{ usdzUrl: { not: '' } }, { glbUrl: { not: '' } }] } }),
-    prisma.dishView.count({ where: { viewedAt: { gte: since } } }),
+    prisma.dishView.count({ where: { viewedAt: { gte: daysAgo(7) } } }),
     prisma.user.findMany({
       where: { role: 'RESTAURANT_ADMIN' },
       orderBy: { createdAt: 'desc' },

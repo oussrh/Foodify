@@ -3,19 +3,17 @@
 'use client'
 
 import { ArrowLeft } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 export default function GoBackButton() {
+  const router = useRouter()
   const handleGoBack = () => {
-    if (typeof window !== 'undefined' && window.history.length > 1) {
-      window.history.back()
-    } else {
-      // Fallback to home page if no history
-      window.location.href = '/'
-    }
+    if (window.history.length > 1) router.back()
+    else router.push('/')
   }
 
   return (
-    <button 
+    <button
       onClick={handleGoBack}
       className="group inline-flex items-center gap-3 bg-card/80 hover:bg-card text-muted-foreground hover:text-foreground px-8 py-4 rounded-lg font-semibold transition-colors transform border border-border/50 hover:border-border"
     >

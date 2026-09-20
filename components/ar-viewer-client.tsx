@@ -356,7 +356,7 @@ export default function ARViewerClient() {
         })
         
         // Add click handler for better camera activation
-        arButton.addEventListener('click', async (event) => {
+        arButton.addEventListener('click', async () => {
           console.log('AR button clicked, preparing camera...')
           
           // Add loading state to button

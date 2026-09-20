@@ -5,18 +5,9 @@ import ResetAdminPasswordButton from '@/components/reset-admin-password-button'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import {
-  ArrowLeft,
-  Shield,
-  Crown,
-  Calendar,
-  Mail,
-  BarChart3,
-  Settings,
-  Lightbulb,
-  Star,
-} from 'lucide-react'
+import { ArrowLeft, Shield, Crown, Calendar, Mail, BarChart3, Settings, Lightbulb, Star } from 'lucide-react'
 import { redirect } from 'next/navigation'
+import { daysSince } from '@/lib/time'
 
 export default async function EditAdminPage({ 
   params 
@@ -33,7 +24,7 @@ export default async function EditAdminPage({
   const defaultValues: EditAdminValues = { email: admin.email }
   
   // Calculate admin statistics
-  const adminAge = Math.floor((Date.now() - new Date(admin.createdAt).getTime()) / (1000 * 60 * 60 * 24))
+  const adminAge = daysSince(admin.createdAt)
   
   return (
     <div className="space-y-8">

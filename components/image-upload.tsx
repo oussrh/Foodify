@@ -26,7 +26,6 @@ import {
 import Image from 'next/image'
 
 interface ImageUploadProps {
-  restaurantId: string
   restaurantName: string
   currentImageUrl?: string
   onImageUpload: (url: string) => void
@@ -44,7 +43,6 @@ interface UploadResult {
 }
 
 export default function ImageUpload({
-  restaurantId,
   restaurantName,
   currentImageUrl,
   onImageUpload,

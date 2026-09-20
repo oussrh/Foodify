@@ -248,7 +248,7 @@ export default function ARModelPreview({
                     Download USDZ File
                   </Button>
                   <p className="text-sm text-muted-foreground">
-                    File size: ~{Math.round(Math.random() * 5 + 2)}MB • Optimized for AR
+                    Optimized for AR
                   </p>
                 </div>
               </div>

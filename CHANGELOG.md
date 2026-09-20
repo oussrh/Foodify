@@ -6,6 +6,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Added
 
+- `lib/time.ts` (`daysAgo`, `daysSince`, with tests): the dashboards' clock reads in one place instead of `Date.now()` arithmetic in six pages.
 - `.gitattributes`: every text file is LF in the working tree as well as the index (`* text=auto eol=lf`), so a Windows checkout no longer flips docs to CRLF, which abatty's front-matter parser misreads.
 - Unit suite (Vitest, `pnpm test`): 85 tests over the shared layer (opening hours, social links, brand colour, pricing and locale, brand uploads, TOTP, JSON-LD) with the coverage floor for `lib/**` pinned in `vitest.config.ts` at the measured figure; `docs/TESTING.md` lists the floor and every exclusion; `pnpm test:changed` holds the floor over the files a push changed (CI runs it).
 - CI (`.github/workflows/checks.yml`): `pnpm run gate` (the pre-push hook's script) and a production audit on every push and pull request, frozen install; a pull-request template with the gate's checklist.
@@ -36,6 +37,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Removed
 
+- Dead code the Next 16 lint presets exposed: the `restaurantId` prop the two upload components accepted and ignored, the calories editor's leftover state and handler in `DishStatusManager` (and its `calories` prop), an unused router, watched field and result in the restaurant form, two unstyled alert-dialog primitives shadowed by the styled exports, an unused type; a fabricated "File size: ~NMB" in the AR preview.
 - 84 unused import bindings in 24 files (11 whole import statements), by `scripts/codemods/remove-unused-imports.mjs`; `size.excessCode` 5306 → 5236.
 - `tsconfig.tsbuildinfo` (a type-checker cache, dirty after every run) and `.claude/settings.local.json` (per-machine tool permissions) are no longer tracked; both and `.serena/` are ignored.
 - `.eslintrc.json` and `next lint` (gone in Next 16); the import graph's one known violation (root `middleware.ts` read as an orphan), fixed in the rule rather than carried.
@@ -45,6 +47,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Fixed
 
+- The back button navigates through Next's router instead of assigning `window.location`.
 - Three empty `interface X extends Y {}` in `components/ui/` are type aliases; the WebXR `@ts-ignore` says why it expects an error.
 - `no-debugger` is an ESLint error (the gate's lint control stayed green without it); knip also watches `src/` so the dead-code control is meaningful.
 - Placeholder credentials in `.env.example` and `DEPLOYMENT.md` use `<angle-bracket>` form; the real Cloudinary cloud name and API key are scrubbed from the example.

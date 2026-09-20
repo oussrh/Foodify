@@ -23,7 +23,6 @@ import {
 } from 'lucide-react'
 
 interface ARFileUploadProps {
-  restaurantId: string
   restaurantName: string
   currentUsdzUrl?: string
   currentGlbUrl?: string
@@ -40,7 +39,6 @@ interface UploadResult {
 }
 
 export default function ARFileUpload({
-  restaurantId,
   restaurantName,
   currentUsdzUrl,
   currentGlbUrl,

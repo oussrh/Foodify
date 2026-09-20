@@ -379,7 +379,6 @@ export default function EditDishForm({
 
         {/* Dish Image Upload */}
         <ImageUpload
-          restaurantId={restaurantId}
           restaurantName={restaurantName || 'Restaurant'}
           currentImageUrl={imageUrl}
           onImageUpload={(url) => {
@@ -390,7 +389,6 @@ export default function EditDishForm({
 
         {/* AR Models Upload */}
         <ARFileUpload
-          restaurantId={restaurantId}
           restaurantName={restaurantName || 'Restaurant'}
           currentUsdzUrl={usdzUrl}
           currentGlbUrl={glbUrl}

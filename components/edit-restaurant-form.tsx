@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState, useCallback } from 'react'
 import { cn } from '@/lib/utils'
-import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -89,7 +88,6 @@ export default function EditRestaurantForm({
   id: string
   defaultValues: EditRestaurantValues
 }) {
-  const router = useRouter()
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [activeTab, setActiveTab] = useState<SettingsTab>('general')
@@ -123,7 +121,6 @@ export default function EditRestaurantForm({
   const logoUrl = watch('logoUrl')
   const coverImageUrl = watch('coverImageUrl')
   const googleFontUrl = watch('googleFontUrl')
-  const currentCurrency = watch('currency')
   const currentCurrencySymbol = watch('currencySymbol')
 
   // Uploads are saved the moment they finish, so they update the baseline instead of dirtying the form.
@@ -174,7 +171,7 @@ export default function EditRestaurantForm({
         website: data.website || undefined,
       }
       
-      const result = await updateRestaurant(id, cleanedData)
+      await updateRestaurant(id, cleanedData)
       
       setSaveStatus('saved')
       setHasUnsavedChanges(false)

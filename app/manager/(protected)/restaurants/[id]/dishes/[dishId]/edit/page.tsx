@@ -61,7 +61,6 @@ export default async function EditDishPage({ params }: { params: Promise<{ id: s
         dishId={dish.id}
         isActive={dish.isActive}
         isMostPurchased={dish.isMostPurchased}
-        calories={dish.calories}
         restaurantId={restaurant.id}
       />
 

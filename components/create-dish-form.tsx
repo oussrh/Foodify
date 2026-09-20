@@ -28,11 +28,6 @@ import {
 
 type Subcategory = { id: string; nameEn: string };
 
-interface Restaurant {
-  id: string;
-  name: string;
-}
-
 // Simple schema without transforms - handle conversion manually
 const schema = z.object({
   nameEn: z.string().min(1, "English name is required"),
@@ -346,7 +341,6 @@ export default function CreateDishForm({
 
         {/* Dish Image Upload */}
         <ImageUpload
-          restaurantId={restaurantId}
           restaurantName={restaurantName || 'Restaurant'}
           currentImageUrl={imageUrl}
           onImageUpload={(url) => {
@@ -357,7 +351,6 @@ export default function CreateDishForm({
 
         {/* AR Models Upload */}
         <ARFileUpload
-          restaurantId={restaurantId}
           restaurantName={restaurantName || 'Restaurant'}
           currentUsdzUrl={usdzUrl}
           currentGlbUrl={glbUrl}

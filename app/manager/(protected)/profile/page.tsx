@@ -6,25 +6,8 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  User,
-  Mail,
-  Calendar,
-  Shield,
-  Activity,
-  Settings,
-  ChevronRight,
-  Clock,
-  MapPin,
-  Building2,
-  TrendingUp,
-  CheckCircle,
-  AlertCircle,
-  Globe,
-  Zap,
-  Star,
-  Eye,
-} from 'lucide-react'
+import { daysSince } from '@/lib/time'
+import { User, Mail, Calendar, Shield, Activity, Settings, ChevronRight, Clock, MapPin, Building2, TrendingUp, CheckCircle, AlertCircle, Globe, Zap, Star, Eye } from 'lucide-react'
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -77,7 +60,7 @@ export default async function ProfilePage() {
     }
   }).catch(() => []) // Fallback if activityLog table doesn't exist
 
-  const accountAge = Math.floor((Date.now() - user.createdAt.getTime()) / (1000 * 60 * 60 * 24))
+  const accountAge = daysSince(user.createdAt)
   const isNewAccount = accountAge < 30
   
   return (
