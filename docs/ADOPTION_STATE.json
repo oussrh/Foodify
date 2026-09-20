@@ -194,7 +194,16 @@
     },
     {
       "id": 6,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-20T19:13:00Z",
+      "numbersBefore": {
+        "rules": "the pinned catalogue wires no API-* check for this stack (abatty rules --phase 6: 0 rules)",
+        "surface": "5 route handlers (2 admin GET lists unbounded and bare, 2 admin POST assignments answering { success }, 1 public POST dish-views with an ad-hoc body), 36 server actions returning Prisma rows, booleans or nothing; money leaves the server as a JavaScript number (Number(Decimal)); no GraphQL",
+        "envelopes": "none shared: bare arrays, { success }, { error }, { success, viewId, message }",
+        "brokenCall": "the admin Delete restaurant button calls DELETE /api/restaurants/[id], a route that does not exist",
+        "score": "66/100",
+        "enforcedShare": "75% (39/52)"
+      }
     },
     {
       "id": 7,
