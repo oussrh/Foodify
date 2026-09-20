@@ -139,7 +139,7 @@ The `vercel-build` script handles:
 When updating the database schema:
 1. Update `prisma/schema.prisma`
 2. Run `prisma db push` (handled automatically in build)
-3. Update seed data if needed in `prisma/seed.js`
+3. Update seed data if needed in `prisma/seed.ts`
 
 ### Seed Data
 The seed script creates:

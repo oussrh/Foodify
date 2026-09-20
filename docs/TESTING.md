@@ -34,7 +34,7 @@ change with the new number in the log of `STANDARDS_PROGRESS.md`.
 
 | Area | Statements | Branches | Functions | Lines | Set on |
 |---|---|---|---|---|---|
-| `lib/**` | 92.7 | 79.7 | 79.4 | 92.9 | 2026-09-20 |
+| `lib/**` | 93.0 | 81.3 | 79.4 | 93.3 | 2026-09-20 (raised the same day: `lib/env.ts` tests) |
 | `lib/menu.ts` (money display, per file) | 88.8 | 85 | 63.6 | 86.2 | 2026-09-20 |
 | `lib/totp.ts` (2FA check, per file) | 100 | 100 | 100 | 100 | 2026-09-20 |
 

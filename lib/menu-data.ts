@@ -1,6 +1,7 @@
 // lib/menu-data.ts
 // Serializers from Prisma rows to the plain shapes the customer pages render.
-import type { Dish, Ingredient, Restaurant } from '@prisma/client'
+import type { Dish, Ingredient, Restaurant } from '@/generated/prisma/client'
+import { publicEnv } from '@/lib/env'
 import type { CoverStyle, Locale, MenuDish, MenuRestaurant, MenuTheme } from './menu'
 
 export function serializeDish(dish: Dish & { ingredients: Ingredient[] }): MenuDish {
@@ -53,5 +54,5 @@ export function serializeRestaurant(restaurant: Restaurant): MenuRestaurant {
 }
 
 export function siteOrigin(): string {
-  return process.env.NEXT_PUBLIC_APP_URL || 'https://foodify.app'
+  return publicEnv.appUrl
 }

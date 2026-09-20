@@ -1,9 +1,11 @@
-// FilePath: prisma/seed.js
+// prisma/seed.ts: sample data for a fresh database. Run by `prisma db seed` through tsx (prisma.config.ts).
 
-import { PrismaClient } from "@prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { PrismaClient } from "../generated/prisma/client";
+import { serverEnv } from "../lib/env";
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString: serverEnv.databaseUrl }) });
 
 async function main() {
   console.log('🌱 Starting database seed...');

@@ -5,3 +5,4 @@ node_modules
 .claude/night/
 .abatty/
 coverage/
+generated/

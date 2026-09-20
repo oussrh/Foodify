@@ -5,7 +5,7 @@ import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 
 export default [
-  { ignores: ['.next/**', 'node_modules/**', 'coverage/**', 'public/**', '.claude/**', '.abatty/**', 'patches/**'] },
+  { ignores: ['.next/**', 'node_modules/**', 'coverage/**', 'generated/**', 'public/**', '.claude/**', '.abatty/**', 'patches/**'] },
   ...nextCoreWebVitals,
   ...nextTypescript,
   { rules: { 'no-debugger': 'error' } },

@@ -12,4 +12,14 @@ export const publicEnv = {
   /** Build identity that versions the service worker so every deploy ships a fresh worker and cache. */
   buildId: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 8) || process.env.NEXT_PUBLIC_BUILD_ID || 'dev',
   isProduction: process.env.NODE_ENV === 'production',
+  /** Public origin of the site, for links sent off-site (JSON-LD, the QR target). */
+  appUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://foodify.app',
+} as const
+
+/**
+ * Server-only values. A client bundle sees `undefined` here: Next inlines NEXT_PUBLIC_* only,
+ * so nothing secret reaches the browser through this object.
+ */
+export const serverEnv = {
+  databaseUrl: process.env.DATABASE_URL,
 } as const

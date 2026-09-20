@@ -14,7 +14,7 @@
     "components/**/*.{ts,tsx}",
     "lib/**/*.ts",
     "test/**/*.ts",
-    "prisma/*.js",
+    "prisma/*.ts",
     "*.{ts,js,cjs,mjs}"
   ],
   // Per-path issue types to skip, with the reason: a vendored UI kit whose sub-component exports

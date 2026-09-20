@@ -27,19 +27,19 @@
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 13,
-    "valid.rawEnv": 37
+    "valid.rawEnv": 36
   },
   "scanned": {
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 17,
+    "docs.citations": 29,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
     "size.excessCode": 157,
     "size.overBudget": 157,
-    "size.overRaw": 162,
+    "size.overRaw": 164,
     "types.escapes": 157,
     "valid.rawEnv": 156
   },
@@ -138,7 +138,6 @@
       "components/restaurant-cover-upload.tsx": 4,
       "components/restaurant-logo-upload.tsx": 4,
       "lib/emails/change-email.ts": 2,
-      "lib/menu-data.ts": 1,
       "lib/prisma.ts": 1
     }
   },

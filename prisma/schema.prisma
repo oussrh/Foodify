@@ -1,11 +1,13 @@
 // prisma/schema.prisma
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 
+// Prisma 7: a TypeScript client generated into generated/prisma (gitignored, rebuilt by
+// `prisma generate` on install and build); the connection URL is in prisma.config.ts.
 generator client {
-  provider = "prisma-client-js"
+  provider = "prisma-client"
+  output   = "../generated/prisma"
 }
 
 enum Locale {
