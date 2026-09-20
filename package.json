@@ -6,7 +6,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "eslint . --max-warnings=0",
+    "lint": "node scripts/codemods/shape-exemptions.mjs --check && eslint . --max-warnings=0",
     "type-check": "tsc --noEmit",
     "postinstall": "prisma generate",
     "prisma": "prisma",
