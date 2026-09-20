@@ -16,6 +16,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { updateRestaurant } from '@/app/actions/restaurant-actions'
 import BrandingPanel from '@/components/branding/branding-panel'
+import ContactPanel, { type ContactFormValues } from '@/components/contact/contact-panel'
+import type { UseFormRegister } from 'react-hook-form'
 import { 
   Building2, 
   MapPin, 
@@ -469,168 +471,27 @@ export default function EditRestaurantForm({
       </div>
 
       <div role="tabpanel" id="settings-panel-contact" aria-labelledby="settings-tab-contact" hidden={activeTab !== 'contact'} className="space-y-6">
-      {/* Contact Information Section */}
-      <Card className="border-border">
-        <CardHeader className="">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Phone className="h-5 w-5 text-success" />
-            Contact Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="email" className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                Contact Email
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                {...register('email')}
-                className="border-border"
-              />
-              {errors.email && (
-                <span className="text-sm text-destructive">{errors.email.message}</span>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="phone" className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                Phone Number
-              </Label>
-              <Input
-                id="phone"
-                type="tel"
-                {...register('phone')}
-                className="border-border"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="website" className="flex items-center gap-2">
-              <Globe className="h-4 w-4" />
-              Website
-            </Label>
-            <Input
-              id="website"
-              type="url"
-              {...register('website')}
-              className="border-border"
-            />
-            {errors.website && (
-              <span className="text-sm text-destructive">{errors.website.message}</span>
-            )}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Address Section */}
-      <Card className="border-border">
-        <CardHeader className="">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <MapPin className="h-5 w-5 text-warning" />
-            Address Information
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          <div className="space-y-2">
-            <Label htmlFor="streetAddress">Street Address</Label>
-            <Input
-              id="streetAddress"
-              {...register('streetAddress')}
-              className="border-border"
-            />
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="city">City</Label>
-              <Input
-                id="city"
-                {...register('city')}
-                className="border-border"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="state">State/Province</Label>
-              <Input
-                id="state"
-                {...register('state')}
-                className="border-border"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="postalCode">Postal Code</Label>
-              <Input
-                id="postalCode"
-                {...register('postalCode')}
-                className="border-border"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
-            <Input
-              id="country"
-              {...register('country')}
-              className="border-border"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Operating Hours Section */}
-      <Card className="border-border">
-        <CardHeader className="">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Clock className="h-5 w-5 text-muted-foreground" />
-            Operating Hours
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="space-y-2">
-            <Label htmlFor="openingHours">Opening Hours</Label>
-            <Textarea
-              id="openingHours"
-              {...register('openingHours')}
-              className="border-border min-h-[80px]"
-            />
-            <span className="text-xs text-muted-foreground">
-              Enter your operating hours. Use line breaks for different days.
-            </span>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Social Media Section */}
-      <Card className="border-border">
-        <CardHeader className="">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Share2 className="h-5 w-5 text-muted-foreground" />
-            Social Media
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <div className="space-y-2">
-            <Label htmlFor="socialMedia">Social Media Links</Label>
-            <Textarea
-              id="socialMedia"
-              {...register('socialMedia')}
-              placeholder="Facebook: https://facebook.com/yourrestaurant&#10;Instagram: https://instagram.com/yourrestaurant&#10;Twitter: https://twitter.com/yourrestaurant"
-              className="border-border min-h-[100px]"
-            />
-            <span className="text-xs text-muted-foreground">
-              Enter your social media links, one per line with platform name.
-            </span>
-          </div>
-        </CardContent>
-      </Card>
+      <ContactPanel
+        register={register as unknown as UseFormRegister<ContactFormValues>}
+        errors={errors}
+        values={{
+          name: watch('name') || '',
+          email: watch('email'),
+          phone: watch('phone'),
+          website: watch('website'),
+          streetAddress: watch('streetAddress'),
+          city: watch('city'),
+          state: watch('state'),
+          postalCode: watch('postalCode'),
+          country: watch('country'),
+          openingHours: watch('openingHours'),
+          socialMedia: watch('socialMedia'),
+        }}
+        onChange={(field, value) => setValue(field, value, { shouldDirty: true })}
+        disabled={isSubmitting}
+      />
+      <input type="hidden" {...register('openingHours')} />
+      <input type="hidden" {...register('socialMedia')} />
       </div>
 
       <div role="tabpanel" id="settings-panel-branding" aria-labelledby="settings-tab-branding" hidden={activeTab !== 'branding'} className="space-y-6">

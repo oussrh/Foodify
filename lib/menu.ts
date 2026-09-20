@@ -138,6 +138,10 @@ export const MENU_TEXT = {
     poweredBy: 'Menu by',
     lightMode: 'Light mode',
     darkMode: 'Dark mode',
+    openNow: 'Open',
+    closedNow: 'Closed',
+    closes: 'closes',
+    opens: 'opens',
   },
   fr: {
     search: 'Rechercher',
@@ -167,6 +171,10 @@ export const MENU_TEXT = {
     poweredBy: 'Menu par',
     lightMode: 'Mode clair',
     darkMode: 'Mode sombre',
+    openNow: 'Ouvert',
+    closedNow: 'Fermé',
+    closes: 'ferme à',
+    opens: 'ouvre à',
   },
 } as const
 

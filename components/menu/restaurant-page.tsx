@@ -18,6 +18,7 @@ import {
   type MenuRestaurant,
 } from '@/lib/menu'
 import DishRow from './dish-row'
+import { dayName, openStatus, parseOpeningHours } from '@/lib/opening-hours'
 import DishBody from './dish-body'
 import MenuFooter from './menu-footer'
 
@@ -57,6 +58,16 @@ export default function RestaurantPage({
   const [openDish, setOpenDish] = useState<MenuDish | null>(null)
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
+  const [status, setStatus] = useState<ReturnType<typeof openStatus>>(null)
+
+  // Open/closed uses the guest's clock, so it is computed after mount and refreshed each minute.
+  useEffect(() => {
+    const hours = parseOpeningHours(restaurant.openingHours)
+    const tick = () => setStatus(openStatus(hours))
+    tick()
+    const id = setInterval(tick, 60_000)
+    return () => clearInterval(id)
+  }, [restaurant.openingHours])
 
   const t = MENU_TEXT[locale]
   const heroRef = useRef<HTMLDivElement>(null)
@@ -240,6 +251,16 @@ export default function RestaurantPage({
             <h1 className="truncate text-2xl font-semibold leading-tight tracking-display sm:text-3xl">{restaurant.name}</h1>
             {(restaurant.tagline || meta) && (
               <p className="truncate text-[13px] text-white/85 sm:text-sm">{restaurant.tagline || meta}</p>
+            )}
+            {status && (
+              <p className="mt-0.5 flex items-center gap-1.5 text-[12px] font-medium text-white/90">
+                <span className={cn('h-1.5 w-1.5 rounded-full', status.open ? 'bg-[#4FB283]' : 'bg-white/60')} aria-hidden="true" />
+                {status.open
+                  ? `${t.openNow} · ${t.closes} ${status.closesAt}`
+                  : status.opensAt
+                    ? `${t.closedNow} · ${t.opens} ${status.opensAt}${status.opensOn ? ' ' + dayName(status.opensOn, locale) : ''}`
+                    : t.closedNow}
+              </p>
             )}
           </div>
         </div>

@@ -3,6 +3,7 @@
 import { Clock, Facebook, Globe, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react'
 import { MENU_TEXT, type Locale, type MenuRestaurant } from '@/lib/menu'
 import type { SocialHandles } from '@/lib/social-media'
+import { hasStructuredHours, parseOpeningHours, summarizeOpeningHours } from '@/lib/opening-hours'
 
 interface MenuFooterProps {
   restaurant: MenuRestaurant
@@ -24,6 +25,9 @@ export function formatAddress(r: Pick<MenuRestaurant, 'streetAddress' | 'city' |
 export default function MenuFooter({ restaurant, social, locale }: MenuFooterProps) {
   const t = MENU_TEXT[locale]
   const address = formatAddress(restaurant)
+  const hours = parseOpeningHours(restaurant.openingHours)
+  const hoursLines = summarizeOpeningHours(hours, locale)
+  const hasHours = hasStructuredHours(hours) || Boolean(hours.note)
   const hasContact = address || restaurant.phone || restaurant.email || restaurant.website
   const hasSocial = social.instagram || social.facebook || social.twitter
   const year = new Date().getFullYear()
@@ -75,14 +79,22 @@ export default function MenuFooter({ restaurant, social, locale }: MenuFooterPro
           </div>
         )}
 
-        {(restaurant.openingHours || hasSocial) && (
+        {(hasHours || hasSocial) && (
           <div className="flex flex-col gap-6">
-            {restaurant.openingHours && (
+            {hasHours && (
               <div className="flex flex-col gap-3">
                 <p className="text-sm font-semibold">{t.hours}</p>
                 <div className={row}>
                   <Clock className={icon} />
-                  <span className="whitespace-pre-line">{restaurant.openingHours}</span>
+                  <span className="flex flex-col gap-0.5">
+                    {hoursLines.map((l) => (
+                      <span key={l.days} className="flex justify-between gap-4">
+                        <span>{l.days}</span>
+                        <span className="tnum">{l.hours}</span>
+                      </span>
+                    ))}
+                    {hours.note && <span className={hoursLines.length > 0 ? 'mt-1 text-xs' : 'whitespace-pre-line'}>{hours.note}</span>}
+                  </span>
                 </div>
               </div>
             )}

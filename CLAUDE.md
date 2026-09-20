@@ -127,6 +127,7 @@ CLOUDINARY_API_SECRET="..."
 - All user-facing content has `nameEn`/`nameFr` and `descriptionEn`/`descriptionFr` fields
 - Components handle locale switching
 - Default locale set per restaurant
+-  is JSON (: per-day periods + note; legacy free text is kept as the note) and  is JSON  ( still accepts URLs/free text). Edit them through  — never as raw strings.
 - Dietary attributes and allergens are real data (`Dish.dietary`, `Dish.allergens`, string arrays keyed by `DIETARY_OPTIONS`/`ALLERGEN_OPTIONS` in `lib/menu.ts`) — never infer them from dish names
 
 ### State Management
