@@ -14,12 +14,13 @@ related: ["./README.md", "./ADOPTION_DECISIONS.md"]
 
 | Metric | Day 0 | Now | Target | Held by | Rule |
 |---|---|---|---|---|---|
-| Gap-analysis score | 49/100 | 53/100 | 100 | `abatty measure` | - |
-| Enforced share (rules held by a machine) | 74% (35/47) | 76% (34/45) | 100% | `abatty measure` | - |
+| Gap-analysis score | 49/100 | 59/100 | 100 | `abatty measure` | - |
+| Enforced share (rules held by a machine) | 74% (35/47) | 77% (36/47) | 100% | `abatty measure` | - |
 | `size.overBudget` (files over their kind's budget) | 31 | 34 | 0 | ratchet | CODE.1 |
-| `size.excessCode` (code lines over budget, summed) | 5302 | 5306 | 0 | ratchet | CODE.1 |
+| `size.excessCode` (code lines over budget, summed) | 5302 | 5158 | 0 | ratchet | CODE.1 |
 | `size.overRaw` (files over the 800-line cap) | 1 | 1 | 0 | ratchet | CODE.1 |
-| `types.escapes` (`any`, `ts-ignore`) | 13 | 13 | 0 | ratchet | TYPES.1 |
+| ESLint findings (`eslint . --max-warnings=0`) | 137 (Next 16 presets) | 0 | 0 | hard (lint script) | CODE.4 |
+| `types.escapes` (`any`, `ts-ignore`) | 13 | 1 | 0 | ratchet | TYPES.1 |
 | `valid.rawEnv` (`process.env` outside `lib/env.ts`) | 37 | 36 | 0 | ratchet | VALID.3 |
 | `docs.frontMatter` (documents without front matter) | 2 | 0 | 0 | hard | DOC.1 |
 | `docs.indexDrift` (documents missing from the index) | 1 | 0 | 0 | hard | DOC.3 |
@@ -30,12 +31,13 @@ related: ["./README.md", "./ADOPTION_DECISIONS.md"]
 | # | Phase | Status |
 |---|---|---|
 | 0 | The instrument: ratchet, gate + hook, CI step, control cases | done 2026-09-20 |
-| 1 | Lint to zero warnings | pending |
+| 1 | Lint to zero warnings | done 2026-09-20 |
 | 2 | Coverage pinned | done 2026-09-20 |
 | 3-13 | see `ADOPTION_STATE.json` | pending |
 
 ## Log
 
+- 2026-09-20 · **phase 1 closed** · ESLint findings 137 → 0 (`eslint .` over the whole tree, Next 16's core-web-vitals and TypeScript presets at their own levels, nothing held at warn); `pnpm lint` is `eslint . --max-warnings=0` and the gate's lint step runs it. What moved: 84 unused import bindings in 24 files by `scripts/codemods/remove-unused-imports.mjs` (8 fixture tests); dead props, state, handlers and a type removed with their call sites; `Date.now()` in six pages replaced by `lib/time.ts` (tested); ten components on `useSyncExternalStore` / `useEffectEvent` instead of setState in mount effects and refs read during render; the eight forms on `useWatch` / `getValues`; twelve `any`s typed (`types.escapes` 13 → 1, the one being a justified `@ts-expect-error`). Caught on the way: a random "file size" shown to users, a never-updating `useMemo` over `watch`, and a dead link the `as any` on its href had hidden. `size.excessCode` 5306 → 5158 net (one raise, 5184 → 5185, with its reason above). CODE-MAXWARN missing → present, TYPES-ESCAPES partial → present; score 57 → 59, enforced share 77%. **Switch proven**: `pnpm lint` exit 1 with a planted unused import, exit 0 without. **Verified on the production build**: the menu's language precedence (URL, then the remembered choice), the settings form's live preview and unsaved-changes guard, clean consoles; the sign-in flow's pending-credentials path (/mfa) was not exercised in a browser, and the standards-reviewer found by reading that a live storage read sent it back to the login after a successful code: fixed in 3c783a5 (the credentials are captured once on the first client render). Other review follow-ups landed there: the codemod split into three functions with three more fixtures, the worker registration out of the effect, `useMenuLocale` and `lib/device.ts` for the duplicated blocks. **Left**: the font picker's option list styles a saved font in its own face only after it is picked again on a revisit (the stylesheet link persists across client navigation and only `onload` marks it loaded); function complexity rose in four components and CODE-SHAPE (function-size rules) is phase 7; JSDoc is phase 11.
 - 2026-09-20 · `size.excessCode` 5184 → 5185 · owner: Oussama Rhoni. Reason: react-hook-form's `watch()` was an inline expression in JSX; the React Compiler-compatible `useWatch` is a hook, hence a statement, one line in each of three forms already over their budget (`create-client-form`, `create-dish-form`, `edit-dish-form`); their split is phase 8. Same phase, other direction: 5306 → 5184 from the codemod and the dead code.
 - 2026-09-20 · **phase 0 closed** · The switch seen both ways in the place it guards: https://github.com/oussrh/Foodify/actions/runs/35510629826 on a throwaway branch `proof/ratchet-red` (one commit placed through the GitHub API, the baseline's `types.escapes` floor lowered 13 → 12) went red at the gate step with `types.escapes 13 / 12 ratchet REGRESSED`; https://github.com/oussrh/Foodify/actions/runs/35509687312 on `main` with the floor at 13 went green on every step, the audit included. The branch is deleted. Numbers: INST-CI, INST-CI-STEPS, SEC-LOCKFILE, SEC-SECRETS missing/partial → present; three `.githooks/*` files 100644 → 100755; the pre-push hook refuses a red push and the guard refuses `--no-verify`, which is why the proof commit was created remotely.
 - 2026-09-20 · **dependency upgrade, CI green end to end** · https://github.com/oussrh/Foodify/actions/runs/35509687312 on `7417ef8`: 67 pushed files, the gate green with the build suite running in CI for the first time (1 min 19 s), the changed-lines coverage green, the audit green (`pnpm audit --prod`: no known vulnerabilities, from 7 critical / 33 high in the morning). Five gated commits on `main`: latest of every current major (228ac1f), Next 16 + ESLint flat config (398caec), Prisma 7 + pg adapter (2ecb218), Tailwind 4 (308a3cc), otplib 13 / resend 6 / lucide 1.x (7417ef8). Floors: `valid.rawEnv` 37 → 36, `size.excessCode` 5307 → 5306, coverage `lib/**` raised to 93.0 / 81.3 / 79.4 / 93.3; 137 ESLint warnings from the Next 16 presets recorded for phase 1. Held back with reasons in `ADOPTION_DECISIONS.md`: TypeScript 7, ESLint 10, Prisma 8 rc, `@types/node` 26. Phase 0's remaining item is the ratchet step seen red in CI on a lowered floor.

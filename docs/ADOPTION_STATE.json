@@ -34,13 +34,24 @@
     },
     {
       "id": 1,
-      "status": "in_progress",
-      "updatedAt": "2026-09-20T12:32:44Z",
+      "status": "done",
+      "updatedAt": "2026-09-20T13:09:13Z",
       "numbersBefore": {
         "lintWarnings": 137,
         "lintErrors": 0,
         "maxWarnings": "not set",
         "typesEscapes": 13
+      },
+      "numbersAfter": {
+        "lintWarnings": 0,
+        "lintErrors": 0,
+        "maxWarnings": 0,
+        "typesEscapes": 1,
+        "score": "59/100",
+        "enforcedShare": "77% (36/47)",
+        "switch": "pnpm lint exit 1 with a planted unused import, exit 0 without",
+        "tests": 109,
+        "sizeExcessCode": 5158
       }
     },
     {
