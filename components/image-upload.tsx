@@ -24,6 +24,7 @@ import {
   CheckCircle2,
 } from 'lucide-react'
 import Image from 'next/image'
+import { publicEnv } from '@/lib/env'
 
 interface ImageUploadProps {
   restaurantName: string
@@ -62,10 +63,7 @@ export default function ImageUpload({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Check if Cloudinary is configured
-  const isCloudinaryConfigured = !!(
-    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME && 
-    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
-  )
+  const isCloudinaryConfigured = Boolean(publicEnv.cloudinaryCloudName && publicEnv.cloudinaryUploadPreset)
 
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes'
@@ -76,8 +74,7 @@ export default function ImageUpload({
   }
 
   const uploadToCloudinary = useCallback(async (file: File): Promise<UploadResult> => {
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+    const { cloudinaryCloudName: cloudName, cloudinaryUploadPreset: uploadPreset } = publicEnv
     
     if (!cloudName) {
       throw new Error('Cloudinary cloud name is not configured. Please set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME in your environment variables.')

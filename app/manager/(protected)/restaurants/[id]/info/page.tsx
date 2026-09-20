@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { publicEnv } from '@/lib/env'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import { ExternalLink } from 'lucide-react'
@@ -23,7 +24,7 @@ export default async function RestaurantInfoPage({ params }: { params: Promise<{
     prisma.dish.count({ where: { restaurantId: restaurant.id, isActive: true } }),
   ])
 
-  const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://foodify.app'}/restaurant/${restaurant.slug}`
+  const publicUrl = `${publicEnv.appUrl}/restaurant/${restaurant.slug}`
 
   return (
     <div className="flex flex-col gap-6">

@@ -21,6 +21,7 @@ import {
   Apple,
   Zap,
 } from 'lucide-react'
+import { publicEnv } from '@/lib/env'
 
 interface ARFileUploadProps {
   restaurantName: string
@@ -53,15 +54,11 @@ export default function ARFileUpload({
   const [uploadProgress, setUploadProgress] = useState(0)
 
   // Check if Cloudinary is configured
-  const isCloudinaryConfigured = !!(
-    process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME && 
-    process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
-  )
+  const isCloudinaryConfigured = Boolean(publicEnv.cloudinaryCloudName && publicEnv.cloudinaryUploadPreset)
 
   const uploadToCloudinary = async (file: File, type: 'usdz' | 'glb'): Promise<UploadResult> => {
     // Check if Cloudinary is configured
-    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET
+    const { cloudinaryCloudName: cloudName, cloudinaryUploadPreset: uploadPreset } = publicEnv
     
     if (!cloudName) {
       throw new Error('Cloudinary cloud name is not configured. Please set NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME in your environment variables.')
