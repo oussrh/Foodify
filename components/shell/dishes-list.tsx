@@ -12,7 +12,8 @@ export interface DishListRow {
   nameEn: string
   nameFr: string
   imageUrl: string
-  price: number
+  /** A two-decimal string, as money travels (API.1). */
+  price: string
   isActive: boolean
   isMostPurchased: boolean
   hasAR: boolean
@@ -95,7 +96,7 @@ export default function DishesList({ role, restaurantId, currency, rows, search,
                 <TableCell className="hidden text-muted-foreground md:table-cell">{d.category || '—'}</TableCell>
                 <TableCell className="tnum text-right">
                   {currency}
-                  {d.price.toFixed(2)}
+                  {d.price}
                 </TableCell>
                 <TableCell className="hidden sm:table-cell">
                   {d.hasAR ? (

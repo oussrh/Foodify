@@ -3,7 +3,7 @@
 // vocabularies: the menu renders a label per key and nothing else is storable.
 import { z } from 'zod'
 import { ALLERGEN_OPTIONS, DIETARY_OPTIONS } from '@/lib/menu'
-import { bilingualName, uuid } from './common'
+import { bilingualName, money, uuid } from './common'
 
 // Typed as strings, as the rows and the picker are; the vocabulary is the runtime rule.
 const keyOf = (options: readonly { key: string }[], what: string) =>
@@ -14,7 +14,7 @@ const allergenKey = keyOf(ALLERGEN_OPTIONS, 'allergen')
 export const dishInput = bilingualName.extend({
   descriptionEn: z.string().optional(),
   descriptionFr: z.string().optional(),
-  price: z.number().min(0, 'Price must be a number, 0 or more'),
+  price: money,
   imageUrl: z.string().min(1, 'Image URL is required'),
   usdzUrl: z.string().optional(),
   glbUrl: z.string().optional(),

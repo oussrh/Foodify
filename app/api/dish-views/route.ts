@@ -1,6 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
+import { ok, fail } from '@/lib/api'
 
 // Public endpoint hit by the customer menu, so the body is validated strictly.
 const dishViewSchema = z.object({
@@ -14,32 +15,28 @@ export async function POST(request: NextRequest) {
   try {
     body = await request.json()
   } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+    return fail('invalid_json', 'The body is not JSON', 400)
   }
 
   const parsed = dishViewSchema.safeParse(body)
   if (!parsed.success) {
-    return NextResponse.json({ error: 'Invalid dish view payload' }, { status: 400 })
+    return fail('invalid_payload', 'Invalid dish view payload', 400, parsed.error.issues)
   }
   const { dishId, arViewed, deviceType } = parsed.data
 
   try {
     const dish = await prisma.dish.findUnique({ where: { id: dishId }, select: { id: true } })
     if (!dish) {
-      return NextResponse.json({ error: 'Dish not found' }, { status: 404 })
+      return fail('not_found', 'Dish not found', 404)
     }
 
     const dishView = await prisma.dishView.create({
       data: { dishId, arViewed, deviceType },
     })
 
-    return NextResponse.json({
-      success: true,
-      viewId: dishView.id,
-      message: arViewed ? 'AR view recorded' : 'Dish view recorded',
-    })
+    return ok({ viewId: dishView.id, arViewed }, { status: 201 })
   } catch (error) {
     console.error('Error recording dish view:', error)
-    return NextResponse.json({ error: 'Failed to record dish view' }, { status: 500 })
+    return fail('internal', 'Failed to record dish view', 500)
   }
 }

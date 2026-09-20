@@ -10,6 +10,7 @@ import {
 } from '@/lib/emails/change-email'
 import { sendMail } from '@/lib/mail'
 import { emailChange, emailToken, passwordChange, type PasswordChange } from '@/lib/schemas/user'
+import { userPayload } from '@/lib/payloads'
 
 export async function initiateEmailChange(rawEmail: string) {
   const session = await auth()
@@ -43,13 +44,14 @@ export async function initiateEmailChange(rawEmail: string) {
     },
   })
 
-  await sendMail({ to: user.email, subject: 'Confirm your email change', html: oldEmailConfirmationEmail(token) })
+  const { sent } = await sendMail({ to: user.email, subject: 'Confirm your email change', html: oldEmailConfirmationEmail(token) })
+  return { sent }
 }
 
 export async function confirmOldEmail(rawToken: string) {
   // A mangled link is the same "invalid or expired" as an unknown token, not a render error.
   const parsed = emailToken.safeParse(rawToken)
-  if (!parsed.success) return null
+  if (!parsed.success) return { confirmed: false }
   const token = parsed.data
   const user = await prisma.user.findFirst({
     where: {
@@ -57,7 +59,7 @@ export async function confirmOldEmail(rawToken: string) {
       emailChangeTokenExpires: { gt: new Date() },
     },
   })
-  if (!user || !user.newEmail) return null
+  if (!user || !user.newEmail) return { confirmed: false }
 
   const verifyToken = crypto.randomBytes(32).toString('hex')
 
@@ -80,14 +82,14 @@ export async function confirmOldEmail(rawToken: string) {
     data: { status: 'confirmed_old' },
   })
 
-  await sendMail({ to: user.newEmail, subject: 'Verify your new email', html: newEmailVerificationEmail(verifyToken) })
+  const { sent } = await sendMail({ to: user.newEmail, subject: 'Verify your new email', html: newEmailVerificationEmail(verifyToken) })
 
-  return true
+  return { confirmed: true, sent }
 }
 
 export async function confirmNewEmail(rawToken: string) {
   const parsed = emailToken.safeParse(rawToken)
-  if (!parsed.success) return null
+  if (!parsed.success) return { confirmed: false }
   const token = parsed.data
   const user = await prisma.user.findFirst({
     where: {
@@ -95,7 +97,7 @@ export async function confirmNewEmail(rawToken: string) {
       emailVerifyTokenExpires: { gt: new Date() },
     },
   })
-  if (!user || !user.newEmail) return null
+  if (!user || !user.newEmail) return { confirmed: false }
 
   await prisma.user.update({
     where: { id: user.id },
@@ -116,7 +118,7 @@ export async function confirmNewEmail(rawToken: string) {
     data: { status: 'confirmed_new' },
   })
 
-  return true
+  return { confirmed: true }
 }
 
 export async function updatePassword(raw: PasswordChange) {
@@ -130,7 +132,7 @@ export async function updatePassword(raw: PasswordChange) {
     throw new Error('Current password is incorrect')
   }
   const passwordHash = await bcrypt.hash(password, 10)
-  return prisma.user.update({
+  return prisma.user.update({ select: userPayload,
     where: { id: user.id },
     data: { passwordHash },
   })

@@ -10,6 +10,11 @@ export const uuid = z.uuid()
 export const email = z.email('Please enter a valid email address')
 /** What an admin sets for someone else, at creation or on a reset: temporary, hence short. A user's own change is `passwordChange`. */
 export const password = z.string().min(6, 'Password must be at least 6 characters')
+/** A monetary amount as it travels: a decimal string with at most two fraction digits, normalised to two (API.1; never a float). */
+export const money = z
+  .string()
+  .regex(/^\d+(\.\d{1,2})?$/, 'Price must be a number with at most two decimals')
+  .transform((v) => Number(v).toFixed(2))
 export const bilingualName = z.object({
   nameEn: z.string().min(1, 'English name is required'),
   nameFr: z.string().min(1, 'French name is required'),

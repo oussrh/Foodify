@@ -194,7 +194,28 @@
     },
     {
       "id": 6,
-      "status": "pending"
+      "status": "done",
+      "updatedAt": "2026-09-20T19:42:12Z",
+      "numbersBefore": {
+        "rules": "the pinned catalogue wires no API-* check for this stack (abatty rules --phase 6: 0 rules)",
+        "surface": "5 route handlers (2 admin GET lists unbounded and bare, 2 admin POST assignments answering { success }, 1 public POST dish-views with an ad-hoc body), 36 server actions returning Prisma rows, booleans or nothing; money leaves the server as a JavaScript number (Number(Decimal)); no GraphQL",
+        "envelopes": "none shared: bare arrays, { success }, { error }, { success, viewId, message }",
+        "brokenCall": "the admin Delete restaurant button calls DELETE /api/restaurants/[id], a route that does not exist",
+        "score": "66/100",
+        "enforcedShare": "75% (39/52)"
+      },
+      "numbersAfter": {
+        "outcome": "one envelope on the five routes, the two lists bounded and followable by keyset cursor, money a two-decimal string on every crossing, every mutation a shaped payload; keys, If-Match, versioning, OpenAPI and GraphQL not applicable for an internal first-party API (decision)",
+        "api.bareResponse": "0, hard (repository probe, 2 controls)",
+        "api.unboundedList": "0, hard (repository probe, 2 controls)",
+        "api.rowReturn": "0, hard (repository probe, 2 controls; 36 actions)",
+        "api.floatMoney": "0, hard (repository probe, 2 controls)",
+        "score": "66/100",
+        "enforcedShare": "75% (39/52)",
+        "readability": "90/100",
+        "switches": "pnpm run standards red on a planted Response.json, a planted findMany without take, a planted row return and a planted price: Number() (HARD FAIL 1 / 0 each), green after each restore; probe controls 24/24",
+        "tests": "207 unit (29 files), 16 browser"
+      }
     },
     {
       "id": 7,

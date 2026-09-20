@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { call, callAll } from "@/lib/api-client";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogTrigger,
@@ -44,9 +46,9 @@ export default function AssignRestaurantsDialog({
 
   useEffect(() => {
     if (!open) return;
-    fetch("/api/restaurants")
-      .then((res) => res.json())
-      .then((data: Restaurant[]) => setRestaurants(data));
+    callAll<Restaurant>("/api/restaurants")
+      .then(setRestaurants)
+      .catch(() => toast.error("Could not load the restaurants"));
   }, [open]);
 
   const filteredRestaurants = restaurants.filter((r: Restaurant) =>
@@ -61,14 +63,19 @@ export default function AssignRestaurantsDialog({
 
   const handleSave = async () => {
     setLoading(true);
-    await fetch(`/api/users/${userId}/restaurants`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ restaurantIds: selected }),
-    });
-    setLoading(false);
-    setOpen(false);
-    router.refresh();
+    try {
+      await call(`/api/users/${userId}/restaurants`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ restaurantIds: selected }),
+      });
+      setOpen(false);
+      router.refresh();
+    } catch {
+      toast.error("Could not save the assignments");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -86,7 +93,7 @@ export default function AssignRestaurantsDialog({
             Assign Restaurants to User
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-4">
           {/* Search */}
           <div className="relative">
@@ -98,7 +105,7 @@ export default function AssignRestaurantsDialog({
               className="pl-10 border-border focus:border-border-strong"
             />
           </div>
-          
+
           {/* Selected count */}
           <div className="flex items-center justify-between p-3 bg-muted border border-border rounded-lg">
             <div className="flex items-center gap-2">
@@ -113,7 +120,7 @@ export default function AssignRestaurantsDialog({
               </Badge>
             )}
           </div>
-          
+
           {/* Restaurant List */}
           <div className="max-h-96 overflow-y-auto space-y-2">
             {filteredRestaurants.length === 0 ? (
@@ -128,7 +135,7 @@ export default function AssignRestaurantsDialog({
                 const isSelected = selected.includes(r.id)
                 const wasOriginallySelected = defaultRestaurantIds.includes(r.id)
                 const isChanged = isSelected !== wasOriginallySelected
-                
+
                 return (
                   <div
                     key={r.id}
@@ -173,17 +180,17 @@ export default function AssignRestaurantsDialog({
             )}
           </div>
         </div>
-        
+
         <DialogFooter className="gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setOpen(false)}
             disabled={loading}
           >
             Cancel
           </Button>
-          <Button 
-            onClick={handleSave} 
+          <Button
+            onClick={handleSave}
             disabled={loading || selected.length === 0}
             className=""
           >

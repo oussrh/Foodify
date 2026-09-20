@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import { dishInput, dishPatch } from './dish'
 
-const dish = { nameEn: 'Grilled Chicken', nameFr: 'Poulet grillé', price: 12.5, imageUrl: '/chicken.jpg' }
+const dish = { nameEn: 'Grilled Chicken', nameFr: 'Poulet grillé', price: '12.5', imageUrl: '/chicken.jpg' }
 
 describe('dish schemas', () => {
-  it('accepts the seed dish and refuses a negative price', () => {
-    expect(dishInput.safeParse(dish).success).toBe(true)
-    expect(dishInput.safeParse({ ...dish, price: -1 }).error?.issues[0].message).toBe('Price must be a number, 0 or more')
+  it('accepts the seed dish with its price normalised to two decimals, and refuses a float', () => {
+    expect(dishInput.safeParse(dish).data?.price).toBe('12.50')
+    expect(dishInput.safeParse({ ...dish, price: 12.5 }).success).toBe(false)
+    expect(dishInput.safeParse({ ...dish, price: '-1' }).error?.issues[0].message).toMatch(/two decimals/)
   })
 
   it('only stores dietary and allergen keys the menu can label', () => {

@@ -3,18 +3,17 @@ import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, re
 
 describe('formatPrice', () => {
   it('formats with the ISO code through Intl, French style in French', () => {
-    expect(formatPrice(12.5, { locale: 'fr', symbol: '€', code: 'EUR' })).toBe('12,50\u00A0€')
-    expect(formatPrice(12.5, { locale: 'en', symbol: '€', code: 'EUR' })).toBe('€12.50')
+    expect(formatPrice('12.50', { locale: 'fr', symbol: '€', code: 'EUR' })).toBe('12,50\u00A0€')
+    expect(formatPrice('12.50', { locale: 'en', symbol: '€', code: 'EUR' })).toBe('€12.50')
   })
 
   it('falls back to the stored symbol when there is no usable code', () => {
-    expect(formatPrice(80, { locale: 'en', symbol: 'DH', code: null })).toBe('DH80.00')
-    expect(formatPrice(80, { locale: 'fr', symbol: 'DH', code: 'dirham' })).toBe('80,00 DH')
+    expect(formatPrice('80.00', { locale: 'en', symbol: 'DH', code: null })).toBe('DH80.00')
+    expect(formatPrice('80.00', { locale: 'fr', symbol: 'DH', code: 'dirham' })).toBe('80,00 DH')
   })
 
   it('always shows two decimals', () => {
-    expect(formatPrice(7, { locale: 'en', symbol: '$', code: null })).toBe('$7.00')
-    expect(formatPrice(7.999, { locale: 'en', symbol: '$', code: null })).toBe('$8.00')
+    expect(formatPrice('7.00', { locale: 'en', symbol: '$', code: null })).toBe('$7.00')
   })
 })
 

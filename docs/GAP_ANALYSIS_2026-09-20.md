@@ -77,7 +77,7 @@ last_verified: "2026-09-20"
 | DOC-RULES | Documents | .claude/rules/*.md path-scoped rules for stack and domain conventions | should | prose | **present** | 5 rule file(s), 4 path-scoped | - | A.1 |
 | DOC-CONVENTIONS | Documents | A CODE_CONVENTIONS.md under docs: how this stack applies the standard | should | prose | **missing** | none | Write it from the standard §3-§7 for this stack | A.1 |
 | DOC-PROGRESS | Documents | A STANDARDS_PROGRESS.md under docs: numbers-only scoreboard and log | must | review | **present** | docs/STANDARDS_PROGRESS.md | - | 0 |
-| DOC-CHANGELOG | Documents | CHANGELOG.md in Keep-a-Changelog shape with an [Unreleased] section | must | hard | **present** | CHANGELOG.md: 75 lines, has [Unreleased] | - | 0 / 11 |
+| DOC-CHANGELOG | Documents | CHANGELOG.md in Keep-a-Changelog shape with an [Unreleased] section | must | hard | **present** | CHANGELOG.md: 78 lines, has [Unreleased] | - | 0 / 11 |
 | DOC-INDEX | Documents | docs index listing every document | must | hard | **present** | docs/README.md | - | 11 |
 | DOC-ADR | Documents | A decisions record (MADR entries or a decision log) | must | prose | **missing** | none | Create a decisions folder under docs with 0001-*.md for the five day-0 decisions | A.1 |
 | DOC-FRONTMATTER | Documents | Every doc opens with front matter | must | hard | **present** | 6/6 docs with front matter | - | 11 |
@@ -116,7 +116,7 @@ last_verified: "2026-09-20"
 | DATA-MIGRATIONS | Data | Migrations are the source of truth | must | hard | **present** | prisma; 5 migration file(s) | - | 0 |
 | DATA-TENANT | Data | Tenant isolation proven: RLS or a scoped service plus an isolation test | must | hard | **n/a** | no tenant column found; no isolation test | - | 4 / 10 |
 | DATA-BACKUP | Data | A restore drill exists | must | review | **n/a** | does not apply: not at this stage: build (a rule of the run stage) | - | - |
-| TEST-UNIT | Tests | A unit test runner and tests, for every language in the tree | must | hard | **present** | vitest, 27 test file(s) | - | 2 / 10 |
+| TEST-UNIT | Tests | A unit test runner and tests, for every language in the tree | must | hard | **present** | vitest, 31 test file(s) | - | 2 / 10 |
 | TEST-INTEGRATION | Tests | Integration tests against a real database | must | hard | **missing** | none | Stand up Testcontainers or the local dev DB; rolled-back transaction per test; no ORM mocking | 10 |
 | TEST-COVERAGE | Tests | Coverage is gated on the change, with a floor under the tree | must | hard | **present** | a floor on the total, a gate on the change, reportOnFailure | - | 2 |
 | TEST-E2E | Tests | A browser suite with an accessibility scan on the same run | must | hard | **present** | playwright + axe | - | 3 |
@@ -129,7 +129,7 @@ last_verified: "2026-09-20"
 | SEC-ENVFILES | Security | No .env file tracked in git | must | hard | **present** | none tracked | - | 0 |
 | FLOW-COMMITS | Delivery | Conventional Commits | must | review | **present** | 50/50 of the last commits | - | 1 |
 | FLOW-TRAILER | Delivery | No authorship trailer, where the repository opted into the scrub | must | hard | **n/a** | provenance kept; the scrub is off (scrub.enabled) | - | - |
-| FLOW-EMDASH | Delivery | No em-dash in code, copy or docs | must | hard | **missing** | 11 file(s): app/admin/(protected)/page.tsx, app/admin/(protected)/users/[id]/restaurants/page.tsx, app/api/users/route.ts, components/contact/contact-panel.tsx, components/shell/dishes-list.tsx | Replace with a hyphen; add the ratchet metric i18n.emDashInCopy | 1 |
+| FLOW-EMDASH | Delivery | No em-dash in code, copy or docs | must | hard | **missing** | 10 file(s): app/admin/(protected)/page.tsx, app/admin/(protected)/users/[id]/restaurants/page.tsx, components/contact/contact-panel.tsx, components/shell/dishes-list.tsx, components/shell/restaurants-list.tsx | Replace with a hyphen; add the ratchet metric i18n.emDashInCopy | 1 |
 | FLOW-CHANGELOG-GATE | Delivery | Changelog-touched check over the pushed range | must | hard | **present** | a check mentions the changelog | - | 0 |
 | FLOW-VERSION | Delivery | A version the release process bumps (SemVer) | should | prose | **present** | package.json 1.0.0 | - | - |
 | I18N-CATALOGUE | i18n | Translation catalogues exist | should | prose | **missing** | no catalogue found | - | - |

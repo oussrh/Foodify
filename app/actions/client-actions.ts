@@ -6,6 +6,7 @@ import { requireSuperAdmin } from '@/lib/auth-guard'
 import { password, uuid } from '@/lib/schemas/common'
 import { clientInput, clientPatch, type ClientInput, type ClientPatch } from '@/lib/schemas/user'
 import { slugify } from '@/lib/slug'
+import { userPayload } from '@/lib/payloads'
 
 export async function createClient(raw: ClientInput) {
   await requireSuperAdmin()
@@ -24,7 +25,7 @@ export async function createClient(raw: ClientInput) {
     restaurantIds.push(restaurant.id)
   }
 
-  return prisma.user.create({
+  return prisma.user.create({ select: userPayload,
     data: {
       email: data.email,
       passwordHash,
@@ -39,7 +40,7 @@ export async function updateClient(rawId: string, raw: ClientPatch) {
   const id = uuid.parse(rawId)
   const data = clientPatch.parse(raw)
   const { restaurantIds, ...rest } = data
-  return prisma.user.update({
+  return prisma.user.update({ select: userPayload,
     where: { id },
     data: {
       ...rest,
@@ -54,7 +55,7 @@ export async function resetClientPassword(rawId: string, newPassword: string) {
   await requireSuperAdmin()
   const id = uuid.parse(rawId)
   const passwordHash = await bcrypt.hash(password.parse(newPassword), 10)
-  return prisma.user.update({
+  return prisma.user.update({ select: userPayload,
     where: { id },
     data: { passwordHash, passwordResetToken: null, passwordResetExpires: null },
   })

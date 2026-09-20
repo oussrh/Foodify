@@ -11,7 +11,7 @@ export function makeDish(overrides: Partial<MenuDish> = {}): MenuDish {
     nameFr: 'Tajine',
     descriptionEn: 'Slow-cooked lamb',
     descriptionFr: "Agneau mijoté",
-    price: 12.5,
+    price: '12.50',
     imageUrl: 'https://img.example/tagine.jpg',
     usdzUrl: null,
     glbUrl: null,

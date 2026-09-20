@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { call, callAll } from "@/lib/api-client";
+import { toast } from "sonner";
 import {
   Dialog,
   DialogTrigger,
@@ -37,9 +39,9 @@ export default function AssignUsersDialog({
 
   useEffect(() => {
     if (!open) return;
-    fetch("/api/users?role=RESTAURANT_ADMIN")
-      .then((res) => res.json())
-      .then((data: User[]) => setUsers(data));
+    callAll<User>("/api/users?role=RESTAURANT_ADMIN")
+      .then(setUsers)
+      .catch(() => toast.error("Could not load the users"));
   }, [open]);
 
   const filteredUsers = users.filter((u: User) =>
@@ -54,14 +56,19 @@ export default function AssignUsersDialog({
 
   const handleSave = async () => {
     setLoading(true);
-    await fetch(`/api/restaurants/${restaurantId}/users`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userIds: selected }),
-    });
-    setLoading(false);
-    setOpen(false);
-    router.refresh();
+    try {
+      await call(`/api/restaurants/${restaurantId}/users`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userIds: selected }),
+      });
+      setOpen(false);
+      router.refresh();
+    } catch {
+      toast.error("Could not save the assignments");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

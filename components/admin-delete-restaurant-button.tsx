@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { deleteRestaurant } from '@/app/actions/restaurant-actions'
 import { Button } from '@/components/ui/button'
-import { 
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -29,14 +30,7 @@ export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: Ad
   const handleDelete = async () => {
     setLoading(true)
     try {
-      const response = await fetch(`/api/restaurants/${restaurantId}`, {
-        method: 'DELETE',
-      })
-      
-      if (!response.ok) {
-        throw new Error('Failed to delete restaurant')
-      }
-      
+      await deleteRestaurant(restaurantId)
       router.push('/admin/restaurants')
     } catch (error) {
       console.error('Failed to delete restaurant:', error)
@@ -49,8 +43,8 @@ export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: Ad
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
-        <Button 
-          variant="destructive" 
+        <Button
+          variant="destructive"
           className="w-full bg-destructive hover:bg-destructive/90"
           size="sm"
           disabled={loading}
@@ -59,7 +53,7 @@ export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: Ad
           Delete Restaurant Permanently
         </Button>
       </AlertDialogTrigger>
-      
+
       <AlertDialogContent className="sm:max-w-md">
         <AlertDialogHeader>
           <div className="flex items-center gap-3">
@@ -73,12 +67,12 @@ export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: Ad
             </div>
           </div>
         </AlertDialogHeader>
-        
+
         <div className="space-y-4">
           <AlertDialogDescription className="text-muted-foreground leading-relaxed">
             Are you sure you want to permanently delete <span className="font-semibold text-foreground">&ldquo;{restaurantName}&rdquo;</span>?
           </AlertDialogDescription>
-          
+
           <div className="p-3 bg-muted border border-border rounded-lg">
             <div className="flex items-start gap-2">
               <AlertTriangle className="h-4 w-4 text-destructive mt-0.5 shrink-0" />
@@ -88,9 +82,9 @@ export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: Ad
             </div>
           </div>
         </div>
-        
+
         <AlertDialogFooter className="gap-3">
-          <AlertDialogCancel 
+          <AlertDialogCancel
             disabled={loading}
             className="flex-1"
           >
