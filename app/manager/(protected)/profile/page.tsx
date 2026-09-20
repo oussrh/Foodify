@@ -6,18 +6,16 @@ import Link from 'next/link'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { 
-  User, 
-  Mail, 
-  Calendar, 
-  Shield, 
-  Activity, 
-  Settings, 
+import {
+  User,
+  Mail,
+  Calendar,
+  Shield,
+  Activity,
+  Settings,
   ChevronRight,
   Clock,
   MapPin,
-  Smartphone,
-  Monitor,
   Building2,
   TrendingUp,
   CheckCircle,
@@ -25,7 +23,7 @@ import {
   Globe,
   Zap,
   Star,
-  Eye
+  Eye,
 } from 'lucide-react'
 
 export default async function ProfilePage() {

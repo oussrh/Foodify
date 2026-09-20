@@ -10,17 +10,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { 
-  Eye, 
-  RotateCcw, 
-  ZoomIn, 
-  ZoomOut,
+import {
+  Eye,
+  RotateCcw,
+  ZoomIn,
   Move3D,
   Camera,
   AlertCircle,
   Loader2,
   X,
-  Maximize,
   Play,
   Pause,
   Download,
@@ -28,7 +26,7 @@ import {
   Monitor,
   ArrowUpRight,
   Info,
-  Settings
+  Settings,
 } from 'lucide-react'
 
 interface ARModelPreviewProps {

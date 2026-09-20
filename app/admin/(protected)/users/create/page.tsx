@@ -9,9 +9,8 @@ import {
   UserPlus,
   Shield,
   Building2,
-  Users,
   Lightbulb,
-  Star
+  Star,
 } from 'lucide-react'
 
 export default async function CreateUserPage() {

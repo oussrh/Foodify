@@ -13,7 +13,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Badge } from '@/components/ui/badge'
-import { Plus, X, Edit2, Loader2, ChefHat, Trash2 } from 'lucide-react'
+import { Plus, Edit2, Loader2, ChefHat, Trash2 } from 'lucide-react'
 import { addIngredient, updateIngredient, deleteIngredient } from '@/app/actions/dish-actions'
 
 interface Ingredient {

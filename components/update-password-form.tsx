@@ -10,12 +10,12 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { updatePassword } from '@/app/actions/profile-actions'
-import { 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  CheckCircle, 
-  AlertCircle, 
+import {
+  Lock,
+  Eye,
+  EyeOff,
+  CheckCircle,
+  AlertCircle,
   Loader2,
   Shield,
   Check,
@@ -26,7 +26,6 @@ import {
   Info,
   ArrowRight,
   CheckCircle2,
-  RefreshCw
 } from 'lucide-react'
 
 const schema = z

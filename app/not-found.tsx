@@ -1,7 +1,7 @@
 // FilePath: app/not-found.tsx
 
 import Link from 'next/link'
-import { Home, Search, ArrowLeft, RefreshCw } from 'lucide-react'
+import { Home, Search, RefreshCw } from 'lucide-react'
 import GoBackButton from '@/components/go-back-button'
 
 export default function NotFound() {

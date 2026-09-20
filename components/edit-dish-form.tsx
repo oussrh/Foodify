@@ -9,7 +9,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import DietarySelect from '@/components/dietary-select'
-import { Badge } from '@/components/ui/badge'
 import { updateDish } from '@/app/actions/dish-actions'
 import ARFileUpload from '@/components/ar-file-upload'
 import ARModelPreview from '@/components/ar-model-preview'
@@ -17,18 +16,12 @@ import ImageUpload from '@/components/image-upload'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { 
-  ChefHat, 
-  Globe, 
-  DollarSign, 
-  Image as ImageIcon,
-  Camera,
+import {
+  Globe,
+  DollarSign,
   Save,
-  AlertCircle,
-  CheckCircle,
   Utensils,
   Edit,
-  X
 } from 'lucide-react'
 
 type Subcategory = { id: string; nameEn: string }

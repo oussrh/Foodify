@@ -5,11 +5,11 @@ import { useState, useCallback, useRef } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { 
-  Upload, 
-  CheckCircle, 
-  AlertCircle, 
-  X, 
+import {
+  Upload,
+  CheckCircle,
+  AlertCircle,
+  X,
   Eye,
   ImageIcon,
   Loader2,
@@ -17,12 +17,11 @@ import {
   RefreshCw,
   Download,
   Camera,
-  Maximize2,
   FileImage,
   Zap,
   Info,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
 } from 'lucide-react'
 import Image from 'next/image'
 

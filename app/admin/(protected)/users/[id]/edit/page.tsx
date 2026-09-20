@@ -12,13 +12,11 @@ import {
   Building2,
   Calendar,
   Settings,
-  Key,
   Mail,
   BarChart3,
   ExternalLink,
   Lightbulb,
   Star,
-  TrendingUp
 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 

@@ -13,19 +13,17 @@ import {
   Smartphone,
   AlertCircle,
   Loader2,
-  Fullscreen,
   Share,
   Settings,
   RefreshCw,
   CheckCircle,
-  X,
   Maximize,
   Minimize,
   View,
   Box,
   ScanLine,
   ZoomIn,
-  ZoomOut
+  ZoomOut,
 } from 'lucide-react'
 import { toast } from 'sonner'
 

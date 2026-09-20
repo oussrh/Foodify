@@ -11,22 +11,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DietarySelect from "@/components/dietary-select";
-import { Badge } from "@/components/ui/badge";
 import { createDish } from "@/app/actions/dish-actions";
 import ARFileUpload from "@/components/ar-file-upload";
 import ARModelPreview from "@/components/ar-model-preview";
 import ImageUpload from "@/components/image-upload";
 import { useState } from "react";
-import { 
-  ChefHat, 
-  Globe, 
-  DollarSign, 
-  Image as ImageIcon,
-  Camera,
+import {
+  ChefHat,
+  Globe,
+  DollarSign,
   Save,
   AlertCircle,
   CheckCircle,
-  Utensils
+  Utensils,
 } from "lucide-react";
 
 type Subcategory = { id: string; nameEn: string };

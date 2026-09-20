@@ -8,15 +8,13 @@ import { Badge } from '@/components/ui/badge'
 import {
   ArrowLeft,
   Shield,
-  Edit,
   Crown,
   Calendar,
   Mail,
   BarChart3,
   Settings,
-  Key,
   Lightbulb,
-  Star
+  Star,
 } from 'lucide-react'
 import { redirect } from 'next/navigation'
 

@@ -36,6 +36,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Removed
 
+- 84 unused import bindings in 24 files (11 whole import statements), by `scripts/codemods/remove-unused-imports.mjs`; `size.excessCode` 5306 → 5236.
 - `tsconfig.tsbuildinfo` (a type-checker cache, dirty after every run) and `.claude/settings.local.json` (per-machine tool permissions) are no longer tracked; both and `.serena/` are ignored.
 - `.eslintrc.json` and `next lint` (gone in Next 16); the import graph's one known violation (root `middleware.ts` read as an orphan), fixed in the rule rather than carried.
 - `/api/seed`, `/api/setup`, `/api/deploy`.

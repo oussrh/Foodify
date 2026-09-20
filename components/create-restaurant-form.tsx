@@ -13,21 +13,20 @@ import { createRestaurant } from "@/app/actions/restaurant-actions";
 import RestaurantLogoUpload from "@/components/restaurant-logo-upload";
 import RestaurantCoverUpload from "@/components/restaurant-cover-upload";
 import GoogleFontsSelector from "@/components/google-fonts-selector";
-import { 
-  Building2, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Globe, 
-  Palette, 
+import {
+  Building2,
+  MapPin,
+  Phone,
+  Mail,
+  Globe,
+  Palette,
   ImageIcon,
   Clock,
   DollarSign,
   ChefHat,
   Share2,
-  Type,
   CreditCard,
-  Monitor
+  Monitor,
 } from "lucide-react";
 
 const schema = z.object({

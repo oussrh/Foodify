@@ -13,28 +13,17 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { updateRestaurant } from '@/app/actions/restaurant-actions'
 import BrandingPanel from '@/components/branding/branding-panel'
 import ContactPanel, { type ContactFormValues } from '@/components/contact/contact-panel'
 import type { UseFormRegister } from 'react-hook-form'
-import { 
-  Building2, 
-  MapPin, 
-  Phone, 
-  Mail, 
-  Globe, 
-  Palette, 
-  Clock,
+import {
+  Building2,
+  Globe,
   DollarSign,
   ChefHat,
-  Share2,
-  Type,
   CreditCard,
   Save,
-  X,
-  AlertCircle,
-  CheckCircle
 } from 'lucide-react'
 
 const schema = z.object({

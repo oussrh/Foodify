@@ -7,30 +7,26 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { updateClient } from '@/app/actions/client-actions'
-import { 
-  Mail, 
-  Building2, 
-  Save, 
-  Check, 
-  AlertCircle, 
-  Plus, 
-  X, 
-  Search, 
+import {
+  Mail,
+  Building2,
+  Save,
+  Check,
+  AlertCircle,
+  Plus,
+  X,
+  Search,
   Users,
   Settings,
   Shield,
-  Eye,
-  EyeOff,
-  RefreshCw,
   CheckCircle2,
   Sparkles,
   ArrowRight,
   Filter,
-  Loader2
+  Loader2,
 } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import {
