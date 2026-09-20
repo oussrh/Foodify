@@ -19,6 +19,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Changed
 
+- Dependencies to the latest of their current majors: `next` 15.5.25 (two unauthenticated RCEs, DoS, SSRF and middleware-bypass advisories closed), `next-auth` 5.0.0-beta.32 and `@auth/prisma-adapter` 2.11.3 (`@auth/core` 0.41.3: auth-check bypass and email-normalisation advisories closed), React 19.3, Prisma 6.19, zod 4.6, react-hook-form 7.88, Radix, resolvers, types and tooling. `abatty` pinned to commit 6fc516c (upstream HEAD spawns `.cmd` files without a shell again). Still open: `postcss` 8.4.31 pinned by Next 15 and `deepmerge-ts` by Prisma 6, both cleared by the next two majors.
 - CI passes the pushed range to the gate (on `main` the checkout left it empty, so the build suite was skipped) and runs the audit last, after the changed-lines coverage.
 - `abatty.config.json`: a change under `.github/` needs a changelog line, like source (CHANGE.1).
 - `pnpm lint` names its directories (`app`, `components`, `lib`, `test`, `types`) and the root files, so the test fixtures and `vitest.config.ts` are linted too.
