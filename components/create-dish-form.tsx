@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import DietarySelect from "@/components/dietary-select";
 import { createDish } from "@/app/actions/dish-actions";
+import { dishInput } from "@/lib/schemas/dish";
 import ARFileUpload from "@/components/ar-file-upload";
 import ARModelPreview from "@/components/ar-model-preview";
 import ImageUpload from "@/components/image-upload";
@@ -29,20 +30,11 @@ import {
 type Subcategory = { id: string; nameEn: string };
 
 // Simple schema without transforms - handle conversion manually
-const schema = z.object({
-  nameEn: z.string().min(1, "English name is required"),
-  nameFr: z.string().min(1, "French name is required"),
-  descriptionEn: z.string().optional(),
-  descriptionFr: z.string().optional(),
+// The dish rules, with the two numeric fields as the text they are typed in (the submit converts them).
+const schema = dishInput.omit({ price: true, calories: true, subcategoryId: true }).extend({
   price: z.string().min(1, "Price is required"),
-  imageUrl: z.string().min(1, "Image URL is required"),
-  usdzUrl: z.string().optional(),
-  glbUrl: z.string().optional(),
-  subcategoryId: z.string().optional(),
   calories: z.string().optional(),
-  isMostPurchased: z.boolean().optional(),
-  dietary: z.array(z.string()).optional(),
-  allergens: z.array(z.string()).optional(),
+  subcategoryId: z.string().optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
