@@ -36,6 +36,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Removed
 
+- `tsconfig.tsbuildinfo` (a type-checker cache, dirty after every run) and `.claude/settings.local.json` (per-machine tool permissions) are no longer tracked; both and `.serena/` are ignored.
 - `.eslintrc.json` and `next lint` (gone in Next 16); the import graph's one known violation (root `middleware.ts` read as an orphan), fixed in the rule rather than carried.
 - `/api/seed`, `/api/setup`, `/api/deploy`.
 - Unused dependencies (`framer-motion`, `@headlessui/react`, `@dnd-kit/modifiers`, three Radix packages, `@tailwindcss/postcss`), unused UI primitives, and nine unused server-action exports (`listAdmins`, `deleteAdmin`, `listClients`, `deleteClient`, `listDishes`, `updateDishPrice`, `getDishDetails`, `listRestaurants`, `listRestaurantsForUser`).
