@@ -14,8 +14,6 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
   Plus,
@@ -24,6 +22,7 @@ import {
   Check,
   Loader2,
 } from "lucide-react";
+import AssignRestaurantRow from "./assign-restaurant-row";
 
 interface Restaurant {
   id: string;
@@ -131,52 +130,15 @@ export default function AssignRestaurantsDialog({
                 </p>
               </div>
             ) : (
-              filteredRestaurants.map((r: Restaurant) => {
-                const isSelected = selected.includes(r.id)
-                const wasOriginallySelected = defaultRestaurantIds.includes(r.id)
-                const isChanged = isSelected !== wasOriginallySelected
-
-                return (
-                  <div
-                    key={r.id}
-                    className={`flex items-center justify-between p-3 border rounded-lg transition-colors ${
- isSelected ? 'bg-muted border-border' : 'bg-card border-border hover:bg-muted'
- } ${isChanged ? 'ring-2' : ''}`}
-                  >
-                    <div className="flex items-center gap-3 flex-1">
-                      <Checkbox
-                        id={`assign-restaurant-${r.id}`}
-                        checked={isSelected}
-                        onCheckedChange={() => toggle(r.id)}
-                        className="data-[state=checked]:bg-primary data-[state=checked]:border-border-strong"
-                      />
-                      <div className="flex-1">
-                        <Label htmlFor={`assign-restaurant-${r.id}`} className="text-sm font-medium text-foreground cursor-pointer">
-                          {r.name}
-                        </Label>
-                        <div className="flex items-center gap-2 mt-1">
-                          {isSelected && (
-                            <Badge className="bg-muted text-muted-foreground border-border text-xs">
-                              <Check className="h-3 w-3 mr-1" />
-                              Selected
-                            </Badge>
-                          )}
-                          {isChanged && (
-                            <Badge variant="outline" className="text-xs text-warning border-border">
-                              {isSelected ? 'Will be Added' : 'Will be Removed'}
-                            </Badge>
-                          )}
-                          {wasOriginallySelected && !isChanged && (
-                            <Badge className="bg-muted text-muted-foreground border-border text-xs">
-                              Currently Assigned
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )
-              })
+              filteredRestaurants.map((r: Restaurant) => (
+                <AssignRestaurantRow
+                  key={r.id}
+                  restaurant={r}
+                  isSelected={selected.includes(r.id)}
+                  wasOriginallySelected={defaultRestaurantIds.includes(r.id)}
+                  onToggle={toggle}
+                />
+              ))
             )}
           </div>
         </div>
