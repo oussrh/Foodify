@@ -3,27 +3,26 @@
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import DietarySelect from '@/components/dietary-select'
 import { updateDish } from '@/app/actions/dish-actions'
 import { dishInput } from '@/lib/schemas/dish'
-import ARFileUpload from '@/components/ar-file-upload'
-import ARModelPreview from '@/components/ar-model-preview'
-import ImageUpload from '@/components/image-upload'
+import { DishNameFields, DishDescriptionFields } from '@/components/dish-form/dish-fields'
+import {
+  DishPriceField,
+  DishCaloriesField,
+  DishCategorySelect,
+  DishPopularCheckbox,
+} from '@/components/dish-form/dish-detail-fields'
+import DishMediaUploads from '@/components/dish-form/dish-media-uploads'
+import DishModelPreview from '@/components/dish-form/dish-model-preview'
+import { useDishAssets } from '@/components/dish-form/use-dish-assets'
+import SaveBar, { type SaveStatus } from '@/components/forms/save-bar'
+import { useSaveShortcuts } from '@/components/forms/use-save-shortcuts'
 import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import {
-  Globe,
-  DollarSign,
-  Save,
-  Utensils,
-  Edit,
-} from 'lucide-react'
+import { Edit } from 'lucide-react'
 
 type Subcategory = { id: string; nameEn: string }
 
@@ -62,11 +61,9 @@ export default function EditDishForm({
   subcategories: Subcategory[]
   restaurantName?: string
 }) {
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [usdzUrl, setUsdzUrl] = useState(defaultValues.usdzUrl || '')
-  const [glbUrl, setGlbUrl] = useState(defaultValues.glbUrl || '')
-  const [imageUrl, setImageUrl] = useState(defaultValues.imageUrl || '')
-  const [previewModel, setPreviewModel] = useState<{url: string, type: 'usdz' | 'glb'} | null>(null)
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
+  const assets = useDishAssets(defaultValues)
+  const { imageUrl, usdzUrl, glbUrl, resetAssets } = assets
   const router = useRouter()
 
   const {
@@ -90,9 +87,7 @@ export default function EditDishForm({
   const [prevDefaults, setPrevDefaults] = useState(defaultValues)
   if (prevDefaults !== defaultValues) {
     setPrevDefaults(defaultValues)
-    setUsdzUrl(defaultValues.usdzUrl || '')
-    setGlbUrl(defaultValues.glbUrl || '')
-    setImageUrl(defaultValues.imageUrl || '')
+    resetAssets(defaultValues)
   }
   useEffect(() => {
     reset(defaultValues)
@@ -155,46 +150,15 @@ export default function EditDishForm({
       if (confirm('You have unsaved changes. Are you sure you want to discard them?')) {
         reset(defaultValues)
         setSaveStatus('idle')
-        setUsdzUrl(defaultValues.usdzUrl || '')
-        setGlbUrl(defaultValues.glbUrl || '')
-        setImageUrl(defaultValues.imageUrl || '')
+        resetAssets(defaultValues)
       }
     }
-  }, [hasUnsavedChanges, reset, defaultValues])
+  }, [hasUnsavedChanges, reset, defaultValues, resetAssets])
 
-  // Create a submit function that's always up to date
-  const submitForm = useCallback(() => {
-    if (!hasUnsavedChanges) {
-      toast.info('No changes to save')
-      return
-    }
-
-    if (isSubmitting) {
-      return
-    }
-
+  const submit = useCallback(() => {
     handleSubmit(onSubmit)()
-  }, [handleSubmit, onSubmit, hasUnsavedChanges, isSubmitting])
-
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 's') {
-        e.preventDefault()
-        submitForm()
-      }
-      if (e.key === 'Escape') {
-        handleCancel()
-      }
-    }
-
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [submitForm, handleCancel])
-
-  const handlePreview = (modelUrl: string, modelType: 'usdz' | 'glb') => {
-    setPreviewModel({ url: modelUrl, type: modelType })
-  }
+  }, [handleSubmit, onSubmit])
+  const submitForm = useSaveShortcuts({ hasUnsavedChanges, isSubmitting, submit, cancel: handleCancel })
 
   return (
     <div className="space-y-8">
@@ -209,108 +173,15 @@ export default function EditDishForm({
           </CardHeader>
           <CardContent className="p-6 space-y-6">
             {/* Names */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="nameEn" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  English Name
-                </Label>
-                <Input
-                  id="nameEn"
-                  {...register('nameEn')}
-                  className="border-border focus:border-border-strong"
-                  disabled={isSubmitting}
-                />
-                {errors.nameEn && (
-                  <p className="text-xs text-destructive flex items-center gap-1">
-                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
-                    {errors.nameEn.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="nameFr" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Globe className="h-4 w-4" />
-                  French Name
-                </Label>
-                <Input
-                  id="nameFr"
-                  {...register('nameFr')}
-                  className="border-border focus:border-border-strong"
-                  disabled={isSubmitting}
-                />
-                {errors.nameFr && (
-                  <p className="text-xs text-destructive flex items-center gap-1">
-                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
-                    {errors.nameFr.message}
-                  </p>
-                )}
-              </div>
-            </div>
+            <DishNameFields nameEn={register('nameEn')} nameFr={register('nameFr')} errors={errors} disabled={isSubmitting} />
 
             {/* Descriptions */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="descriptionEn" className="text-sm font-medium text-muted-foreground">
-                  English Description
-                </Label>
-                <Textarea
-                  id="descriptionEn"
-                  {...register('descriptionEn')}
-                  className="border-border focus:border-border-strong min-h-[100px]"
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="descriptionFr" className="text-sm font-medium text-muted-foreground">
-                  French Description
-                </Label>
-                <Textarea
-                  id="descriptionFr"
-                  {...register('descriptionFr')}
-                  className="border-border focus:border-border-strong min-h-[100px]"
-                  disabled={isSubmitting}
-                />
-              </div>
-            </div>
+            <DishDescriptionFields descriptionEn={register('descriptionEn')} descriptionFr={register('descriptionFr')} disabled={isSubmitting} />
 
             {/* Price and Details */}
             <div className="grid md:grid-cols-3 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="price" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <DollarSign className="h-4 w-4" />
-                  Price
-                </Label>
-                <Input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  {...register('price')}
-                  className="border-border focus:border-border-strong"
-                  disabled={isSubmitting}
-                />
-                {errors.price && (
-                  <p className="text-xs text-destructive flex items-center gap-1">
-                    <span className="w-1 h-1 bg-destructive rounded-full"></span>
-                    {errors.price.message}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="calories" className="text-sm font-medium text-muted-foreground">
-                  Calories (optional)
-                </Label>
-                <Input
-                  id="calories"
-                  type="number"
-                  {...register('calories', { valueAsNumber: true })}
-                  className="border-border focus:border-border-strong"
-                  disabled={isSubmitting}
-                />
-              </div>
+              <DishPriceField field={register('price')} error={errors.price} disabled={isSubmitting} />
+              <DishCaloriesField field={register('calories', { valueAsNumber: true })} disabled={isSubmitting} />
 
               <div className="md:col-span-2">
                 <DietarySelect
@@ -322,106 +193,24 @@ export default function EditDishForm({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="subcategory" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
-                  <Utensils className="h-4 w-4" />
-                  Category
-                </Label>
-                <select
-                  id="subcategory"
-                  {...register('subcategoryId')}
-                  className="w-full border border-border focus:border-border-strong rounded-md px-3 py-2 text-sm focus:outline-hidden focus:ring-2"
-                  disabled={isSubmitting}
-                >
-                  <option value="">No category</option>
-                  {subcategories.map((s: Subcategory) => (
-                    <option key={s.id} value={s.id}>
-                      {s.nameEn}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              <DishCategorySelect field={register('subcategoryId')} subcategories={subcategories} disabled={isSubmitting} />
             </div>
 
             {/* Image URL - Hidden field for form */}
             <input type="hidden" {...register('imageUrl')} value={imageUrl} />
 
             {/* Special Options */}
-            <div className="space-y-3">
-              <p className="text-sm font-medium leading-none text-muted-foreground">Special Options</p>
-              <div className="flex items-center gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    {...register('isMostPurchased')}
-                    className="rounded border-border text-muted-foreground"
-                    disabled={isSubmitting}
-                  />
-                  <span className="text-sm text-muted-foreground">Mark as Popular Dish</span>
-                </label>
-              </div>
-            </div>
+            <DishPopularCheckbox field={register('isMostPurchased')} disabled={isSubmitting} />
           </CardContent>
         </Card>
 
-        {/* Dish Image Upload */}
-        <ImageUpload
-          restaurantName={restaurantName || 'Restaurant'}
-          currentImageUrl={imageUrl}
-          onImageUpload={(url) => {
-            setImageUrl(url)
-            setValue('imageUrl', url)
-          }}
-        />
-
-        {/* AR Models Upload */}
-        <ARFileUpload
-          restaurantName={restaurantName || 'Restaurant'}
-          currentUsdzUrl={usdzUrl}
-          currentGlbUrl={glbUrl}
-          onUsdzUpload={setUsdzUrl}
-          onGlbUpload={setGlbUrl}
-          onPreview={handlePreview}
-        />
+        <DishMediaUploads restaurantName={restaurantName} assets={assets} onImageUrl={(url) => setValue('imageUrl', url)} />
 
         {/* Save bar: only when there is something to save */}
-        {(hasUnsavedChanges || saveStatus === 'saving' || saveStatus === 'error') && (
-          <div className="sticky bottom-[72px] z-40 flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-4 py-3 shadow-sheet md:bottom-4">
-            <p className="text-sm text-muted-foreground">
-              {saveStatus === 'error' ? 'Could not save. Check the fields and try again.' : saveStatus === 'saving' ? 'Saving…' : 'You have unsaved changes.'}
-            </p>
-            <div className="flex gap-2">
-              <Button type="button" variant="ghost" onClick={handleCancel} disabled={isSubmitting}>
-                Discard
-              </Button>
-              <Button type="button" onClick={submitForm} disabled={isSubmitting}>
-                {saveStatus === 'saving' ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    Saving…
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Save changes
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-        )}
+        <SaveBar saveStatus={saveStatus} hasUnsavedChanges={hasUnsavedChanges} isSubmitting={isSubmitting} onDiscard={handleCancel} onSave={submitForm} />
       </form>
 
-      {/* AR Model Preview */}
-      {previewModel && (
-        <ARModelPreview
-          isOpen={!!previewModel}
-          onClose={() => setPreviewModel(null)}
-          modelUrl={previewModel.url}
-          modelType={previewModel.type}
-          dishName={nameEn || 'Dish Preview'}
-        />
-      )}
+      <DishModelPreview assets={assets} dishName={nameEn} />
     </div>
   )
 }
