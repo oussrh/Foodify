@@ -30,10 +30,17 @@ const serverSchema = z
     RESEND_API_KEY: optional,
     RESEND_FROM: optional,
     NEXTAUTH_URL: optional,
+    NEXT_PUBLIC_APP_URL: optional,
+    CLOUDINARY_CLOUD_NAME: optional,
+    CLOUDINARY_API_KEY: optional,
+    CLOUDINARY_API_SECRET: optional,
     NODE_ENV: z.preprocess(unset, z.enum(['development', 'test', 'production']).default('development')),
   })
   .refine((e) => Boolean(e.RESEND_API_KEY) === Boolean(e.RESEND_FROM), {
     message: 'RESEND_API_KEY and RESEND_FROM are set together or not at all',
+  })
+  .refine((e) => [e.CLOUDINARY_CLOUD_NAME, e.CLOUDINARY_API_KEY, e.CLOUDINARY_API_SECRET].every(Boolean) === Boolean(e.CLOUDINARY_CLOUD_NAME), {
+    message: 'CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET are set together or not at all',
   })
 
 let parsed: z.infer<typeof serverSchema> | undefined
@@ -54,9 +61,20 @@ export const serverEnv = {
   get resendFrom() {
     return server().RESEND_FROM
   },
-  /** Origin of the dashboards, for links in transactional mail; the public origin when unset. */
+  /**
+   * Origin of the dashboards, for links in transactional mail: NEXTAUTH_URL, else the public
+   * origin when one is set explicitly. Never the production literal: a preview deploy that set
+   * neither would otherwise mail links to production, so the send fails instead (VALID.4).
+   */
   get authUrl() {
-    return server().NEXTAUTH_URL ?? publicEnv.appUrl
+    const url = server().NEXTAUTH_URL ?? server().NEXT_PUBLIC_APP_URL
+    if (!url) throw new Error('NEXTAUTH_URL (or NEXT_PUBLIC_APP_URL) is not set; no origin for the link')
+    return url
+  },
+  /** Signed server-side uploads (AR assets, logos, covers); all three or none. */
+  get cloudinary() {
+    const { CLOUDINARY_CLOUD_NAME: cloudName, CLOUDINARY_API_KEY: apiKey, CLOUDINARY_API_SECRET: apiSecret } = server()
+    return cloudName && apiKey && apiSecret ? { cloudName, apiKey, apiSecret } : null
   },
   get isDevelopment() {
     return server().NODE_ENV === 'development'

@@ -13,7 +13,8 @@
     "docs.frontMatter",
     "docs.indexDrift",
     "valid.rawEnv",
-    "valid.unparsedBoundary"
+    "valid.unparsedBoundary",
+    "valid.wholeEnv"
   ],
   "metrics": {
     "change.changelogMissing": 0,
@@ -25,27 +26,29 @@
     "docs.danglingSource": 0,
     "docs.frontMatter": 0,
     "docs.indexDrift": 0,
-    "size.excessCode": 5058,
+    "size.excessCode": 5056,
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 1,
     "valid.rawEnv": 0,
-    "valid.unparsedBoundary": 0
+    "valid.unparsedBoundary": 0,
+    "valid.wholeEnv": 0
   },
   "scanned": {
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 40,
+    "docs.citations": 45,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 170,
-    "size.overBudget": 170,
-    "size.overRaw": 179,
-    "types.escapes": 170,
-    "valid.rawEnv": 169,
-    "valid.unparsedBoundary": 15
+    "size.excessCode": 173,
+    "size.overBudget": 173,
+    "size.overRaw": 182,
+    "types.escapes": 173,
+    "valid.rawEnv": 172,
+    "valid.unparsedBoundary": 15,
+    "valid.wholeEnv": 181
   },
   "debt": {
     "size.excessCode": {
@@ -72,7 +75,7 @@
       "components/create-dish-form.tsx": 112,
       "components/create-restaurant-form.tsx": 262,
       "components/edit-client-form.tsx": 278,
-      "components/edit-dish-form.tsx": 132,
+      "components/edit-dish-form.tsx": 130,
       "components/edit-restaurant-form.tsx": 189,
       "components/image-upload.tsx": 286,
       "components/ingredient-manager.tsx": 50,
@@ -142,7 +145,8 @@
     "size.overRaw": 1,
     "types.escapes": 1,
     "valid.rawEnv": 1,
-    "valid.unparsedBoundary": 1
+    "valid.unparsedBoundary": 1,
+    "valid.wholeEnv": 1
   },
   "entries": {
     "size.overBudget": {
