@@ -27,8 +27,9 @@
         },
         "switch": "pnpm run -s standards -- --range main..HEAD: exit 3 with types.escapes floor 13->12, exit 0 restored"
       },
-      "remaining": "ratchet step seen red in CI on a lowered floor (throwaway branch push); audit step green after the dependency upgrade",
-      "firstRun": "https://github.com/oussrh/Foodify/actions/runs/35507179202"
+      "remaining": "ratchet step seen red in CI on a lowered floor (throwaway branch push)",
+      "firstRun": "https://github.com/oussrh/Foodify/actions/runs/35507179202",
+      "auditGreenRun": "https://github.com/oussrh/Foodify/actions/runs/35509687312"
     },
     {
       "id": 1,
