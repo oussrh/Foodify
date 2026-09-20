@@ -2,7 +2,8 @@
 
 import { useMemo } from 'react'
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
-import { Clock, ExternalLink, Facebook, Globe, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react'
+import { Clock, ExternalLink, Globe, Mail, MapPin, Phone } from 'lucide-react'
+import { Facebook, Instagram, Twitter } from '@/components/social-icons'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { cleanPhone, formatAddress } from '@/components/menu/menu-footer'
@@ -254,11 +255,9 @@ export default function ContactPanel({ register, errors, values, onChange, disab
             )}
           </dl>
 
-          {(socialHandles.instagram || socialHandles.facebook || socialHandles.twitter) && (
+          {SOCIAL.some((s) => socialHandles[s.key]) && (
             <div className="mt-4 flex gap-2">
-              {socialHandles.instagram && <Instagram className="h-4 w-4 text-muted-foreground" />}
-              {socialHandles.facebook && <Facebook className="h-4 w-4 text-muted-foreground" />}
-              {socialHandles.twitter && <Twitter className="h-4 w-4 text-muted-foreground" />}
+              {SOCIAL.filter((s) => socialHandles[s.key]).map((s) => <s.icon key={s.key} className="h-4 w-4 text-muted-foreground" />)}
             </div>
           )}
 

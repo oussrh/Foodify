@@ -23,7 +23,7 @@
     "docs.danglingSource": 0,
     "docs.frontMatter": 0,
     "docs.indexDrift": 0,
-    "size.excessCode": 5307,
+    "size.excessCode": 5306,
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 13,
@@ -37,11 +37,11 @@
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 157,
-    "size.overBudget": 157,
+    "size.excessCode": 158,
+    "size.overBudget": 158,
     "size.overRaw": 164,
-    "types.escapes": 157,
-    "valid.rawEnv": 156
+    "types.escapes": 158,
+    "valid.rawEnv": 157
   },
   "debt": {
     "size.excessCode": {
@@ -63,7 +63,7 @@
       "components/ar-model-preview.tsx": 124,
       "components/ar-viewer-client.tsx": 560,
       "components/branding/branding-panel.tsx": 37,
-      "components/contact/contact-panel.tsx": 3,
+      "components/contact/contact-panel.tsx": 2,
       "components/create-client-form.tsx": 87,
       "components/create-dish-form.tsx": 129,
       "components/create-restaurant-form.tsx": 296,

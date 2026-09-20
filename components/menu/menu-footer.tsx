@@ -1,6 +1,7 @@
 "use client"
 
-import { Clock, Facebook, Globe, Instagram, Mail, MapPin, Phone, Twitter } from 'lucide-react'
+import { Clock, Globe, Mail, MapPin, Phone } from 'lucide-react'
+import { Facebook, Instagram, Twitter } from '@/components/social-icons'
 import { MENU_TEXT, type Locale, type MenuRestaurant } from '@/lib/menu'
 import type { SocialHandles } from '@/lib/social-media'
 import { hasStructuredHours, parseOpeningHours, summarizeOpeningHours } from '@/lib/opening-hours'

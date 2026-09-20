@@ -61,3 +61,10 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Default taken**: the presets are on in full; the five rules with new errors run at `warn` in `eslint.config.mjs` with the counts in the comment; three empty interfaces and one `@ts-ignore` fixed in the same commit; ESLint 9.39.5 (the `maintenance` tag) until the plugins move.
 - **Alternative set aside**: fixing the 32 semantic findings inside the upgrade. They are component work (several in `components/ar-viewer-client.tsx`, the file due for a split) with no browser suite to catch a behaviour change; that is phase 1 (lint to zero, then `--max-warnings=0`) and phase 9 (types).
 - **Re-read when**: phase 1 starts, and when `eslint-plugin-react` publishes ESLint 10 support.
+
+## 2026-09-20 · dependency upgrade · what "latest" was held back on, and why
+
+- **Situation**: after Next 16, Prisma 7, Tailwind 4, otplib 13, resend 6 and lucide 1.x, `pnpm outdated` still lists TypeScript 7.0.2, ESLint 10.11, Prisma 8.0.0-rc.15 and `@types/node` 26.
+- **Default taken**: TypeScript stays 5.9.3 (`typescript-eslint` peers `<6.1.0`; knip and dependency-cruiser use the same API); ESLint 9.39.5 (`eslint-plugin-react`, `jsx-a11y`, `import` have no ESLint 10 release); Prisma 7.10 (8 is a release candidate); `@types/node` 24 (CI and Vercel run Node 22/24; types track the runtime, not the newest Node). `abatty` pinned to 6fc516c (upstream HEAD spawns `.cmd` without a shell, EINVAL on Node >= 20.12).
+- **Alternative set aside**: forcing them with overrides or `--force`. A type-checker, a linter and a query-engine RC are not places to run ahead of the tools that consume them.
+- **Re-read when**: `typescript-eslint` accepts TypeScript 6/7, `eslint-plugin-react` publishes ESLint 10 support, Prisma 8 ships, abatty fixes its Windows spawn.

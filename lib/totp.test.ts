@@ -1,4 +1,4 @@
-import { authenticator } from 'otplib'
+import { generateSync } from 'otplib'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { safeEqual, verifyTOTP } from './totp'
 
@@ -20,7 +20,8 @@ describe('safeEqual', () => {
 })
 
 describe('verifyTOTP', () => {
-  const secret = 'JBSWY3DPEHPK3PXP'
+  // 20-byte secrets, as generateSecret() issues them; otplib 13 refuses anything under 16 bytes.
+  const secret = 'JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP'
 
   afterEach(() => {
     vi.useRealTimers()
@@ -30,13 +31,13 @@ describe('verifyTOTP', () => {
   it('accepts the code generated for the same secret at the same time', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-09-20T10:00:00Z'))
-    expect(verifyTOTP(authenticator.generate(secret), secret)).toBe(true)
+    expect(verifyTOTP(generateSync({ secret }), secret)).toBe(true)
   })
 
   it('rejects a code from another secret', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-09-20T10:00:00Z'))
-    expect(verifyTOTP(authenticator.generate('GEZDGNBVGY3TQOJQ'), secret)).toBe(false)
+    expect(verifyTOTP(generateSync({ secret: 'GEZDGNBVGY3TQOJQGEZDGNBVGY3TQOJQ' }), secret)).toBe(false)
   })
 
   it('is false for an empty or malformed code', () => {
@@ -44,10 +45,7 @@ describe('verifyTOTP', () => {
     expect(verifyTOTP('abc', 'not-base32!!')).toBe(false)
   })
 
-  it('returns false instead of propagating an error from the library', () => {
-    vi.spyOn(authenticator, 'check').mockImplementation(() => {
-      throw new Error('bad secret')
-    })
-    expect(verifyTOTP('123456', secret)).toBe(false)
+  it('returns false instead of propagating an error from the library (a secret under 16 bytes throws)', () => {
+    expect(verifyTOTP('123456', 'JBSWY3DPEHPK3PXP')).toBe(false)
   })
 })

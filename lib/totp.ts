@@ -1,9 +1,10 @@
-import { authenticator } from 'otplib'
+import { verifySync } from 'otplib'
 import { timingSafeEqual } from 'crypto'
 
+/** Checks a 6-digit authenticator code against the account's secret (30 s step, no drift tolerance, as before otplib 13). */
 export function verifyTOTP(token: string, secret: string) {
   try {
-    return authenticator.check(token, secret)
+    return verifySync({ token, secret }).valid
   } catch {
     return false
   }
