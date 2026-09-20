@@ -19,6 +19,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Changed
 
+- CI passes the pushed range to the gate (on `main` the checkout left it empty, so the build suite was skipped) and runs the audit last, after the changed-lines coverage.
 - `abatty.config.json`: a change under `.github/` needs a changelog line, like source (CHANGE.1).
 - `pnpm lint` names its directories (`app`, `components`, `lib`, `test`, `types`) and the root files, so the test fixtures and `vitest.config.ts` are linted too.
 - `GET /api/users` and `GET /api/restaurants` require a super admin and return only `id/email/role` and `id/name/slug`; the two assignment routes require a super admin.
