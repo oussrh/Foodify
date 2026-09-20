@@ -109,8 +109,8 @@
     },
     {
       "id": 3,
-      "status": "in_progress",
-      "updatedAt": "2026-09-20T15:03:48Z",
+      "status": "done",
+      "updatedAt": "2026-09-20T16:06:06Z",
       "numbersBefore": {
         "rules": {
           "A11Y-LINT": "missing",
@@ -118,6 +118,21 @@
           "A11Y-CONTRAST": "missing"
         },
         "jsxA11yFindings": "not measured"
+      },
+      "numbersAfter": {
+        "rules": {
+          "A11Y-LINT": "present",
+          "TEST-E2E": "present",
+          "A11Y-CONTRAST": "present",
+          "TEST-E2E-CONFIG": "present"
+        },
+        "jsxA11yFindings": 0,
+        "e2eTests": 14,
+        "axeSeriousOrCritical": 0,
+        "score": "65/100",
+        "enforcedShare": "75% (39/52)",
+        "ciRun": "https://github.com/oussrh/Foodify/actions/runs/35521456613 (migrate deploy + seed + gate; the browser suite ran in CI on 35519532521 and in the pre-push gate of every later push)",
+        "switches": "pnpm lint red on planted img/div and mapped Button; contrast test red on lightened muted-foreground; axe red on a nameless button"
       }
     },
     {
