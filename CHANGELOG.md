@@ -55,6 +55,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Fixed
 
+- The migrations carry `MenuCategory.isActive` and `MenuSubcategory.isActive` (`prisma/migrations/20260920160000_category_is_active`): they had entered the schema through `prisma db push` in July 2025 and no migration added them, so `prisma migrate deploy` built a database the seed could not use (the first CI run with it). The statements use `IF NOT EXISTS`, so a database that already has the columns takes the migration as a no-op.
 - The light theme's `--warning` token reads 4.6:1 on the muted surface (it was 4.11, below AA, where badges and hints paint it; `42 100% 30%` → `28%`, same hue), and the "Refresh" a guest taps for a new menu version reloads the page again (the first-visit fix had also swallowed the change of worker it asks for; unit-tested both ways).
 - A first visit to a menu no longer reloads the page a second after it appears: the freshly installed service worker claiming the page was taken for an update (found by the browser suite, whose navigations it aborted).
 - The manager profile's "view restaurant" link pointed at `/manager/restaurants/[id]`, a route with no page (an `as any` on the href hid it from the typed routes); it opens the restaurant's info page.
