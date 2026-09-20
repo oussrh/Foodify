@@ -10,7 +10,7 @@ import DishBody from './dish-body'
 
 interface DishPageProps {
   dish: MenuDish
-  restaurant: Pick<MenuRestaurant, 'name' | 'slug' | 'defaultLocale' | 'fontFamily' | 'currencySymbol'>
+  restaurant: Pick<MenuRestaurant, 'name' | 'slug' | 'defaultLocale' | 'fontFamily' | 'currencySymbol' | 'menuTheme'>
   breadcrumb: { en: string; fr: string } | null
   brandStyle: Record<string, string>
   shareUrl: string
@@ -27,7 +27,7 @@ export default function DishPage({ dish, restaurant, breadcrumb, brandStyle, sha
   }
 
   return (
-    <div className="brand-scope min-h-screen bg-background text-foreground" style={style}>
+    <div className={cn('brand-scope min-h-screen bg-background text-foreground', restaurant.menuTheme === 'system' ? '' : restaurant.menuTheme)} style={style}>
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur">
         <div className="mx-auto flex h-14 max-w-lg items-center gap-2 px-4">
           <Link
@@ -54,7 +54,7 @@ export default function DishPage({ dish, restaurant, breadcrumb, brandStyle, sha
               </button>
             ))}
           </div>
-          <ThemeToggle variant="outline" className="h-10 w-10 shrink-0" />
+          {restaurant.menuTheme === 'system' && <ThemeToggle variant="outline" className="h-10 w-10 shrink-0" />}
         </div>
       </header>
 

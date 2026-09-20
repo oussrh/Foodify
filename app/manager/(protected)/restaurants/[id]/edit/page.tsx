@@ -37,6 +37,7 @@ export default async function EditRestaurantPage({ params }: { params: Promise<{
     secondaryColor: restaurant.secondaryColor ?? '',
     fontFamily: restaurant.fontFamily ?? '',
     googleFontUrl: restaurant.googleFontUrl ?? '',
+    menuTheme: (['light', 'dark'].includes(restaurant.menuTheme) ? restaurant.menuTheme : 'system') as 'system' | 'light' | 'dark',
     currency: restaurant.currency ?? '',
     currencySymbol: restaurant.currencySymbol ?? '',
   }

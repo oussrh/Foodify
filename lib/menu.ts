@@ -2,6 +2,8 @@
 // Shared shapes and vocabulary for the customer-facing menu.
 
 export type Locale = 'en' | 'fr'
+export type MenuTheme = 'system' | 'light' | 'dark'
+export type CoverStyle = 'cover' | 'repeat'
 
 export interface MenuIngredient {
   id: string
@@ -47,6 +49,8 @@ export interface MenuRestaurant {
   tagline: string | null
   logoUrl: string | null
   coverImageUrl: string | null
+  coverImageStyle: CoverStyle
+  menuTheme: MenuTheme
   colorTheme: string | null
   defaultLocale: Locale
   fontFamily: string | null

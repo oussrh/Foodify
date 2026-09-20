@@ -9,7 +9,8 @@
   Values are HSL components so Tailwind alpha modifiers (bg-primary/10) keep working.
 */
 @layer base {
-  :root {
+  :root,
+  .light {
     --background: 60 17% 97.6%;        /* Paper   #FAFAF8 */
     --foreground: 45 8% 9.8%;          /* Ink     #1B1A17 */
     --card: 0 0% 100%;                 /* Surface #FFFFFF */
@@ -81,10 +82,18 @@
     --brand-tint: var(--brand-tint-light, hsl(var(--primary) / 0.1));
     --brand-on: var(--brand-on-light, #ffffff);
   }
-  .dark .brand-scope {
+  .dark .brand-scope,
+  .dark.brand-scope {
     --brand-ink: var(--brand-ink-dark, hsl(var(--primary)));
     --brand-tint: var(--brand-tint-dark, hsl(var(--primary) / 0.14));
     --brand-on: var(--brand-on-dark, #141311);
+  }
+  /* A forced-light scope inside a dark page wins over the rules above. */
+  .light .brand-scope,
+  .light.brand-scope {
+    --brand-ink: var(--brand-ink-light, hsl(var(--primary)));
+    --brand-tint: var(--brand-tint-light, hsl(var(--primary) / 0.1));
+    --brand-on: var(--brand-on-light, #ffffff);
   }
 
   * {

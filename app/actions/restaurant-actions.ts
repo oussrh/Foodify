@@ -68,6 +68,7 @@ export async function updateRestaurant(
     // Design fields
     coverImageUrl?: string
     coverImageStyle?: 'cover' | 'repeat'
+    menuTheme?: 'system' | 'light' | 'dark'
     secondaryColor?: string
     fontFamily?: string
     googleFontUrl?: string

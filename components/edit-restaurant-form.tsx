@@ -15,9 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { updateRestaurant } from '@/app/actions/restaurant-actions'
-import RestaurantLogoUpload from '@/components/restaurant-logo-upload'
-import RestaurantCoverUpload from '@/components/restaurant-cover-upload'
-import GoogleFontsSelector from '@/components/google-fonts-selector'
+import BrandingPanel from '@/components/branding/branding-panel'
 import { 
   Building2, 
   MapPin, 
@@ -25,14 +23,12 @@ import {
   Mail, 
   Globe, 
   Palette, 
-  ImageIcon,
   Clock,
   DollarSign,
   ChefHat,
   Share2,
   Type,
   CreditCard,
-  Monitor,
   Save,
   X,
   AlertCircle,
@@ -67,6 +63,7 @@ const schema = z.object({
   secondaryColor: z.string().optional().or(z.literal("")),
   fontFamily: z.string().optional(),
   googleFontUrl: z.string().optional(),
+  menuTheme: z.enum(['system', 'light', 'dark']).optional(),
   // Business settings
   currency: z.string().optional(),
   currencySymbol: z.string().optional(),
@@ -90,7 +87,7 @@ const TABS: { key: SettingsTab; label: string; fields: (keyof EditRestaurantValu
   {
     key: 'branding',
     label: 'Branding',
-    fields: ['logoUrl', 'colorTheme', 'secondaryColor', 'coverImageUrl', 'coverImageStyle', 'fontFamily', 'googleFontUrl'],
+    fields: ['logoUrl', 'colorTheme', 'coverImageUrl', 'coverImageStyle', 'fontFamily', 'googleFontUrl', 'menuTheme'],
   },
 ]
 
@@ -124,7 +121,8 @@ export default function EditRestaurantForm({
     formState: { errors, isSubmitting, isDirty },
     setValue,
     watch,
-    reset
+    reset,
+    resetField,
   } = useForm<EditRestaurantValues>({ 
     resolver: zodResolver(schema), 
     defaultValues,
@@ -136,6 +134,29 @@ export default function EditRestaurantForm({
   const googleFontUrl = watch('googleFontUrl')
   const currentCurrency = watch('currency')
   const currentCurrencySymbol = watch('currencySymbol')
+
+  // Uploads are saved the moment they finish, so they update the baseline instead of dirtying the form.
+  const onBrandingChange = useCallback(
+    (field: 'logoUrl' | 'coverImageUrl' | 'coverImageStyle' | 'colorTheme' | 'fontFamily' | 'googleFontUrl' | 'menuTheme', value: string, opts?: { persisted?: boolean }) => {
+      if (opts?.persisted) resetField(field, { defaultValue: value })
+      else setValue(field, value as never, { shouldDirty: true })
+    },
+    [resetField, setValue],
+  )
+  const brandingValues = {
+    name: watch('name') || '',
+    tagline: watch('tagline') || '',
+    cuisineType: watch('cuisineType') || '',
+    city: watch('city') || '',
+    currencySymbol: currentCurrencySymbol || '',
+    logoUrl: logoUrl || '',
+    coverImageUrl: coverImageUrl || '',
+    coverImageStyle: (watch('coverImageStyle') || 'cover') as 'cover' | 'repeat',
+    colorTheme: watch('colorTheme') || '',
+    fontFamily: watch('fontFamily') || '',
+    googleFontUrl: googleFontUrl || '',
+    menuTheme: (watch('menuTheme') || 'system') as 'system' | 'light' | 'dark',
+  }
   
   // Track form changes
   useEffect(() => {
@@ -613,139 +634,21 @@ export default function EditRestaurantForm({
       </div>
 
       <div role="tabpanel" id="settings-panel-branding" aria-labelledby="settings-tab-branding" hidden={activeTab !== 'branding'} className="space-y-6">
-      {/* Branding & Design Section */}
-      <Card className="border-border">
-        <CardHeader className="">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Palette className="h-5 w-5 text-muted-foreground" />
-            Branding & Design
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
-          {/* Logo Upload */}
-          <div className="space-y-4">
-            <Label className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" />
-              Restaurant Logo
-            </Label>
-            <RestaurantLogoUpload
-              restaurantId={id}
-              restaurantSlug={defaultValues.slug}
-              restaurantName={defaultValues.name}
-              currentLogoUrl={logoUrl}
-              onLogoUpload={(url) => setValue('logoUrl', url, { shouldDirty: true })}
-              disabled={isSubmitting}
-            />
-            {/* Hidden input to ensure logoUrl is included in form submission */}
-            <input type="hidden" {...register('logoUrl')} />
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="colorTheme" className="flex items-center gap-2">
-                <Palette className="h-4 w-4" />
-                Primary Brand Color
-              </Label>
-              <div className="flex items-center gap-3">
-                <Input
-                  id="colorTheme"
-                  type="color"
-                  value={watch('colorTheme') || '#3B82F6'}
-                  onChange={(e) => setValue('colorTheme', e.target.value, { shouldDirty: true })}
-                  className="h-12 w-20 border-border"
-                />
-                <Input
-                  type="text"
-                  {...register('colorTheme')}
-                  placeholder="#3B82F6"
-                  className="flex-1 border-border font-mono"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="secondaryColor">Secondary Color</Label>
-              <div className="flex items-center gap-3">
-                <Input
-                  id="secondaryColor"
-                  type="color"
-                  value={watch('secondaryColor') || '#6B7280'}
-                  onChange={(e) => setValue('secondaryColor', e.target.value, { shouldDirty: true })}
-                  className="h-12 w-20 border-border"
-                />
-                <Input
-                  type="text"
-                  {...register('secondaryColor')}
-                  placeholder="#6B7280"
-                  className="flex-1 border-border font-mono"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Cover Image Upload */}
-          <div className="space-y-4">
-            <Label className="flex items-center gap-2">
-              <ImageIcon className="h-4 w-4" />
-              Restaurant Cover Image
-            </Label>
-            <RestaurantCoverUpload
-              restaurantId={id}
-              restaurantSlug={defaultValues.slug}
-              restaurantName={defaultValues.name}
-              currentCoverUrl={coverImageUrl}
-              onCoverUpload={(url) => setValue('coverImageUrl', url, { shouldDirty: true })}
-              disabled={isSubmitting}
-            />
-            {/* Hidden input to ensure coverImageUrl is included in form submission */}
-            <input type="hidden" {...register('coverImageUrl')} />
-          </div>
-
-          {/* Google Fonts Selection */}
-          <div className="space-y-4">
-            <GoogleFontsSelector
-              currentFontUrl={googleFontUrl || defaultValues.googleFontUrl}
-              onFontChange={(fontUrl, fontFamily) => {
-                setValue("googleFontUrl", fontUrl, { shouldDirty: true });
-                setValue("fontFamily", fontFamily, { shouldDirty: true });
-              }}
-              disabled={isSubmitting}
-            />
-            {/* Hidden inputs to ensure font data is included in form submission */}
-            <input type="hidden" {...register('googleFontUrl')} />
-            <input type="hidden" {...register('fontFamily')} />
-          </div>
-
-          {/* Cover Image Style */}
-          <div className="space-y-2">
-            <Label htmlFor="coverImageStyle" className="flex items-center gap-2">
-              <Monitor className="h-4 w-4" />
-              Cover Image Background Style
-            </Label>
-            <Select onValueChange={(value) => setValue("coverImageStyle", value as "cover" | "repeat", { shouldDirty: true })} defaultValue={defaultValues.coverImageStyle || "cover"}>
-              <SelectTrigger className="border-border">
-                <SelectValue placeholder="Select background style" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="cover">
-                  <div className="space-y-1">
-                    <div className="font-medium">Cover (Recommended)</div>
-                    <div className="text-xs text-muted-foreground">Image fills the entire background area</div>
-                  </div>
-                </SelectItem>
-                <SelectItem value="repeat">
-                  <div className="space-y-1">
-                    <div className="font-medium">Repeat Pattern</div>
-                    <div className="text-xs text-muted-foreground">Image repeats as a pattern/texture</div>
-                  </div>
-                </SelectItem>
-              </SelectContent>
-            </Select>
-            {/* Hidden input to ensure coverImageStyle is included in form submission */}
-            <input type="hidden" {...register('coverImageStyle')} />
-          </div>
-        </CardContent>
-      </Card>
+      <BrandingPanel
+        restaurantId={id}
+        restaurantSlug={defaultValues.slug}
+        values={brandingValues}
+        onChange={onBrandingChange}
+        disabled={isSubmitting}
+      />
+      {/* Registered so the values travel with the form submission */}
+      <input type="hidden" {...register('logoUrl')} />
+      <input type="hidden" {...register('coverImageUrl')} />
+      <input type="hidden" {...register('coverImageStyle')} />
+      <input type="hidden" {...register('colorTheme')} />
+      <input type="hidden" {...register('fontFamily')} />
+      <input type="hidden" {...register('googleFontUrl')} />
+      <input type="hidden" {...register('menuTheme')} />
       </div>
 
       {/* Save bar: only when there is something to save */}

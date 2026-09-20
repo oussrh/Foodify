@@ -1,7 +1,7 @@
 // lib/menu-data.ts
 // Serializers from Prisma rows to the plain shapes the customer pages render.
 import type { Dish, Ingredient, Restaurant } from '@prisma/client'
-import type { Locale, MenuDish, MenuRestaurant } from './menu'
+import type { CoverStyle, Locale, MenuDish, MenuRestaurant, MenuTheme } from './menu'
 
 export function serializeDish(dish: Dish & { ingredients: Ingredient[] }): MenuDish {
   return {
@@ -30,6 +30,8 @@ export function serializeRestaurant(restaurant: Restaurant): MenuRestaurant {
     tagline: restaurant.tagline,
     logoUrl: restaurant.logoUrl,
     coverImageUrl: restaurant.coverImageUrl,
+    coverImageStyle: (restaurant.coverImageStyle === 'repeat' ? 'repeat' : 'cover') as CoverStyle,
+    menuTheme: (['light', 'dark'].includes(restaurant.menuTheme) ? restaurant.menuTheme : 'system') as MenuTheme,
     colorTheme: restaurant.colorTheme,
     defaultLocale: (restaurant.defaultLocale === 'fr' ? 'fr' : 'en') as Locale,
     fontFamily: restaurant.fontFamily,

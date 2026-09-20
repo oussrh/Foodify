@@ -53,6 +53,7 @@ model Restaurant {
   secondaryColor  String?
   fontFamily      String?
   googleFontUrl   String? // Google Fonts URL for easy implementation
+  menuTheme       String         @default("system") // system | light | dark: appearance of the public menu
   // Business Settings
   currency        String? // e.g., "USD", "EUR", "GBP", "CAD"
   currencySymbol  String? // e.g., "$", "€", "£", "C$"

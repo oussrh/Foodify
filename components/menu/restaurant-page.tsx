@@ -207,16 +207,20 @@ export default function RestaurantPage({
   const hasResults = sections.length > 0
   const meta = [restaurant.cuisineType, restaurant.city].filter(Boolean).join(' · ')
 
+  const themeClass = restaurant.menuTheme === 'system' ? '' : restaurant.menuTheme
+
   const pageStyle: CSSProperties = {
     ...(brandStyle as CSSProperties),
     ...(restaurant.fontFamily ? { fontFamily: `"${restaurant.fontFamily}", var(--font-sans), sans-serif` } : {}),
   }
 
   return (
-    <div className="brand-scope min-h-screen bg-background text-foreground" style={pageStyle}>
+    <div className={cn('brand-scope min-h-screen bg-background text-foreground', themeClass)} style={pageStyle}>
       {/* Hero: the restaurant's photo and name, then it gets out of the way */}
       <div ref={heroRef} className="relative h-44 w-full overflow-hidden bg-muted sm:h-60 lg:h-72">
-        {restaurant.coverImageUrl ? (
+        {restaurant.coverImageUrl && restaurant.coverImageStyle === 'repeat' ? (
+          <div className="absolute inset-0" style={{ backgroundImage: `url(${restaurant.coverImageUrl})`, backgroundRepeat: 'repeat', backgroundSize: 'auto' }} />
+        ) : restaurant.coverImageUrl ? (
           <Image src={restaurant.coverImageUrl} alt="" fill priority unoptimized sizes="100vw" className="object-cover" />
         ) : (
           <div className="absolute inset-0 bg-brand-tint" />
@@ -303,7 +307,7 @@ export default function RestaurantPage({
             )}
           </button>
 
-          <ThemeToggle variant="outline" className="h-10 w-10 shrink-0" />
+          {restaurant.menuTheme === 'system' && <ThemeToggle variant="outline" className="h-10 w-10 shrink-0" />}
         </div>
 
         {/* Category chips */}
@@ -401,7 +405,7 @@ export default function RestaurantPage({
       <Sheet open={openDish !== null} onOpenChange={(open) => !open && hideDish()}>
         <SheetContent
           side="bottom"
-          className="mx-auto w-full max-w-lg overflow-y-auto p-0 sm:rounded-t-sheet"
+          className={cn('mx-auto w-full max-w-lg overflow-y-auto p-0 sm:rounded-t-sheet', themeClass)}
           style={brandStyle as CSSProperties}
         >
           <div className="brand-scope px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
@@ -424,7 +428,7 @@ export default function RestaurantPage({
 
       {/* Filters sheet */}
       <Sheet open={filtersOpen} onOpenChange={setFiltersOpen}>
-        <SheetContent side="bottom" className="mx-auto w-full max-w-lg p-0 sm:rounded-t-sheet" style={brandStyle as CSSProperties}>
+        <SheetContent side="bottom" className={cn('mx-auto w-full max-w-lg p-0 sm:rounded-t-sheet', themeClass)} style={brandStyle as CSSProperties}>
           <div className="brand-scope flex flex-col gap-5 px-4 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">
             <div className="mx-auto h-1 w-10 rounded-full bg-border-strong" aria-hidden="true" />
             <SheetTitle className="text-lg font-semibold tracking-display">{t.filters}</SheetTitle>
