@@ -1,39 +1,45 @@
 'use server'
 
+import { revalidatePath } from 'next/cache'
 import prisma from '@/lib/prisma'
 import { requireRestaurantAccess, requireSuperAdmin } from '@/lib/auth-guard'
 import { uuid } from '@/lib/schemas/common'
 import { imageUpload, restaurantInput, restaurantPatch, slug, type RestaurantInput, type RestaurantPatch } from '@/lib/schemas/restaurant'
 
+/**
+ * The dashboards render on every request and cache nothing on the server; what an open client
+ * keeps is the shell of its preserved layout, which lists every restaurant by name. A
+ * revalidation makes this action's response carry a fresh render from the root, so the switcher
+ * shows a new, renamed or deleted restaurant without a reload (CACHE.1: every write invalidates).
+ */
+function refreshDashboards() {
+  revalidatePath('/admin', 'layout')
+  revalidatePath('/manager', 'layout')
+}
+
 export async function createRestaurant(raw: RestaurantInput) {
   await requireSuperAdmin()
   const data = restaurantInput.parse(raw)
-  return prisma.restaurant.create({ data })
+  const restaurant = await prisma.restaurant.create({ data })
+  refreshDashboards()
+  return restaurant
 }
 
 export async function updateRestaurant(rawId: string, raw: RestaurantPatch) {
   await requireRestaurantAccess({ id: rawId })
   const id = uuid.parse(rawId)
   const data = restaurantPatch.parse(raw)
-  console.log('Updating restaurant with ID:', id)
-  console.log('Update data:', JSON.stringify(data, null, 2))
-  
   const result = await prisma.restaurant.update({ where: { id }, data })
-  
-  console.log('Restaurant updated in database:', JSON.stringify(result, null, 2))
-  
-  // Revalidate the page to reflect changes
-  const { revalidatePath } = await import('next/cache')
-  revalidatePath(`/admin/restaurants/${id}/edit`)
-  revalidatePath(`/manager/restaurants/${id}/edit`)
-  
+  refreshDashboards()
   return result
 }
 
 export async function deleteRestaurant(rawId: string) {
   await requireSuperAdmin()
   const id = uuid.parse(rawId)
-  return prisma.restaurant.delete({ where: { id } })
+  const restaurant = await prisma.restaurant.delete({ where: { id } })
+  refreshDashboards()
+  return restaurant
 }
 
 export async function uploadRestaurantLogo(formData: FormData, rawSlug: string) {
@@ -46,13 +52,13 @@ export async function uploadRestaurantLogo(formData: FormData, rawSlug: string) 
     const file = parsed.data
 
     const logoUrl = await uploadLogo(file, restaurantSlug)
-    
+
     return { success: true, logoUrl }
   } catch (error) {
     console.error('Logo upload error:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Upload failed' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Upload failed'
     }
   }
 }
@@ -67,13 +73,13 @@ export async function uploadRestaurantCover(formData: FormData, rawSlug: string)
     const file = parsed.data
 
     const coverUrl = await uploadCoverImage(file, restaurantSlug)
-    
+
     return { success: true, coverUrl }
   } catch (error) {
     console.error('Cover upload error:', error)
-    return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'Upload failed' 
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Upload failed'
     }
   }
 }
