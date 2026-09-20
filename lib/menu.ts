@@ -136,6 +136,9 @@ export const LOCALE_STORAGE_KEY = 'foodify-menu-locale'
 export function resolveInitialLocale(defaultLocale: Locale, urlLang?: string | null): Locale {
   if (urlLang === 'en' || urlLang === 'fr') return urlLang
   if (typeof window !== 'undefined') {
+    // A page served from the offline cache carries no query on the server side; read it here too.
+    const fromUrl = new URLSearchParams(window.location.search).get('lang')
+    if (fromUrl === 'en' || fromUrl === 'fr') return fromUrl
     try {
       const stored = window.localStorage.getItem(LOCALE_STORAGE_KEY)
       if (stored === 'en' || stored === 'fr') return stored

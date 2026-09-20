@@ -21,8 +21,8 @@ self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(VERSION)
-      .then((cache) => cache.add(new Request(OFFLINE_URL, { cache: 'reload' })).catch(() => undefined))
-      .then(() => self.skipWaiting()),
+      .then((cache) => cache.add(new Request(OFFLINE_URL, { cache: 'reload' })).catch(() => undefined)),
+    // No skipWaiting here: a new version waits until the guest taps Refresh, so a menu never reloads mid-read.
   )
 })
 
@@ -155,7 +155,8 @@ async function networkFirst(event) {
     if (res && res.ok) cache.put(request, res.clone())
     return res
   } catch {
-    const hit = await cache.match(request)
+    // ?lang, ?filter, ?source=pwa and Next's _rsc do not change which menu this is.
+    const hit = (await cache.match(request)) || (await cache.match(request, { ignoreSearch: true }))
     if (hit) return hit
     if (request.mode === 'navigate') {
       const offline = await cache.match(OFFLINE_URL)
