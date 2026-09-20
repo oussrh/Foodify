@@ -219,7 +219,16 @@
     },
     {
       "id": 7,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-20T20:01:03Z",
+      "numbersBefore": {
+        "rules": {
+          "CODE-SHAPE": "missing (none of max-lines, max-lines-per-function, complexity, max-params in the linter)"
+        },
+        "shapeFindings": "72 at the standard thresholds (max-lines-per-function 35, complexity 37, max-params 0) in 44 files, measured 2026-09-20 with the rules forced on over the whole tree (tests and e2e specs carved out of the length rule)",
+        "score": "66/100",
+        "enforcedShare": "75% (39/52)"
+      }
     },
     {
       "id": 8,
