@@ -22,3 +22,22 @@ the extracted `restaurantFormValues`/`dishFormValues` mappings feed the forms th
 `test-results/render-check/` afterwards; it compares HEAD with the tree and means nothing once
 committed. Cut JSX out of the original by exact line range with a script (dedent by at most the
 line's own indent - the codebase has 1-space lines inside template literals) instead of retyping.
+
+## Addendum (phase 8, 2026-09-20): 43 scenarios over 10 pages from the scratchpad
+
+- Run it from `<scratchpad>/<territory>/proof` with the node_modules junction and `--root` (see
+  [[patterns-render-diff-proof]]); `git show HEAD:<page>` copies keep their `@/` imports, and a
+  HEAD page whose component you also change gets a HEAD copy of that component beside it with
+  the import rewritten to `./`.
+- A `vi.mock` factory cannot touch a top-level `const`, not even an arrow that only does
+  `await import('./stubs')`: wrap it in `vi.hoisted(() => async () => (await import('./stubs')).stub)`.
+  Stub every `'use client'` child as `<div data-stub data-props={sorted JSON}>` with element
+  props rendered as `data-slot` children; a page that passes rows to a client list is proven
+  by that JSON (Dates land as ISO strings, Decimal money as its string).
+- `redirect`/`notFound` mocked to throw; `render()` returns `THREW <message>` so a guard
+  scenario compares the throw. Read the size table afterwards: only guard scenarios may throw.
+- A dead `${cond ? '' : ''}` inside a class template literal leaves one trailing space in the
+  attribute; dropping it is a 1-byte diff the harness normalises explicitly (assert the needle
+  occurs once) and the report names.
+- `abatty ratchet` with the per-file debt reads a NEW over-budget file as `1 / 8 REGRESSED`
+  even while the floor is unlocked: the red half of the mutation test needs no baseline lock.

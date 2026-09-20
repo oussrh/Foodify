@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { Prisma } from '@/generated/prisma/client'
 import { dishRow, restaurantRow } from '@/test/factories/prisma'
-import { serializeDish, serializeRestaurant } from './menu-data'
+import { serializeCategories, serializeDish, serializeRestaurant } from './menu-data'
 
 describe('serializeDish', () => {
   it('sends the price as an exact two-decimal string, never a float', () => {
@@ -22,5 +22,33 @@ describe('serializeRestaurant', () => {
     const set = serializeRestaurant(restaurantRow({ coverImageStyle: 'repeat', menuTheme: 'dark', defaultLocale: 'fr', currencySymbol: 'DH', currency: 'MAD' }))
     expect(set).toMatchObject({ coverImageStyle: 'repeat', menuTheme: 'dark', defaultLocale: 'fr', currencySymbol: 'DH', currency: 'MAD' })
     expect(serializeRestaurant(restaurantRow({ coverImageStyle: 'tile', menuTheme: 'sepia' }))).toMatchObject({ coverImageStyle: 'cover', menuTheme: 'system' })
+  })
+})
+
+describe('serializeCategories', () => {
+  it('keeps the tree and both names, serializing every dish, and an empty section stays empty', () => {
+    const category = { id: 'c1', restaurantId: 'r1', nameEn: 'Mains', nameFr: 'Plats', sortOrder: 0, isActive: true }
+    const tree = [
+      {
+        ...category,
+        subcategories: [
+          { id: 's1', categoryId: 'c1', nameEn: 'Grill', nameFr: 'Grillades', sortOrder: 0, isActive: true, dishes: [dishRow({ id: 'd1', price: new Prisma.Decimal('9') })] },
+          { id: 's2', categoryId: 'c1', nameEn: 'Soups', nameFr: 'Soupes', sortOrder: 1, isActive: true, dishes: [] },
+        ],
+      },
+      { ...category, id: 'c2', nameEn: 'Drinks', nameFr: 'Boissons', subcategories: [] },
+    ]
+    expect(serializeCategories(tree)).toEqual([
+      {
+        id: 'c1',
+        nameEn: 'Mains',
+        nameFr: 'Plats',
+        subcategories: [
+          { id: 's1', nameEn: 'Grill', nameFr: 'Grillades', dishes: [serializeDish(dishRow({ id: 'd1', price: new Prisma.Decimal('9') }))] },
+          { id: 's2', nameEn: 'Soups', nameFr: 'Soupes', dishes: [] },
+        ],
+      },
+      { id: 'c2', nameEn: 'Drinks', nameFr: 'Boissons', subcategories: [] },
+    ])
   })
 })

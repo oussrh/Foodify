@@ -1,10 +1,13 @@
 // lib/menu-data.ts
 // Serializers from Prisma rows to the plain shapes the customer pages render.
-import type { Dish, Ingredient, Restaurant } from '@/generated/prisma/client'
+import type { Dish, Ingredient, MenuCategory as CategoryRow, MenuSubcategory as SubcategoryRow, Restaurant } from '@/generated/prisma/client'
 import { publicEnv } from '@/lib/env'
-import type { CoverStyle, Locale, MenuDish, MenuRestaurant, MenuTheme } from './menu'
+import type { CoverStyle, Locale, MenuCategory, MenuDish, MenuRestaurant, MenuTheme } from './menu'
 
-export function serializeDish(dish: Dish & { ingredients: Ingredient[] }): MenuDish {
+type DishRow = Dish & { ingredients: Ingredient[] }
+type CategoryTree = CategoryRow & { subcategories: (SubcategoryRow & { dishes: DishRow[] })[] }
+
+export function serializeDish(dish: DishRow): MenuDish {
   return {
     id: dish.id,
     nameEn: dish.nameEn,
@@ -51,6 +54,21 @@ export function serializeRestaurant(restaurant: Restaurant): MenuRestaurant {
     openingHours: restaurant.openingHours,
     socialMedia: restaurant.socialMedia,
   }
+}
+
+/** The menu tree as the page renders it: names in both languages, every dish serialized. */
+export function serializeCategories(categories: CategoryTree[]): MenuCategory[] {
+  return categories.map((cat) => ({
+    id: cat.id,
+    nameEn: cat.nameEn,
+    nameFr: cat.nameFr,
+    subcategories: cat.subcategories.map((sub) => ({
+      id: sub.id,
+      nameEn: sub.nameEn,
+      nameFr: sub.nameFr,
+      dishes: sub.dishes.map(serializeDish),
+    })),
+  }))
 }
 
 export function siteOrigin(): string {

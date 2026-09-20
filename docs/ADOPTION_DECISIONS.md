@@ -178,3 +178,15 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - Twenty-five of the new files export two to four sibling components (a card and its parts). The repository's rule is five exports per file (`.claude/rules/size-limits.md`); the standard's one-component-per-file is read here as one *concern* per file, a card with the parts only it renders. Re-read when a sibling gains a second consumer: it moves to its own file then.
 - `components/forms/form-defaults.ts` (the row-to-form mappers) sits outside the `lib/**` coverage floor; it carries its own 126-line test. Deriving the forms' value types in `lib/schemas/` would let it move under the floor; a phase 9/10 tidy.
 
+## 2026-09-20 · phase 8 · the size floors hard at zero; what the last eight pages kept
+
+- **Situation**: after phase 7 the only files over a budget were eight pages (composition roots, 100 code lines), 103 to 152 lines each; `size.overRaw` was already 0.
+- **Default taken**: each page keeps its data reads, its guard (the admin ones still start with `requireSuperAdminPage()`) and its redirects, and hands its markup to components; the public menu route keeps its two metadata selects and hands the metadata, viewport and loader to `lib/` modules with prisma-mocked tests that pin the query arguments (the `lib/**` coverage floor binds). The admin dishes page, under budget but a verbatim copy of the manager's row mapping, took the same seam. `size.overBudget` and `size.excessCode` are hard at 0: a new file over its kind's budget fails the gate (proven on a planted 102-line page).
+- **Alternative set aside**: leaving the two list pages (66 and 78 lines) with their query inline above the 30-60 target; they are under the budget and a query belongs to the page.
+- **Re-read when**: a page needs a second query and crosses 100 again: the query moves to a loader module, not the guard.
+
+## 2026-09-20 · phase 8 · two small non-identities accepted
+
+- The confirm-new page's icon box had a dead `${success ? '' : ''}` in its class, one trailing space in the attribute; it is the plain string, like confirm-old's. Nothing in `confirm-old-email.tsx` was reusable as-is, so the shared shape (status banner, bullet box, the invalid-link card) became three primitives in `components/manager/email-change-notice.tsx` and confirm-old moved onto them (proven identical in three states).
+- The proof ran the menu's browser tests against the running dev server rather than a production build (a build was off limits to the worker); the pre-push gate then ran them against the build.
+
