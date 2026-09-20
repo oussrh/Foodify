@@ -13,6 +13,7 @@
     "app/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
     "lib/**/*.ts",
+    "test/**/*.ts",
     "prisma/*.js",
     "*.{ts,js,cjs,mjs}"
   ],
