@@ -14,6 +14,9 @@ last_verified: "2026-09-20"
 
 `pnpm test` runs Vitest with coverage (`vitest run --coverage`); `pnpm test:watch` for a file at a
 time. The gate and CI run `pnpm test`, so a coverage drop below the floor is red for the push.
+`pnpm test:changed` (CI runs it after the gate) holds the same floor over the `lib/` files the
+push changed, measured against `origin/main`: an untested new file, or an edit to a file below
+the floor, is red even while the total holds (TEST.4, the changed-lines gate).
 
 ## Unit suite
 

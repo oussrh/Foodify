@@ -3,7 +3,10 @@
 # hook's. Inside it, in order: format (skipped until a .prettierrc exists), lint, typecheck, import
 # graph, dead code, unit tests with the coverage floor, standards ratchet + changelog over the
 # pushed range, secret scan, production build; the database and browser suites join when their
-# scripts exist. The audit is its own step because the gate's built-in one needs package-lock.json.
+# scripts exist. Two steps follow that the gate cannot run: the audit (its built-in one needs
+# package-lock.json) and the coverage of the changed lines (TEST.4: the runner's changed-files
+# mode holds the lib/** floor over what this push touched, so an untested new file is red even
+# while the total holds).
 # Started from `abatty ci` (next preset), which generates npm steps; hand-maintained since, see
 # docs/ADOPTION_DECISIONS.md (2026-09-20 · phase 0).
 name: checks
@@ -44,3 +47,5 @@ jobs:
         run: pnpm run -s gate
       - name: audit (SEC.1)
         run: pnpm audit --prod --audit-level=high
+      - name: coverage of the changed lines (TEST.4)
+        run: pnpm run -s test:changed

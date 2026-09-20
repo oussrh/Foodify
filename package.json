@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
+    "test:changed": "vitest run --coverage --changed origin/main --passWithNoTests",
     "format:check": "prettier --check --end-of-line auto .",
     "graph": "depcruise app components lib auth.ts middleware.ts --config .dependency-cruiser.cjs --ignore-known --output-type err",
     "graph:mermaid": "depcruise app components lib --config .dependency-cruiser.cjs --output-type mermaid",
