@@ -1,7 +1,7 @@
 {
   "measuredAt": "2026-09-20",
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
-  "score": 84,
+  "score": 74,
   "hard": [
     "change.changelogMissing",
     "code.barrels",
@@ -27,21 +27,23 @@
     "size.overBudget": 34,
     "size.overRaw": 1,
     "types.escapes": 1,
-    "valid.rawEnv": 36
+    "valid.rawEnv": 36,
+    "valid.unparsedBoundary": 40
   },
   "scanned": {
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 1,
-    "docs.citations": 36,
+    "docs.citations": 40,
     "docs.danglingSource": 2,
     "docs.frontMatter": 6,
     "docs.indexDrift": 5,
-    "size.excessCode": 163,
-    "size.overBudget": 163,
-    "size.overRaw": 172,
-    "types.escapes": 163,
-    "valid.rawEnv": 162
+    "size.excessCode": 164,
+    "size.overBudget": 164,
+    "size.overRaw": 173,
+    "types.escapes": 164,
+    "valid.rawEnv": 163,
+    "valid.unparsedBoundary": 15
   },
   "debt": {
     "size.excessCode": {
@@ -135,6 +137,20 @@
       "components/restaurant-logo-upload.tsx": 4,
       "lib/emails/change-email.ts": 2,
       "lib/prisma.ts": 1
+    },
+    "valid.unparsedBoundary": {
+      "app/actions/admin-auth-actions.ts": 1,
+      "app/actions/admin-user-actions.ts": 3,
+      "app/actions/client-actions.ts": 3,
+      "app/actions/dish-actions.ts": 8,
+      "app/actions/manager-auth-actions.ts": 1,
+      "app/actions/menu-actions.ts": 11,
+      "app/actions/profile-actions.ts": 4,
+      "app/actions/restaurant-actions.ts": 5,
+      "app/api/restaurants/[id]/users/route.ts": 1,
+      "app/api/users/[id]/restaurants/route.ts": 1,
+      "app/api/users/route.ts": 1,
+      "auth.ts": 1
     }
   },
   "versions": {
@@ -151,7 +167,8 @@
     "size.overBudget": 1,
     "size.overRaw": 1,
     "types.escapes": 1,
-    "valid.rawEnv": 1
+    "valid.rawEnv": 1,
+    "valid.unparsedBoundary": 1
   },
   "entries": {
     "size.excessCode": {

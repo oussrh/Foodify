@@ -138,7 +138,19 @@
     {
       "id": 4,
       "status": "in_progress",
-      "updatedAt": "2026-09-20T17:25:26Z"
+      "updatedAt": "2026-09-20T17:25:26Z",
+      "numbersBefore": {
+        "rules": {
+          "VALID-ZOD": "present (zod present; 40 boundaries unparsed)",
+          "VALID-ENV": "partial",
+          "DATA-TENANT": "n/a (probe finds no tenant column)"
+        },
+        "valid.rawEnv": 36,
+        "valid.unparsedBoundary": "40 of 15 files, measured by the repository probe written this phase (36 server actions, 3 route handlers, the credentials callback)",
+        "score": "65/100",
+        "enforcedShare": "75% (39/52)",
+        "readability": "84/100 (74 once the new metric is baselined)"
+      }
     },
     {
       "id": 5,
