@@ -35,8 +35,8 @@
     },
     {
       "id": 2,
-      "status": "in_progress",
-      "updatedAt": "2026-09-20T10:16:09Z",
+      "status": "done",
+      "updatedAt": "2026-09-20T10:22:30Z",
       "numbersBefore": {
         "runner": "none",
         "testFiles": 0,
@@ -45,6 +45,45 @@
           "TEST-UNIT": "missing",
           "TEST-COVERAGE": "missing"
         }
+      },
+      "numbersAfter": {
+        "runner": "vitest 5.0.1",
+        "testFiles": 7,
+        "tests": 85,
+        "coverage": {
+          "area": "lib/**",
+          "statements": 92.72,
+          "branches": 79.73,
+          "functions": 79.41,
+          "lines": 92.94
+        },
+        "floor": {
+          "lib/**": {
+            "statements": 92.7,
+            "branches": 79.7,
+            "functions": 79.4,
+            "lines": 92.9
+          },
+          "lib/menu.ts": {
+            "statements": 88.8,
+            "branches": 85,
+            "functions": 63.6,
+            "lines": 86.2
+          },
+          "lib/totp.ts": {
+            "statements": 100,
+            "branches": 100,
+            "functions": 100,
+            "lines": 100
+          }
+        },
+        "rules": {
+          "TEST-UNIT": "present",
+          "TEST-COVERAGE": "present"
+        },
+        "score": "57/100",
+        "enforcedShare": "77% (36/47)",
+        "switch": "pnpm test exit 1 with opening-hours.test.ts removed, exit 0 restored; pnpm test:changed exit 1 with a planted untested lib file, exit 0 with nothing changed"
       }
     },
     {

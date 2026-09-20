@@ -85,7 +85,7 @@ last_verified: "2026-09-20"
 | DOC-RULES | Documents | .claude/rules/*.md path-scoped rules for stack and domain conventions | should | prose | **present** | 5 rule file(s), 4 path-scoped | - | A.1 |
 | DOC-CONVENTIONS | Documents | A CODE_CONVENTIONS.md under docs: how this stack applies the standard | should | prose | **missing** | none | Write it from the standard §3-§7 for this stack | A.1 |
 | DOC-PROGRESS | Documents | A STANDARDS_PROGRESS.md under docs: numbers-only scoreboard and log | must | review | **present** | docs/STANDARDS_PROGRESS.md | - | 0 |
-| DOC-CHANGELOG | Documents | CHANGELOG.md in Keep-a-Changelog shape with an [Unreleased] section | must | hard | **present** | CHANGELOG.md: 40 lines, has [Unreleased] | - | 0 / 11 |
+| DOC-CHANGELOG | Documents | CHANGELOG.md in Keep-a-Changelog shape with an [Unreleased] section | must | hard | **present** | CHANGELOG.md: 41 lines, has [Unreleased] | - | 0 / 11 |
 | DOC-INDEX | Documents | docs index listing every document | must | hard | **present** | docs/README.md | - | 11 |
 | DOC-ADR | Documents | A decisions record (MADR entries or a decision log) | must | prose | **missing** | none | Create a decisions folder under docs with 0001-*.md for the five day-0 decisions | A.1 |
 | DOC-FRONTMATTER | Documents | Every doc opens with front matter | must | hard | **present** | 6/6 docs with front matter | - | 11 |
@@ -104,7 +104,7 @@ last_verified: "2026-09-20"
 | HARNESS-SKILL | Harness | adopt-standards skill and standards-reviewer agent | must | review | **present** | skill, reviewer | - | A.1 |
 | HARNESS-GITIGNORE | Harness | .claude/night/ ignored | must | hard | **present** | ignored | - | A.1 |
 | CODE-LINTER | Code | A linter configured, for every language in the tree | must | hard | **present** | javascript: `lint` | - | 1 |
-| CODE-MAXWARN | Code | lint runs with a warning as an error (--max-warnings=0, --error-on-warnings) | must | hard | **partial** | `next lint` | Make a warning fail the lint script: --max-warnings=0 (ESLint, oxlint) or --error-on-warnings (Biome) | 1 |
+| CODE-MAXWARN | Code | lint runs with a warning as an error (--max-warnings=0, --error-on-warnings) | must | hard | **partial** | `next lint --dir app --dir components --dir lib --dir test --dir types --file auth.ts --file middleware.ts --file vitest.config.ts` | Make a warning fail the lint script: --max-warnings=0 (ESLint, oxlint) or --error-on-warnings (Biome) | 1 |
 | CODE-SHAPE | Code | Function shape held: max-lines, max-lines-per-function, complexity, max-params in the linter or the ratchet | must | hard | **missing** | MISSING max-lines, MISSING max-lines-per-function, MISSING complexity, MISSING max-params | Add the four rules at warn under --max-warnings=0, exemptions generated from the baseline debt | 7 / 8 |
 | CODE-JSDOC | Code | jsdoc/require-jsdoc publicOnly on the exported surface | must | hard | **missing** | none | Add eslint-plugin-jsdoc (typescript-flavor on TS) with the fixer disabled | 11 |
 | CODE-ARCH-IMPORTS | Code | no-restricted-imports / import boundaries hold the architecture | must | hard | **missing** | none | Ban vendor SDKs outside their provider home and enforce the import direction | 1 |
@@ -135,9 +135,9 @@ last_verified: "2026-09-20"
 | SEC-AUDIT | Security | Dependency audit in CI | must | hard | **present** | the gate's built-in audit: production only, a severity floor | - | 0 |
 | SEC-LOCKFILE | Security | Lockfile committed and frozen installs in CI | must | hard | **present** | pnpm-lock.yaml, frozen install in CI | - | 0 |
 | SEC-ENVFILES | Security | No .env file tracked in git | must | hard | **present** | none tracked | - | 0 |
-| FLOW-COMMITS | Delivery | Conventional Commits | must | review | **missing** | 12/50 of the last commits | Adopt the format; a commit-msg hook can refuse the rest | 1 |
+| FLOW-COMMITS | Delivery | Conventional Commits | must | review | **missing** | 14/50 of the last commits | Adopt the format; a commit-msg hook can refuse the rest | 1 |
 | FLOW-TRAILER | Delivery | No authorship trailer, where the repository opted into the scrub | must | hard | **n/a** | provenance kept; the scrub is off (scrub.enabled) | - | - |
-| FLOW-EMDASH | Delivery | No em-dash in code, copy or docs | must | hard | **missing** | 14 file(s): app/admin/(protected)/page.tsx, app/admin/(protected)/users/[id]/restaurants/page.tsx, app/api/users/route.ts, components/contact/contact-panel.tsx, components/shell/dishes-list.tsx | Replace with a hyphen; add the ratchet metric i18n.emDashInCopy | 1 |
+| FLOW-EMDASH | Delivery | No em-dash in code, copy or docs | must | hard | **missing** | 11 file(s): app/admin/(protected)/page.tsx, app/admin/(protected)/users/[id]/restaurants/page.tsx, app/api/users/route.ts, components/contact/contact-panel.tsx, components/shell/dishes-list.tsx | Replace with a hyphen; add the ratchet metric i18n.emDashInCopy | 1 |
 | FLOW-CHANGELOG-GATE | Delivery | Changelog-touched check over the pushed range | must | hard | **present** | a check mentions the changelog | - | 0 |
 | FLOW-VERSION | Delivery | A version the release process bumps (SemVer) | should | prose | **present** | package.json 1.0.0 | - | - |
 | I18N-CATALOGUE | i18n | Translation catalogues exist | should | prose | **missing** | no catalogue found | - | - |

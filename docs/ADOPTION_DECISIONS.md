@@ -13,7 +13,7 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 ## 2026-09-20 · day 0 · `size.overRaw` held as a ratchet
 
 - **Situation**: `components/ar-viewer-client.tsx` is 810 code lines, over the 800-line absolute cap, so the baseline could not be written.
-- **Default taken**: `ratchet.ratchet: ["size.overRaw"]` — the metric is held at 1 and may only fall.
+- **Default taken**: `ratchet.ratchet: ["size.overRaw"]`: the metric is held at 1 and may only fall.
 - **Alternative set aside**: splitting the AR viewer (support detection, model-viewer loading, controls, AR launch) in the adoption commit. It is the customer-facing AR surface, mid-redesign on `redesign/quiet-plate`; the split belongs with that work, not with the instrument.
 - **Re-read when**: the redesign branch merges. The split drops the metric to 0 and this entry is closed by removing the override.
 
@@ -47,3 +47,10 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Default taken**: the phase stays `in_progress` in `ADOPTION_STATE.json` with its numbers recorded. It closes when the first run's URL is in the progress log and the ratchet step has been seen red then green there; the audit step is red until the dependency upgrade, so the first green run follows that change.
 - **Alternative set aside**: marking it done on the local proof. A switch nobody watched fail in the place it guards is not flipped (§B.1.3).
 - **Re-read when**: the push lands and the run is read.
+
+## 2026-09-20 · phase 2 · two dev dependencies installed by day
+
+- **Situation**: phase 2 pins coverage, and the repository had no test runner. The night protocol forbids installing a dependency; this was an attended run.
+- **Default taken**: `vitest` 5.0.1 and `@vitest/coverage-v8` 5.0.1 added as devDependencies in the phase commit, lockfile updated, `PRISMA_GENERATE_SKIP_AUTOINSTALL=true` set for the install.
+- **Alternative set aside**: waiting for a morning to install. The phase cannot start without a runner, and the user asked for the phase.
+- **Re-read when**: never; recorded so a night reading the range knows the install was a decision, not a drift.
