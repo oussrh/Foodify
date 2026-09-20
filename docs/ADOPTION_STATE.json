@@ -35,7 +35,17 @@
     },
     {
       "id": 2,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-20T10:16:09Z",
+      "numbersBefore": {
+        "runner": "none",
+        "testFiles": 0,
+        "coverage": "not measured",
+        "rules": {
+          "TEST-UNIT": "missing",
+          "TEST-COVERAGE": "missing"
+        }
+      }
     },
     {
       "id": 3,
