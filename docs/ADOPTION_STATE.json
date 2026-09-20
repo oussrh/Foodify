@@ -1,0 +1,130 @@
+{
+  "startedAt": "2026-09-20T10:00:16Z",
+  "baseBranch": "main",
+  "phases": [
+    {
+      "id": 0,
+      "status": "in_progress",
+      "updatedAt": "2026-09-20T10:13:07Z",
+      "numbersBefore": {
+        "score": "55/100",
+        "enforcedShare": "74% (35/47)",
+        "rules": {
+          "INST-CI": "missing",
+          "INST-CI-STEPS": "missing",
+          "SEC-LOCKFILE": "partial",
+          "SEC-SECRETS": "partial"
+        }
+      },
+      "numbersAfter": {
+        "score": "53/100",
+        "enforcedShare": "76% (34/45)",
+        "rules": {
+          "INST-CI": "present",
+          "INST-CI-STEPS": "present",
+          "SEC-LOCKFILE": "present",
+          "SEC-SECRETS": "present"
+        },
+        "switch": "pnpm run -s standards -- --range main..HEAD: exit 3 with types.escapes floor 13->12, exit 0 restored"
+      },
+      "remaining": "first CI run: ratchet step red on a lowered floor, then green (run URLs into the progress log); audit step green after the dependency upgrade"
+    },
+    {
+      "id": 1,
+      "status": "pending"
+    },
+    {
+      "id": 2,
+      "status": "done",
+      "updatedAt": "2026-09-20T10:22:30Z",
+      "numbersBefore": {
+        "runner": "none",
+        "testFiles": 0,
+        "coverage": "not measured",
+        "rules": {
+          "TEST-UNIT": "missing",
+          "TEST-COVERAGE": "missing"
+        }
+      },
+      "numbersAfter": {
+        "runner": "vitest 5.0.1",
+        "testFiles": 7,
+        "tests": 85,
+        "coverage": {
+          "area": "lib/**",
+          "statements": 92.72,
+          "branches": 79.73,
+          "functions": 79.41,
+          "lines": 92.94
+        },
+        "floor": {
+          "lib/**": {
+            "statements": 92.7,
+            "branches": 79.7,
+            "functions": 79.4,
+            "lines": 92.9
+          },
+          "lib/menu.ts": {
+            "statements": 88.8,
+            "branches": 85,
+            "functions": 63.6,
+            "lines": 86.2
+          },
+          "lib/totp.ts": {
+            "statements": 100,
+            "branches": 100,
+            "functions": 100,
+            "lines": 100
+          }
+        },
+        "rules": {
+          "TEST-UNIT": "present",
+          "TEST-COVERAGE": "present"
+        },
+        "score": "57/100",
+        "enforcedShare": "77% (36/47)",
+        "switch": "pnpm test exit 1 with opening-hours.test.ts removed, exit 0 restored; pnpm test:changed exit 1 with a planted untested lib file, exit 0 with nothing changed"
+      }
+    },
+    {
+      "id": 3,
+      "status": "pending"
+    },
+    {
+      "id": 4,
+      "status": "pending"
+    },
+    {
+      "id": 5,
+      "status": "pending"
+    },
+    {
+      "id": 6,
+      "status": "pending"
+    },
+    {
+      "id": 7,
+      "status": "pending"
+    },
+    {
+      "id": 8,
+      "status": "pending"
+    },
+    {
+      "id": 9,
+      "status": "pending"
+    },
+    {
+      "id": 10,
+      "status": "pending"
+    },
+    {
+      "id": 11,
+      "status": "pending"
+    },
+    {
+      "id": 12,
+      "status": "pending"
+    }
+  ]
+}
