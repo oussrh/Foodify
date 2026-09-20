@@ -2,8 +2,10 @@
 
 import prisma from '@/lib/prisma'
 import { uploadArAsset } from '@/lib/cloudinary'
+import { requireDishAccess, requireIngredientAccess, requireRestaurantAccess } from '@/lib/auth-guard'
 
 export async function listDishes(restaurantId: string) {
+  await requireRestaurantAccess({ id: restaurantId })
   return prisma.dish.findMany({
     where: { restaurantId },
     include: { subcategory: true },
@@ -29,6 +31,7 @@ export async function createDish(
     allergens?: string[]
   }
 ) {
+  await requireRestaurantAccess({ id: restaurantId })
   const count = await prisma.dish.count({ where: { restaurantId } })
   
   // Only process AR URLs if they exist and are not already Cloudinary URLs or local paths
@@ -92,6 +95,7 @@ export async function updateDish(
     allergens?: string[]
   }
 ) {
+  await requireDishAccess(id)
   const updatedData = { ...data }
   
   // Only process AR URLs if they are not already Cloudinary URLs or local paths
@@ -126,11 +130,13 @@ export async function updateDish(
 }
 
 export async function deleteDish(id: string) {
+  await requireDishAccess(id)
   return prisma.dish.delete({ where: { id } })
 }
 
 // Toggle dish activation status
 export async function toggleDishStatus(id: string) {
+  await requireDishAccess(id)
   const dish = await prisma.dish.findUnique({ where: { id }, select: { isActive: true } })
   if (!dish) throw new Error('Dish not found')
   
@@ -142,6 +148,7 @@ export async function toggleDishStatus(id: string) {
 
 // Update dish price
 export async function updateDishPrice(id: string, price: number) {
+  await requireDishAccess(id)
   return prisma.dish.update({
     where: { id },
     data: { price }
@@ -150,6 +157,7 @@ export async function updateDishPrice(id: string, price: number) {
 
 // Toggle most purchased status
 export async function toggleMostPurchased(id: string) {
+  await requireDishAccess(id)
   const dish = await prisma.dish.findUnique({ where: { id }, select: { isMostPurchased: true } })
   if (!dish) throw new Error('Dish not found')
   
@@ -161,6 +169,7 @@ export async function toggleMostPurchased(id: string) {
 
 // Add ingredient to dish
 export async function addIngredient(dishId: string, data: { nameEn: string; nameFr: string }) {
+  await requireDishAccess(dishId)
   return prisma.ingredient.create({
     data: {
       dishId,
@@ -172,6 +181,7 @@ export async function addIngredient(dishId: string, data: { nameEn: string; name
 
 // Update ingredient
 export async function updateIngredient(id: string, data: { nameEn?: string; nameFr?: string }) {
+  await requireIngredientAccess(id)
   return prisma.ingredient.update({
     where: { id },
     data
@@ -180,11 +190,13 @@ export async function updateIngredient(id: string, data: { nameEn?: string; name
 
 // Delete ingredient
 export async function deleteIngredient(id: string) {
+  await requireIngredientAccess(id)
   return prisma.ingredient.delete({ where: { id } })
 }
 
 // Get dish with all details including ingredients
 export async function getDishDetails(id: string) {
+  await requireDishAccess(id)
   return prisma.dish.findUnique({
     where: { id },
     include: {

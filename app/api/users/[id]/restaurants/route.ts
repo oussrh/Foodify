@@ -1,13 +1,20 @@
 import prisma from '@/lib/prisma'
 import { NextRequest } from 'next/server'
+import { authErrorResponse, requireSuperAdmin } from '@/lib/auth-guard'
 
 export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  try {
+    await requireSuperAdmin()
+  } catch (error) {
+    return authErrorResponse(error)
+  }
+
   const { restaurantIds } = await req.json()
   const { id } = await params
-  if (!Array.isArray(restaurantIds)) {
+  if (!Array.isArray(restaurantIds) || !restaurantIds.every((r) => typeof r === 'string')) {
     return new Response('Invalid restaurantIds', { status: 400 })
   }
 

@@ -3,23 +3,24 @@
 import prisma from '@/lib/prisma'
 import { Resend } from 'resend'
 import bcrypt from 'bcryptjs'
+import { randomInt } from 'crypto'
 import { managerOtpEmail } from '@/lib/emails/manager-otp-email'
 
 export async function requestManagerOtp(email: string, password: string) {
   try {
     const user = await prisma.user.findUnique({ where: { email } })
     if (!user) {
-      return { error: 'User not found. Please check your email address.' }
+      return { error: 'Invalid email or password' }
     }
     if (user.role !== 'RESTAURANT_ADMIN') {
-      return { error: `Access denied. Manager access required.` }
+      return { error: 'Invalid email or password' }
     }
     const valid = await bcrypt.compare(password, user.passwordHash)
     if (!valid) {
-      return { error: 'Invalid password' }
+      return { error: 'Invalid email or password' }
     }
     
-    const code = Math.floor(100000 + Math.random() * 900000).toString()
+    const code = randomInt(100000, 1000000).toString()
     await prisma.user.update({
       where: { id: user.id },
       data: {
