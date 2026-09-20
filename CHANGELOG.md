@@ -6,6 +6,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Added
 
+- Browser suite (`pnpm e2e`, Playwright, `e2e/`): the public menu journey (load, language toggle and memory, the dish sheet and the back button) and both sign-in pages, on a phone and a desktop project, each with an axe scan that fails on any serious or critical violation; runs against the production build, in the gate after the build, and in CI with a Postgres service seeded by `prisma/seed.ts`.
 - `test/contrast.test.ts`: every text-on-surface pair of the design tokens in `app/globals.css` must read at WCAG AA (4.5:1) in both themes, the focus ring at 3:1, computed from the token file on every test run; the input border is pinned at its measured 1.4:1 with 3:1 as the target.
 - `scripts/codemods/remove-unused-imports.mjs`: removes the import bindings ESLint reports unused and nothing else, driven by ESLint's JSON output; dry run by default, `--write` to apply; eleven fixture cases. `lib/device.ts` (`isIOS`, `isAndroid`, tested) and `components/menu/use-menu-locale.ts` (the guest's language on a menu page) are the seams the review found duplicated.
 - `components/use-client-value.ts`: a value that exists only in the browser (user agent, matchMedia, storage) read through `useSyncExternalStore` with a server snapshot, so components stop setting state from effects after hydration.
@@ -54,6 +55,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Fixed
 
+- A first visit to a menu no longer reloads the page a second after it appears: the freshly installed service worker claiming the page was taken for an update (found by the browser suite, whose navigations it aborted).
 - The manager profile's "view restaurant" link pointed at `/manager/restaurants/[id]`, a route with no page (an `as any` on the href hid it from the typed routes); it opens the restaurant's info page.
 - The back button navigates through Next's router instead of assigning `window.location`.
 - Three empty `interface X extends Y {}` in `components/ui/` are type aliases; the WebXR `@ts-ignore` says why it expects an error.

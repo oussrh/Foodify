@@ -17,6 +17,7 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:changed": "vitest run --coverage --changed origin/main --passWithNoTests",
+    "e2e": "playwright test",
     "format:check": "prettier --check --end-of-line auto .",
     "graph": "depcruise app components lib auth.ts proxy.ts --config .dependency-cruiser.cjs --ignore-known --output-type err",
     "graph:mermaid": "depcruise app components lib --config .dependency-cruiser.cjs --output-type mermaid",
@@ -59,6 +60,8 @@
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^24.13.6",
     "@types/react": "^19.3.0",

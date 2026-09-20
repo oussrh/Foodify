@@ -3,7 +3,7 @@
 // FLOW.3); every exclusion below is listed with its reason in docs/TESTING.md. Never add
 // `thresholds.autoUpdate`: the direction check refuses it, and a raise is a reviewed change.
 import { fileURLToPath } from 'node:url'
-import { defineConfig } from 'vitest/config'
+import { configDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
   resolve: {
@@ -11,6 +11,8 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    // e2e/ is Playwright's (its specs call test.describe from @playwright/test).
+    exclude: [...configDefaults.exclude, 'e2e/**'],
     coverage: {
       provider: 'v8',
       reportOnFailure: true,

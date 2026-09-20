@@ -53,8 +53,17 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 | `lib/auth-guard.ts` | Needs a NextAuth session and Postgres; belongs to the integration suite |
 | `lib/emails/**` | HTML templates; presentational |
 
+## Browser suite
+
+`pnpm e2e` runs Playwright (`playwright.config.ts`, specs in `e2e/`) against the production build
+served on port 3100 (`pnpm build` first; the gate and CI do both): the public menu journey (load,
+language toggle, dish sheet) and the sign-in pages, each with an axe scan that fails on any serious
+or critical violation (TEST.3, A11Y.1). Two projects, a phone and a desktop; retries 0 locally and
+2 in CI; a trace on the first retry. Test data is the seeded restaurant (`prisma/seed.ts`); CI seeds
+a Postgres service before the run. Vitest excludes `e2e/`.
+
 ## Still to come
 
 - Integration (TEST.2): real Postgres in a rolled-back transaction, on real migrations: phase 10.
-- End-to-end (TEST.3): Playwright with `axe`, a mobile viewport as a project; the browser job in
-  `.github/workflows/checks.yml` is added when the `e2e` script exists.
+- Authenticated journeys in the browser suite: the sign-in needs an emailed code, which the suite
+  cannot read; a test-only code source is the seam.

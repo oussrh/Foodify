@@ -51,10 +51,12 @@ function registerServiceWorker(handlers: WorkerHandlers) {
   }
   navigator.serviceWorker.addEventListener('message', onMessage)
 
-  // A new worker took control after we asked it to skip waiting: the page is now stale.
+  // A new worker took control after we asked it to skip waiting: the page is now stale. On a
+  // first visit the freshly installed worker claims the page too, and that is not an update.
+  const hadController = Boolean(navigator.serviceWorker.controller)
   let refreshing = false
   const onControllerChange = () => {
-    if (refreshing) return
+    if (!hadController || refreshing) return
     refreshing = true
     handlers.onControllerChange()
   }

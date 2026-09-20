@@ -2,8 +2,9 @@
 # (INST-GATE: one implementation, three callers), so the list of checks cannot drift from the
 # hook's. Inside it, in order: format (skipped until a .prettierrc exists), lint, typecheck, import
 # graph, dead code, unit tests with the coverage floor, standards ratchet + changelog over the
-# pushed range, secret scan, production build; the database and browser suites join when their
-# scripts exist; a red gate names the failing step in its log. Two steps follow that the gate
+# pushed range, secret scan, production build, then the browser suite with its axe scans against
+# that build (the e2e script; Chromium and the seeded restaurant are prepared below); a red gate
+# names the failing step in its log. Two steps follow that the gate
 # cannot run: the coverage of the changed lines (TEST.4: the runner's changed-files mode holds the
 # lib/** floor over what this push touched, so an untested new file is red even while the total
 # holds) and the audit (its built-in one needs package-lock.json).
@@ -23,7 +24,8 @@ env:
   # Prisma auto-installs @prisma/client (rewriting package.json and the lockfile) when it fails to
   # resolve it. A frozen install must fail loudly instead (SEC-LOCKFILE).
   PRISMA_GENERATE_SKIP_AUTOINSTALL: "true"
-  # The build needs these variables to exist, not to be real: every route is rendered on demand.
+  # The build needs these variables to exist; the browser suite needs the database to be real (the
+  # postgres service below).
   DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
   NEXTAUTH_URL: http://localhost:3000
   NEXTAUTH_SECRET: ci-only-not-a-secret
@@ -31,6 +33,17 @@ env:
 jobs:
   checks:
     runs-on: ubuntu-latest
+    services:
+      # The browser suite needs the seeded restaurant behind the production build (DATABASE_URL above).
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: ci
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
       - uses: actions/checkout@v4
         with:
@@ -43,6 +56,11 @@ jobs:
           node-version: "22"
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - name: the browser suite's data (the schema and the seeded restaurant)
+        run: |
+          pnpm exec prisma db push
+          pnpm exec prisma db seed
       - name: the range this run judges
         # On a push to main, origin/main already equals HEAD, so the gate's own fork-point logic
         # sees an empty push and skips the build suite; the event carries the real range.
