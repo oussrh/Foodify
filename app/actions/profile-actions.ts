@@ -9,12 +9,14 @@ import {
   newEmailVerificationEmail,
 } from '@/lib/emails/change-email'
 import { sendMail } from '@/lib/mail'
+import { emailChange, emailToken, passwordChange, type PasswordChange } from '@/lib/schemas/user'
 
-export async function initiateEmailChange(email: string, ip?: string) {
+export async function initiateEmailChange(rawEmail: string, ip?: string) {
   const session = await auth()
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
+  const { email } = emailChange.parse({ email: rawEmail })
   const user = await prisma.user.findUnique({ where: { email: session.user.email } })
   if (!user) throw new Error('User not found')
 
@@ -45,7 +47,8 @@ export async function initiateEmailChange(email: string, ip?: string) {
   await sendMail({ to: user.email, subject: 'Confirm your email change', html: oldEmailConfirmationEmail(token) })
 }
 
-export async function confirmOldEmail(token: string) {
+export async function confirmOldEmail(rawToken: string) {
+  const token = emailToken.parse(rawToken)
   const user = await prisma.user.findFirst({
     where: {
       emailChangeToken: token,
@@ -80,7 +83,8 @@ export async function confirmOldEmail(token: string) {
   return true
 }
 
-export async function confirmNewEmail(token: string) {
+export async function confirmNewEmail(rawToken: string) {
+  const token = emailToken.parse(rawToken)
   const user = await prisma.user.findFirst({
     where: {
       emailVerifyToken: token,
@@ -111,14 +115,19 @@ export async function confirmNewEmail(token: string) {
   return true
 }
 
-export async function updatePassword(password: string) {
+export async function updatePassword(raw: PasswordChange) {
   const session = await auth()
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
+  const { currentPassword, password } = passwordChange.parse(raw)
+  const user = await prisma.user.findUnique({ where: { email: session.user.email } })
+  if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+    throw new Error('Current password is incorrect')
+  }
   const passwordHash = await bcrypt.hash(password, 10)
   return prisma.user.update({
-    where: { email: session.user.email },
+    where: { id: user.id },
     data: { passwordHash },
   })
 }

@@ -2,7 +2,6 @@
 'use client'
 
 import { useForm, useWatch } from 'react-hook-form'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,6 +9,7 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card'
 import { updateClient } from '@/app/actions/client-actions'
+import { clientPatch, type ClientPatch } from '@/lib/schemas/user'
 import {
   Mail,
   Building2,
@@ -39,12 +39,8 @@ import {
 
 type Restaurant = { id: string; name: string }
 
-const schema = z.object({
-  email: z.string().email('Please enter a valid email address'),
-  restaurantIds: z.array(z.string()).optional(),
-})
-
-export type EditClientValues = z.infer<typeof schema>
+const schema = clientPatch
+export type EditClientValues = ClientPatch
 
 // One empty list, so an unset field keeps the same identity across renders (the memos below depend on it).
 const NO_RESTAURANTS: string[] = []

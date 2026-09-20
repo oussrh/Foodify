@@ -1,13 +1,13 @@
 "use client";
 
 import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { createClient } from "@/app/actions/client-actions";
+import { clientInput, type ClientInput } from "@/lib/schemas/user";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Mail, Lock, Building2, Plus, UserPlus, Check, X, Search } from "lucide-react";
 import { useState } from "react";
@@ -21,14 +21,8 @@ import {
 
 type Restaurant = { id: string; name: string };
 
-const schema = z.object({
-  email: z.string().email(),
-  password: z.string().min(6),
-  restaurantIds: z.array(z.string()).optional(),
-  restaurantName: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof schema>;
+const schema = clientInput;
+type FormValues = ClientInput;
 
 export default function CreateClientForm({
   restaurants,

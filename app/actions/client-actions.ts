@@ -3,17 +3,15 @@
 import bcrypt from 'bcryptjs'
 import prisma from '@/lib/prisma'
 import { requireSuperAdmin } from '@/lib/auth-guard'
+import { password, uuid } from '@/lib/schemas/common'
+import { clientInput, clientPatch, type ClientInput, type ClientPatch } from '@/lib/schemas/user'
 
-export async function createClient(data: {
-  email: string
-  password: string
-  restaurantIds: string[]
-  restaurantName?: string
-}) {
+export async function createClient(raw: ClientInput) {
   await requireSuperAdmin()
+  const data = clientInput.parse(raw)
   const passwordHash = await bcrypt.hash(data.password, 10)
 
-  const restaurantIds = [...data.restaurantIds]
+  const restaurantIds = [...(data.restaurantIds ?? [])]
   if (data.restaurantName) {
     const restaurant = await prisma.restaurant.create({
       data: {
@@ -35,11 +33,10 @@ export async function createClient(data: {
   })
 }
 
-export async function updateClient(
-  id: string,
-  data: { email?: string; restaurantIds?: string[] }
-) {
+export async function updateClient(rawId: string, raw: ClientPatch) {
   await requireSuperAdmin()
+  const id = uuid.parse(rawId)
+  const data = clientPatch.parse(raw)
   const { restaurantIds, ...rest } = data
   return prisma.user.update({
     where: { id },
@@ -52,9 +49,10 @@ export async function updateClient(
   })
 }
 
-export async function resetClientPassword(id: string, newPassword: string) {
+export async function resetClientPassword(rawId: string, newPassword: string) {
   await requireSuperAdmin()
-  const passwordHash = await bcrypt.hash(newPassword, 10)
+  const id = uuid.parse(rawId)
+  const passwordHash = await bcrypt.hash(password.parse(newPassword), 10)
   return prisma.user.update({
     where: { id },
     data: { passwordHash, passwordResetToken: null, passwordResetExpires: null },

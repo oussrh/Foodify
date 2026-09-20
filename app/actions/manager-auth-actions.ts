@@ -5,9 +5,11 @@ import bcrypt from 'bcryptjs'
 import { randomInt } from 'crypto'
 import { managerOtpEmail } from '@/lib/emails/manager-otp-email'
 import { sendMail } from '@/lib/mail'
+import { otpRequest } from '@/lib/schemas/user'
 
-export async function requestManagerOtp(email: string, password: string) {
+export async function requestManagerOtp(rawEmail: string, rawPassword: string) {
   try {
+    const { email, password } = otpRequest.parse({ email: rawEmail, password: rawPassword })
     const user = await prisma.user.findUnique({ where: { email } })
     if (!user) {
       return { error: 'Invalid email or password' }

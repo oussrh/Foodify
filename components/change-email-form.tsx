@@ -3,18 +3,15 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
 
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import { initiateEmailChange } from '@/app/actions/profile-actions'
+import { emailChange } from '@/lib/schemas/user'
 
-const schema = z.object({
-  email: z.string().email(),
-})
-
-type FormValues = z.infer<typeof schema>
+const schema = emailChange
+type FormValues = { email: string }
 
 export default function ChangeEmailForm({ disabled = false }: { disabled?: boolean }) {
   const {
