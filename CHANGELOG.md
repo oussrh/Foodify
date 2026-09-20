@@ -6,6 +6,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Added
 
+- `test/contrast.test.ts`: every text-on-surface pair of the design tokens in `app/globals.css` must read at WCAG AA (4.5:1) in both themes, the focus ring at 3:1, computed from the token file on every test run; the input border is pinned at its measured 1.4:1 with 3:1 as the target.
 - `scripts/codemods/remove-unused-imports.mjs`: removes the import bindings ESLint reports unused and nothing else, driven by ESLint's JSON output; dry run by default, `--write` to apply; eleven fixture cases. `lib/device.ts` (`isIOS`, `isAndroid`, tested) and `components/menu/use-menu-locale.ts` (the guest's language on a menu page) are the seams the review found duplicated.
 - `components/use-client-value.ts`: a value that exists only in the browser (user agent, matchMedia, storage) read through `useSyncExternalStore` with a server snapshot, so components stop setting state from effects after hydration.
 - `lib/time.ts` (`daysAgo`, `daysSince`, with tests): the dashboards' clock reads in one place instead of `Date.now()` arithmetic in six pages; `daysSince` is never negative, where the old arithmetic could be under clock skew.

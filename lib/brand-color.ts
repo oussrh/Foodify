@@ -4,7 +4,7 @@
 // text; they use an "ink" (the same hue pushed to at least 4.5:1 against the page
 // ground) and a "tint" (the raw colour at low alpha over the surface).
 
-type RGB = [number, number, number]
+export type RGB = [number, number, number]
 type HSL = [number, number, number]
 
 const LIGHT_GROUND: RGB = [250, 250, 248] // Paper
@@ -60,7 +60,8 @@ function rgbToHsl([r, g, b]: RGB): HSL {
   return [h / 6, s, l]
 }
 
-function hslToRgb([h, s, l]: HSL): RGB {
+/** HSL with h, s, l in 0..1 to RGB 0..255; the design tokens in globals.css are checked through it. */
+export function hslToRgb([h, s, l]: HSL): RGB {
   if (s === 0) return [l * 255, l * 255, l * 255]
   const q = l < 0.5 ? l * (1 + s) : l + s - l * s
   const p = 2 * l - q
