@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import prisma from '@/lib/prisma'
 import { requireRestaurantAccess, requireSuperAdmin } from '@/lib/auth-guard'
 import { uuid } from '@/lib/schemas/common'
+import { idOnly, restaurantPayload } from '@/lib/payloads'
 import { imageUpload, restaurantInput, restaurantPatch, slug, type RestaurantInput, type RestaurantPatch } from '@/lib/schemas/restaurant'
 
 /**
@@ -20,7 +21,7 @@ function refreshDashboards() {
 export async function createRestaurant(raw: RestaurantInput) {
   await requireSuperAdmin()
   const data = restaurantInput.parse(raw)
-  const restaurant = await prisma.restaurant.create({ data, select: { id: true, slug: true } })
+  const restaurant = await prisma.restaurant.create({ data, select: restaurantPayload })
   refreshDashboards()
   return restaurant
 }
@@ -29,7 +30,7 @@ export async function updateRestaurant(rawId: string, raw: RestaurantPatch) {
   await requireRestaurantAccess({ id: rawId })
   const id = uuid.parse(rawId)
   const data = restaurantPatch.parse(raw)
-  const restaurant = await prisma.restaurant.update({ where: { id }, data, select: { id: true, slug: true } })
+  const restaurant = await prisma.restaurant.update({ where: { id }, data, select: restaurantPayload })
   refreshDashboards()
   return restaurant
 }
@@ -37,7 +38,7 @@ export async function updateRestaurant(rawId: string, raw: RestaurantPatch) {
 export async function deleteRestaurant(rawId: string) {
   await requireSuperAdmin()
   const id = uuid.parse(rawId)
-  const restaurant = await prisma.restaurant.delete({ where: { id }, select: { id: true } })
+  const restaurant = await prisma.restaurant.delete({ where: { id }, select: idOnly })
   refreshDashboards()
   return restaurant
 }

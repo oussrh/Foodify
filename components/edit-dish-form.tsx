@@ -32,7 +32,7 @@ export interface EditDishValues {
   nameFr: string
   descriptionEn?: string
   descriptionFr?: string
-  price: number
+  price: string
   imageUrl: string
   usdzUrl?: string
   glbUrl?: string
@@ -48,7 +48,6 @@ const schema = dishInput.omit({ subcategoryId: true, calories: true }).extend({
   calories: z.number().int('Calories must be a whole number').optional(),
 }).transform((data) => ({
   ...data,
-  price: Number(data.price),
   calories: data.calories ? Number(data.calories) : undefined,
 }))
 
@@ -69,7 +68,7 @@ export default function EditDishForm({
   const [imageUrl, setImageUrl] = useState(defaultValues.imageUrl || '')
   const [previewModel, setPreviewModel] = useState<{url: string, type: 'usdz' | 'glb'} | null>(null)
   const router = useRouter()
-  
+
   const {
     register,
     handleSubmit,
@@ -104,7 +103,7 @@ export default function EditDishForm({
     try {
       setSaveStatus('saving')
       toast.loading('Saving dish...', { id: 'dish-save' })
-      
+
       const finalData = {
         ...data,
         imageUrl: imageUrl || data.imageUrl,
@@ -112,7 +111,7 @@ export default function EditDishForm({
         usdzUrl: usdzUrl || '',
         glbUrl: glbUrl || '',
       }
-      
+
       console.log('Form submission data:', {
         formData: data,
         usdzUrl,
@@ -120,36 +119,36 @@ export default function EditDishForm({
         imageUrl,
         finalData
       })
-      
+
       await updateDish(id, finalData)
-      
+
       setSaveStatus('saved')
-      
+
       // Reset form state to mark as clean
       reset(data)
-      
-      toast.success('Dish saved successfully!', { 
+
+      toast.success('Dish saved successfully!', {
         id: 'dish-save',
         description: 'All changes have been saved.'
       })
-      
+
       router.refresh() // Refresh the page to get updated data
-      
+
       // Show saved status briefly
       setTimeout(() => setSaveStatus('idle'), 2000)
     } catch (error) {
       console.error('Dish update error:', error)
       setSaveStatus('error')
-      
+
       toast.error('Failed to save dish', {
         id: 'dish-save',
         description: error instanceof Error ? error.message : 'Please try again.'
       })
-      
+
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
   }, [id, imageUrl, usdzUrl, glbUrl, reset, router])
-  
+
   // Handle cancel
   const handleCancel = useCallback(() => {
     if (hasUnsavedChanges) {
@@ -162,21 +161,21 @@ export default function EditDishForm({
       }
     }
   }, [hasUnsavedChanges, reset, defaultValues])
-  
+
   // Create a submit function that's always up to date
   const submitForm = useCallback(() => {
     if (!hasUnsavedChanges) {
       toast.info('No changes to save')
       return
     }
-    
+
     if (isSubmitting) {
       return
     }
-    
+
     handleSubmit(onSubmit)()
   }, [handleSubmit, onSubmit, hasUnsavedChanges, isSubmitting])
-  
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -188,7 +187,7 @@ export default function EditDishForm({
         handleCancel()
       }
     }
-    
+
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [submitForm, handleCancel])
@@ -216,9 +215,9 @@ export default function EditDishForm({
                   <Globe className="h-4 w-4" />
                   English Name
                 </Label>
-                <Input 
-                  id="nameEn" 
-                  {...register('nameEn')} 
+                <Input
+                  id="nameEn"
+                  {...register('nameEn')}
                   className="border-border focus:border-border-strong"
                   disabled={isSubmitting}
                 />
@@ -229,15 +228,15 @@ export default function EditDishForm({
                   </p>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="nameFr" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Globe className="h-4 w-4" />
                   French Name
                 </Label>
-                <Input 
-                  id="nameFr" 
-                  {...register('nameFr')} 
+                <Input
+                  id="nameFr"
+                  {...register('nameFr')}
                   className="border-border focus:border-border-strong"
                   disabled={isSubmitting}
                 />
@@ -256,21 +255,21 @@ export default function EditDishForm({
                 <Label htmlFor="descriptionEn" className="text-sm font-medium text-muted-foreground">
                   English Description
                 </Label>
-                <Textarea 
-                  id="descriptionEn" 
-                  {...register('descriptionEn')} 
+                <Textarea
+                  id="descriptionEn"
+                  {...register('descriptionEn')}
                   className="border-border focus:border-border-strong min-h-[100px]"
                   disabled={isSubmitting}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="descriptionFr" className="text-sm font-medium text-muted-foreground">
                   French Description
                 </Label>
-                <Textarea 
-                  id="descriptionFr" 
-                  {...register('descriptionFr')} 
+                <Textarea
+                  id="descriptionFr"
+                  {...register('descriptionFr')}
                   className="border-border focus:border-border-strong min-h-[100px]"
                   disabled={isSubmitting}
                 />
@@ -284,11 +283,11 @@ export default function EditDishForm({
                   <DollarSign className="h-4 w-4" />
                   Price
                 </Label>
-                <Input 
-                  id="price" 
-                  type="number" 
-                  step="0.01" 
-                  {...register('price', { valueAsNumber: true })} 
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  {...register('price')}
                   className="border-border focus:border-border-strong"
                   disabled={isSubmitting}
                 />
@@ -299,15 +298,15 @@ export default function EditDishForm({
                   </p>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="calories" className="text-sm font-medium text-muted-foreground">
                   Calories (optional)
                 </Label>
-                <Input 
-                  id="calories" 
-                  type="number" 
-                  {...register('calories', { valueAsNumber: true })} 
+                <Input
+                  id="calories"
+                  type="number"
+                  {...register('calories', { valueAsNumber: true })}
                   className="border-border focus:border-border-strong"
                   disabled={isSubmitting}
                 />
@@ -322,7 +321,7 @@ export default function EditDishForm({
                   disabled={isSubmitting}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="subcategory" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Utensils className="h-4 w-4" />
@@ -346,7 +345,7 @@ export default function EditDishForm({
 
             {/* Image URL - Hidden field for form */}
             <input type="hidden" {...register('imageUrl')} value={imageUrl} />
-            
+
             {/* Special Options */}
             <div className="space-y-3">
               <p className="text-sm font-medium leading-none text-muted-foreground">Special Options</p>
@@ -412,7 +411,7 @@ export default function EditDishForm({
           </div>
         )}
       </form>
-      
+
       {/* AR Model Preview */}
       {previewModel && (
         <ARModelPreview

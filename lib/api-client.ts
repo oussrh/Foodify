@@ -13,13 +13,17 @@ export class ApiError extends Error {
   }
 }
 
-type Envelope<T> = { data: T; meta?: { next?: string | null } } | { error: string; code: string }
+type Success<T> = { data: T; meta?: { next?: string | null } }
+type Failure = { error: string; code: string }
+const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null
+const isSuccess = <T>(b: unknown): b is Success<T> => isObject(b) && 'data' in b
+const isFailure = (b: unknown): b is Failure => isObject(b) && typeof b.code === 'string' && typeof b.error === 'string'
 
 export async function call<T>(input: string, init?: RequestInit): Promise<{ data: T; next: string | null }> {
   const res = await fetch(input, init)
-  const body = (await res.json().catch(() => null)) as Envelope<T> | null
-  if (!res.ok || !body || !('data' in body)) {
-    const failure = body && 'code' in body ? body : { code: 'unknown', error: `HTTP ${res.status}` }
+  const body: unknown = await res.json().catch(() => null)
+  if (!res.ok || !isSuccess<T>(body)) {
+    const failure = isFailure(body) ? body : { code: 'unknown', error: `HTTP ${res.status}` }
     throw new ApiError(failure.code, failure.error, res.status)
   }
   return { data: body.data, next: body.meta?.next ?? null }

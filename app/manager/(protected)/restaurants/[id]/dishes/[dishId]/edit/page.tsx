@@ -38,7 +38,7 @@ export default async function EditDishPage({ params }: { params: Promise<{ id: s
     nameFr: dish.nameFr,
     descriptionEn: dish.descriptionEn,
     descriptionFr: dish.descriptionFr,
-    price: Number(dish.price),
+    price: dish.price.toFixed(2),
     imageUrl: dish.imageUrl,
     usdzUrl: dish.usdzUrl || '',
     glbUrl: dish.glbUrl || '',

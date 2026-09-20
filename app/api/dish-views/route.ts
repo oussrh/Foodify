@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
       data: { dishId, arViewed, deviceType },
     })
 
-    return ok({ viewId: dishView.id, arViewed }, undefined, { status: 201 })
+    return ok({ viewId: dishView.id, arViewed }, { status: 201 })
   } catch (error) {
     console.error('Error recording dish view:', error)
     return fail('internal', 'Failed to record dish view', 500)

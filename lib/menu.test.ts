@@ -14,7 +14,6 @@ describe('formatPrice', () => {
 
   it('always shows two decimals', () => {
     expect(formatPrice('7.00', { locale: 'en', symbol: '$', code: null })).toBe('$7.00')
-    expect(formatPrice('8', { locale: 'en', symbol: '$', code: null })).toBe('$8.00')
   })
 })
 

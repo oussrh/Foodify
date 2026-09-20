@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma'
 import { uploadArAsset } from '@/lib/cloudinary'
 import { requireDishAccess, requireIngredientAccess, requireRestaurantAccess } from '@/lib/auth-guard'
 import { uuid } from '@/lib/schemas/common'
+import { dishPayload, idOnly, ingredientPayload } from '@/lib/payloads'
 import {
   dishInput,
   dishPatch,
@@ -41,7 +42,7 @@ export async function createDish(rawRestaurantId: string, raw: DishInput) {
     imageUrl: data.imageUrl
   })
 
-  return prisma.dish.create({ select: { id: true, isActive: true, isMostPurchased: true },
+  return prisma.dish.create({ select: dishPayload,
     data: {
       nameEn: data.nameEn,
       nameFr: data.nameFr,
@@ -96,13 +97,13 @@ export async function updateDish(rawId: string, raw: DishPatch) {
     }
   })
 
-  return prisma.dish.update({ select: { id: true, isActive: true, isMostPurchased: true }, where: { id }, data: updatedData })
+  return prisma.dish.update({ select: dishPayload, where: { id }, data: updatedData })
 }
 
 export async function deleteDish(rawId: string) {
   await requireDishAccess(rawId)
   const id = uuid.parse(rawId)
-  return prisma.dish.delete({ select: { id: true, isActive: true, isMostPurchased: true }, where: { id } })
+  return prisma.dish.delete({ select: idOnly, where: { id } })
 }
 
 // Toggle dish activation status
@@ -112,7 +113,7 @@ export async function toggleDishStatus(rawId: string) {
   const dish = await prisma.dish.findUnique({ where: { id }, select: { isActive: true } })
   if (!dish) throw new Error('Dish not found')
 
-  return prisma.dish.update({ select: { id: true, isActive: true, isMostPurchased: true },
+  return prisma.dish.update({ select: dishPayload,
     where: { id },
     data: { isActive: !dish.isActive }
   })
@@ -125,7 +126,7 @@ export async function toggleMostPurchased(rawId: string) {
   const dish = await prisma.dish.findUnique({ where: { id }, select: { isMostPurchased: true } })
   if (!dish) throw new Error('Dish not found')
 
-  return prisma.dish.update({ select: { id: true, isActive: true, isMostPurchased: true },
+  return prisma.dish.update({ select: dishPayload,
     where: { id },
     data: { isMostPurchased: !dish.isMostPurchased }
   })
@@ -136,7 +137,7 @@ export async function addIngredient(rawDishId: string, raw: IngredientInput) {
   await requireDishAccess(rawDishId)
   const dishId = uuid.parse(rawDishId)
   const data = ingredientInput.parse(raw)
-  return prisma.ingredient.create({ select: { id: true, nameEn: true, nameFr: true },
+  return prisma.ingredient.create({ select: ingredientPayload,
     data: {
       dishId,
       nameEn: data.nameEn,
@@ -150,7 +151,7 @@ export async function updateIngredient(rawId: string, raw: IngredientPatch) {
   await requireIngredientAccess(rawId)
   const id = uuid.parse(rawId)
   const data = ingredientPatch.parse(raw)
-  return prisma.ingredient.update({ select: { id: true, nameEn: true, nameFr: true },
+  return prisma.ingredient.update({ select: ingredientPayload,
     where: { id },
     data
   })
@@ -160,6 +161,6 @@ export async function updateIngredient(rawId: string, raw: IngredientPatch) {
 export async function deleteIngredient(rawId: string) {
   await requireIngredientAccess(rawId)
   const id = uuid.parse(rawId)
-  return prisma.ingredient.delete({ select: { id: true, nameEn: true, nameFr: true }, where: { id } })
+  return prisma.ingredient.delete({ select: idOnly, where: { id } })
 }
 

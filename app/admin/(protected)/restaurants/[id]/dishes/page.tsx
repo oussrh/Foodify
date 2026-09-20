@@ -46,7 +46,7 @@ export default async function DishesPage({
     nameEn: d.nameEn,
     nameFr: d.nameFr,
     imageUrl: d.imageUrl,
-    price: Number(d.price),
+    price: d.price.toFixed(2),
     isActive: d.isActive,
     isMostPurchased: d.isMostPurchased,
     hasAR: Boolean(d.usdzUrl || d.glbUrl),

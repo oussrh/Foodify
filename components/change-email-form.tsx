@@ -21,12 +21,14 @@ export default function ChangeEmailForm({ disabled = false }: { disabled?: boole
   } = useForm<FormValues>({ resolver: zodResolver(schema) })
   const [loading, setLoading] = useState(false)
   const [submitted, setSubmitted] = useState(false)
+  const [notSent, setNotSent] = useState(false)
 
   const onSubmit = async (data: FormValues) => {
     setLoading(true)
-    await initiateEmailChange(data.email)
+    const { sent } = await initiateEmailChange(data.email)
     setLoading(false)
-    setSubmitted(true)
+    setNotSent(!sent)
+    setSubmitted(sent)
   }
 
   if (submitted) {
@@ -35,6 +37,11 @@ export default function ChangeEmailForm({ disabled = false }: { disabled?: boole
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
+      {notSent && (
+        <p role="alert" className="text-xs text-destructive">
+          The confirmation email could not be sent. Try again later.
+        </p>
+      )}
       <div>
         <Label htmlFor="email">New Email</Label>
         <Input id="email" {...register('email')} disabled={disabled} />

@@ -31,8 +31,7 @@ type Subcategory = { id: string; nameEn: string };
 
 // Simple schema without transforms - handle conversion manually
 // The dish rules, with the two numeric fields as the text they are typed in (the submit converts them).
-const schema = dishInput.omit({ price: true, calories: true, subcategoryId: true }).extend({
-  price: z.string().min(1, "Price is required"),
+const schema = dishInput.omit({ calories: true, subcategoryId: true }).extend({
   calories: z.string().optional(),
   subcategoryId: z.string().optional(),
 });
@@ -55,7 +54,7 @@ export default function CreateDishForm({
   const [glbUrl, setGlbUrl] = useState('')
   const [imageUrl, setImageUrl] = useState('')
   const [previewModel, setPreviewModel] = useState<{url: string, type: 'usdz' | 'glb'} | null>(null)
-  
+
   const {
     register,
     handleSubmit,
@@ -73,15 +72,8 @@ export default function CreateDishForm({
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true)
     setError(null)
-    
-    // Manual validation and conversion
-    const price = parseFloat(data.price);
-    if (isNaN(price) || price < 0) {
-      setFormError("price", { message: "Price must be a valid number greater than 0" });
-      setIsSubmitting(false);
-      return;
-    }
 
+    // Manual validation and conversion
     let calories: number | undefined;
     if (data.calories && data.calories !== "") {
       calories = parseInt(data.calories);
@@ -91,13 +83,13 @@ export default function CreateDishForm({
         return;
       }
     }
-    
+
     const finalData = {
       nameEn: data.nameEn,
       nameFr: data.nameFr,
       descriptionEn: data.descriptionEn,
       descriptionFr: data.descriptionFr,
-      price: price,
+      price: data.price,
       calories: calories,
       imageUrl: imageUrl || data.imageUrl,
       subcategoryId: data.subcategoryId || null,
@@ -107,7 +99,7 @@ export default function CreateDishForm({
       dietary: data.dietary || [],
       allergens: data.allergens || [],
     }
-    
+
     console.log('Create dish form submission data:', {
       formData: data,
       usdzUrl,
@@ -115,7 +107,7 @@ export default function CreateDishForm({
       imageUrl,
       finalData
     })
-    
+
     try {
       await createDish(restaurantId, finalData);
       setSuccess(true)
@@ -131,7 +123,7 @@ export default function CreateDishForm({
       setIsSubmitting(false)
     }
   };
-  
+
   const handlePreview = (modelUrl: string, modelType: 'usdz' | 'glb') => {
     setPreviewModel({ url: modelUrl, type: modelType })
   }
@@ -153,7 +145,7 @@ export default function CreateDishForm({
           <span className="text-sm text-destructive font-medium">{error}</span>
         </div>
       )}
-      
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
         {/* Basic Information */}
         <Card className="border-0">
@@ -171,9 +163,9 @@ export default function CreateDishForm({
                   <Globe className="h-4 w-4" />
                   English Name
                 </Label>
-                <Input 
-                  id="nameEn" 
-                  {...register("nameEn")} 
+                <Input
+                  id="nameEn"
+                  {...register("nameEn")}
                   className="border-border focus:border-border-strong"
                   placeholder="Enter dish name in English"
                   disabled={isSubmitting}
@@ -185,15 +177,15 @@ export default function CreateDishForm({
                   </p>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="nameFr" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Globe className="h-4 w-4" />
                   French Name
                 </Label>
-                <Input 
-                  id="nameFr" 
-                  {...register("nameFr")} 
+                <Input
+                  id="nameFr"
+                  {...register("nameFr")}
                   className="border-border focus:border-border-strong"
                   placeholder="Entrez le nom du plat en français"
                   disabled={isSubmitting}
@@ -213,22 +205,22 @@ export default function CreateDishForm({
                 <Label htmlFor="descriptionEn" className="text-sm font-medium text-muted-foreground">
                   English Description
                 </Label>
-                <Textarea 
-                  id="descriptionEn" 
-                  {...register("descriptionEn")} 
+                <Textarea
+                  id="descriptionEn"
+                  {...register("descriptionEn")}
                   className="border-border focus:border-border-strong min-h-[100px]"
                   placeholder="Describe the dish in English"
                   disabled={isSubmitting}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="descriptionFr" className="text-sm font-medium text-muted-foreground">
                   French Description
                 </Label>
-                <Textarea 
-                  id="descriptionFr" 
-                  {...register("descriptionFr")} 
+                <Textarea
+                  id="descriptionFr"
+                  {...register("descriptionFr")}
                   className="border-border focus:border-border-strong min-h-[100px]"
                   placeholder="Décrivez le plat en français"
                   disabled={isSubmitting}
@@ -243,11 +235,11 @@ export default function CreateDishForm({
                   <DollarSign className="h-4 w-4" />
                   Price
                 </Label>
-                <Input 
-                  id="price" 
-                  type="number" 
-                  step="0.01" 
-                  {...register("price")} 
+                <Input
+                  id="price"
+                  type="number"
+                  step="0.01"
+                  {...register("price")}
                   className="border-border focus:border-border-strong"
                   placeholder="0.00"
                   disabled={isSubmitting}
@@ -259,15 +251,15 @@ export default function CreateDishForm({
                   </p>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="calories" className="text-sm font-medium text-muted-foreground">
                   Calories (optional)
                 </Label>
-                <Input 
-                  id="calories" 
-                  type="number" 
-                  {...register("calories")} 
+                <Input
+                  id="calories"
+                  type="number"
+                  {...register("calories")}
                   className="border-border focus:border-border-strong"
                   placeholder="250"
                   disabled={isSubmitting}
@@ -289,7 +281,7 @@ export default function CreateDishForm({
                   disabled={isSubmitting}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="subcategory" className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                   <Utensils className="h-4 w-4" />
@@ -313,7 +305,7 @@ export default function CreateDishForm({
 
             {/* Image URL - Hidden field for form */}
             <input type="hidden" {...register("imageUrl")} value={imageUrl} />
-            
+
             {/* Special Options */}
             <div className="space-y-3">
               <p className="text-sm font-medium leading-none text-muted-foreground">Special Options</p>
@@ -354,8 +346,8 @@ export default function CreateDishForm({
 
         {/* Submit Button */}
         <div className="flex items-center gap-4 pt-4 border-t border-border">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isSubmitting || !isDirty}
             className="flex-1 disabled:opacity-50"
             size="lg"
@@ -372,7 +364,7 @@ export default function CreateDishForm({
               </div>
             )}
           </Button>
-          
+
           {isDirty && (
             <div className="flex items-center text-sm text-warning">
               <AlertCircle className="h-4 w-4 mr-1" />
@@ -381,7 +373,7 @@ export default function CreateDishForm({
           )}
         </div>
       </form>
-      
+
       {/* AR Model Preview */}
       {previewModel && (
         <ARModelPreview

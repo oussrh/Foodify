@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bilingualName, email, password, uuid } from './common'
+import { bilingualName, email, money, password, uuid } from './common'
 
 describe('the shared pieces', () => {
   it('accepts a v4 UUID and refuses a cuid', () => {
@@ -19,5 +19,12 @@ describe('the shared pieces', () => {
   it('requires both names of a bilingual entity', () => {
     const r = bilingualName.safeParse({ nameEn: 'Salads', nameFr: '' })
     expect(r.error?.issues.map((i) => i.message)).toEqual(['French name is required'])
+  })
+  it('carries money as a two-decimal string and refuses a float\'s formatting', () => {
+    expect(money.parse('12')).toBe('12.00')
+    expect(money.parse('12.5')).toBe('12.50')
+    expect(money.safeParse('12.345').success).toBe(false)
+    expect(money.safeParse('1e3').success).toBe(false)
+    expect(money.safeParse('-1').success).toBe(false)
   })
 })

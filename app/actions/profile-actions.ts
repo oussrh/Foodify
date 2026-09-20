@@ -10,6 +10,7 @@ import {
 } from '@/lib/emails/change-email'
 import { sendMail } from '@/lib/mail'
 import { emailChange, emailToken, passwordChange, type PasswordChange } from '@/lib/schemas/user'
+import { userPayload } from '@/lib/payloads'
 
 export async function initiateEmailChange(rawEmail: string) {
   const session = await auth()
@@ -81,9 +82,9 @@ export async function confirmOldEmail(rawToken: string) {
     data: { status: 'confirmed_old' },
   })
 
-  await sendMail({ to: user.newEmail, subject: 'Verify your new email', html: newEmailVerificationEmail(verifyToken) })
+  const { sent } = await sendMail({ to: user.newEmail, subject: 'Verify your new email', html: newEmailVerificationEmail(verifyToken) })
 
-  return { confirmed: true }
+  return { confirmed: true, sent }
 }
 
 export async function confirmNewEmail(rawToken: string) {
@@ -131,7 +132,7 @@ export async function updatePassword(raw: PasswordChange) {
     throw new Error('Current password is incorrect')
   }
   const passwordHash = await bcrypt.hash(password, 10)
-  return prisma.user.update({ select: { id: true, email: true },
+  return prisma.user.update({ select: userPayload,
     where: { id: user.id },
     data: { passwordHash },
   })

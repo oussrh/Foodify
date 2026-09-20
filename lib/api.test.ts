@@ -4,8 +4,8 @@ import { fail, ok } from './api'
 describe('the response envelope', () => {
   it('wraps data, and meta only when there is some', async () => {
     await expect(ok([1]).json()).resolves.toEqual({ data: [1] })
-    await expect(ok([1], { next: 'x' }).json()).resolves.toEqual({ data: [1], meta: { next: 'x' } })
-    expect(ok(null, undefined, { status: 201 }).status).toBe(201)
+    await expect(ok([1], { meta: { next: 'x' } }).json()).resolves.toEqual({ data: [1], meta: { next: 'x' } })
+    expect(ok(null, { status: 201 }).status).toBe(201)
   })
 
   it('names a failure by code and status, with details only when given', async () => {

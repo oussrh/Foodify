@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { call } from '@/lib/api-client'
+import { toast } from 'sonner'
 
 export default function RemoveUserRestaurantButton({
   userId,
@@ -19,15 +20,20 @@ export default function RemoveUserRestaurantButton({
   const handleRemove = async () => {
     if (loading) return
     setLoading(true)
-    await call(`/api/users/${userId}/restaurants`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        restaurantIds: restaurantIds.filter((id: string) => id !== restaurantId),
-      }),
-    })
-    setLoading(false)
-    router.refresh()
+    try {
+      await call(  `/api/users/${userId}/restaurants`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          restaurantIds: restaurantIds.filter((id: string) => id !== restaurantId),
+        }),
+      })
+      router.refresh()
+    } catch {
+      toast.error('Could not remove the restaurant')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

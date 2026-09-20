@@ -16,6 +16,8 @@ describe('the browser side of the envelope', () => {
     await expect(call('/api/x')).rejects.toMatchObject({ name: 'ApiError', code: 'forbidden', status: 403 })
     vi.stubGlobal('fetch', vi.fn(async () => new Response('<html>', { status: 502 })))
     await expect(call('/api/x')).rejects.toBeInstanceOf(ApiError)
+    vi.stubGlobal('fetch', vi.fn(async () => json('text')))
+    await expect(call('/api/x')).rejects.toMatchObject({ code: 'unknown', status: 200 })
   })
 
   it('follows next until the list is complete, keeping the query the url already has', async () => {
