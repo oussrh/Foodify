@@ -77,7 +77,7 @@ const nextConfig = {
 **Solution:**
 1. Ensure `DATABASE_URL` is correctly formatted for Neon:
 ```bash
-DATABASE_URL="postgresql://user:password@host-pooler.region.aws.neon.tech/dbname?sslmode=require&channel_binding=require&connect_timeout=15&pool_timeout=15&connection_limit=10&pgbouncer=true"
+DATABASE_URL="postgresql://<user>:<password>@host-pooler.region.aws.neon.tech/dbname?sslmode=require&channel_binding=require&connect_timeout=15&pool_timeout=15&connection_limit=10&pgbouncer=true"
 ```
 
 2. The build process automatically runs database setup:

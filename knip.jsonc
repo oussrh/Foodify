@@ -9,6 +9,7 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [],
   "project": [
+    "src/**/*.{ts,tsx}",
     "app/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
     "lib/**/*.ts",

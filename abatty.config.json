@@ -47,6 +47,7 @@
   "coupled": [],
   "protectedPaths": [
     "prisma/migrations/",
+    "migrations/",
     ".env",
     ".env.",
     "prod.dont.touch"
@@ -73,7 +74,9 @@
     "local": "abatty.probes.mjs",
     "exclude": [],
     "hard": [],
-    "ratchet": []
+    "ratchet": [
+      "size.overRaw"
+    ]
   },
   "lintOnEdit": true,
   "lintExtensions": [

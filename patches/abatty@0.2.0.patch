@@ -1,0 +1,36 @@
+diff --git a/src/core/gate.mjs b/src/core/gate.mjs
+index d8d9b4a3f8dd58de6991c3be2e8d5f91b8362f6d..e210124832a46b29ef8be3ca9ce1f313e935ecc7 100644
+--- a/src/core/gate.mjs
++++ b/src/core/gate.mjs
+@@ -165,6 +165,7 @@ export function runGate(o) {
+         repoDir,
+         (cmd, args) => {
+           const r = spawnSync(bin(cmd), args, {
++        shell: process.platform === "win32",
+             cwd: repoDir,
+             encoding: "utf8",
+             maxBuffer: 16 * 1024 * 1024,
+diff --git a/src/core/spawn.mjs b/src/core/spawn.mjs
+index ae6c5adf98220e416f94b0b5b2cd67379a883170..24e6cb36f0782d85ee794e29481af6e9ec352ff2 100644
+--- a/src/core/spawn.mjs
++++ b/src/core/spawn.mjs
+@@ -63,6 +63,7 @@ export function runScript(repoDir, script, extraArgs = []) {
+       {
+         cwd: repoDir,
+         stdio: "inherit",
++        shell: process.platform === "win32",
+       },
+     ),
+   );
+diff --git a/src/core/step-controls.mjs b/src/core/step-controls.mjs
+index 9c9917d1be25060e680ed4f35a68ee18ac763da2..e878b31c504867add4c46ce0da6c94da3d19ff34 100644
+--- a/src/core/step-controls.mjs
++++ b/src/core/step-controls.mjs
+@@ -100,6 +100,7 @@ export function runStepControls(o) {
+     o.run ||
+     ((cwd, script) => {
+       const r = spawnSync(bin("npm"), ["run", "-s", script], {
++        shell: process.platform === "win32",
+         cwd,
+         encoding: "utf8",
+         maxBuffer: 16 * 1024 * 1024,
