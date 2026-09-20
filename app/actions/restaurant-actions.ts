@@ -2,80 +2,19 @@
 
 import prisma from '@/lib/prisma'
 import { requireRestaurantAccess, requireSuperAdmin } from '@/lib/auth-guard'
+import { uuid } from '@/lib/schemas/common'
+import { imageUpload, restaurantInput, restaurantPatch, slug, type RestaurantInput, type RestaurantPatch } from '@/lib/schemas/restaurant'
 
-export async function createRestaurant(data: {
-  name: string
-  slug: string
-  email?: string
-  phone?: string
-  tagline?: string
-  logoUrl?: string
-  colorTheme?: string
-  defaultLocale: 'en' | 'fr'
-  // Address fields
-  streetAddress?: string
-  city?: string
-  state?: string
-  postalCode?: string
-  country?: string
-  // Business info fields
-  website?: string
-  description?: string
-  cuisineType?: string
-  priceRange?: '$' | '$$' | '$$$' | '$$$$'
-  openingHours?: string
-  socialMedia?: string
-  // Design fields
-  coverImageUrl?: string
-  coverImageStyle?: 'cover' | 'repeat'
-  secondaryColor?: string
-  fontFamily?: string
-  googleFontUrl?: string
-  // Business settings
-  currency?: string
-  currencySymbol?: string
-}) {
+export async function createRestaurant(raw: RestaurantInput) {
   await requireSuperAdmin()
+  const data = restaurantInput.parse(raw)
   return prisma.restaurant.create({ data })
 }
 
-export async function updateRestaurant(
-  id: string,
-  data: {
-    name?: string
-    slug?: string
-    email?: string
-    phone?: string
-    tagline?: string
-    logoUrl?: string
-    colorTheme?: string
-    defaultLocale?: 'en' | 'fr'
-    // Address fields
-    streetAddress?: string
-    city?: string
-    state?: string
-    postalCode?: string
-    country?: string
-    // Business info fields
-    website?: string
-    description?: string
-    cuisineType?: string
-    priceRange?: '$' | '$$' | '$$$' | '$$$$'
-    openingHours?: string
-    socialMedia?: string
-    // Design fields
-    coverImageUrl?: string
-    coverImageStyle?: 'cover' | 'repeat'
-    menuTheme?: 'system' | 'light' | 'dark'
-    secondaryColor?: string
-    fontFamily?: string
-    googleFontUrl?: string
-    // Business settings
-    currency?: string
-    currencySymbol?: string
-  }
-) {
-  await requireRestaurantAccess({ id })
+export async function updateRestaurant(rawId: string, raw: RestaurantPatch) {
+  await requireRestaurantAccess({ id: rawId })
+  const id = uuid.parse(rawId)
+  const data = restaurantPatch.parse(raw)
   console.log('Updating restaurant with ID:', id)
   console.log('Update data:', JSON.stringify(data, null, 2))
   
@@ -91,36 +30,20 @@ export async function updateRestaurant(
   return result
 }
 
-export async function deleteRestaurant(id: string) {
+export async function deleteRestaurant(rawId: string) {
   await requireSuperAdmin()
+  const id = uuid.parse(rawId)
   return prisma.restaurant.delete({ where: { id } })
 }
 
-export async function uploadRestaurantLogo(formData: FormData, restaurantSlug: string) {
-  await requireRestaurantAccess({ slug: restaurantSlug })
+export async function uploadRestaurantLogo(formData: FormData, rawSlug: string) {
+  await requireRestaurantAccess({ slug: rawSlug })
+  const restaurantSlug = slug.parse(rawSlug)
   try {
     const { uploadLogo } = await import('@/lib/cloudinary')
-    
-    const file = formData.get('file') as File
-    if (!file) {
-      throw new Error('No file provided')
-    }
-
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml']
-    if (!allowedTypes.includes(file.type)) {
-      throw new Error('Invalid file type. Please select a JPG, PNG, WebP, or SVG file.')
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error('File size must be less than 5MB')
-    }
-
-    // Check for double extensions
-    if (file.name.match(/\.(svg|png|jpg|jpeg|webp)\.(png|jpg|jpeg|webp)$/i)) {
-      throw new Error('File appears to have a double extension. Please rename the file and try again.')
-    }
+    const parsed = imageUpload(5).safeParse(formData.get('file'))
+    if (!parsed.success) throw new Error(parsed.error.issues[0].message)
+    const file = parsed.data
 
     const logoUrl = await uploadLogo(file, restaurantSlug)
     
@@ -134,31 +57,14 @@ export async function uploadRestaurantLogo(formData: FormData, restaurantSlug: s
   }
 }
 
-export async function uploadRestaurantCover(formData: FormData, restaurantSlug: string) {
-  await requireRestaurantAccess({ slug: restaurantSlug })
+export async function uploadRestaurantCover(formData: FormData, rawSlug: string) {
+  await requireRestaurantAccess({ slug: rawSlug })
+  const restaurantSlug = slug.parse(rawSlug)
   try {
     const { uploadCoverImage } = await import('@/lib/cloudinary')
-    
-    const file = formData.get('file') as File
-    if (!file) {
-      throw new Error('No file provided')
-    }
-
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml']
-    if (!allowedTypes.includes(file.type)) {
-      throw new Error('Invalid file type. Please select a JPG, PNG, WebP, or SVG file.')
-    }
-
-    // Validate file size (max 10MB for cover images)
-    if (file.size > 10 * 1024 * 1024) {
-      throw new Error('File size must be less than 10MB')
-    }
-
-    // Check for double extensions
-    if (file.name.match(/\.(svg|png|jpg|jpeg|webp)\.(png|jpg|jpeg|webp)$/i)) {
-      throw new Error('File appears to have a double extension. Please rename the file and try again.')
-    }
+    const parsed = imageUpload(10).safeParse(formData.get('file'))
+    if (!parsed.success) throw new Error(parsed.error.issues[0].message)
+    const file = parsed.data
 
     const coverUrl = await uploadCoverImage(file, restaurantSlug)
     
