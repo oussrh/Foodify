@@ -6,6 +6,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Added
 
+- `.gitattributes`: every text file is LF in the working tree as well as the index (`* text=auto eol=lf`), so a Windows checkout no longer flips docs to CRLF, which abatty's front-matter parser misreads.
 - Unit suite (Vitest, `pnpm test`): 85 tests over the shared layer (opening hours, social links, brand colour, pricing and locale, brand uploads, TOTP, JSON-LD) with the coverage floor for `lib/**` pinned in `vitest.config.ts` at the measured figure; `docs/TESTING.md` lists the floor and every exclusion; `pnpm test:changed` holds the floor over the files a push changed (CI runs it).
 - CI (`.github/workflows/checks.yml`): `pnpm run gate` (the pre-push hook's script) and a production audit on every push and pull request, frozen install; a pull-request template with the gate's checklist.
 - The engineering standard's instrument: harness, gate, import graph, dead code (`abatty init`).
