@@ -1,6 +1,7 @@
 'use client'
 
 import { useForm, useWatch } from 'react-hook-form'
+import { useClientValue } from '@/components/use-client-value'
 import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useState, useCallback } from 'react'
@@ -88,15 +89,11 @@ export default function EditRestaurantForm({
   id: string
   defaultValues: EditRestaurantValues
 }) {
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
-  const [activeTab, setActiveTab] = useState<SettingsTab>('general')
-
-  // Keep the active tab in the URL so a reload (or a shared link) lands on the same section.
-  useEffect(() => {
-    const t = new URLSearchParams(window.location.search).get('tab')
-    if (t && TABS.some((tab) => tab.key === t)) setActiveTab(t as SettingsTab)
-  }, [])
+  // The active tab lives in the URL so a reload (or a shared link) lands on the same section.
+  const urlTab = useClientValue(() => new URLSearchParams(window.location.search).get('tab'), null)
+  const [pickedTab, setActiveTab] = useState<SettingsTab | null>(null)
+  const activeTab: SettingsTab = pickedTab ?? (TABS.some((tab) => tab.key === urlTab) ? (urlTab as SettingsTab) : 'general')
   const showTab = useCallback((tab: SettingsTab) => {
     setActiveTab(tab)
     const url = new URL(window.location.href)
@@ -145,10 +142,7 @@ export default function EditRestaurantForm({
     menuTheme: (values.menuTheme || 'system') as 'system' | 'light' | 'dark',
   }
   
-  // Track form changes
-  useEffect(() => {
-    setHasUnsavedChanges(isDirty)
-  }, [isDirty])
+  const hasUnsavedChanges = isDirty
 
   // Handle save
   const onSubmit = useCallback(async (data: EditRestaurantValues) => {
@@ -173,7 +167,6 @@ export default function EditRestaurantForm({
       await updateRestaurant(id, cleanedData)
       
       setSaveStatus('saved')
-      setHasUnsavedChanges(false)
       
       // Reset form state to mark as clean
       reset(data)
@@ -196,14 +189,13 @@ export default function EditRestaurantForm({
       
       setTimeout(() => setSaveStatus('idle'), 3000)
     }
-  }, [id, reset, setSaveStatus, setHasUnsavedChanges])
+  }, [id, reset, setSaveStatus])
   
   // Handle cancel
   const handleCancel = useCallback(() => {
     if (hasUnsavedChanges) {
       if (confirm('You have unsaved changes. Are you sure you want to discard them?')) {
         reset(defaultValues)
-        setHasUnsavedChanges(false)
         setSaveStatus('idle')
       }
     }

@@ -75,7 +75,6 @@ export default function EditDishForm({
   subcategories: Subcategory[]
   restaurantName?: string
 }) {
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
   const [usdzUrl, setUsdzUrl] = useState(defaultValues.usdzUrl || '')
   const [glbUrl, setGlbUrl] = useState(defaultValues.glbUrl || '')
@@ -97,17 +96,19 @@ export default function EditDishForm({
   })
   const [dietary = [], allergens = [], nameEn] = useWatch({ control, name: ['dietary', 'allergens', 'nameEn'] })
 
-  // Track form changes
-  useEffect(() => {
-    setHasUnsavedChanges(isDirty)
-  }, [isDirty])
+  const hasUnsavedChanges = isDirty
 
-  // Update state when defaultValues change (after database updates)
-  useEffect(() => {
+  // New defaults (after a save the page re-renders with fresh data): the asset fields follow
+  // them during this render, the form resets after it.
+  const [prevDefaults, setPrevDefaults] = useState(defaultValues)
+  if (prevDefaults !== defaultValues) {
+    setPrevDefaults(defaultValues)
     setUsdzUrl(defaultValues.usdzUrl || '')
     setGlbUrl(defaultValues.glbUrl || '')
     setImageUrl(defaultValues.imageUrl || '')
-    reset(defaultValues) // Reset the entire form with new default values
+  }
+  useEffect(() => {
+    reset(defaultValues)
   }, [defaultValues, reset])
 
   // Handle save
@@ -135,7 +136,6 @@ export default function EditDishForm({
       await updateDish(id, restaurantId, finalData)
       
       setSaveStatus('saved')
-      setHasUnsavedChanges(false)
       
       // Reset form state to mark as clean
       reset(data)
@@ -167,7 +167,6 @@ export default function EditDishForm({
     if (hasUnsavedChanges) {
       if (confirm('You have unsaved changes. Are you sure you want to discard them?')) {
         reset(defaultValues)
-        setHasUnsavedChanges(false)
         setSaveStatus('idle')
         setUsdzUrl(defaultValues.usdzUrl || '')
         setGlbUrl(defaultValues.glbUrl || '')

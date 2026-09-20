@@ -6,20 +6,18 @@ import { Switch } from '@/components/ui/switch'
 import {
   Loader2,
 } from 'lucide-react'
-import { toggleDishStatus, toggleMostPurchased, updateDish } from '@/app/actions/dish-actions'
+import { toggleDishStatus, toggleMostPurchased } from '@/app/actions/dish-actions'
 
 interface DishStatusManagerProps {
   dishId: string
   isActive: boolean
   isMostPurchased: boolean
-  restaurantId: string
 }
 
 export default function DishStatusManager({ 
   dishId, 
   isActive, 
   isMostPurchased, 
-  restaurantId
 }: DishStatusManagerProps) {
   const [loading, setLoading] = useState(false)
   const router = useRouter()

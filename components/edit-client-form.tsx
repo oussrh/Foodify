@@ -90,7 +90,8 @@ export default function EditClientForm({
   }
 
   const currentEmail = useWatch({ control, name: 'email' })
-  const selectedRestaurants = useWatch({ control, name: 'restaurantIds' }) || []
+  const watchedRestaurantIds = useWatch({ control, name: 'restaurantIds' })
+  const selectedRestaurants = useMemo(() => watchedRestaurantIds ?? [], [watchedRestaurantIds])
 
   // Filter restaurants based on search and toggle
   const filteredRestaurants = useMemo(() => {
@@ -108,10 +109,8 @@ export default function EditClientForm({
   // Calculate assignment changes
   const assignmentChanges = useMemo(() => {
     const originalIds = defaultValues.restaurantIds || []
-    const currentIds = selectedRestaurants
-    
-    const added = currentIds.filter(id => !originalIds.includes(id))
-    const removed = originalIds.filter(id => !currentIds.includes(id))
+    const added = selectedRestaurants.filter((id) => !originalIds.includes(id))
+    const removed = originalIds.filter((id) => !selectedRestaurants.includes(id))
     
     return { added, removed }
   }, [defaultValues.restaurantIds, selectedRestaurants])
