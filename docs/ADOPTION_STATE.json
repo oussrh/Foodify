@@ -5,7 +5,29 @@
     {
       "id": 0,
       "status": "in_progress",
-      "updatedAt": "2026-09-20T10:00:16Z"
+      "updatedAt": "2026-09-20T10:13:07Z",
+      "numbersBefore": {
+        "score": "55/100",
+        "enforcedShare": "74% (35/47)",
+        "rules": {
+          "INST-CI": "missing",
+          "INST-CI-STEPS": "missing",
+          "SEC-LOCKFILE": "partial",
+          "SEC-SECRETS": "partial"
+        }
+      },
+      "numbersAfter": {
+        "score": "53/100",
+        "enforcedShare": "76% (34/45)",
+        "rules": {
+          "INST-CI": "present",
+          "INST-CI-STEPS": "present",
+          "SEC-LOCKFILE": "present",
+          "SEC-SECRETS": "present"
+        },
+        "switch": "pnpm run -s standards -- --range main..HEAD: exit 3 with types.escapes floor 13->12, exit 0 restored"
+      },
+      "remaining": "first CI run: ratchet step red on a lowered floor, then green (run URLs into the progress log); audit step green after the dependency upgrade"
     },
     {
       "id": 1,

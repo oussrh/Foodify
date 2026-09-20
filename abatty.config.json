@@ -34,6 +34,7 @@
     "middleware.ts"
   ],
   "changelogRequiredFor": [
+    ".github/",
     "app/",
     "components/",
     "lib/",

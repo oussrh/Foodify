@@ -6,7 +6,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Added
 
-- CI (`.github/workflows/checks.yml`): the gate's steps on every push and pull request, frozen install, production audit, production build; a pull-request template with the gate's checklist.
+- CI (`.github/workflows/checks.yml`): `pnpm run gate` (the pre-push hook's script) and a production audit on every push and pull request, frozen install; a pull-request template with the gate's checklist.
 - The engineering standard's instrument: harness, gate, import graph, dead code (`abatty init`).
 - `lib/auth-guard.ts`: `requireSuperAdmin`, `requireRestaurantAccess` and the dish, ingredient, category and subcategory variants; every exported server action now starts with one.
 - `docs/LESSONS.md`, the lessons catalogue behind `CLAUDE.md`.
@@ -17,6 +17,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Changed
 
+- `abatty.config.json`: a change under `.github/` needs a changelog line, like source (CHANGE.1).
 - `GET /api/users` and `GET /api/restaurants` require a super admin and return only `id/email/role` and `id/name/slug`; the two assignment routes require a super admin.
 - Sign-in failures return one message; one-time codes come from `crypto.randomInt` and are compared in constant time.
 - Reorder actions scope their updates to the parent restaurant or category.
