@@ -6,6 +6,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Added
 
+- Browser suite: a wrong password on the manager login is refused with the one message (the first sign-in step end to end, through the server action).
 - `abatty.probes.mjs`: the repository's own ratchet probe `valid.unparsedBoundary` counts the route handlers, server actions and credentials callbacks that read input without a zod parse (eight control cases; `pnpm exec abatty ratchet --controls`). It reads 40 on the day it is written and may only fall.
 - Browser suite (`pnpm e2e`, Playwright, `e2e/`): the public menu journey (load, language toggle and memory, the dish sheet and the back button) and both sign-in pages, on a phone and a desktop project, each with an axe scan that fails on any serious or critical violation; runs against the production build, in the gate after the build, and in CI with a Postgres service seeded by `prisma/seed.ts`.
 - `test/contrast.test.ts` (`pnpm contrast`, part of `pnpm test`): every text-on-surface pair of the design tokens in `app/globals.css`, on the page ground and on the muted surface, must read at WCAG AA (4.5:1) in both themes and the focus ring at 3:1, computed from the token file on every run; the input border is pinned at what it measures (1.46 light, 1.60 dark) with 3:1 as the target. Surfaces painted with an alpha are not computed. `lib/color.ts` holds the colour arithmetic `lib/brand-color.ts` and the test share.
