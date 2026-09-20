@@ -171,7 +171,15 @@
     },
     {
       "id": 5,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-20T18:38:57Z",
+      "numbersBefore": {
+        "rules": "the pinned catalogue wires no CACHE-* check for this stack (abatty rules --phase 5: 0 rules)",
+        "cacheLayers": "none in the application (no Redis/KV, no unstable_cache, no \"use cache\", no SWR); one HTTP Cache-Control (manifest route, public, max-age 3600, keyed by slug); one stray revalidatePath pair in updateRestaurant; the service worker caches the public menu per URL and build (PWA track)",
+        "cachedAuthz": "the admin layout decides the role once per mount; 17 admin pages re-check nothing on client navigation (Next preserves layouts); manager pages scope every read by assignment",
+        "score": "66/100",
+        "enforcedShare": "75% (39/52)"
+      }
     },
     {
       "id": 6,
