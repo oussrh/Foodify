@@ -70,10 +70,11 @@ module.exports = {
       to: { moreThanOneDependencyType: true, dependencyTypesNot: ["type-only"] },
     },
 
-    // ---- the boundary map: one rule per arrow that must not exist (CLAUDE.md §3) ---------
-    // Direction: shared -> features -> app; features never import each other; the data layer
-    // and anything holding a secret is a leaf. Edit the paths; keep one arrow per rule so a
-    // violation names the arrow, not "architecture".
+    // ---- the boundary map: one rule per arrow that must not exist (CLAUDE.md, "Boundary map") --
+    // Direction: lib -> components -> app. lib knows nothing above it; a component reaches app/
+    // only for a server action; server code renders nothing; a module holding a secret or the
+    // database client is imported by server code only; the two portals share through
+    // components/shell and components/forms, never each other.
     {
       name: "data-layer-is-a-leaf",
       severity: "error",
@@ -82,18 +83,32 @@ module.exports = {
       to: { path: "^(?:app|components)/" },
     },
     {
-      name: "features-never-import-each-other",
+      name: "components-never-import-routes",
       severity: "error",
-      comment: "Two features that need each other share a module under lib/ or one becomes the other's caller (boundary map).",
-      from: { path: "^src/features/([^/]+)/" },
-      to: { path: "^src/features/([^/]+)/", pathNot: "^src/features/$1/" },
+      comment: "A component may import a server action (app/actions); a page, a layout, a route handler or a route's helper is composed by app/, never imported by it (boundary map, row `components`).",
+      from: { path: "^components/" },
+      to: { path: "^app/", pathNot: "^app/actions/" },
+    },
+    {
+      name: "server-code-never-imports-components",
+      severity: "error",
+      comment: "A server action or a route handler answers data, never markup: nothing under app/actions or app/api imports a component (boundary map, row `app/actions`, `app/api`).",
+      from: { path: "^app/(?:actions|api)/" },
+      to: { path: "^components/" },
     },
     {
       name: "server-only-never-reaches-the-client",
       severity: "error",
-      comment: "A module that holds a secret or a database client is imported by server code only (CODE-10, SEC-1).",
-      from: { path: "^src/(?:components|app/.*/_components)/" },
-      to: { path: "^src/(?:lib/db|server|lib/env)" },
+      comment: "The database client, the mailer, the Cloudinary signer, the guards and the auth config hold a secret or a connection: a component reaches them through a server action only (CODE-10, SEC-1). lib/env is shared on purpose (publicEnv) and is not listed.",
+      from: { path: "^components/" },
+      to: { path: "^(?:lib/(?:prisma|mail|cloudinary|auth-guard|otp-request|sign-in-checks)|auth)[.]ts$" },
+    },
+    {
+      name: "portals-never-import-each-other",
+      severity: "error",
+      comment: "components/admin and components/manager are the two portals' sections; what both need lives in components/shell or components/forms (boundary map).",
+      from: { path: "^components/(admin|manager)/" },
+      to: { path: "^components/(admin|manager)/", pathNot: "^components/$1/" },
     },
   ],
   options: {

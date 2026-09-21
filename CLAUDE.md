@@ -74,6 +74,11 @@ Key models and relationships:
 - Restaurant brand colours are never painted raw under text: `lib/brand-color.ts` derives a contrast-safe ink + tint, exposed as `text-brand`, `bg-brand`, `bg-brand-tint`, `text-brand-on` inside a `.brand-scope` element.
 - `components/branding/` is the Settings → Branding tab: live phone preview (`menu-preview.tsx`), logo/cover tiles (`image-tile.tsx`, uploads persist immediately via `lib/brand-upload.ts`), colour presets + contrast readout, font picker (`lib/brand-fonts.ts`), and `Restaurant.menuTheme` (system | light | dark). A forced theme is applied as a `.light`/`.dark` class on the `.brand-scope` wrapper; `globals.css` defines both scopes.
 
+### Boundary map (held by `pnpm run graph`, one dependency-cruiser rule per arrow)
+- `lib/` is the shared layer and imports nothing from `app/` or `components/`; `components/` imports `app/actions/*` only (never a page, layout or route); `app/actions` and `app/api` import no component.
+- `lib/prisma`, `lib/mail`, `lib/cloudinary`, `lib/auth-guard`, `lib/otp-request`, `lib/sign-in-checks` and `auth.ts` are server-only: a component reaches them through a server action. `components/admin` and `components/manager` never import each other (shared pieces go to `components/shell` or `components/forms`).
+- Dead code is a gate (`pnpm run dead`, knip at zero); duplication is a ratchet (`pnpm dup`; `dup.clones` / `dup.clonedLines` may only fall).
+
 ### Server Actions Pattern
 All data mutations use Next.js server actions in `app/actions/`:
 - `dish-actions.ts` - CRUD operations for dishes
