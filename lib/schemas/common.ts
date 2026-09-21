@@ -4,6 +4,7 @@
 // sentences for now: the dashboards have one language and no message catalogue; when one
 // exists they become keys (docs/ADOPTION_DECISIONS.md, phase 4).
 import { z } from 'zod'
+import { ALLERGEN_OPTIONS, DIETARY_OPTIONS } from '@/lib/menu'
 
 /** Every row id is a v4 UUID (Prisma's `@default(uuid())`; verified over the live data on 2026-09-20). */
 export const uuid = z.uuid()
@@ -23,3 +24,11 @@ export const bilingualName = z.object({
 })
 /** The message of a failed parse's first issue, what a toast or a tile shows; a failed parse carries at least one, the error's own message stands in otherwise. */
 export const firstIssue = (error: z.ZodError): string => error.issues[0]?.message ?? error.message
+
+// A vocabulary key, typed as the strings the rows and the pickers carry; the vocabulary is the runtime rule.
+const keyOf = (options: readonly { key: string }[], what: string) =>
+  z.string().refine((k) => options.some((o) => o.key === k), `Unknown ${what}`)
+/** A dietary attribute the menu can label (a key of DIETARY_OPTIONS); a dish's tags and a restaurant's offered list are arrays of these. */
+export const dietaryKey = keyOf(DIETARY_OPTIONS, 'dietary attribute')
+/** An allergen the menu can label (a key of ALLERGEN_OPTIONS). */
+export const allergenKey = keyOf(ALLERGEN_OPTIONS, 'allergen')

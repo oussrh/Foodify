@@ -14,7 +14,7 @@ export const TABS: { key: SettingsTab; label: string; fields: (keyof EditRestaur
   {
     key: 'general',
     label: 'General',
-    fields: ['name', 'slug', 'tagline', 'description', 'cuisineType', 'priceRange', 'currency', 'currencySymbol', 'defaultLocale'],
+    fields: ['name', 'slug', 'tagline', 'description', 'cuisineType', 'dietaryOptions', 'currency', 'currencySymbol', 'defaultLocale'],
   },
   {
     key: 'contact',

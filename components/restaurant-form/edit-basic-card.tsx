@@ -1,6 +1,6 @@
 // components/restaurant-form/edit-basic-card.tsx
 // The "Basic Information" card of the settings form's General tab: the identity fields (name,
-// slug, tagline, description, cuisine, price range) and the money and language fields
+// slug, tagline, description, cuisine, the dietary options offered) and the money and language fields
 // (currency, its read-only symbol carried by hidden inputs, default language). Every change
 // dirties the form.
 'use client'
@@ -11,7 +11,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Building2, Globe, DollarSign, ChefHat, CreditCard } from 'lucide-react'
+import { Building2, Globe, ChefHat, CreditCard } from 'lucide-react'
+import DietaryOptionsField from './dietary-options-field'
 import { CURRENCIES, currencySymbolFor } from './currencies'
 import type { EditRestaurantValues } from './edit-restaurant-schema'
 
@@ -21,9 +22,10 @@ type Props = {
   setValue: UseFormSetValue<EditRestaurantValues>
   defaultValues: EditRestaurantValues
   currencySymbol: string | undefined
+  dietaryOptions: string[]
 }
 
-function IdentityFields({ register, errors, setValue, defaultValues }: Omit<Props, 'currencySymbol'>) {
+function IdentityFields({ register, errors, setValue, dietaryOptions }: Omit<Props, 'currencySymbol' | 'defaultValues'>) {
   return (
     <>
       <div className="grid md:grid-cols-2 gap-6">
@@ -89,29 +91,15 @@ function IdentityFields({ register, errors, setValue, defaultValues }: Omit<Prop
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="priceRange" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Price Range
-          </Label>
-          <Select onValueChange={(value) => setValue('priceRange', value as "$" | "$$" | "$$$" | "$$$$", { shouldDirty: true })} {...(defaultValues.priceRange !== undefined ? { defaultValue: defaultValues.priceRange } : {})}>
-            <SelectTrigger className="border-border">
-              <SelectValue placeholder="Select price range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="$">$ - Budget Friendly</SelectItem>
-              <SelectItem value="$$">$$ - Moderate</SelectItem>
-              <SelectItem value="$$$">$$$ - Upscale</SelectItem>
-              <SelectItem value="$$$$">$$$$ - Fine Dining</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="space-y-2 md:pt-6">
+          <DietaryOptionsField value={dietaryOptions} onChange={(next) => setValue('dietaryOptions', next, { shouldDirty: true })} />
         </div>
       </div>
     </>
   )
 }
 
-function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omit<Props, 'errors'>) {
+function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omit<Props, 'errors' | 'dietaryOptions'>) {
   return (
     <>
       {/* Currency Selection */}
@@ -182,7 +170,7 @@ export default function EditBasicCard(props: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6 space-y-6">
-        <IdentityFields register={props.register} errors={props.errors} setValue={props.setValue} defaultValues={props.defaultValues} />
+        <IdentityFields register={props.register} errors={props.errors} setValue={props.setValue} dietaryOptions={props.dietaryOptions} />
         <LocaleFields register={props.register} setValue={props.setValue} defaultValues={props.defaultValues} currencySymbol={props.currencySymbol} />
       </CardContent>
     </Card>

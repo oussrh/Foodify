@@ -46,7 +46,9 @@ model Restaurant {
   website         String?
   description     String?
   cuisineType     String?
-  priceRange      String? // e.g., "$", "$$", "$$$", "$$$$"
+  // The dietary attributes this restaurant offers: keys of DIETARY_OPTIONS (lib/menu.ts). The dish
+  // forms offer these and the public menu shows these; a new restaurant starts with all of them.
+  dietaryOptions  String[]       @default(["vegetarian", "vegan", "halal", "gluten_free", "spicy"])
   openingHours    String? // JSON string with operating hours
   socialMedia     String? // JSON string with social media links
   // Design/Branding

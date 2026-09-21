@@ -71,7 +71,6 @@ export default function EditRestaurantForm({
         googleFontUrl: data.googleFontUrl || undefined,
         currency: data.currency || undefined,
         currencySymbol: data.currencySymbol || undefined,
-        priceRange: data.priceRange || undefined,
         coverImageStyle: data.coverImageStyle || undefined,
         website: data.website || undefined,
       }
@@ -136,7 +135,7 @@ export default function EditRestaurantForm({
 
       <div role="tabpanel" id="settings-panel-general" aria-labelledby="settings-tab-general" hidden={activeTab !== 'general'} className="space-y-6">
       {/* Basic Information Section */}
-      <EditBasicCard register={register} errors={errors} setValue={setValue} defaultValues={defaultValues} currencySymbol={values.currencySymbol} />
+      <EditBasicCard register={register} errors={errors} setValue={setValue} defaultValues={defaultValues} currencySymbol={values.currencySymbol} dietaryOptions={values.dietaryOptions ?? []} />
       </div>
 
       <div role="tabpanel" id="settings-panel-contact" aria-labelledby="settings-tab-contact" hidden={activeTab !== 'contact'} className="space-y-6">

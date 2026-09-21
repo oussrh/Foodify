@@ -1,10 +1,7 @@
 import type { Route } from 'next'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
-import EditDishForm, { type EditDishValues } from '@/components/edit-dish-form'
-import IngredientManager from '@/components/ingredient-manager'
-import DishStatusManager from '@/components/dish-status-manager'
-import { PageHeader } from '@/components/shell/page-header'
+import DishEditor from '@/components/shell/dish-editor'
 import { AdminDeleteDishButton } from '@/components/admin-delete-dish-button'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
 
@@ -29,49 +26,9 @@ export default async function EditDishPage({ params }: { params: Promise<{ id: s
   })
   if (!dish) redirect(`/admin/restaurants/${restaurant.id}/dishes` as Route)
 
-  const subcategories = restaurant.categories.flatMap((category) =>
-    category.subcategories.map((sub) => ({ id: sub.id, nameEn: `${category.nameEn} → ${sub.nameEn}` })),
-  )
-
-  const defaultValues: EditDishValues = {
-    nameEn: dish.nameEn,
-    nameFr: dish.nameFr,
-    descriptionEn: dish.descriptionEn,
-    descriptionFr: dish.descriptionFr,
-    price: dish.price.toFixed(2),
-    imageUrl: dish.imageUrl,
-    usdzUrl: dish.usdzUrl || '',
-    glbUrl: dish.glbUrl || '',
-    subcategoryId: dish.subcategoryId || '',
-    calories: dish.calories || undefined,
-    isMostPurchased: dish.isMostPurchased || false,
-    dietary: dish.dietary ?? [],
-    allergens: dish.allergens ?? [],
-  }
-
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <PageHeader
-        title={dish.nameEn}
-        description={`${dish.nameFr} · ${dish._count.views} view${dish._count.views === 1 ? '' : 's'} so far`}
-        back={{ href: `/admin/restaurants/${restaurant.id}/dishes` as Route, label: 'All dishes' }}
-      />
-
-      <DishStatusManager
-        dishId={dish.id}
-        isActive={dish.isActive}
-        isMostPurchased={dish.isMostPurchased}
-      />
-
-      <EditDishForm
-        key={`${dish.id}-${dish.imageUrl}-${dish.usdzUrl}-${dish.glbUrl}`}
-        id={dish.id}
-        defaultValues={defaultValues}
-        subcategories={subcategories}
-        restaurantName={restaurant.name}
-      />
-
-      <IngredientManager dishId={dish.id} ingredients={dish.ingredients} />
+      <DishEditor portal="admin" restaurant={restaurant} dish={dish} />
 
       <section className="mt-6 flex flex-col gap-3 rounded-lg border border-destructive/40 p-5">
         <div>

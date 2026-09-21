@@ -1,53 +1,11 @@
 'use client'
 
-import { Label } from '@/components/ui/label'
-import { ALLERGEN_OPTIONS, DIETARY_OPTIONS } from '@/lib/menu'
-import { cn } from '@/lib/utils'
-
-interface ChipGroupProps {
-  id: string
-  label: string
-  hint?: string
-  options: readonly { key: string; en: string; fr: string }[]
-  value: string[]
-  onChange: (next: string[]) => void
-  disabled?: boolean | undefined
-}
-
-function ChipGroup({ id, label, hint, options, value, onChange, disabled }: ChipGroupProps) {
-  const toggle = (key: string) => onChange(value.includes(key) ? value.filter((k) => k !== key) : [...value, key])
-  return (
-    <div className="space-y-2">
-      <Label id={`${id}-label`} className="text-sm font-medium text-muted-foreground">
-        {label}
-      </Label>
-      <div role="group" aria-labelledby={`${id}-label`} className="flex flex-wrap gap-1.5">
-        {options.map((opt) => {
-          const on = value.includes(opt.key)
-          return (
-            <button
-              key={opt.key}
-              type="button"
-              disabled={disabled}
-              aria-pressed={on}
-              onClick={() => toggle(opt.key)}
-              className={cn(
-                'h-8 rounded-full border px-3 text-[13px] font-medium transition-colors disabled:opacity-50',
-                on ? 'border-primary bg-primary text-primary-foreground' : 'border-border-strong bg-card hover:bg-accent',
-              )}
-            >
-              {opt.en}
-              <span className="ml-1 font-normal text-current/70">· {opt.fr}</span>
-            </button>
-          )
-        })}
-      </div>
-      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
-    </div>
-  )
-}
+import ChipGroup from '@/components/forms/chip-group'
+import { ALLERGEN_OPTIONS, offeredDietary } from '@/lib/menu'
 
 interface DietarySelectProps {
+  /** The dietary attributes the restaurant offers (Settings → General); the picker shows these and no other. */
+  dietaryOptions: readonly string[]
   dietary: string[]
   allergens: string[]
   onDietaryChange: (next: string[]) => void
@@ -55,19 +13,22 @@ interface DietarySelectProps {
   disabled?: boolean
 }
 
-/** Dietary attributes and allergens for a dish. Shown to diners as chips and filters. */
-export default function DietarySelect({ dietary, allergens, onDietaryChange, onAllergensChange, disabled }: DietarySelectProps) {
+/** Dietary attributes (only those the restaurant offers) and allergens for a dish. Shown to diners as chips and filters. */
+export default function DietarySelect({ dietaryOptions, dietary, allergens, onDietaryChange, onAllergensChange, disabled }: DietarySelectProps) {
+  const offered = offeredDietary(dietaryOptions)
   return (
     <div className="grid gap-5">
-      <ChipGroup
-        id="dietary"
-        label="Dietary"
-        hint="Diners can filter the menu by these."
-        options={DIETARY_OPTIONS}
-        value={dietary}
-        onChange={onDietaryChange}
-        disabled={disabled}
-      />
+      {offered.length > 0 && (
+        <ChipGroup
+          id="dietary"
+          label="Dietary"
+          hint="Diners can filter the menu by these. The list is set in the restaurant's settings."
+          options={offered}
+          value={dietary}
+          onChange={onDietaryChange}
+          disabled={disabled}
+        />
+      )}
       <ChipGroup
         id="allergens"
         label="Contains allergens"

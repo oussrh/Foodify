@@ -1,6 +1,6 @@
 // components/restaurant-form/create-basic-card.tsx
 // The "Basic Information" card of the create-restaurant form: the identity fields (name,
-// slug, tagline, description, cuisine, price range) and the money and language fields
+// slug, tagline, description, cuisine, the dietary options offered) and the money and language fields
 // (currency with its symbol, default language).
 "use client";
 
@@ -11,16 +11,18 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RestaurantInput } from "@/lib/schemas/restaurant";
-import { Building2, Globe, DollarSign, ChefHat, CreditCard } from "lucide-react";
+import { Building2, Globe, ChefHat, CreditCard } from "lucide-react";
+import DietaryOptionsField from "./dietary-options-field";
 import { CURRENCIES, currencySymbolFor } from "./currencies";
 
 type Props = {
   register: UseFormRegister<RestaurantInput>;
   errors: FieldErrors<RestaurantInput>;
   setValue: UseFormSetValue<RestaurantInput>;
+  dietaryOptions: string[];
 };
 
-function IdentityFields({ register, errors, setValue }: Props) {
+function IdentityFields({ register, errors, setValue, dietaryOptions }: Props) {
   return (
     <>
       <div className="grid md:grid-cols-2 gap-6">
@@ -94,29 +96,15 @@ function IdentityFields({ register, errors, setValue }: Props) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="priceRange" className="flex items-center gap-2">
-            <DollarSign className="h-4 w-4" />
-            Price Range
-          </Label>
-          <Select onValueChange={(value) => setValue("priceRange", value as "$" | "$$" | "$$$" | "$$$$")} defaultValue="$">
-            <SelectTrigger className="border-border">
-              <SelectValue placeholder="Select price range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="$">$ - Budget Friendly</SelectItem>
-              <SelectItem value="$$">$$ - Moderate</SelectItem>
-              <SelectItem value="$$$">$$$ - Upscale</SelectItem>
-              <SelectItem value="$$$$">$$$$ - Fine Dining</SelectItem>
-            </SelectContent>
-          </Select>
+        <div className="space-y-2 md:pt-6">
+          <DietaryOptionsField value={dietaryOptions} onChange={(next) => setValue("dietaryOptions", next)} />
         </div>
       </div>
     </>
   );
 }
 
-function LocaleFields({ register, setValue }: Omit<Props, "errors">) {
+function LocaleFields({ register, setValue }: Omit<Props, "errors" | "dietaryOptions">) {
   return (
     <>
       {/* Currency Selection */}

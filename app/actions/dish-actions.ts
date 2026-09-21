@@ -57,7 +57,7 @@ export async function createDish(rawRestaurantId: string, raw: DishInput) {
       sortOrder: count,
       calories: data.calories ?? null,
       isMostPurchased: data.isMostPurchased ?? false,
-      dietary: data.dietary ?? [],
+      dietary: await offeredOf(restaurantId, data.dietary ?? []),
       allergens: data.allergens ?? [],
     },
   })
@@ -72,6 +72,7 @@ export async function updateDish(rawId: string, raw: DishPatch) {
   const { restaurantId } = await requireDishAccess(rawId)
   const id = uuid.parse(rawId)
   const data = dishPatch.parse(raw)
+  if (data.dietary) data.dietary = await offeredOf(restaurantId, data.dietary)
   await requireSubcategoryOf(restaurantId, data.subcategoryId)
   const updatedData = { ...data }
 
@@ -80,6 +81,13 @@ export async function updateDish(rawId: string, raw: DishPatch) {
   if (data.glbUrl) updatedData.glbUrl = await storedArUrl(data.glbUrl, restaurantId)
 
   return prisma.dish.update({ select: dishPayload, where: { id }, data: definedFields(updatedData) })
+}
+
+// A dish carries only the dietary tags its restaurant offers (Settings → General); a key the
+// form could not show is dropped rather than refused, so an old dish saves without complaint.
+async function offeredOf(restaurantId: string, dietary: string[]): Promise<string[]> {
+  const { dietaryOptions } = await prisma.restaurant.findUniqueOrThrow({ where: { id: restaurantId }, select: { dietaryOptions: true } })
+  return dietary.filter((k) => dietaryOptions.includes(k))
 }
 
 /**

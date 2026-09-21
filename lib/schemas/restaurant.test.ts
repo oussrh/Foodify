@@ -13,6 +13,13 @@ describe('restaurant schemas', () => {
     expect(restaurantInput.safeParse({ ...restaurant, slug: 'Chez Test' }).error?.issues[0]?.message).toMatch(/lowercase/)
   })
 
+  it('takes the dietary options a restaurant offers as vocabulary keys and refuses a key the menu cannot label', () => {
+    expect(restaurantPatch.safeParse({ dietaryOptions: ['halal', 'vegan'] }).success).toBe(true)
+    expect(restaurantPatch.safeParse({ dietaryOptions: [] }).success).toBe(true)
+    expect(restaurantPatch.safeParse({ dietaryOptions: ['keto'] }).error?.issues[0]?.message).toBe('Unknown dietary attribute')
+    expect('priceRange' in restaurantInput.shape).toBe(false)
+  })
+
   it('accepts a menu theme on a patch and nothing outside the three', () => {
     expect(restaurantPatch.safeParse({ menuTheme: 'dark' }).success).toBe(true)
     expect(restaurantPatch.safeParse({ menuTheme: 'sepia' }).success).toBe(false)

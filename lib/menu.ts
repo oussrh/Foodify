@@ -78,6 +78,8 @@ export interface MenuRestaurant {
   website: string | null
   openingHours: string | null
   socialMedia: string | null
+  /** The dietary keys this restaurant offers (Settings → General): the filter chips, and the only tags a dish shows. */
+  dietaryOptions: string[]
 }
 
 /** Dietary attributes a restaurant can set on a dish. Keys are what is stored. */
@@ -100,6 +102,11 @@ export const ALLERGEN_OPTIONS = [
   { key: 'soy', en: 'Soy', fr: 'Soja' },
   { key: 'sesame', en: 'Sesame', fr: 'Sésame' },
 ] as const
+
+/** The dietary options a restaurant offers, in the vocabulary's order; a key outside the vocabulary is dropped. */
+export function offeredDietary(keys: readonly string[]) {
+  return DIETARY_OPTIONS.filter((o) => keys.includes(o.key))
+}
 
 /** The label in the guest's language, or the key itself for one not in DIETARY_OPTIONS, so a stale row shows something rather than nothing. */
 export function dietaryLabel(key: string, locale: Locale): string {

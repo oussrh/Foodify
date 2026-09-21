@@ -28,7 +28,7 @@ export function restaurantFormValues(restaurant: Restaurant): EditRestaurantValu
     slug: restaurant.slug,
     defaultLocale: restaurant.defaultLocale,
     ...textColumns(restaurant),
-    priceRange: restaurant.priceRange as '$' | '$$' | '$$$' | '$$$$' | undefined,
+    dietaryOptions: restaurant.dietaryOptions,
     coverImageStyle: restaurant.coverImageStyle as 'cover' | 'repeat' | undefined,
     menuTheme: (['light', 'dark'].includes(restaurant.menuTheme) ? restaurant.menuTheme : 'system') as 'system' | 'light' | 'dark',
   }

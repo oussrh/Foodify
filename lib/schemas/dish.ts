@@ -2,14 +2,7 @@
 // A dish and its ingredients. Dietary attributes and allergens are the keys of lib/menu.ts's
 // vocabularies: the menu renders a label per key and nothing else is storable.
 import { z } from 'zod'
-import { ALLERGEN_OPTIONS, DIETARY_OPTIONS } from '@/lib/menu'
-import { bilingualName, money, uuid } from './common'
-
-// Typed as strings, as the rows and the picker are; the vocabulary is the runtime rule.
-const keyOf = (options: readonly { key: string }[], what: string) =>
-  z.string().refine((k) => options.some((o) => o.key === k), `Unknown ${what}`)
-const dietaryKey = keyOf(DIETARY_OPTIONS, 'dietary attribute')
-const allergenKey = keyOf(ALLERGEN_OPTIONS, 'allergen')
+import { allergenKey, bilingualName, dietaryKey, money, uuid } from './common'
 
 /**
  * What the create form submits and createDish parses. `price` is `money` (a decimal string, never a

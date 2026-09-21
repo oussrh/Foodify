@@ -6,16 +6,10 @@ import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import DietarySelect from "@/components/dietary-select";
 import { createDish } from "@/app/actions/dish-actions";
 import { dishInput } from "@/lib/schemas/dish";
 import { DishNameFields, DishDescriptionFields } from "@/components/dish-form/dish-fields";
-import {
-  DishPriceField,
-  DishCaloriesField,
-  DishCategorySelect,
-  DishPopularCheckbox,
-} from "@/components/dish-form/dish-detail-fields";
+import DishDetailsGrid from "@/components/dish-form/dish-details-grid";
 import DishMediaUploads from "@/components/dish-form/dish-media-uploads";
 import DishModelPreview from "@/components/dish-form/dish-model-preview";
 import CreateDishSubmit from "@/components/dish-form/create-dish-submit";
@@ -39,10 +33,13 @@ export default function CreateDishForm({
   restaurantId,
   subcategories,
   restaurantName,
+  dietaryOptions,
 }: {
   restaurantId: string;
   subcategories: Subcategory[];
   restaurantName?: string;
+  /** The restaurant's dietary options (Settings → General): what the picker offers. */
+  dietaryOptions: readonly string[];
 }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)
@@ -148,29 +145,16 @@ export default function CreateDishForm({
               placeholders={{ en: "Describe the dish in English", fr: "Décrivez le plat en français" }}
             />
 
-            {/* Price and Details */}
-            <div className="grid md:grid-cols-3 gap-6">
-              <DishPriceField field={register("price")} error={errors.price} disabled={isSubmitting} placeholder="0.00" />
-              <DishCaloriesField field={register("calories")} error={errors.calories} disabled={isSubmitting} placeholder="250" />
-
-              <div className="md:col-span-2">
-                <DietarySelect
-                  dietary={dietary}
-                  allergens={allergens}
-                  onDietaryChange={(v) => setValue('dietary', v, { shouldDirty: true })}
-                  onAllergensChange={(v) => setValue('allergens', v, { shouldDirty: true })}
-                  disabled={isSubmitting}
-                />
-              </div>
-
-              <DishCategorySelect field={register("subcategoryId")} subcategories={subcategories} disabled={isSubmitting} />
-            </div>
-
-            {/* Image URL - Hidden field for form */}
-            <input type="hidden" {...register("imageUrl")} value={imageUrl} />
-
-            {/* Special Options */}
-            <DishPopularCheckbox field={register("isMostPurchased")} disabled={isSubmitting} />
+            <DishDetailsGrid
+              price={{ field: register("price"), error: errors.price, placeholder: "0.00" }}
+              calories={{ field: register("calories"), error: errors.calories, placeholder: "250" }}
+              subcategoryId={register("subcategoryId")}
+              imageUrl={{ field: register("imageUrl"), value: imageUrl }}
+              isMostPurchased={register("isMostPurchased")}
+              subcategories={subcategories}
+              tags={{ dietaryOptions, dietary, allergens, onDietaryChange: (v) => setValue('dietary', v, { shouldDirty: true }), onAllergensChange: (v) => setValue('allergens', v, { shouldDirty: true }) }}
+              disabled={isSubmitting}
+            />
           </CardContent>
         </Card>
 
