@@ -4,6 +4,7 @@
 import nextCoreWebVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
+import jsdoc from 'eslint-plugin-jsdoc'
 import { readExemptions } from './scripts/codemods/shape-exemptions.mjs'
 import { COMPONENT_LINES, SHAPE_RULE_CONFIG } from './scripts/codemods/shape-exemptions.mjs'
 
@@ -61,6 +62,26 @@ const config = [
     },
   },
   { rules: { 'no-debugger': 'error' } },
+  {
+    // JSDoc on the boundary surface (CODE.7, phase 11): every export of the shared layer, the
+    // server actions, the route handlers and the two auth modules carries a block that says
+    // what a reader would get wrong; types stay in TypeScript (no-types). Components are read
+    // by their props and their markup, not held by this rule.
+    files: ['lib/**/*.ts', 'app/actions/**/*.ts', 'app/api/**/*.ts', 'auth.ts', 'proxy.ts'],
+    ignores: ['**/*.test.ts'],
+    plugins: { jsdoc },
+    rules: {
+      'jsdoc/require-jsdoc': [
+        'error',
+        {
+          publicOnly: true,
+          require: { FunctionDeclaration: true, FunctionExpression: false, ArrowFunctionExpression: false, ClassDeclaration: true, MethodDefinition: false },
+          contexts: ['ExportNamedDeclaration > VariableDeclaration > VariableDeclarator', 'ExportNamedDeclaration > TSTypeAliasDeclaration', 'ExportNamedDeclaration > TSInterfaceDeclaration'],
+        },
+      ],
+      'jsdoc/no-types': 'error',
+    },
+  },
   { files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'], rules: SHAPE_RULE_CONFIG },
   { files: ['**/*.tsx'], rules: { 'max-lines-per-function': COMPONENT_LINES } },
   // Tests and fixtures describe a behaviour per block, not a function per concern; a spec's
