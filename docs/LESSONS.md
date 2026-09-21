@@ -16,6 +16,15 @@ What we learned the hard way, one entry per lesson, newest first. A line added t
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
 
+## 2026-09-21 · A library's default is a fact to read, not to assume
+
+The logger's first header said pino's default destination writes synchronously, and built the
+"safe on a frozen serverless instance" reasoning on it; the default is an asynchronous write that
+only the process's exit flushes, which a frozen or killed instance never reaches. A comment that
+asserts a protection nobody verified is the missing protection. The destination is now
+`sync: true` (`server/log.ts`), and a claim about a dependency's behaviour is read in its source
+or its docs before it is written down (the same standard the JSDoc pass held for our own code).
+
 ## 2026-09-21 · A rule copied from a template holds the template's layout, not yours
 
 The import-graph step was green for twelve phases while two of its boundary rules named `src/features` and
