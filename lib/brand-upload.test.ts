@@ -79,6 +79,21 @@ describe('uploadBrandImage', () => {
     await expect(uploadBrandImage(file('l.png', 'image/png', 10), 'logo', 's', viaServer)).resolves.toBe('https://cdn/logo.png')
   })
 
+  it('treats a 200 with an error body, or without a URL, as a failed direct upload and uses the server', async () => {
+    configured()
+    cloudinaryAnswers({ ok: true, json: async () => ({ error: { message: 'Invalid preset' } }) })
+    const viaServer = vi.fn<BrandUploadAction>().mockResolvedValue({ success: true, logoUrl: 'https://cdn/logo.png' })
+    await expect(uploadBrandImage(file('l.png', 'image/png', 10), 'logo', 's', viaServer)).resolves.toBe('https://cdn/logo.png')
+    cloudinaryAnswers({ ok: true, json: async () => ({}) })
+    await expect(uploadBrandImage(file('l.png', 'image/png', 10), 'logo', 's', viaServer)).resolves.toBe('https://cdn/logo.png')
+    expect(viaServer).toHaveBeenCalledTimes(2)
+  })
+
+  it('says "Upload failed" when the server action refuses without a message', async () => {
+    const viaServer = vi.fn<BrandUploadAction>().mockResolvedValue({ success: false })
+    await expect(uploadBrandImage(file('c.jpg', 'image/jpeg', 10), 'logo', 's', viaServer)).rejects.toThrow('Upload failed')
+  })
+
   it('sends the file and the slug to the server action when direct upload is not configured', async () => {
     const viaServer = vi.fn<BrandUploadAction>().mockResolvedValue({ success: true, coverUrl: 'https://cdn/cover.jpg' })
     await uploadBrandImage(file('c.jpg', 'image/jpeg', 10), 'cover', 'dar-zitoun', viaServer)

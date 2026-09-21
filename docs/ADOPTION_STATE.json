@@ -341,7 +341,7 @@
     {
       "id": 11,
       "status": "done",
-      "updatedAt": "2026-09-21T09:53:46Z",
+      "updatedAt": "2026-09-21T10:15:32Z",
       "numbersBefore": {
         "rules": {
           "DOC-CHANGELOG": "present",
@@ -367,7 +367,7 @@
         "enforcedShare": "78% (45/58)",
         "readability": "100/100 (docs-freshness 100)",
         "switches": "pnpm lint red on a planted exported const without a block, on a block removed from a function and on a @param {string} added (jsdoc/no-types), green after each restore",
-        "tests": "290 unit (45 files), 13 integration, 20 browser",
+        "tests": "297 unit (47 files), 13 integration, 20 browser; lib/** measures 98.1 / 93.1 / 96.3 / 98.4 (floors 96.7 / 91.7 / 94.0 / 96.9 unchanged)",
         "caught": "uploadArAsset named by slug but called with the id; FORCE_CHANGE stamp read by nothing; the confirm-email actions are token-only; the JWT keeps the old address; deletes fail at the database under ON DELETE RESTRICT on Ingredient/DishView (needs a decision: migration or child deletes); on review: the fixer left on, 16 alias blocks paraphrasing, export default unseen, a garbled LESSONS paragraph and a stale CLAUDE.md testing section"
       }
     },
