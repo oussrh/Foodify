@@ -26,8 +26,9 @@ no test touches the network (`fetch` is stubbed where a module calls it).
 
 ## Coverage floor
 
-One area today, `lib/`, the shared layer (the only code with a unit surface: the customer-menu
-data formats, brand colour, pricing, locale, TOTP, JSON-LD). The floor is pinned in
+Two areas: `lib/`, the shared layer (the customer-menu data formats, brand colour, pricing, locale,
+TOTP, JSON-LD, the schemas, the list keyset), and `server/`, the process's modules (the logger's
+redaction and level rule, the SIGTERM drain). The floor is pinned in
 `vitest.config.ts` at the figure measured on 2026-09-21 (first set on 2026-09-20) and only ever raised; branches and
 functions are what bind (TEST.4). `thresholds.autoUpdate` is never set: a raise is a reviewed
 change with the new number in the log of `STANDARDS_PROGRESS.md`.
@@ -37,10 +38,12 @@ change with the new number in the log of `STANDARDS_PROGRESS.md`.
 | `lib/**` | 96.7 | 91.7 | 94.0 | 96.9 | 2026-09-21, phase 10 (from 93.0 / 81.3 / 79.4 / 93.3 set on 2026-09-20; phases 4 to 9 added the schema, env, mail, sign-in, list, loader and payload tests) |
 | `lib/menu.ts` (money display, per file) | 88.8 | 85 | 63.6 | 86.2 | 2026-09-20 |
 | `lib/totp.ts` (2FA check, per file) | 100 | 100 | 100 | 100 | 2026-09-20 |
+| `server/**` (the logger's redaction, the drain) | 100 | 100 | 100 | 100 | 2026-09-21, phase 13 |
 
 `app/` and `components/` have no unit floor: server actions and route handlers need a session and
 Postgres (the phase-10 integration suite, TEST.2), and the components are presentational (the
-Playwright + axe suite, TEST.3). Both are listed as missing in `GAP_ANALYSIS_2026-09-20.md`.
+Playwright + axe suite, TEST.3); `app/api/health/route.test.ts` is the one route unit test (the
+client and the drain mocked; `e2e/health.spec.ts` asks the real one on the production build). Both are listed as missing in `GAP_ANALYSIS_2026-09-20.md`.
 
 ## Exclusions
 

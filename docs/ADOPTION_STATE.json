@@ -406,8 +406,8 @@
     },
     {
       "id": 13,
-      "status": "in_progress",
-      "updatedAt": "2026-09-21T11:03:28Z",
+      "status": "done",
+      "updatedAt": "2026-09-21T11:13:35Z",
       "numbersBefore": {
         "rules": {
           "OBS-STRUCTURED": "missing (no logging dependency and no logger module)",
@@ -420,6 +420,26 @@
         "console": "13 console calls on the server paths (auth.ts 1, app/api/dish-views 1, app/actions 4, lib/sign-in-checks 3 printing the address, lib/otp-request 1, lib/cloudinary 2 printing the signing parameters and the signature, lib/brand-upload 1 in browser code); 60 more under components/ (the browser's)",
         "score": "76/100 (74 checks)",
         "enforcedShare": "78% (46/59)"
+      },
+      "numbersAfter": {
+        "rules": {
+          "OBS-STRUCTURED": "present (pino; server/log.ts)",
+          "OBS-REDACTION": "present (configured at the logger, no hand-written masking)",
+          "OBS-CONSOLE": "present (no-console configured; no console call in the server)",
+          "OBS-SIGTERM": "present (a SIGTERM handler that drains before exiting)",
+          "OBS-HEALTH": "present (app/api/health/route.ts)",
+          "OBS-TRACKER": "missing on purpose (no error tracker; decision recorded)"
+        },
+        "console": "0 console calls on the server paths; no-console at error on lib, app, server, auth.ts, proxy.ts, instrumentation.ts (error.tsx and tests excepted); 60 under components/ untouched (the browser's)",
+        "logger": "server/log.ts: pino 10.3.1, JSON lines on stdout, no transport; REDACTED_PATHS (24 secret fields at the top and under any key, plus code and credentials.code), censor <redacted>; silent under a test runner",
+        "health": "GET /api/health (force-dynamic): 200 { status, database } on SELECT 1, 503 unavailable, 503 draining; unit-tested with the client and the drain mocked, browser-tested on the production build",
+        "drain": "server/drain.ts registered from instrumentation.ts on the Node runtime: flag first, 10 s unref grace, prisma.$disconnect(), exit left to Next (143); idempotent, returns its remover; 4 tests",
+        "score": "82/100 (74 checks)",
+        "enforcedShare": "73% (47/64)",
+        "readability": "97/100 (navigability 88)",
+        "switches": "lint red on a planted console call in lib and in a route; tests red on email dropped from the redaction list, on the health route not asking the drain, on the drain not flipping its flag; green after each restore; the build clean; the health spec green on the production build",
+        "tests": "310 unit (50 files), 13 integration, 22 browser; server/** pinned at 100",
+        "left": "the SIGTERM drill under load on Linux; an error tracker (OBS-TRACKER, should); the console calls under components/; the server-only lib modules not under server/"
       }
     }
   ]

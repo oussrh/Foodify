@@ -76,8 +76,12 @@ Key models and relationships:
 
 ### Boundary map (held by `pnpm run graph`, one dependency-cruiser rule per arrow)
 - `lib/` is the shared layer and imports nothing from `app/` or `components/`; `components/` imports `app/actions/*` only (never a page, layout or route); `app/actions` and `app/api` import no component.
-- `lib/prisma`, `lib/mail`, `lib/cloudinary`, `lib/auth-guard`, `lib/otp-request`, `lib/sign-in-checks` and `auth.ts` are server-only: a component reaches them through a server action. `components/admin` and `components/manager` never import each other (what both need lives anywhere outside the two portal folders: `components/shell`, `components/forms`, the form directories).
+- `lib/prisma`, `lib/mail`, `lib/cloudinary`, `lib/auth-guard`, `lib/otp-request`, `lib/sign-in-checks`, `auth.ts` and `server/` are server-only: a component reaches them through a server action. `components/admin` and `components/manager` never import each other (what both need lives anywhere outside the two portal folders: `components/shell`, `components/forms`, the form directories).
 - Dead code is a gate (`pnpm run dead`, knip at zero); duplication is a ratchet (`pnpm dup`; `dup.clones` / `dup.clonedLines` may only fall).
+
+### Observability
+- `server/log.ts` is the one writer of server output (pino, JSON lines; redaction by field path there and nowhere else: never mask at a call site, add the path); `no-console` is an error on `lib/`, `app/`, `server/`, `auth.ts`, `proxy.ts`, `instrumentation.ts`. Log ids, never addresses.
+- `GET /api/health` answers 200 with `SELECT 1`, 503 `unavailable` without it, 503 `draining` after SIGTERM; `instrumentation.ts` registers the drain (`server/drain.ts`: health fails first, the pool is released after the grace, Next's own handler exits).
 
 ### Server Actions Pattern
 All data mutations use Next.js server actions in `app/actions/`:
