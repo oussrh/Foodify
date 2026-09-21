@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createRestaurant } from "@/app/actions/restaurant-actions";
 import { restaurantInput, type RestaurantInput } from "@/lib/schemas/restaurant";
+import { DIETARY_OPTIONS } from "@/lib/menu";
 import CreateBasicCard from "@/components/restaurant-form/create-basic-card";
 import CreateContactCard from "@/components/restaurant-form/create-contact-card";
 import CreateAddressCard from "@/components/restaurant-form/create-address-card";
@@ -35,12 +36,14 @@ export default function CreateRestaurantForm() {
       website: "",
       coverImageUrl: "",
       coverImageStyle: "cover",
-      priceRange: "$",
+      dietaryOptions: DIETARY_OPTIONS.map((o) => o.key),
       currency: "USD",
       currencySymbol: "$",
     },
     mode: "onChange",
   });
+
+  const dietaryOptions = useWatch({ control, name: "dietaryOptions" });
 
   const onSubmit = async (data: FormValues) => {
     try {
@@ -55,7 +58,7 @@ export default function CreateRestaurantForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       {/* Basic Information Section */}
-      <CreateBasicCard register={register} errors={errors} setValue={setValue} />
+      <CreateBasicCard register={register} errors={errors} setValue={setValue} dietaryOptions={dietaryOptions ?? []} />
 
       {/* Contact Information Section */}
       <CreateContactCard register={register} errors={errors} />

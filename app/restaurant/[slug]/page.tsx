@@ -35,8 +35,8 @@ export default async function RestaurantRoute({ params, searchParams }: Props) {
 
   const { restaurant, uncategorizedDishes } = data
   const menuRestaurant = serializeRestaurant(restaurant)
-  const categories = serializeCategories(restaurant.categories)
-  const dishes = uncategorizedDishes.map(serializeDish)
+  const categories = serializeCategories(restaurant.categories, restaurant.dietaryOptions)
+  const dishes = uncategorizedDishes.map((dish) => serializeDish(dish, restaurant.dietaryOptions))
   const origin = siteOrigin()
   const jsonLd = restaurantJsonLd(menuRestaurant, categories, dishes, origin)
 

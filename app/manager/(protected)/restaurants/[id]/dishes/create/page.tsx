@@ -29,7 +29,7 @@ export default async function CreateDishPage({ params }: { params: Promise<{ id:
         description={`It appears on ${restaurant.name}'s menu as soon as it is saved and live.`}
         back={{ href: `/manager/restaurants/${restaurant.id}/dishes` as Route, label: 'All dishes' }}
       />
-      <CreateDishForm restaurantId={restaurant.id} subcategories={subcategories} restaurantName={restaurant.name} />
+      <CreateDishForm restaurantId={restaurant.id} subcategories={subcategories} restaurantName={restaurant.name} dietaryOptions={restaurant.dietaryOptions} />
     </div>
   )
 }

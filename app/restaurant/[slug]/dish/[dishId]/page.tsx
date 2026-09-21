@@ -60,7 +60,7 @@ export default async function DishRoute({
     <>
       {restaurant.googleFontUrl && <link href={restaurant.googleFontUrl} rel="stylesheet" />}
       <DishPage
-        dish={serializeDish(dish)}
+        dish={serializeDish(dish, restaurant.dietaryOptions)}
         restaurant={restaurant}
         breadcrumb={breadcrumb}
         brandStyle={brandStyle(restaurant.colorTheme)}

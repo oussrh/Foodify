@@ -6,7 +6,6 @@ import { restaurantPatch } from '@/lib/schemas/restaurant'
 
 // The settings form always carries the identity fields; two selects may hold "" until the submit drops it.
 export const editRestaurantSchema = restaurantPatch.required({ name: true, slug: true, defaultLocale: true }).extend({
-  priceRange: restaurantPatch.shape.priceRange.or(z.literal('')),
   coverImageStyle: restaurantPatch.shape.coverImageStyle.or(z.literal('')),
 })
 

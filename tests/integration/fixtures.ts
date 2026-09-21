@@ -12,8 +12,8 @@ const PASSWORD = 'correct horse'
 let n = 0
 const tag = () => `t${++n}`
 
-export async function restaurant(tx: Tx, name = `Test ${tag()}`) {
-  return tx.restaurant.create({ data: { name, slug: `test-${tag()}`, defaultLocale: 'en' }, select: { id: true, slug: true, name: true } })
+export async function restaurant(tx: Tx, name = `Test ${tag()}`, extra: { dietaryOptions?: string[] } = {}) {
+  return tx.restaurant.create({ data: { name, slug: `test-${tag()}`, defaultLocale: 'en', ...extra }, select: { id: true, slug: true, name: true } })
 }
 
 async function user(tx: Tx, role: 'SUPER_ADMIN' | 'RESTAURANT_ADMIN', restaurantIds: string[]) {

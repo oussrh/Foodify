@@ -1,7 +1,7 @@
 // lib/schemas/restaurant.ts
 // A restaurant's profile, address, business settings and branding, plus its image uploads.
 import { z } from 'zod'
-import { email } from './common'
+import { dietaryKey, email } from './common'
 
 const optionalUrl = z.url('Invalid URL format').optional().or(z.literal(''))
 
@@ -11,7 +11,8 @@ const optionalUrl = z.url('Invalid URL format').optional().or(z.literal(''))
  * conform), where `slug` below is the loose lookup key. `openingHours` and `socialMedia` are
  * JSON in a string column (lib/opening-hours, lib/social-media); the URL fields take '' as
  * "not set" so a cleared field still validates. `menuTheme` is not here: the branding tab alone
- * sets it, through `restaurantPatch`.
+ * sets it, through `restaurantPatch`. `dietaryOptions` is the subset of the menu's dietary vocabulary
+ * this restaurant offers: what the dish forms show and what the public menu filters by.
  */
 export const restaurantInput = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -32,7 +33,7 @@ export const restaurantInput = z.object({
   website: optionalUrl,
   description: z.string().optional(),
   cuisineType: z.string().optional(),
-  priceRange: z.enum(['$', '$$', '$$$', '$$$$']).optional(),
+  dietaryOptions: z.array(dietaryKey).optional(),
   openingHours: z.string().optional(),
   socialMedia: z.string().optional(),
   // Design

@@ -14,6 +14,13 @@ describe('serializeDish', () => {
     expect(serializeDish(dishRow())).toMatchObject({ descriptionEn: null, descriptionFr: null, usdzUrl: null, glbUrl: null, dietary: ['halal'] })
   })
 
+  it('keeps only the dietary tags the restaurant offers when told what it offers, and every tag otherwise', () => {
+    const dish = dishRow({ dietary: ['halal', 'vegan', 'spicy'] })
+    expect(serializeDish(dish, ['vegan', 'halal']).dietary).toEqual(['halal', 'vegan'])
+    expect(serializeDish(dish, []).dietary).toEqual([])
+    expect(serializeDish(dish).dietary).toEqual(['halal', 'vegan', 'spicy'])
+  })
+
   it('carries the ingredients as plain bilingual names', () => {
     const ingredient = { id: 'i1', dishId: 'd1', nameEn: 'Salt', nameFr: 'Sel', createdAt: new Date('2026-09-20T12:00:00Z') }
     expect(serializeDish(dishRow({ ingredients: [ingredient] })).ingredients).toEqual([{ id: 'i1', nameEn: 'Salt', nameFr: 'Sel' }])

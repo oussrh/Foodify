@@ -25,6 +25,18 @@ describe('writes on the real database', () => {
       expect((await tx.dish.findUniqueOrThrow({ where: { id: created.id } })).price.toFixed(2)).toBe('0.10')
     }))
 
+  it('keeps a dish to the dietary tags its restaurant offers, on create and on update, and a new restaurant offers them all', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx, undefined, { dietaryOptions: ['vegan'] })
+      signInAs(await manager(tx, [mine.id]))
+      const created = await createDish(mine.id, { nameEn: 'Salad', nameFr: 'Salade', price: '8.00', imageUrl: '/s.jpg', dietary: ['halal', 'vegan'] })
+      expect((await tx.dish.findUniqueOrThrow({ where: { id: created.id } })).dietary).toEqual(['vegan'])
+      await updateDish(created.id, { dietary: ['spicy', 'vegan', 'halal'] })
+      expect((await tx.dish.findUniqueOrThrow({ where: { id: created.id } })).dietary).toEqual(['vegan'])
+      const fresh = await tx.restaurant.create({ data: { name: 'Fresh', slug: `fresh-${created.id.slice(0, 8)}`, defaultLocale: 'en' }, select: { dietaryOptions: true } })
+      expect(fresh.dietaryOptions).toEqual(['vegetarian', 'vegan', 'halal', 'gluten_free', 'spicy'])
+    }))
+
   it('refuses a dish whose price is not a decimal string before the database sees it', () =>
     withRollback(async (tx) => {
       const mine = await restaurant(tx)

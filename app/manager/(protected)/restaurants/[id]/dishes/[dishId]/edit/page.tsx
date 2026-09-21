@@ -2,11 +2,7 @@ import type { Route } from 'next'
 import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import EditDishForm from '@/components/edit-dish-form'
-import { dishFormValues } from '@/components/forms/form-defaults'
-import IngredientManager from '@/components/ingredient-manager'
-import DishStatusManager from '@/components/dish-status-manager'
-import { PageHeader } from '@/components/shell/page-header'
+import DishEditor from '@/components/shell/dish-editor'
 
 export default async function EditDishPage({ params }: { params: Promise<{ id: string; dishId: string }> }) {
   const { id, dishId } = await params
@@ -30,35 +26,9 @@ export default async function EditDishPage({ params }: { params: Promise<{ id: s
   })
   if (!dish) redirect(`/manager/restaurants/${restaurant.id}/dishes` as Route)
 
-  const subcategories = restaurant.categories.flatMap((category) =>
-    category.subcategories.map((sub) => ({ id: sub.id, nameEn: `${category.nameEn} → ${sub.nameEn}` })),
-  )
-
-  const defaultValues = dishFormValues(dish)
-
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
-      <PageHeader
-        title={dish.nameEn}
-        description={`${dish.nameFr} · ${dish._count.views} view${dish._count.views === 1 ? '' : 's'} so far`}
-        back={{ href: `/manager/restaurants/${restaurant.id}/dishes` as Route, label: 'All dishes' }}
-      />
-
-      <DishStatusManager
-        dishId={dish.id}
-        isActive={dish.isActive}
-        isMostPurchased={dish.isMostPurchased}
-      />
-
-      <EditDishForm
-        key={`${dish.id}-${dish.imageUrl}-${dish.usdzUrl}-${dish.glbUrl}`}
-        id={dish.id}
-        defaultValues={defaultValues}
-        subcategories={subcategories}
-        restaurantName={restaurant.name}
-      />
-
-      <IngredientManager dishId={dish.id} ingredients={dish.ingredients} />
+      <DishEditor portal="manager" restaurant={restaurant} dish={dish} />
     </div>
   )
 }

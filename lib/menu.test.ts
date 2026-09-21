@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, resolveInitialLocale, localName } from './menu'
+import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, offeredDietary, resolveInitialLocale, localName } from './menu'
 
 describe('formatPrice', () => {
   it('formats with the ISO code through Intl, French style in French', () => {
@@ -18,6 +18,11 @@ describe('formatPrice', () => {
 })
 
 describe('labels', () => {
+  it('lists the offered dietary options in the vocabulary order and drops an unknown key', () => {
+    expect(offeredDietary(['spicy', 'keto', 'vegetarian']).map((o) => o.key)).toEqual(['vegetarian', 'spicy'])
+    expect(offeredDietary([])).toEqual([])
+  })
+
   it('translates a known dietary or allergen key', () => {
     expect(dietaryLabel('gluten_free', 'fr')).toBe('Sans gluten')
     expect(allergenLabel('nuts', 'en')).toBe('Nuts')

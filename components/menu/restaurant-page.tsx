@@ -150,6 +150,7 @@ export default function RestaurantPage({
         open={filtersOpen}
         onOpenChange={setFiltersOpen}
         filters={filters}
+        dietaryOptions={restaurant.dietaryOptions}
         locale={locale}
         themeClass={themeClass}
         brandStyle={brandStyle}

@@ -5,7 +5,7 @@ import { Camera, Check, Download } from 'lucide-react'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { cn } from '@/lib/utils'
-import { DIETARY_OPTIONS, MENU_TEXT, type Locale } from '@/lib/menu'
+import { MENU_TEXT, offeredDietary, type Locale } from '@/lib/menu'
 import type { InstallPlatform } from '../use-pwa'
 import type { MenuFilters } from './use-menu-filters'
 
@@ -13,6 +13,8 @@ interface FiltersSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   filters: MenuFilters
+  /** The restaurant's dietary options: the only chips offered; none, and the group is not shown. */
+  dietaryOptions: readonly string[]
   locale: Locale
   /** '' when the menu follows the device; the forced theme's class otherwise */
   themeClass: string
@@ -23,9 +25,10 @@ interface FiltersSheetProps {
 }
 
 /** The filters sheet: AR only, dietary chips, then the install offer and the offline note. */
-export default function FiltersSheet({ open, onOpenChange, filters, locale, themeClass, brandStyle, installPlatform, onInstall, offlineReady }: FiltersSheetProps) {
+export default function FiltersSheet({ open, onOpenChange, filters, dietaryOptions, locale, themeClass, brandStyle, installPlatform, onInstall, offlineReady }: FiltersSheetProps) {
   const t = MENU_TEXT[locale]
   const { arCount, arOnly, setArOnly, dietary, setDietary } = filters
+  const offered = offeredDietary(dietaryOptions)
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -45,10 +48,11 @@ export default function FiltersSheet({ open, onOpenChange, filters, locale, them
             </label>
           )}
 
+          {offered.length > 0 && (
           <div className="flex flex-col gap-2">
             <span className="text-sm font-medium">{t.dietary}</span>
             <div className="flex flex-wrap gap-1.5">
-              {DIETARY_OPTIONS.map((opt) => {
+              {offered.map((opt) => {
                 const on = dietary.includes(opt.key)
                 return (
                   <button
@@ -67,6 +71,7 @@ export default function FiltersSheet({ open, onOpenChange, filters, locale, them
               })}
             </div>
           </div>
+          )}
 
           <div className="flex items-center justify-between gap-3 pt-1">
             <button

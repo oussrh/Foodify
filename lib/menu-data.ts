@@ -10,9 +10,11 @@ type CategoryTree = CategoryRow & { subcategories: (SubcategoryRow & { dishes: D
 /**
  * Prisma's Decimal price becomes the two-fraction-digit string of MenuDish (never a float) and
  * empty-string columns become null, so the shape crosses the server/client boundary as plain
- * JSON and a consumer tests for null alone.
+ * JSON and a consumer tests for null alone. With `offered` (the restaurant's dietary options)
+ * the dish keeps only those tags: the public menu shows what the restaurant offers, and a tag
+ * set before the restaurant narrowed its list stays stored, unseen.
  */
-export function serializeDish(dish: DishRow): MenuDish {
+export function serializeDish(dish: DishRow, offered?: readonly string[]): MenuDish {
   return {
     id: dish.id,
     nameEn: dish.nameEn,
@@ -25,7 +27,7 @@ export function serializeDish(dish: DishRow): MenuDish {
     glbUrl: dish.glbUrl || null,
     calories: dish.calories ?? null,
     isMostPurchased: dish.isMostPurchased,
-    dietary: dish.dietary ?? [],
+    dietary: offered ? (dish.dietary ?? []).filter((k) => offered.includes(k)) : (dish.dietary ?? []),
     allergens: dish.allergens ?? [],
     ingredients: dish.ingredients.map((i) => ({ id: i.id, nameEn: i.nameEn, nameFr: i.nameFr })),
   }
@@ -63,11 +65,12 @@ export function serializeRestaurant(restaurant: Restaurant): MenuRestaurant {
     website: restaurant.website,
     openingHours: restaurant.openingHours,
     socialMedia: restaurant.socialMedia,
+    dietaryOptions: restaurant.dietaryOptions,
   }
 }
 
-/** The menu tree as the page renders it: names in both languages, every dish serialized. */
-export function serializeCategories(categories: CategoryTree[]): MenuCategory[] {
+/** The menu tree as the page renders it: names in both languages, every dish serialized with the restaurant's `offered` dietary options. */
+export function serializeCategories(categories: CategoryTree[], offered?: readonly string[]): MenuCategory[] {
   return categories.map((cat) => ({
     id: cat.id,
     nameEn: cat.nameEn,
@@ -76,7 +79,7 @@ export function serializeCategories(categories: CategoryTree[]): MenuCategory[] 
       id: sub.id,
       nameEn: sub.nameEn,
       nameFr: sub.nameFr,
-      dishes: sub.dishes.map(serializeDish),
+      dishes: sub.dishes.map((dish) => serializeDish(dish, offered)),
     })),
   }))
 }
