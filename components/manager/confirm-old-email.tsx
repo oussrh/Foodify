@@ -1,6 +1,20 @@
 import Link from 'next/link'
-import { AlertCircle, ArrowLeft, ArrowRight, Clock, Mail } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Clock, Mail } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { BulletNotice, EmailLinkFailed, StatusBanner } from '@/components/manager/email-change-notice'
+
+const IMPORTANT = [
+  'The confirmation link expires in 24 hours',
+  "Check your spam/junk folder if you don't see the email",
+  'You can still access your account with your current email',
+]
+
+const FAILED_TIPS = [
+  'Go back to your profile and start the email change process again',
+  'Check if you have a more recent verification email',
+  "Make sure you're clicking the correct link from your old email",
+  'Contact support if you continue having issues',
+]
 
 /** Step 1 done: the old address is verified, the link to the new one is on its way. */
 export function OldEmailConfirmed() {
@@ -8,14 +22,9 @@ export function OldEmailConfirmed() {
     <div className="space-y-6">
       {/* Success Content */}
       <div className="text-center space-y-4">
-        <div className="p-4 bg-muted border border-border rounded-md">
-          <div className="flex items-center gap-3 justify-center">
-            <Mail className="h-5 w-5 text-muted-foreground dark:text-muted-foreground" />
-            <span className="text-sm font-medium text-muted-foreground">
-              Old Email Verified!
-            </span>
-          </div>
-        </div>
+        <StatusBanner icon={Mail} tone="muted">
+          Old Email Verified!
+        </StatusBanner>
 
         <div className="space-y-3">
           <h2 className="text-lg font-semibold text-foreground">
@@ -52,16 +61,7 @@ export function OldEmailConfirmed() {
       </div>
 
       {/* Important Notice */}
-      <div className="p-4 bg-muted border border-border rounded-md">
-        <h3 className="text-sm font-medium text-muted-foreground mb-2">
-          Important:
-        </h3>
-        <ul className="text-sm text-muted-foreground dark:text-muted-foreground space-y-1">
-          <li>• The confirmation link expires in 24 hours</li>
-          <li>• Check your spam/junk folder if you don&apos;t see the email</li>
-          <li>• You can still access your account with your current email</li>
-        </ul>
-      </div>
+      <BulletNotice title="Important:" tone="muted" items={IMPORTANT} />
 
       {/* Action Button */}
       <Button asChild className="w-full h-12 bg-primary hover:bg-primary text-white">
@@ -77,57 +77,12 @@ export function OldEmailConfirmed() {
 /** The link was invalid or expired: what happened and what to do. */
 export function OldEmailFailed() {
   return (
-    <div className="space-y-6">
-      {/* Error Content */}
-      <div className="text-center space-y-4">
-        <div className="p-4 bg-muted border border-border rounded-md">
-          <div className="flex items-center gap-3 justify-center">
-            <AlertCircle className="h-5 w-5 text-destructive dark:text-muted-foreground" />
-            <span className="text-sm font-medium text-destructive">
-              Verification Failed
-            </span>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <h2 className="text-lg font-semibold text-foreground">
-            Invalid or expired link
-          </h2>
-          <p className="text-sm text-muted-foreground">
-            The verification link you clicked is either invalid or has expired. This may happen if the link is older than 24 hours or has already been used.
-          </p>
-        </div>
-      </div>
-
-      {/* Help Section */}
-      <div className="p-4 bg-muted border border-border rounded-md">
-        <h3 className="text-sm font-medium text-warning mb-2">
-          What can you do?
-        </h3>
-        <ul className="text-sm text-warning dark:text-muted-foreground space-y-1">
-          <li>• Go back to your profile and start the email change process again</li>
-          <li>• Check if you have a more recent verification email</li>
-          <li>• Make sure you&apos;re clicking the correct link from your old email</li>
-          <li>• Contact support if you continue having issues</li>
-        </ul>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex gap-3">
-        <Button asChild variant="outline" className="flex-1">
-          <Link href="/manager/profile">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Profile
-          </Link>
-        </Button>
-        <Button asChild className="flex-1 bg-primary hover:bg-primary text-white">
-          <Link href="/manager/profile#change-email">
-            <ArrowRight className="h-4 w-4 mr-2" />
-            Try Again
-          </Link>
-        </Button>
-      </div>
-    </div>
+    <EmailLinkFailed
+      banner="Verification Failed"
+      explanation="The verification link you clicked is either invalid or has expired. This may happen if the link is older than 24 hours or has already been used."
+      tips={FAILED_TIPS}
+      retryIcon={ArrowRight}
+    />
   )
 }
 

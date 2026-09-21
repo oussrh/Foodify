@@ -59,7 +59,7 @@ export default async function UserRestaurantsPage({ params }: { params: Promise<
                   </Link>
                   <span className="block text-xs text-muted-foreground">/{r.slug}</span>
                 </TableCell>
-                <TableCell className="hidden text-muted-foreground sm:table-cell">{r.city || '—'}</TableCell>
+                <TableCell className="hidden text-muted-foreground sm:table-cell">{r.city || '-'}</TableCell>
                 <TableCell className="tnum">{r._count.dishes}</TableCell>
                 <TableCell className="text-right">
                   <div className="inline-flex h-8 items-center rounded-md px-2 text-sm text-muted-foreground hover:bg-accent hover:text-destructive">

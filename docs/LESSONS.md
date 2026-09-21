@@ -33,3 +33,15 @@ guard from `lib/auth-guard.ts`, and unused exports are deleted rather than kept.
 Sessions kept reintroducing Tailwind colour utilities and gradients after the "Quiet Plate"
 rebuild because the design system lived only in `globals.css`. Writing the token names, the
 radius hierarchy and the brand-colour rule into `CLAUDE.md` stopped the drift.
+
+## 2026-09-21 · A page is a composition root; its sections live under components/<portal>/
+
+Phases 7 and 8 split 52 files into some 150: every function under the shape rules, no file over
+its budget, behaviour proven identical by rendering old and new to static markup. What kept the
+splits honest was the seam rule, not the line count: a page keeps its data reads, its guard and
+its redirects and hands its markup to `components/admin/` or `components/manager/`; a form
+keeps its schema and submit and hands its sections to a folder of its own; a hook is a seam only
+where two components share it. The two directories the pages grew are named in `CLAUDE.md` so
+the next session puts a section where the last one did, and the size floors are hard at zero so
+a new file over its budget fails the gate rather than a review.
+

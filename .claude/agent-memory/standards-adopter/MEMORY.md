@@ -2,7 +2,8 @@
 - [Windows Bash tool](patterns_windows-bash-tool.md) - the Bash tool unescapes backslashes and rejects some heredocs; write source files with Write
 - [Render-diff proof](patterns_render-diff-proof.md) - SSR the HEAD copy vs the tree through vitest from the scratchpad; forced useState by index, mocked hooks, junction, negative control
 - [Render differential](patterns_render-differential.md) - recipe that proved ten component splits: HEAD copies via git archive, SSR both, diff
-- [Page render diff](patterns_page-render-diff.md) - proving a Next server-page split kept the DOM: render HEAD and tree versions of the async page
+- [Page render diff](patterns_page-render-diff.md) - proving a Next server-page split kept the DOM: render HEAD and tree versions of the async page; vi.hoisted stub loader, throw scenarios, dead-ternary space
+- [Dev-server e2e](patterns_dev-server-e2e.md) - no build allowed: aim Playwright at the project's running `next dev` (serves the tree) via a scratch config with webServer dropped
 - [Probe refactor](patterns_probe-refactor.md) - proving a refactor of abatty-probes/*.mjs kept every reading with a differential script
 - [Text-probe traps](patterns_text-probes.md) - `process.env` in a comment trips wholeEnv; a moved ts-expect-error regresses per file; exempt files hide shape errors, force the rules
 - [Shape seams](patterns_shape-seams.md) - the eslint override that measures exempted files, and the seams that took the admin forms/managers under the shape rules

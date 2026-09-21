@@ -3,8 +3,10 @@ import type { Route } from 'next'
 import prisma from '@/lib/prisma'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { PageHeader, StatStrip } from '@/components/shell/page-header'
+import { PageHeader } from '@/components/shell/page-header'
 import DishesList from '@/components/shell/dishes-list'
+import { dishListRow } from '@/components/shell/dish-list-rows'
+import { DishStatStrip } from '@/components/shell/dish-stat-strip'
 import { notFound } from 'next/navigation'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
 
@@ -41,26 +43,7 @@ export default async function DishesPage({
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
   })
 
-  const rows = dishes.map((d) => ({
-    id: d.id,
-    nameEn: d.nameEn,
-    nameFr: d.nameFr,
-    imageUrl: d.imageUrl,
-    price: d.price.toFixed(2),
-    isActive: d.isActive,
-    isMostPurchased: d.isMostPurchased,
-    hasAR: Boolean(d.usdzUrl || d.glbUrl),
-    category: d.subcategory
-      ? d.subcategory.nameEn.toLowerCase() === d.subcategory.category.nameEn.toLowerCase()
-        ? d.subcategory.category.nameEn
-        : `${d.subcategory.category.nameEn} · ${d.subcategory.nameEn}`
-      : null,
-    createdAt: d.createdAt,
-  }))
-
-  const live = rows.filter((r) => r.isActive).length
-  const ar = rows.filter((r) => r.hasAR).length
-  const popular = rows.filter((r) => r.isMostPurchased).length
+  const rows = dishes.map(dishListRow)
   const currency = restaurant.currencySymbol || '$'
   const base = `/admin/restaurants/${restaurant.id}`
 
@@ -78,16 +61,7 @@ export default async function DishesPage({
           </Button>
         }
       />
-      {!search && rows.length > 0 && (
-        <StatStrip
-          stats={[
-            { label: 'Dishes', value: rows.length },
-            { label: 'Live on the menu', value: live },
-            { label: 'AR ready', value: ar },
-            { label: 'Marked popular', value: popular },
-          ]}
-        />
-      )}
+      {!search && rows.length > 0 && <DishStatStrip rows={rows} />}
       <DishesList
         role="admin"
         restaurantId={restaurant.id}
