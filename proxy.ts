@@ -1,7 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// proxy.ts (Next 16: the middleware convention renamed; runs on the Node.js runtime)
+/**
+ * Next 16's middleware (the convention renamed; runs on the Node.js runtime), matched on every path. Rewrites by host
+ * alone and never authenticates: an `admin.` host is served under `/admin`, the first label of any other host of three
+ * labels or more under `/restaurant/<label>` (`www`, localhost, IPs and hosting domains untouched); the URL is not the route.
+ */
 export function proxy(request: NextRequest) {
   const host = request.headers.get('host') || ''
   const url = request.nextUrl.clone()
@@ -35,6 +39,7 @@ export function proxy(request: NextRequest) {
   return NextResponse.next()
 }
 
+/** Next reads this: the proxy runs on every path (the subdomain rewrite has to see every request) and narrows inside. */
 export const config = {
   matcher: ['/:path*'],
 }

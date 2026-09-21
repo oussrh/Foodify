@@ -8,6 +8,7 @@ import prisma from '@/lib/prisma'
 import { sendMail } from '@/lib/mail'
 import type { OtpRequest } from '@/lib/schemas/user'
 
+/** How long a mailed sign-in code stays valid; the two OTP mails (lib/emails) say "ten minutes", so the three move together. */
 export const OTP_TTL_MS = 10 * 60 * 1000
 
 type Portal = {

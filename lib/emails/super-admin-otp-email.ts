@@ -1,3 +1,4 @@
+/** HTML body of the admin sign-in code mail; the ten minutes it states is OTP_TTL_MS in lib/otp-request, so change both together. */
 export function superAdminOtpEmail(code: string) {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">

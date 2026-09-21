@@ -2,6 +2,11 @@
 import crypto from "crypto";
 import { serverEnv } from "@/lib/env";
 
+/**
+ * Signed upload of a USDZ/GLB (a remote URL or a base64 string; Cloudinary fetches it) into
+ * `restaurants/<second argument>`; the dish action passes the restaurant id, so AR files sit under
+ * the id while branding sits under the slug. Throws on unset variables or any non-2xx answer.
+ */
 export async function uploadArAsset(fileUrl: string, restaurantSlug: string) {
   const cloudinary = serverEnv.cloudinary;
   if (!cloudinary) {
@@ -44,6 +49,11 @@ export async function uploadArAsset(fileUrl: string, restaurantSlug: string) {
   return data.secure_url as string;
 }
 
+/**
+ * Signed upload of a logo or cover to `restaurants/<slug>/branding/<assetType>`: the fixed public
+ * id makes a new upload replace the previous file. The signature is computed over `params`, so
+ * the form fields and that map are kept in step. An SVG goes to the raw endpoint, not image.
+ */
 export async function uploadRestaurantAsset(
   file: File, 
   restaurantSlug: string, 
@@ -125,10 +135,12 @@ export async function uploadRestaurantAsset(
 }
 
 // Convenience functions
+/** The logo variant, stored as `logoUrl`; no file check here, the action has parsed it with `imageUpload(5)` first. */
 export async function uploadLogo(file: File, restaurantSlug: string) {
   return uploadRestaurantAsset(file, restaurantSlug, 'logo');
 }
 
+/** The cover variant, stored as `coverImageUrl`; no file check here, the action has parsed it with `imageUpload(10)` first. */
 export async function uploadCoverImage(file: File, restaurantSlug: string) {
   return uploadRestaurantAsset(file, restaurantSlug, 'cover');
 }

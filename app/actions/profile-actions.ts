@@ -12,6 +12,11 @@ import { sendMail } from '@/lib/mail'
 import { emailChange, emailToken, passwordChange, type PasswordChange } from '@/lib/schemas/user'
 import { userPayload } from '@/lib/payloads'
 
+/**
+ * The signed-in user of either portal, for their own account only. Parses `emailChange` (a valid address, not checked for
+ * being taken), stores it as `newEmail` behind a fifteen-minute token, logs the change as pending and mails the first link
+ * to the OLD address; the email itself is untouched until both links are followed. Answers the mailer's `{ sent }`.
+ */
 export async function initiateEmailChange(rawEmail: string) {
   const session = await auth()
   if (!session?.user?.email) {
@@ -48,6 +53,11 @@ export async function initiateEmailChange(rawEmail: string) {
   return { sent }
 }
 
+/**
+ * Open to whoever holds the link: the token is the credential, no session is read. Parses `emailToken` (64 hex chars); a
+ * mangled, unknown or expired token answers `{ confirmed: false }` alike. Swaps in a fifteen-minute verify token, logs
+ * `confirmed_old`, mails the second link to the NEW address and answers `{ confirmed: true, sent }`.
+ */
 export async function confirmOldEmail(rawToken: string) {
   // A mangled link is the same "invalid or expired" as an unknown token, not a render error.
   const parsed = emailToken.safeParse(rawToken)
@@ -87,6 +97,11 @@ export async function confirmOldEmail(rawToken: string) {
   return { confirmed: true, sent }
 }
 
+/**
+ * Open to whoever holds the link: the token is the credential, no session is read. Parses `emailToken`; a mangled, unknown
+ * or expired token answers `{ confirmed: false }`. Makes `newEmail` the account's email (one taken meanwhile is Prisma's
+ * unique error), logs `confirmed_new`, answers `{ confirmed: true }`; the JWT session shows the old address until re-sign-in.
+ */
 export async function confirmNewEmail(rawToken: string) {
   const parsed = emailToken.safeParse(rawToken)
   if (!parsed.success) return { confirmed: false }
@@ -121,6 +136,11 @@ export async function confirmNewEmail(rawToken: string) {
   return { confirmed: true }
 }
 
+/**
+ * The signed-in user of either portal, for their own account only. Parses `passwordChange` (the current password and a
+ * strong new one: eight characters with upper, lower, digit and symbol), throws 'Current password is incorrect' when the
+ * current one does not match the hash, stores the new hash and answers `userPayload`; a FORCE_CHANGE stamp stays.
+ */
 export async function updatePassword(raw: PasswordChange) {
   const session = await auth()
   if (!session?.user?.email) {

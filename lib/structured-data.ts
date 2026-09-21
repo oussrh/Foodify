@@ -81,6 +81,11 @@ function menuSections(restaurant: MenuRestaurant, categories: MenuCategory[], un
   return sections
 }
 
+/**
+ * The JSON-LD object the public page embeds: English names only (schema.org has no bilingual
+ * text), the phone stripped to digits and '+', absent fields left undefined so JSON.stringify
+ * drops them. `origin` is siteOrigin, so the ids are canonical URLs.
+ */
 export function restaurantJsonLd(restaurant: MenuRestaurant, categories: MenuCategory[], uncategorized: MenuDish[], origin: string) {
   const url = `${origin}/restaurant/${restaurant.slug}`
 

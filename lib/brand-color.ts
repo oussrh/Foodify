@@ -10,6 +10,7 @@ const LIGHT_GROUND: RGB = [250, 250, 248] // Paper
 const DARK_GROUND: RGB = [20, 19, 17] // Coal
 const AA = 4.5
 
+/** What `brandPalette` derives from one stored colour: the raw hex plus, per theme, an ink that reads at AA on that ground, a tint, and the text colour to put on the ink. */
 export interface BrandPalette {
   /** The colour as stored, normalized to #rrggbb */
   raw: string
@@ -45,6 +46,11 @@ function onColor(ink: RGB): string {
   return contrast(ink, WHITE) >= contrast(ink, NEAR_BLACK) ? '#ffffff' : '#141311'
 }
 
+/**
+ * The palette for a stored colour; an empty or unparseable value takes the fallback (Basil, the
+ * accent), so a bad row still renders on-brand. Pure, so the branding preview, the page and the
+ * manifest agree on the same hex.
+ */
 export function brandPalette(hex: string | null | undefined, fallback = '#1F6B49'): BrandPalette {
   const rgb = hexToRgb(hex || '') ?? (hexToRgb(fallback) as RGB)
   const inkLight = deriveInk(rgb, LIGHT_GROUND, true)

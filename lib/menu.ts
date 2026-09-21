@@ -1,16 +1,21 @@
 // lib/menu.ts
 // Shared shapes and vocabulary for the customer-facing menu.
 
+/** The two guest languages; every bilingual column is `<field>En` / `<field>Fr` and the restaurant picks the default. */
 export type Locale = 'en' | 'fr'
+/** The theme forced on the public menu; 'system' follows the device, the other two are applied as a class on the .brand-scope wrapper. */
 export type MenuTheme = 'system' | 'light' | 'dark'
+/** How the cover image fills the hero: one photo scaled to cover it, or a small pattern tiled. */
 export type CoverStyle = 'cover' | 'repeat'
 
+/** An ingredient as the dish sheet lists it; serializeDish (lib/menu-data) builds it from the Ingredient row. */
 export interface MenuIngredient {
   id: string
   nameEn: string
   nameFr: string
 }
 
+/** A dish as the customer pages render it: the plain output of serializeDish (lib/menu-data), safe to pass to a client component. */
 export interface MenuDish {
   id: string
   nameEn: string
@@ -29,6 +34,7 @@ export interface MenuDish {
   ingredients: MenuIngredient[]
 }
 
+/** A subcategory with its dishes already serialized; one node of the tree serializeCategories builds. */
 export interface MenuSubcategory {
   id: string
   nameEn: string
@@ -36,6 +42,7 @@ export interface MenuSubcategory {
   dishes: MenuDish[]
 }
 
+/** A top-level menu section with its subcategories; the tree serializeCategories builds from the Prisma include. */
 export interface MenuCategory {
   id: string
   nameEn: string
@@ -43,6 +50,7 @@ export interface MenuCategory {
   subcategories: MenuSubcategory[]
 }
 
+/** The restaurant as the public pages see it: serializeRestaurant's output, the enum-like columns already coerced and the JSON columns still raw strings. */
 export interface MenuRestaurant {
   id: string
   name: string
@@ -93,11 +101,13 @@ export const ALLERGEN_OPTIONS = [
   { key: 'sesame', en: 'Sesame', fr: 'Sésame' },
 ] as const
 
+/** The label in the guest's language, or the key itself for one not in DIETARY_OPTIONS, so a stale row shows something rather than nothing. */
 export function dietaryLabel(key: string, locale: Locale): string {
   const opt = DIETARY_OPTIONS.find((o) => o.key === key)
   return opt ? opt[locale] : key
 }
 
+/** The label in the guest's language, or the key itself for one not in ALLERGEN_OPTIONS, so a stale row shows something rather than nothing. */
 export function allergenLabel(key: string, locale: Locale): string {
   const opt = ALLERGEN_OPTIONS.find((o) => o.key === key)
   return opt ? opt[locale] : key
@@ -106,10 +116,12 @@ export function allergenLabel(key: string, locale: Locale): string {
 /** A category or subcategory name in the guest's language. */
 export const localName = (locale: Locale, en: string, fr: string) => (locale === 'fr' ? fr : en)
 
+/** Whether the AR button appears at all: either model format counts, and an empty string is not a URL. */
 export function hasAR(dish: Pick<MenuDish, 'usdzUrl' | 'glbUrl'>): boolean {
   return Boolean(dish.usdzUrl || dish.glbUrl)
 }
 
+/** What formatPrice needs beside the amount: the guest's locale and the restaurant's symbol and ISO code; each page builds one from MenuRestaurant. */
 export interface Money {
   locale: Locale
   symbol: string
@@ -135,6 +147,7 @@ export function formatPrice(price: string, money: Money): string {
   return money.locale === 'fr' ? `${n} ${money.symbol}` : `${money.symbol}${n}`
 }
 
+/** The localStorage key of the guest's remembered language, one for every restaurant's menu on the origin; read second, after `?lang=`. */
 export const LOCALE_STORAGE_KEY = 'foodify-menu-locale'
 
 /** Pick the first language: ?lang=, then a remembered choice, then the browser, then the restaurant default. */

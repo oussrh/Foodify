@@ -19,6 +19,11 @@ function refreshDashboards() {
   revalidatePath('/manager', 'layout')
 }
 
+/**
+ * Super admin only. Parses `restaurantInput` (name, a lowercase slug, defaultLocale en or fr; the rest optional), stores
+ * the row and revalidates both dashboards' layouts so the switcher lists it without a reload. Answers `restaurantPayload`
+ * (id, slug); a taken slug is Prisma's unique error, not a shaped one.
+ */
 export async function createRestaurant(raw: RestaurantInput) {
   await requireSuperAdmin()
   const data = restaurantInput.parse(raw)
@@ -27,6 +32,11 @@ export async function createRestaurant(raw: RestaurantInput) {
   return restaurant
 }
 
+/**
+ * The restaurant's admin or a super admin: the one restaurant write a manager may make. Parses the id as a UUID and
+ * `restaurantPatch` (every field optional, plus menuTheme); an absent member leaves the column, an empty string is
+ * stored as one. Revalidates both dashboards' layouts and answers `restaurantPayload` (id, slug).
+ */
 export async function updateRestaurant(rawId: string, raw: RestaurantPatch) {
   await requireRestaurantAccess({ id: rawId })
   const id = uuid.parse(rawId)
@@ -36,6 +46,11 @@ export async function updateRestaurant(rawId: string, raw: RestaurantPatch) {
   return restaurant
 }
 
+/**
+ * Super admin only: a manager cannot delete their own restaurant. Parses the id as a UUID, deletes the row, which the
+ * schema cascades to its menu and dishes, refusing while any dish has an ingredient or a view, and revalidates both
+ * dashboards' layouts. Answers `{ id }`.
+ */
 export async function deleteRestaurant(rawId: string) {
   await requireSuperAdmin()
   const id = uuid.parse(rawId)
@@ -44,6 +59,11 @@ export async function deleteRestaurant(rawId: string) {
   return restaurant
 }
 
+/**
+ * The restaurant's admin or a super admin, the restaurant named by slug. Takes the form's `file` (JPG, PNG, WebP or SVG,
+ * at most 5 MB, no double extension) and uploads it to the restaurant's Cloudinary branding folder over the last logo.
+ * Answers `{ success: true, logoUrl }`, or `{ success: false, error }` for a refused file or failed upload; no row is written.
+ */
 export async function uploadRestaurantLogo(formData: FormData, rawSlug: string) {
   await requireRestaurantAccess({ slug: rawSlug })
   const restaurantSlug = slug.parse(rawSlug)
@@ -65,6 +85,11 @@ export async function uploadRestaurantLogo(formData: FormData, rawSlug: string) 
   }
 }
 
+/**
+ * The restaurant's admin or a super admin, the restaurant named by slug. Takes the form's `file` (JPG, PNG, WebP or SVG,
+ * at most 10 MB, no double extension) and uploads it to the restaurant's Cloudinary branding folder over the last cover.
+ * Answers `{ success: true, coverUrl }`, or `{ success: false, error }` for a refused file or failed upload; no row is written.
+ */
 export async function uploadRestaurantCover(formData: FormData, rawSlug: string) {
   await requireRestaurantAccess({ slug: rawSlug })
   const restaurantSlug = slug.parse(rawSlug)

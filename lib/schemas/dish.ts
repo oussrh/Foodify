@@ -11,6 +11,12 @@ const keyOf = (options: readonly { key: string }[], what: string) =>
 const dietaryKey = keyOf(DIETARY_OPTIONS, 'dietary attribute')
 const allergenKey = keyOf(ALLERGEN_OPTIONS, 'allergen')
 
+/**
+ * What the create form submits and createDish parses. `price` is `money` (a decimal string, never a
+ * float); `dietary` and `allergens` are keys of the menu vocabularies, so a key the picker does not
+ * know cannot be stored; `subcategoryId` is only checked to be a UUID here: that it belongs to the
+ * dish's restaurant is the action's guard (`requireSubcategoryOf`), not the schema's.
+ */
 export const dishInput = bilingualName.extend({
   descriptionEn: z.string().optional(),
   descriptionFr: z.string().optional(),
@@ -24,11 +30,18 @@ export const dishInput = bilingualName.extend({
   dietary: z.array(dietaryKey).optional(),
   allergens: z.array(allergenKey).optional(),
 })
+/** Any subset of `dishInput` plus `isActive`; a field left out is left as it was (`definedFields` at the write). */
 export const dishPatch = dishInput.partial().extend({ isActive: z.boolean().optional() })
+/** A whole dish as the create form submits and the create action parses; `price` is already normalised to two fraction digits. */
 export type DishInput = z.infer<typeof dishInput>
+/** Any subset of the dish fields plus `isActive`; what the edit form submits and the update action parses. */
 export type DishPatch = z.infer<typeof dishPatch>
 
+/** A new ingredient is its two names and nothing else; the dish comes from the action's argument, guarded there. */
 export const ingredientInput = bilingualName
+/** Either name of an ingredient, or both; an ingredient cannot be moved to another dish. */
 export const ingredientPatch = bilingualName.partial()
+/** Both names of a new ingredient, as the ingredient form submits them. */
 export type IngredientInput = z.infer<typeof ingredientInput>
+/** Either name of an ingredient, as an edit submits it. */
 export type IngredientPatch = z.infer<typeof ingredientPatch>

@@ -4,6 +4,7 @@
 import { Resend } from 'resend'
 import { serverEnv } from '@/lib/env'
 
+/** One message as a caller composes it; `from` is not here because the env holds it, and `text` is the optional plain-text alternative. */
 export type Mail = { to: string; subject: string; html: string; text?: string }
 
 /**

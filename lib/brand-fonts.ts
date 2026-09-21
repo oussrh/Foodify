@@ -2,6 +2,7 @@
 // Curated Google Fonts a restaurant can pick for its public menu. Kept short on purpose:
 // a menu needs one readable face, and every option here has been checked at 15px on a phone.
 
+/** The picker's filter groups; every entry of BRAND_FONTS is in exactly one. */
 export type FontCategory = 'sans' | 'serif' | 'display'
 
 interface BrandFont {
@@ -16,6 +17,7 @@ interface BrandFont {
 const gf = (family: string, axes = 'wght@400;500;600;700') =>
   `https://fonts.googleapis.com/css2?family=${family.replace(/ /g, '+')}:${axes}&display=swap`
 
+/** The fonts a restaurant may pick, in the picker's order; a stored `fontFamily` outside this list still renders (the public page loads whatever URL was stored) but the picker shows none selected. */
 export const BRAND_FONTS: BrandFont[] = [
   { family: 'Inter', category: 'sans', url: gf('Inter'), note: 'Neutral, very legible' },
   { family: 'Manrope', category: 'sans', url: gf('Manrope'), note: 'Geometric, modern' },

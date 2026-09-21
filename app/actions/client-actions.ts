@@ -9,6 +9,11 @@ import { slugify } from '@/lib/slug'
 import { userPayload } from '@/lib/payloads'
 import { definedFields } from '@/lib/defined-fields'
 
+/**
+ * Super admin only. Parses `clientInput` (email, temporary password, optional restaurant ids, optional restaurant name);
+ * a name creates a restaurant first (slug from the name, locale en) and assigns it with the ids, in a write of its own,
+ * so a taken email leaves that restaurant with no admin. Stores the account as RESTAURANT_ADMIN; answers `userPayload` (id, email).
+ */
 export async function createClient(raw: ClientInput) {
   await requireSuperAdmin()
   const data = clientInput.parse(raw)
@@ -36,6 +41,10 @@ export async function createClient(raw: ClientInput) {
   })
 }
 
+/**
+ * Super admin only. Parses the id as a UUID and `clientPatch` (optional email, optional restaurant ids); ids given
+ * replace the whole assignment, ids absent leave it, and the password is not patchable here. Answers `userPayload`.
+ */
 export async function updateClient(rawId: string, raw: ClientPatch) {
   await requireSuperAdmin()
   const id = uuid.parse(rawId)
@@ -50,6 +59,10 @@ export async function updateClient(rawId: string, raw: ClientPatch) {
   })
 }
 
+/**
+ * Super admin only. Parses the id as a UUID and the new password against `password` (six characters, meant as temporary),
+ * stores its hash and clears any reset marker: unlike an admin's reset, the row is not stamped. Answers `userPayload`.
+ */
 export async function resetClientPassword(rawId: string, newPassword: string) {
   await requireSuperAdmin()
   const id = uuid.parse(rawId)

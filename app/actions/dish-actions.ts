@@ -27,6 +27,11 @@ async function storedArUrl(url: string | undefined, restaurantId: string): Promi
   return uploadArAsset(url, restaurantId)
 }
 
+/**
+ * The restaurant's admin or a super admin. Parses the restaurant id as a UUID and `dishInput` (bilingual name, decimal
+ * price string, image URL; the rest optional), refuses a subcategory of another restaurant and uploads an AR URL that is
+ * neither Cloudinary nor local to a folder named by the restaurant's id. Takes the next sortOrder; answers `dishPayload`.
+ */
 export async function createDish(rawRestaurantId: string, raw: DishInput) {
   await requireRestaurantAccess({ id: rawRestaurantId })
   const restaurantId = uuid.parse(rawRestaurantId)
@@ -65,6 +70,11 @@ export async function createDish(rawRestaurantId: string, raw: DishInput) {
   })
 }
 
+/**
+ * The dish's restaurant's admin or a super admin: the grant comes from the row, not from the caller. Parses the id as a
+ * UUID and `dishPatch` (every field optional, plus isActive); a subcategory must be the restaurant's own, an AR URL is
+ * uploaded only when non-empty ('' clears it), an absent member leaves the column. Answers `dishPayload`.
+ */
 export async function updateDish(rawId: string, raw: DishPatch) {
   const { restaurantId } = await requireDishAccess(rawId)
   const id = uuid.parse(rawId)
@@ -88,13 +98,21 @@ export async function updateDish(rawId: string, raw: DishPatch) {
   return prisma.dish.update({ select: dishPayload, where: { id }, data: definedFields(updatedData) })
 }
 
+/**
+ * The dish's restaurant's admin or a super admin. Parses the id as a UUID, deletes the row and answers `{ id }`. The
+ * database refuses the delete while the dish has an ingredient or a view (both restrict), and nothing here removes them first.
+ */
 export async function deleteDish(rawId: string) {
   await requireDishAccess(rawId)
   const id = uuid.parse(rawId)
   return prisma.dish.delete({ select: idOnly, where: { id } })
 }
 
-// Toggle dish activation status
+/**
+ * The dish's restaurant's admin or a super admin. Parses the id as a UUID and flips `isActive` from the stored value: the
+ * caller sends no target state, so two toggles racing from one read make one flip. Answers `dishPayload`; 'Dish not found'
+ * only follows a delete between the guard and the read, a missing dish being Forbidden at the guard.
+ */
 export async function toggleDishStatus(rawId: string) {
   await requireDishAccess(rawId)
   const id = uuid.parse(rawId)
@@ -107,7 +125,10 @@ export async function toggleDishStatus(rawId: string) {
   })
 }
 
-// Toggle most purchased status
+/**
+ * The dish's restaurant's admin or a super admin. Parses the id as a UUID and flips `isMostPurchased` from the stored
+ * value, the caller sending no target state. Answers `dishPayload`; a missing dish is Forbidden at the guard.
+ */
 export async function toggleMostPurchased(rawId: string) {
   await requireDishAccess(rawId)
   const id = uuid.parse(rawId)
@@ -120,7 +141,11 @@ export async function toggleMostPurchased(rawId: string) {
   })
 }
 
-// Add ingredient to dish
+/**
+ * The dish's restaurant's admin or a super admin. Parses the dish id as a UUID and `ingredientInput` (both names
+ * required) and answers `ingredientPayload` (id, nameEn, nameFr). Ingredients carry no order and no uniqueness: the same
+ * name twice is two rows.
+ */
 export async function addIngredient(rawDishId: string, raw: IngredientInput) {
   await requireDishAccess(rawDishId)
   const dishId = uuid.parse(rawDishId)
@@ -134,7 +159,10 @@ export async function addIngredient(rawDishId: string, raw: IngredientInput) {
   })
 }
 
-// Update ingredient
+/**
+ * The admin of the restaurant of the ingredient's dish, or a super admin. Parses the id as a UUID and `ingredientPatch`
+ * (either name optional); an absent name leaves the column. Answers `ingredientPayload` (id, nameEn, nameFr).
+ */
 export async function updateIngredient(rawId: string, raw: IngredientPatch) {
   await requireIngredientAccess(rawId)
   const id = uuid.parse(rawId)
@@ -145,7 +173,10 @@ export async function updateIngredient(rawId: string, raw: IngredientPatch) {
   })
 }
 
-// Delete ingredient
+/**
+ * The admin of the restaurant of the ingredient's dish, or a super admin. Parses the id as a UUID, deletes the row and
+ * answers `{ id }`.
+ */
 export async function deleteIngredient(rawId: string) {
   await requireIngredientAccess(rawId)
   const id = uuid.parse(rawId)

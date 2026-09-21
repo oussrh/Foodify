@@ -3,7 +3,11 @@ import { ok, fail } from '@/lib/api'
 import { authErrorResponse, requireSuperAdmin } from '@/lib/auth-guard'
 import { afterCursor, listParams, listQuery, page, pageArgs } from '@/lib/schemas/list'
 
-// Used by the assign-restaurants dialog, which follows meta.next until the list is complete.
+/**
+ * GET, super admin only (401 or 403 in the envelope). Query `limit` 1..500 (default 100) and an opaque `cursor`: a bad
+ * limit or an empty cursor is 400 invalid_query, a foreign cursor restarts the list. Answers `{ data: [{ id, name, slug }],
+ * meta: { next } }` in name order, `next` the following page's cursor or null; the assign-restaurants dialog follows it to the end.
+ */
 export async function GET(request: Request) {
   try {
     await requireSuperAdmin()

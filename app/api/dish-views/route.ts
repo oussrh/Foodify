@@ -10,6 +10,11 @@ const dishViewSchema = z.object({
   deviceType: z.enum(['iOS', 'Android', 'Other']).default('Other'),
 })
 
+/**
+ * POST, public: the guest menu records a view with no session. Body `{ dishId, arViewed?, deviceType? }` as
+ * `dishViewSchema` says. Answers 201 `{ data: { viewId, arViewed } }`; 400 invalid_json or invalid_payload (with the
+ * issues), 404 not_found for an unknown dish, 500 internal. Nothing dedupes or rate-limits: every accepted call is a row.
+ */
 export async function POST(request: NextRequest) {
   let body: unknown
   try {
