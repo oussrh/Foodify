@@ -9,6 +9,11 @@ import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import { fail } from '@/lib/api'
 
+/**
+ * Thrown by every guard here (requireSuperAdminPage catches it and redirects instead); `status` is 401 (nobody signed in) or 403 (signed in, not allowed).
+ * A row that does not exist and a row that belongs to someone else raise the same 403 with the
+ * same message, so an id cannot be probed through a guard.
+ */
 export class AuthError extends Error {
   status: 401 | 403
   constructor(message: string, status: 401 | 403) {
@@ -44,6 +49,7 @@ export async function requireUser() {
   return user
 }
 
+/** The signed-in super admin, the role read from the database on this call (requireUser) so a demotion takes effect at once; 403 for any other role. */
 export async function requireSuperAdmin() {
   const user = await requireUser()
   if (user.role !== 'SUPER_ADMIN') throw new AuthError('Forbidden', 403)
@@ -92,6 +98,7 @@ export async function requireDishAccess(dishId: string) {
   return { restaurantId: dish.restaurantId }
 }
 
+/** Access through the ingredient's dish's restaurant; an unknown ingredient id is a 403 like a foreign one, so ids cannot be enumerated. */
 export async function requireIngredientAccess(ingredientId: string) {
   const ingredient = await prisma.ingredient.findUnique({
     where: { id: ingredientId },
@@ -101,6 +108,7 @@ export async function requireIngredientAccess(ingredientId: string) {
   return requireRestaurantAccess({ id: ingredient.dish.restaurantId })
 }
 
+/** Access through the category's restaurant; an unknown category id is a 403 like a foreign one, so ids cannot be enumerated. */
 export async function requireCategoryAccess(categoryId: string) {
   const category = await prisma.menuCategory.findUnique({
     where: { id: categoryId },
@@ -121,6 +129,7 @@ export async function requireSubcategoryOf(restaurantId: string, subcategoryId: 
   if (!owned) throw new AuthError('Forbidden', 403)
 }
 
+/** Access through the parent category's restaurant (a subcategory has no restaurantId of its own); an unknown id is a 403 like a foreign one. */
 export async function requireSubcategoryAccess(subcategoryId: string) {
   const subcategory = await prisma.menuSubcategory.findUnique({
     where: { id: subcategoryId },

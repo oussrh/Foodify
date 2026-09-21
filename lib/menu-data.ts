@@ -7,6 +7,11 @@ import type { CoverStyle, Locale, MenuCategory, MenuDish, MenuRestaurant, MenuTh
 type DishRow = Dish & { ingredients: Ingredient[] }
 type CategoryTree = CategoryRow & { subcategories: (SubcategoryRow & { dishes: DishRow[] })[] }
 
+/**
+ * Prisma's Decimal price becomes the two-fraction-digit string of MenuDish (never a float) and
+ * empty-string columns become null, so the shape crosses the server/client boundary as plain
+ * JSON and a consumer tests for null alone.
+ */
 export function serializeDish(dish: DishRow): MenuDish {
   return {
     id: dish.id,
@@ -26,6 +31,11 @@ export function serializeDish(dish: DishRow): MenuDish {
   }
 }
 
+/**
+ * The row as MenuRestaurant: the enum-like columns (cover style, theme, locale) are coerced to
+ * their closed sets with a default for anything unknown and the symbol to '$', so an old or
+ * hand-edited row still renders. openingHours and socialMedia stay raw; their parsers run later.
+ */
 export function serializeRestaurant(restaurant: Restaurant): MenuRestaurant {
   return {
     id: restaurant.id,
@@ -71,6 +81,7 @@ export function serializeCategories(categories: CategoryTree[]): MenuCategory[] 
   }))
 }
 
+/** The absolute origin for share links, JSON-LD and metadata: the public app URL from lib/env, not the request host, so it is the same on every render. */
 export function siteOrigin(): string {
   return publicEnv.appUrl
 }

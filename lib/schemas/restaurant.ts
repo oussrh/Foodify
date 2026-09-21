@@ -5,6 +5,14 @@ import { email } from './common'
 
 const optionalUrl = z.url('Invalid URL format').optional().or(z.literal(''))
 
+/**
+ * A whole restaurant as the create form and the settings forms submit it. `slug` here is the
+ * rule a typed slug must meet (lowercase, digits, hyphens; lib/slug makes a generated one
+ * conform), where `slug` below is the loose lookup key. `openingHours` and `socialMedia` are
+ * JSON in a string column (lib/opening-hours, lib/social-media); the URL fields take '' as
+ * "not set" so a cleared field still validates. `menuTheme` is not here: the branding tab alone
+ * sets it, through `restaurantPatch`.
+ */
 export const restaurantInput = z.object({
   name: z.string().min(1, 'Name is required'),
   slug: z.string().min(1, 'Slug is required').regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and hyphens'),
@@ -37,8 +45,11 @@ export const restaurantInput = z.object({
   currency: z.string().optional(),
   currencySymbol: z.string().optional(),
 })
+/** Any subset of `restaurantInput` plus `menuTheme`; a field left out is left as it was. */
 export const restaurantPatch = restaurantInput.partial().extend({ menuTheme: z.enum(['system', 'light', 'dark']).optional() })
+/** `restaurantInput` after parsing. */
 export type RestaurantInput = z.infer<typeof restaurantInput>
+/** `restaurantPatch` after parsing. */
 export type RestaurantPatch = z.infer<typeof restaurantPatch>
 
 /** A slug as a lookup key (the uploads name their restaurant by it): whatever is stored, not the rule a new one must meet. */

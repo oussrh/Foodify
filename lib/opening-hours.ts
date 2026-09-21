@@ -4,9 +4,12 @@
 
 import type { Locale } from './menu'
 
+/** The keys of the `days` map, Monday first; DAY_KEYS is the order the week is walked in. */
 export type DayKey = 'mon' | 'tue' | 'wed' | 'thu' | 'fri' | 'sat' | 'sun'
+/** The week in the order the editor and the menu walk it, Monday first (the JSON's `days` is a map, so this is the only order there is). */
 export const DAY_KEYS: DayKey[] = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun']
 
+/** One open-close span of a day; a day keeps at most two (the parser and the serializer drop the rest). */
 export interface Period {
   /** "HH:MM", 24h */
   open: string
@@ -14,6 +17,7 @@ export interface Period {
   close: string
 }
 
+/** The parsed column: what parseOpeningHours returns and the hours editor edits; serializeOpeningHours writes it back. */
 export interface OpeningHours {
   /** Missing key = not set; empty array = closed that day */
   days: Partial<Record<DayKey, Period[]>>
@@ -42,6 +46,7 @@ const DAY_NAMES: Record<Locale, Record<DayKey, { short: string; long: string }>>
   },
 }
 
+/** 'Mon' or 'Monday' (and the French pair) for a day key; short is the default because the summary lines are built from it. */
 export function dayName(day: DayKey, locale: Locale, form: 'short' | 'long' = 'short'): string {
   return DAY_NAMES[locale][day][form]
 }
@@ -72,6 +77,10 @@ export function parseOpeningHours(raw: string | null | undefined): OpeningHours 
   return { days: {}, note: raw.trim() }
 }
 
+/**
+ * The string to store: '' when nothing is set (the column then reads as unset), else JSON with
+ * the note only when non-blank and each day trimmed to its valid periods, at most two.
+ */
 export function serializeOpeningHours(hours: OpeningHours): string {
   const days: OpeningHours['days'] = {}
   for (const key of DAY_KEYS) {
@@ -83,6 +92,7 @@ export function serializeOpeningHours(hours: OpeningHours): string {
   return JSON.stringify(note ? { days, note } : { days })
 }
 
+/** Whether any day is set at all, a closed day included; false for legacy free text, which has only a note. */
 export function hasStructuredHours(hours: OpeningHours): boolean {
   return DAY_KEYS.some((d) => hours.days[d] !== undefined)
 }
@@ -94,6 +104,7 @@ function periodsLabel(periods: Period[], locale: Locale): string {
   return periods.map((p) => `${p.open}–${p.close}`).join(locale === 'fr' ? ' et ' : ' & ')
 }
 
+/** One printed line of the summary: a day or a merged range, and its hours text; summarizeOpeningHours produces them. */
 export interface HoursLine {
   /** e.g. "Mon–Thu" */
   days: string
@@ -118,6 +129,7 @@ export function summarizeOpeningHours(hours: OpeningHours, locale: Locale): Hour
   }))
 }
 
+/** openStatus's answer: open and when it closes, or closed and the next opening (today, or on `opensOn` later in the week). */
 export interface OpenStatus {
   open: boolean
   /** "HH:MM" the current period closes at, when open */

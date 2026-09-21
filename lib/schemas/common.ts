@@ -7,6 +7,7 @@ import { z } from 'zod'
 
 /** Every row id is a v4 UUID (Prisma's `@default(uuid())`; verified over the live data on 2026-09-20). */
 export const uuid = z.uuid()
+/** An address as every form and action takes it; the two sign-in schemas alone (`otpRequest`, `credentials`) stay looser, on purpose. */
 export const email = z.email('Please enter a valid email address')
 /** What an admin sets for someone else, at creation or on a reset: temporary, hence short. A user's own change is `passwordChange`. */
 export const password = z.string().min(6, 'Password must be at least 6 characters')
@@ -15,6 +16,7 @@ export const money = z
   .string()
   .regex(/^\d+(\.\d{1,2})?$/, 'Price must be a number with at most two decimals')
   .transform((v) => Number(v).toFixed(2))
+/** Both languages required on every named row: the menu renders the guest's language and has nothing to fall back on (see Locale in lib/menu). */
 export const bilingualName = z.object({
   nameEn: z.string().min(1, 'English name is required'),
   nameFr: z.string().min(1, 'French name is required'),

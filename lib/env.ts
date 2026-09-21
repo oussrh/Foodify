@@ -7,6 +7,11 @@
 // lib/prisma.ts creating its client, which is boot.
 import { z } from 'zod'
 
+/**
+ * The variables the browser bundle may see, each a literal `process.env.NEXT_PUBLIC_*` read so
+ * Next inlines it at build time (a computed key would be undefined in the browser). Nothing here
+ * is a secret; the server's variables are `serverEnv`.
+ */
 export const publicEnv = {
   /** Unsigned Cloudinary uploads straight from the browser; when unset, uploads go through a server action. */
   cloudinaryCloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,

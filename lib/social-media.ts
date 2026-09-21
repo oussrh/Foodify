@@ -1,5 +1,6 @@
 // lib/social-media.ts
 
+/** Bare handles per platform (never URLs), null when unknown: what parseSocialMedia returns and the footer turns into links. */
 export interface SocialHandles {
   instagram: string | null
   facebook: string | null

@@ -2,6 +2,11 @@
 // The browser side of lib/api.ts: a call that unwraps `{ data }` or throws the failure's code,
 // and one that follows `meta.next` until a list is complete. Client-safe (no server import).
 
+/**
+ * What `call` throws for any answer that is not a success envelope: `code` is the failure's own,
+ * or 'unknown' when the body was not one (a proxy page, a 500 without JSON, a 2xx with a bad
+ * body), so a caller switches on `code` and shows `message` instead of reading the response.
+ */
 export class ApiError extends Error {
   code: string
   status: number
@@ -19,6 +24,11 @@ const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'obj
 const isSuccess = <T>(b: unknown): b is Success<T> => isObject(b) && 'data' in b
 const isFailure = (b: unknown): b is Failure => isObject(b) && typeof b.code === 'string' && typeof b.error === 'string'
 
+/**
+ * One request to a route handler, unwrapped: the envelope's `data` and its `meta.next` cursor
+ * (null when the list is complete or the route is not a list). A non-2xx status, or a body
+ * without `data` even on 2xx, throws ApiError; `init` goes to fetch untouched.
+ */
 export async function call<T>(input: string, init?: RequestInit): Promise<{ data: T; next: string | null }> {
   const res = await fetch(input, init)
   const body: unknown = await res.json().catch(() => null)

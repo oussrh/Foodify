@@ -4,6 +4,7 @@
 // (lib/ never imports app/actions — see .dependency-cruiser.cjs). Returns the public URL.
 import { publicEnv } from '@/lib/env'
 
+/** Which of the two brand images a tile edits; it is also the Cloudinary public id, so a new upload replaces the old file. */
 export type BrandImageKind = 'logo' | 'cover'
 
 /** Shape of `uploadRestaurantLogo` / `uploadRestaurantCover` from app/actions/restaurant-actions. */
@@ -12,11 +13,17 @@ export type BrandUploadAction = (
   slug: string,
 ) => Promise<{ success: boolean; error?: string; logoUrl?: string; coverUrl?: string }>
 
+/** The browser-side limits per image kind, the same as the server's `imageUpload(5|10)` but with the SVG cover refused here already; `hint` is the tile's caption. */
 export const BRAND_IMAGE_LIMITS = {
   logo: { maxBytes: 5 * 1024 * 1024, types: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml'], hint: 'PNG, SVG, JPG or WebP · square works best · up to 5 MB' },
   cover: { maxBytes: 10 * 1024 * 1024, types: ['image/png', 'image/jpeg', 'image/jpg', 'image/webp'], hint: 'JPG, PNG or WebP · wide photo, at least 1600 px · up to 10 MB' },
 } as const
 
+/**
+ * The message to show before any upload starts, or null when the file may go. The type list and
+ * the size limit differ per kind (an SVG logo is fine, an SVG cover is not). The server action
+ * has its own check; this one exists so the tile can refuse without a network round trip.
+ */
 export function validateBrandImage(file: File, kind: BrandImageKind): string | null {
   const limits = BRAND_IMAGE_LIMITS[kind]
   if (!(limits.types as readonly string[]).includes(file.type)) return `That file type is not supported. ${limits.hint}.`
@@ -40,6 +47,11 @@ async function uploadDirect(file: File, kind: BrandImageKind, slug: string): Pro
   return json.secure_url as string
 }
 
+/**
+ * The public URL of the stored image: the unsigned direct upload when it works, else one try
+ * through `viaServer`, whose failure is then the error thrown. `kind` picks which URL of the
+ * action's result is returned (logoUrl or coverUrl).
+ */
 export async function uploadBrandImage(
   file: File,
   kind: BrandImageKind,

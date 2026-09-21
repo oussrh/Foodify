@@ -14,3 +14,6 @@
 - [Type-only cycles](patterns_type-only-cycles.md) - depcruise no-circular still fails a value import that closes a cycle through an import type; shared types in a leaf
 - [Mutation restore](patterns_mutation-restore.md) - restoring a mutation-tested file with `git checkout --` wipes the refactor in progress; undo the mutation itself
 - [Strict flags](patterns_strict-flags.md) - noUncheckedIndexedAccess + exactOptionalPropertyTypes to zero: definedFields at the Prisma boundary, widen the child prop, never zod exactOptional, utf-8 in python edits
+- [JSDoc boundary](patterns_jsdoc-boundary.md) - phase 11 lib/** recipe: anchor-table insert with a line-1 case, trace every stated number to its constant, exported schema consts are invisible to the rule, the red/green pair (STUB: body lost to an overwrite, rewrite it)
+- [JSDoc actions and routes](patterns_jsdoc-actions-routes.md) - phase 11 app/actions, app/api: the five false claims a first draft makes (strip vs strict, toggle races, updateMany count, cursor restart, '' stored) and where each truth lives
+- [Shared memory dir](patterns_shared-scratchpad.md) - parallel agents also share the memory directory; `ls` it before Write, a same-named file is replaced silently

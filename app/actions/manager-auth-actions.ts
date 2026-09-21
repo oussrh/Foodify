@@ -4,6 +4,11 @@ import { managerOtpEmail } from '@/lib/emails/manager-otp-email'
 import { requestOtp } from '@/lib/otp-request'
 import { otpRequest } from '@/lib/schemas/user'
 
+/**
+ * The manager sign-in's first step, open to anyone: parses `otpRequest` (two non-empty fields, nothing stricter) and
+ * mails a ten-minute code to a RESTAURANT_ADMIN account whose password matches; a super admin is refused here, unlike at
+ * the credentials step. Answers `{ success }` or `{ error }`, one message for every failure of the caller's making.
+ */
 export async function requestManagerOtp(rawEmail: string, rawPassword: string) {
   const parsed = otpRequest.safeParse({ email: rawEmail, password: rawPassword })
   if (!parsed.success) return { error: 'Invalid email or password' }

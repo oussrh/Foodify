@@ -16,4 +16,5 @@ const prisma = globalForPrisma.prisma ?? createClient()
 
 if (!publicEnv.isProduction) globalForPrisma.prisma = prisma
 
+/** The one client of the process; every query, guard and action goes through it (the integration suite proxies this module to its transaction). */
 export default prisma

@@ -3,11 +3,14 @@
 // luminance and the WCAG contrast ratio. The brand palette (lib/brand-color.ts) and the token
 // contrast test (test/contrast.test.ts) are built on it.
 
+/** Channels 0..255, left unrounded between conversions; `rgbToHex` is where rounding and clamping happen. */
 export type RGB = [number, number, number]
+/** Hue, saturation and lightness all in 0..1 (the hue is a turn, not degrees), as `rgbToHsl` produces and `hslToRgb` expects. */
 export type HSL = [number, number, number]
 
 
 
+/** Accepts #rgb and #rrggbb, with or without the hash and surrounding space; null for anything else, so a stored colour is never trusted blindly. */
 export function hexToRgb(hex: string): RGB | null {
   let h = hex.trim().replace('#', '')
   if (h.length === 3) h = h.replace(/./g, (c) => c + c)
@@ -16,6 +19,7 @@ export function hexToRgb(hex: string): RGB | null {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
 }
 
+/** Always lowercase #rrggbb: each channel rounded and clamped to 0..255, so a derived ink is storable and comparable as-is. */
 export function rgbToHex([r, g, b]: RGB): string {
   return (
     '#' +
@@ -28,6 +32,7 @@ export function rgbToHex([r, g, b]: RGB): string {
   )
 }
 
+/** A grey comes back with hue 0 and saturation 0 rather than NaN, so a grey brand colour goes through the ink derivation unharmed. */
 export function rgbToHsl([r, g, b]: RGB): HSL {
   r /= 255
   g /= 255
@@ -71,6 +76,7 @@ function luminance([r, g, b]: RGB): number {
   return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
 }
 
+/** The WCAG 2 contrast ratio, 1..21, the same whichever argument is the text; AA for body text is 4.5, which lib/brand-color pushes an ink to. */
 export function contrast(a: RGB, b: RGB): number {
   const la = luminance(a) + 0.05
   const lb = luminance(b) + 0.05

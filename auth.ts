@@ -30,6 +30,11 @@ declare module 'next-auth/jwt' {
   }
 }
 
+/**
+ * NextAuth with JWT sessions; `role` rides the token into `session.user`. The credentials provider decides in this order:
+ * the form parses (`credentials`), the account exists and its password matches (else null, a quiet failure), the portal
+ * fits (a super admin passes either), then the second factor (a pending emailed code, else TOTP, else none); those two throw.
+ */
 export const {
   handlers: { GET, POST },
   auth,

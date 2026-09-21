@@ -6,6 +6,8 @@ status: living
 audience: ["developer", "agent"]
 tags: ["standards", "adoption", "decisions"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
+source_truth: ["abatty.config.json", "docs/ADOPTION_STATE.json", "eslint.config.mjs"]
+last_verified: "2026-09-21"
 ---
 
 # Adoption decisions
@@ -206,3 +208,16 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Alternative set aside**: Testcontainers (a dependency for what one docker command does); truncating tables per test (slower, and it would erase the seed the browser suite needs on CI's shared service).
 - **Re-read when**: a test needs to observe a constraint violation, or the suite outgrows one connection.
 
+## 2026-09-21 · phase 11 · JSDoc held on the boundary surface and on every export there, not on components
+
+- **Situation**: CODE.7 wants `jsdoc/require-jsdoc` `publicOnly` on the exported surface: functions in service and library code, hooks, permission checks, and any schema whose shape encodes a decision. 308 exports had no block on 2026-09-21: 121 on `lib/**`, `app/actions/**`, `app/api/**`, `auth.ts` and `proxy.ts`, 187 on `components/**`.
+- **Default taken**: the rule at error on those five paths only, with `no-types` at error and the fixer off (`enableFixer: false`: an empty `/** */` satisfies the rule and documents nothing, and the reviewer found the first draft had left the fixer on). Its contexts are function declarations, every exported `VariableDeclarator`, the default export (an arrow, a zod schema, a payload select, a table: the plugin's arrow-only context left `export const x = z.object(...)` unseen, which the lib worker noticed and the reviewer would have missed), exported types and interfaces. A block states what the code does not say on its own: which guard, which schema, what is answered, what is refused, the number's origin (the ten-minute code names `OTP_TTL_MS`, the fifteen-minute link names the action that stores it). Components are not held: a component's contract is its props type and its markup, and a block there restates the props, which is the rot `no-types` exists to prevent.
+- **Alternative set aside**: the plugin's `flat/recommended-typescript-flavor` preset (it pairs every `@param` and `@returns` on every function, private ones too, which the standard does not ask and the surface would answer with tags rather than sentences); holding `components/**` (187 blocks about props); a repository probe instead of the plugin (the plugin sees the AST the probe would approximate).
+- **Re-read when**: a component gains a rule its props do not say (then that file joins the held list), a hook module appears outside `lib/`, or a block is found restating a signature (then the standard's "what a reader would get wrong" was not applied).
+
+## 2026-09-21 · phase 11 · what each living doc is verified against
+
+- **Situation**: DOC.5 measures a document's freshness by the diff: `source_truth` names the files it describes, `last_verified` the day it was last read against them, and `docs.behindCode` counts the docs a cited file has moved past.
+- **Default taken**: `docs/README.md` cites `docs/ADOPTION_STATE.json` and `abatty.config.json` (the index changes when the programme's state or its instrument does); `docs/LESSONS.md` cites `CLAUDE.md` and `.claude/rules/size-limits.md` (a lesson lives behind a line of one of them); `docs/ADOPTION_DECISIONS.md` cites `abatty.config.json`, `docs/ADOPTION_STATE.json` and `eslint.config.mjs` (a decision is a config line with its reason); `docs/STANDARDS_PROGRESS.md` cites `scripts/ci/standards-baseline.json`, `abatty.probes.mjs` and `docs/ADOPTION_STATE.json` (its scoreboard is the baseline read aloud). The date moves in the commit that changes a cited file, after the doc was re-read against it: every phase close moves the baseline and the state, so the progress and index docs are re-dated at every close.
+- **Alternative set aside**: citing the whole tree (every commit would stale every doc, and the number would say nothing); no `source_truth` at all (DOC-FRESHNESS partial for good, and a doc's date meaning "someone opened it").
+- **Re-read when**: a cited file is renamed or split, or a doc starts describing a file it does not cite.

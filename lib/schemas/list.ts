@@ -7,10 +7,12 @@
 // list early. Sorting ends on `id` so a key is unambiguous.
 import { z } from 'zod'
 
+/** The query of every admin list: `limit` 1..500 (100 when absent; a page of 500 is the most one request may hold) and an optional non-empty `cursor` from a previous page's `meta.next`. */
 export const listQuery = z.object({
   limit: z.coerce.number().int().min(1).max(500).default(100),
   cursor: z.string().min(1).optional(),
 })
+/** `listQuery` after parsing: `limit` is always present (100 by default), `cursor` only when the client sent one. */
 export type ListQuery = z.infer<typeof listQuery>
 
 /** The list parameters of a request as the handler parses them, an absent one absent rather than the string "null". */

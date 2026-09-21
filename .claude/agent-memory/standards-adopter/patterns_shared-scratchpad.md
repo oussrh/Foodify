@@ -11,3 +11,9 @@ Namespace scratch work under `<scratchpad>/<territory>/` (e.g. `t2/`) and only e
 HEAD copies when I wrote mine there; a `rm -rf` of "my" folder would have destroyed their proof.
 **How to apply:** first command of a run: `mkdir -p <scratchpad>/<territory>`; put the eslint
 override config, the HEAD copies (`git show HEAD:<path>`), the render harness and its `out/` there.
+
+The same holds for the agent-memory directory: on 2026-09-21 (phase 11) `Write` to
+`patterns_jsdoc-boundary.md` silently replaced the note the lib/** agent had written minutes
+earlier under that name (untracked, so unrecoverable). `ls` the memory directory and `git status`
+it before writing a new note; if a same-topic file exists, append to it with Edit or pick a name
+carrying the territory.

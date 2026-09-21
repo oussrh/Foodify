@@ -8,8 +8,11 @@ import { afterCursor, listParams, listQuery, page, pageArgs } from '@/lib/schema
 // An unknown or absent role filters nothing, as before.
 const roleFilter = z.enum(['SUPER_ADMIN', 'RESTAURANT_ADMIN']).optional().catch(undefined)
 
-// Used by the assign-users dialog, which follows meta.next until the list is complete. Only the
-// fields the UI needs: never the password hash, OTP or reset tokens.
+/**
+ * GET, super admin only (401 or 403 in the envelope). Query `role` (SUPER_ADMIN or RESTAURANT_ADMIN, else no filter), `limit`
+ * 1..500 (default 100) and an opaque `cursor`: a bad limit or an empty cursor is 400 invalid_query, a foreign cursor restarts
+ * the list. Answers `{ data: [{ id, email, role }], meta: { next } }` in email order, never a secret column; the assign-users dialog follows `next`.
+ */
 export async function GET(request: NextRequest) {
   try {
     await requireSuperAdmin()

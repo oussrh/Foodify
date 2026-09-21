@@ -3,9 +3,13 @@
 import { z } from 'zod'
 import { bilingualName, uuid } from './common'
 
+/** A new category or subcategory is its two names; the parent (restaurant or category) is the action's argument, guarded there. */
 export const categoryInput = bilingualName
+/** Either name and/or `isActive` of a category or subcategory; `sortOrder` changes only through a reorder (`order`), never here. */
 export const categoryPatch = bilingualName.partial().extend({ isActive: z.boolean().optional() })
+/** `categoryInput` after parsing. */
 export type CategoryInput = z.infer<typeof categoryInput>
+/** `categoryPatch` after parsing. */
 export type CategoryPatch = z.infer<typeof categoryPatch>
 /** The ids of one parent's children in their new order. */
 export const order = z.array(uuid)

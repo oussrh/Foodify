@@ -1,5 +1,9 @@
 import { serverEnv } from '@/lib/env'
 
+/**
+ * HTML of the mail sent to the CURRENT address when a manager asks to change it: the link carries
+ * the raw token, and the 15 minutes it states is the expiry profile-actions stores with it.
+ */
 export function oldEmailConfirmationEmail(token: string) {
   const url = `${serverEnv.authUrl}/manager/change-email/confirm-old?token=${token}`
   return `
@@ -14,6 +18,10 @@ export function oldEmailConfirmationEmail(token: string) {
   `
 }
 
+/**
+ * HTML of the mail sent to the NEW address once the old one has confirmed: the link carries the
+ * verify token, and the 15 minutes it states is the expiry profile-actions stores with it.
+ */
 export function newEmailVerificationEmail(token: string) {
   const url = `${serverEnv.authUrl}/manager/change-email/confirm-new?token=${token}`
   return `
