@@ -78,6 +78,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Fixed
 
+- The restaurant's brand colour is painted: `bg-brand`, `text-brand`, `bg-brand-tint` and `text-brand-on` had never resolved (the AR button and chips on the public menu were transparent with the page's text colour, the phone preview ignored the colour), and a nested `.dark`/`.light` scope (the settings preview's toggle, a forced menu theme) kept the root's light tokens: Tailwind's `@theme` computed the `--color-*` tokens once at `:root`; the block is `@theme inline` now, so every utility resolves its token on the element.
 - The category manager no longer reports a hydration mismatch on every card: the drag context takes a stable React id instead of dnd-kit's counter, which differed between the server and the client.
 - A dish can only sit under a subcategory of its own restaurant (`requireSubcategoryOf` in `createDish` and `updateDish`): a manager could give a dish another restaurant's subcategory id and place it on that restaurant's public menu. The public menu's loader also filters the dishes of every subcategory by the restaurant, so a row written past the action is never shown either. Both proven on the real database.
 - While a dish or filter sheet is open, the public menu behind it is `inert`: Radix hid it from assistive technology but its links and buttons stayed in the tab order, which the browser suite's axe scan caught once in ten runs (`aria-hidden-focus`); now deterministic.
