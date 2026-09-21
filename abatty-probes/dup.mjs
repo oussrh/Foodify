@@ -36,42 +36,49 @@ function runJscpd(dir, extra) {
   return execFileSync(process.execPath, [JSCPD, ...roots, ...FLAGS, ...extra], { cwd: dir, stdio: ['ignore', 'pipe', 'pipe'], encoding: 'utf8' })
 }
 
+/** jscpd's JSON report for `dir`, empty when no file survived its filters (every file under its minimum, no root or format match: the reporter writes nothing then); its stderr in the error when it fails. @param {string} dir */
+function jsonReport(dir) {
+  const out = mkdtempSync(join(tmpdir(), 'jscpd-'))
+  try {
+    const ran = runJscpd(dir, ['--reporters', 'json', '--output', out, '--silent'])
+    const reportFile = join(out, 'jscpd-report.json')
+    if (ran === null || !existsSync(reportFile)) return { statistics: { total: { sources: 0 } }, duplicates: [] }
+    return JSON.parse(readFileSync(reportFile, 'utf8'))
+  } catch (e) {
+    const said = e && typeof e === 'object' && 'stderr' in e ? String(e.stderr).trim() : ''
+    throw new Error(`jscpd failed${said ? `: ${said}` : ''}`)
+  } finally {
+    rmSync(out, { recursive: true, force: true })
+  }
+}
+
+/**
+ * A clone as charged: to the lexicographically smaller of its two paths. jscpd's own "first file"
+ * is the one it happened to read later, which follows the traversal order and would move a
+ * file's debt with a rename. @param {string} dir @param {any} d one of the report's `duplicates`
+ * @returns {Clone}
+ */
+function toClone(dir, d) {
+  const rel = (name) => relative(dir, resolve(dir, name)).replace(/\\/g, '/')
+  const a = { path: rel(d.firstFile.name), line: d.firstFile.startLoc.line }
+  const b = { path: rel(d.secondFile.name), line: d.secondFile.startLoc.line }
+  const [first, second] = a.path < b.path ? [a, b] : [b, a]
+  return { lines: d.lines, first: first.path, firstLine: first.line, second: second.path, secondLine: second.line }
+}
+
 /**
  * The clones under `dir` and how many files jscpd read (its `sources`, so a moved root reads as a
- * scan of nothing, not as zero clones). A clone is charged to the lexicographically smaller of
- * its two paths: jscpd's own "first file" is the one it happened to read later, which follows the
- * traversal order and would move a file's debt with a rename.
+ * scan of nothing, not as zero clones), once per measurement.
  * @param {object} ctx the measurement's context @param {string} dir
  * @returns {Report}
  */
 function reportOf(ctx, dir) {
   const known = reports.get(ctx)
   if (known) return known
-  const out = mkdtempSync(join(tmpdir(), 'jscpd-'))
-  try {
-    let report = { statistics: { total: { sources: 0 } }, duplicates: [] }
-    try {
-      const ran = runJscpd(dir, ['--reporters', 'json', '--output', out, '--silent'])
-      // The JSON reporter writes nothing when no file survives jscpd's filters (every file under its minimum, no root or format match).
-      const reportFile = join(out, 'jscpd-report.json')
-      if (ran !== null && existsSync(reportFile)) report = JSON.parse(readFileSync(reportFile, 'utf8'))
-    } catch (e) {
-      const said = e && typeof e === 'object' && 'stderr' in e ? String(e.stderr).trim() : ''
-      throw new Error(`jscpd failed${said ? `: ${said}` : ''}`)
-    }
-    const rel = (name) => relative(dir, resolve(dir, name)).replace(/\\/g, '/')
-    const clones = (report.duplicates ?? []).map((d) => {
-      const a = { path: rel(d.firstFile.name), line: d.firstFile.startLoc.line }
-      const b = { path: rel(d.secondFile.name), line: d.secondFile.startLoc.line }
-      const [first, second] = a.path < b.path ? [a, b] : [b, a]
-      return { lines: d.lines, first: first.path, firstLine: first.line, second: second.path, secondLine: second.line }
-    })
-    const result = { sources: report.statistics?.total?.sources ?? 0, clones }
-    reports.set(ctx, result)
-    return result
-  } finally {
-    rmSync(out, { recursive: true, force: true })
-  }
+  const report = jsonReport(dir)
+  const result = { sources: report.statistics?.total?.sources ?? 0, clones: (report.duplicates ?? []).map((d) => toClone(dir, d)) }
+  reports.set(ctx, result)
+  return result
 }
 
 /** The probe result: one finding per clone, weighted by `weightOf` (one, or the clone's lines). @param {object} c @param {(clone: Clone) => number} weightOf */
