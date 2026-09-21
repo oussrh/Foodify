@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { Prisma } from '@/generated/prisma/client'
 import { categoryRow, dishRow, restaurantRow, subcategoryRow } from '@/test/factories/prisma'
-import { serializeCategories, serializeDish, serializeRestaurant } from './menu-data'
+import { serializeCategories, serializeDish, serializeRestaurant, siteOrigin } from './menu-data'
 
 describe('serializeDish', () => {
   it('sends the price as an exact two-decimal string, never a float', () => {
