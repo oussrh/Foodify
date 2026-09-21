@@ -32,16 +32,16 @@ export const dishInput = bilingualName.extend({
 })
 /** Any subset of `dishInput` plus `isActive`; a field left out is left as it was (`definedFields` at the write). */
 export const dishPatch = dishInput.partial().extend({ isActive: z.boolean().optional() })
-/** A whole dish as the create form submits and the create action parses; `price` is already normalised to two fraction digits. */
+/** `dishInput` after parsing: `price` is already the two-fraction-digit string `money` produces. */
 export type DishInput = z.infer<typeof dishInput>
-/** Any subset of the dish fields plus `isActive`; what the edit form submits and the update action parses. */
+/** `dishPatch` after parsing. */
 export type DishPatch = z.infer<typeof dishPatch>
 
 /** A new ingredient is its two names and nothing else; the dish comes from the action's argument, guarded there. */
 export const ingredientInput = bilingualName
 /** Either name of an ingredient, or both; an ingredient cannot be moved to another dish. */
 export const ingredientPatch = bilingualName.partial()
-/** Both names of a new ingredient, as the ingredient form submits them. */
+/** `ingredientInput` after parsing. */
 export type IngredientInput = z.infer<typeof ingredientInput>
-/** Either name of an ingredient, as an edit submits it. */
+/** `ingredientPatch` after parsing. */
 export type IngredientPatch = z.infer<typeof ingredientPatch>

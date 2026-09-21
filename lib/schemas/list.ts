@@ -12,7 +12,7 @@ export const listQuery = z.object({
   limit: z.coerce.number().int().min(1).max(500).default(100),
   cursor: z.string().min(1).optional(),
 })
-/** A list request after parsing: `limit` always present (100 by default), `cursor` only when the client sent one. */
+/** `listQuery` after parsing: `limit` is always present (100 by default), `cursor` only when the client sent one. */
 export type ListQuery = z.infer<typeof listQuery>
 
 /** The list parameters of a request as the handler parses them, an absent one absent rather than the string "null". */

@@ -75,8 +75,10 @@ const config = [
         'error',
         {
           publicOnly: true,
+          // an empty block would satisfy the rule and document nothing
+          enableFixer: false,
           require: { FunctionDeclaration: true, FunctionExpression: false, ArrowFunctionExpression: false, ClassDeclaration: true, MethodDefinition: false },
-          contexts: ['ExportNamedDeclaration > VariableDeclaration > VariableDeclarator', 'ExportNamedDeclaration > TSTypeAliasDeclaration', 'ExportNamedDeclaration > TSInterfaceDeclaration'],
+          contexts: ['ExportNamedDeclaration > VariableDeclaration > VariableDeclarator', 'ExportDefaultDeclaration', 'ExportNamedDeclaration > TSTypeAliasDeclaration', 'ExportNamedDeclaration > TSInterfaceDeclaration'],
         },
       ],
       'jsdoc/no-types': 'error',

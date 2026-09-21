@@ -7,9 +7,9 @@ import { bilingualName, uuid } from './common'
 export const categoryInput = bilingualName
 /** Either name and/or `isActive` of a category or subcategory; `sortOrder` changes only through a reorder (`order`), never here. */
 export const categoryPatch = bilingualName.partial().extend({ isActive: z.boolean().optional() })
-/** Both names of a new category or subcategory; the same shape serves both levels. */
+/** `categoryInput` after parsing. */
 export type CategoryInput = z.infer<typeof categoryInput>
-/** Either name and/or `isActive` of a category or subcategory, as an edit submits it. */
+/** `categoryPatch` after parsing. */
 export type CategoryPatch = z.infer<typeof categoryPatch>
 /** The ids of one parent's children in their new order. */
 export const order = z.array(uuid)

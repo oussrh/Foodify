@@ -47,9 +47,9 @@ export const restaurantInput = z.object({
 })
 /** Any subset of `restaurantInput` plus `menuTheme`; a field left out is left as it was. */
 export const restaurantPatch = restaurantInput.partial().extend({ menuTheme: z.enum(['system', 'light', 'dark']).optional() })
-/** A whole restaurant as the create form submits it; the optional URL fields accept '' as "not set" so a cleared field still validates. */
+/** `restaurantInput` after parsing. */
 export type RestaurantInput = z.infer<typeof restaurantInput>
-/** Any subset of the restaurant fields plus `menuTheme`, which only the branding tab sets; what the settings forms submit. */
+/** `restaurantPatch` after parsing. */
 export type RestaurantPatch = z.infer<typeof restaurantPatch>
 
 /** A slug as a lookup key (the uploads name their restaurant by it): whatever is stored, not the rule a new one must meet. */

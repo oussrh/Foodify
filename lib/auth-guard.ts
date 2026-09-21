@@ -10,7 +10,7 @@ import prisma from '@/lib/prisma'
 import { fail } from '@/lib/api'
 
 /**
- * Thrown by every guard here; `status` is 401 (nobody signed in) or 403 (signed in, not allowed).
+ * Thrown by every guard here (requireSuperAdminPage catches it and redirects instead); `status` is 401 (nobody signed in) or 403 (signed in, not allowed).
  * A row that does not exist and a row that belongs to someone else raise the same 403 with the
  * same message, so an id cannot be probed through a guard.
  */
