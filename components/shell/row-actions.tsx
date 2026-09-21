@@ -131,15 +131,15 @@ export function DishRowMenu({ dishId, dishName, editHref, isMostPurchased }: Dis
 interface RestaurantRowMenuProps {
   restaurantId: string
   restaurantName: string
-  role: 'admin' | 'manager'
+  portal: 'admin' | 'manager'
   slug: string
 }
 
-export function RestaurantRowMenu({ restaurantId, restaurantName, role, slug }: RestaurantRowMenuProps) {
+export function RestaurantRowMenu({ restaurantId, restaurantName, portal, slug }: RestaurantRowMenuProps) {
   const [confirm, setConfirm] = useState(false)
   const [pending, startTransition] = useTransition()
   const router = useRouter()
-  const base = `/${role}/restaurants/${restaurantId}`
+  const base = `/${portal}/restaurants/${restaurantId}`
 
   return (
     <>
@@ -159,7 +159,7 @@ export function RestaurantRowMenu({ restaurantId, restaurantName, role, slug }: 
           <DropdownMenuItem asChild>
             <Link href={`${base}/edit` as Route}>Settings</Link>
           </DropdownMenuItem>
-          {role === 'admin' && (
+          {portal === 'admin' && (
             <DropdownMenuItem asChild>
               <Link href={`${base}/users` as Route}>People</Link>
             </DropdownMenuItem>
@@ -169,7 +169,7 @@ export function RestaurantRowMenu({ restaurantId, restaurantName, role, slug }: 
               Open public menu
             </a>
           </DropdownMenuItem>
-          {role === 'admin' && (
+          {portal === 'admin' && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => setConfirm(true)}>

@@ -82,7 +82,7 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Situation**: `role="admin" | "manager"` is this app's portal prop on five of its own components (`SignInFlow`, `AppShell`, `RestaurantRowMenu`, `DishesList`, `RestaurantsList`) with twelve call sites; `jsx-a11y/aria-role` reads it as an invalid ARIA role.
 - **Default taken**: the rule's `ignoreNonDOM: true`, with the shadcn primitives that render DOM (Badge, the Card and Table parts, Button, Input, Textarea, Label, Link, Image) mapped so a `role` on them is still checked. The reviewer showed `<Badge role="stauts">` passed before the mapping; it fails after.
 - **Alternative set aside**: renaming the prop to `portal`. Seventeen files change; that is a codemod (CODE.11) and belongs with the shell work of phase 8, not inside the lint phase.
-- **Re-read when**: phase 8 touches the shells; rename then and drop the option.
+- **Re-read when**: phase 8 touches the shells; rename then and drop the option. **Closed 2026-09-21 (phase 9, the rename codemod)**: the prop is `portal` on the eight declaring components and twelve call sites; `ignoreNonDOM` is gone.
 
 ## 2026-09-20 · phase 4 · the shared schemas carry English sentences, not message keys
 

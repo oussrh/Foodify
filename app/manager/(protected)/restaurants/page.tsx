@@ -53,7 +53,7 @@ export default async function ManagerRestaurantsPage({
         title="Restaurants"
         description={restaurants.length === 1 ? 'The restaurant you manage' : `${restaurants.length} restaurants you manage`}
       />
-      <RestaurantsList role="manager" rows={rows} search={search} />
+      <RestaurantsList portal="manager" rows={rows} search={search} />
     </div>
   )
 }

@@ -67,7 +67,7 @@ export default async function DishesPage({
       />
       {!search && rows.length > 0 && <DishStatStrip rows={rows} />}
       <DishesList
-        role="manager"
+        portal="manager"
         restaurantId={restaurant.id}
         currency={currency}
         rows={rows}

@@ -61,7 +61,7 @@ export default async function RestaurantsPage({
         }
       />
       <RestaurantsList
-        role="admin"
+        portal="admin"
         rows={rows}
         search={search}
         emptyAction={

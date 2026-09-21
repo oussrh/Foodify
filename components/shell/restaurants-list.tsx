@@ -20,14 +20,14 @@ export interface RestaurantListRow {
 }
 
 interface RestaurantsListProps {
-  role: 'admin' | 'manager'
+  portal: 'admin' | 'manager'
   rows: RestaurantListRow[]
   search: string
   emptyAction?: React.ReactNode
 }
 
 /** Search box (GET) plus the table. Server-renderable. */
-export default function RestaurantsList({ role, rows, search, emptyAction }: RestaurantsListProps) {
+export default function RestaurantsList({ portal, rows, search, emptyAction }: RestaurantsListProps) {
   return (
     <div className="flex flex-col gap-4">
       <ListSearch value={search} placeholder="Search restaurants" label="Search restaurants" />
@@ -36,7 +36,7 @@ export default function RestaurantsList({ role, rows, search, emptyAction }: Res
         <EmptyState
           title={search ? `Nothing matches “${search}”` : 'No restaurants yet'}
           description={search ? 'Try a shorter word, or clear the search.' : undefined}
-          action={search ? <Link href={`/${role}/restaurants` as Route} className="text-sm font-medium text-primary hover:underline">Clear search</Link> : emptyAction}
+          action={search ? <Link href={`/${portal}/restaurants` as Route} className="text-sm font-medium text-primary hover:underline">Clear search</Link> : emptyAction}
         />
       ) : (
         <Table>
@@ -46,7 +46,7 @@ export default function RestaurantsList({ role, rows, search, emptyAction }: Res
               <TableHead className="hidden sm:table-cell">City</TableHead>
               <TableHead>Dishes</TableHead>
               <TableHead className="hidden md:table-cell">Categories</TableHead>
-              {role === 'admin' && <TableHead className="hidden md:table-cell">Managers</TableHead>}
+              {portal === 'admin' && <TableHead className="hidden md:table-cell">Managers</TableHead>}
               <TableHead className="w-[1%]">
                 <span className="sr-only">Actions</span>
               </TableHead>
@@ -65,7 +65,7 @@ export default function RestaurantsList({ role, rows, search, emptyAction }: Res
                       )}
                     </span>
                     <div className="min-w-0">
-                      <Link href={`/${role}/restaurants/${r.id}/menu` as Route} className="block truncate font-medium hover:underline">
+                      <Link href={`/${portal}/restaurants/${r.id}/menu` as Route} className="block truncate font-medium hover:underline">
                         {r.name}
                       </Link>
                       <span className="block truncate text-xs text-muted-foreground">/{r.slug}</span>
@@ -78,9 +78,9 @@ export default function RestaurantsList({ role, rows, search, emptyAction }: Res
                   {r.dishCount > 0 && <span className="text-muted-foreground"> · {r.liveCount} live</span>}
                 </TableCell>
                 <TableCell className="tnum hidden md:table-cell">{r.categoryCount}</TableCell>
-                {role === 'admin' && <TableCell className="tnum hidden md:table-cell">{r.managerCount}</TableCell>}
+                {portal === 'admin' && <TableCell className="tnum hidden md:table-cell">{r.managerCount}</TableCell>}
                 <TableCell className="text-right">
-                  <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} role={role} slug={r.slug} />
+                  <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} portal={portal} slug={r.slug} />
                 </TableCell>
               </TableRow>
             ))}
