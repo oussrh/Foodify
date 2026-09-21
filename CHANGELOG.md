@@ -77,6 +77,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Fixed
 
+- The category manager no longer reports a hydration mismatch on every card: the drag context takes a stable React id instead of dnd-kit's counter, which differed between the server and the client.
 - A dish can only sit under a subcategory of its own restaurant (`requireSubcategoryOf` in `createDish` and `updateDish`): a manager could give a dish another restaurant's subcategory id and place it on that restaurant's public menu. The public menu's loader also filters the dishes of every subcategory by the restaurant, so a row written past the action is never shown either. Both proven on the real database.
 - While a dish or filter sheet is open, the public menu behind it is `inert`: Radix hid it from assistive technology but its links and buttons stayed in the tab order, which the browser suite's axe scan caught once in ten runs (`aria-hidden-focus`); now deterministic.
 - The dish and restaurant lists' search icon carried a broken utility class (`-/2`) and sat off-centre; the three list pages share one `ListSearch`. The admins table no longer receives each admin's TOTP secret, only whether one is set. Empty table cells show `-`.
