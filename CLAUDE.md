@@ -76,7 +76,7 @@ Key models and relationships:
 
 ### Boundary map (held by `pnpm run graph`, one dependency-cruiser rule per arrow)
 - `lib/` is the shared layer and imports nothing from `app/` or `components/`; `components/` imports `app/actions/*` only (never a page, layout or route); `app/actions` and `app/api` import no component.
-- `lib/prisma`, `lib/mail`, `lib/cloudinary`, `lib/auth-guard`, `lib/otp-request`, `lib/sign-in-checks` and `auth.ts` are server-only: a component reaches them through a server action. `components/admin` and `components/manager` never import each other (shared pieces go to `components/shell` or `components/forms`).
+- `lib/prisma`, `lib/mail`, `lib/cloudinary`, `lib/auth-guard`, `lib/otp-request`, `lib/sign-in-checks` and `auth.ts` are server-only: a component reaches them through a server action. `components/admin` and `components/manager` never import each other (what both need lives anywhere outside the two portal folders: `components/shell`, `components/forms`, the form directories).
 - Dead code is a gate (`pnpm run dead`, knip at zero); duplication is a ratchet (`pnpm dup`; `dup.clones` / `dup.clonedLines` may only fall).
 
 ### Server Actions Pattern

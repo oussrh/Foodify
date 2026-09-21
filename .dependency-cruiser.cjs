@@ -1,17 +1,16 @@
 /**
- * The import graph, checked instead of described (CODE-5). Copy to the repository root.
+ * The import graph, checked instead of described (CODE-5).
  *
  * The first five rules are the same on every repository. The rules under "the boundary map"
- * are the arrows of CLAUDE.md §3 that must not exist, one rule each: edit them to this
- * repository's directories and delete the example. A violation that is there today goes into
- * `.dependency-cruiser-known-violations.json` (`npx depcruise src --baseline`), which the gate
+ * are the arrows of CLAUDE.md ("Boundary map") that must not exist, one rule each. A violation
+ * that is there today goes into `.dependency-cruiser-known-violations.json`
+ * (`pnpm exec depcruise <roots> --config .dependency-cruiser.cjs --baseline`), which the gate
  * passes with `--ignore-known` and which may only shrink - the tool's own per-finding debt,
- * the same principle as the ratchet's `debt`. Regenerating the baseline when a number rose
- * is what `check-direction.mjs` refuses at night.
+ * the same principle as the ratchet's `debt`. It is empty.
  *
- * Run: `npx depcruise src --config .dependency-cruiser.cjs --ignore-known --output-type err`
- *      (exit code = number of error-severity violations; the gate treats non-zero as red)
- * Graph: `npx depcruise src --config .dependency-cruiser.cjs --output-type mermaid > docs/graph.mmd`
+ * Run: `pnpm run graph` (package.json holds the roots: app components lib auth.ts proxy.ts;
+ *      exit code = number of error-severity violations; the gate treats non-zero as red)
+ * Graph: `pnpm run graph:mermaid > docs/graph.mmd`
  *
  * @type {import('dependency-cruiser').IConfiguration}
  */
@@ -99,9 +98,9 @@ module.exports = {
     {
       name: "server-only-never-reaches-the-client",
       severity: "error",
-      comment: "The database client, the mailer, the Cloudinary signer, the guards and the auth config hold a secret or a connection: a component reaches them through a server action only (CODE-10, SEC-1). lib/env is shared on purpose (publicEnv) and is not listed.",
+      comment: "The database client, the mailer, the Cloudinary signer, and every lib module that reaches one of them (the guards, the sign-in checks, the OTP request, the menu loader: the transitive closure, recomputed when a lib module starts importing one) hold a secret or a connection: a component reaches them through a server action only (CODE-10, SEC-1). lib/env is shared on purpose (publicEnv) and is not listed.",
       from: { path: "^components/" },
-      to: { path: "^(?:lib/(?:prisma|mail|cloudinary|auth-guard|otp-request|sign-in-checks)|auth)[.]ts$" },
+      to: { path: "^(?:lib/(?:prisma|mail|cloudinary|auth-guard|otp-request|sign-in-checks|menu-loader)|auth)(?:[.]ts|/)" },
     },
     {
       name: "portals-never-import-each-other",

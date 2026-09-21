@@ -24,7 +24,7 @@
     "graph": "depcruise app components lib auth.ts proxy.ts --config .dependency-cruiser.cjs --ignore-known --output-type err",
     "graph:mermaid": "depcruise app components lib --config .dependency-cruiser.cjs --output-type mermaid",
     "dead": "knip --max-issues 0",
-    "dup": "jscpd app components lib auth.ts proxy.ts --format typescript,tsx,javascript,jsx --ignore \"**/*.test.ts,**/*.test.tsx,**/e2e/**,**/tests/**,**/generated/**\"",
+    "dup": "node abatty-probes/dup.mjs",
     "standards": "abatty ratchet",
     "standards:baseline": "abatty baseline",
     "gate": "abatty gate",
