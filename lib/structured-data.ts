@@ -19,7 +19,7 @@ function menuItem(dish: MenuDish, restaurant: MenuRestaurant, origin: string) {
     '@type': 'MenuItem',
     name: dish.nameEn,
     description: dish.descriptionEn || undefined,
-    image: dish.imageUrl,
+    image: dish.imageUrl || undefined,
     url: `${origin}/restaurant/${restaurant.slug}/dish/${dish.id}`,
     offers: {
       '@type': 'Offer',

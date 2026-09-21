@@ -22,7 +22,7 @@ export function serializeDish(dish: DishRow, offered?: readonly string[]): MenuD
     descriptionEn: dish.descriptionEn || null,
     descriptionFr: dish.descriptionFr || null,
     price: dish.price.toFixed(2),
-    imageUrl: dish.imageUrl,
+    imageUrl: dish.imageUrl || null,
     usdzUrl: dish.usdzUrl || null,
     glbUrl: dish.glbUrl || null,
     calories: dish.calories ?? null,

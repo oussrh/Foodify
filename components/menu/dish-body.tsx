@@ -1,6 +1,6 @@
 "use client"
 
-import Image from 'next/image'
+import DishPhoto from '@/components/menu/dish-photo'
 import { Camera, Share2 } from 'lucide-react'
 import ARLaunchButton from './ar-launch-button'
 import { DishFacts, DishIngredients, DishTags } from './dish-details'
@@ -32,14 +32,7 @@ export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, ph
   return (
     <article className="flex flex-col gap-4">
       <div className="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-muted" style={photoTransition ? { viewTransitionName: 'dish-photo' } : undefined}>
-        <Image
-          src={dish.imageUrl}
-          alt={name}
-          fill
-          sizes="(max-width: 640px) 100vw, 640px"
-          className="object-cover"
-          priority
-        />
+        <DishPhoto src={dish.imageUrl} alt={name} sizes="(max-width: 640px) 100vw, 640px" priority iconClassName="h-12 w-12" />
         {ar && (
           <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-bold text-[#1B1A17]">
             <Camera className="h-3 w-3" />

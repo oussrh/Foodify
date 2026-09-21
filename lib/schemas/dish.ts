@@ -14,7 +14,7 @@ export const dishInput = bilingualName.extend({
   descriptionEn: z.string().optional(),
   descriptionFr: z.string().optional(),
   price: money,
-  imageUrl: z.string().min(1, 'Image URL is required'),
+  imageUrl: z.string(),
   usdzUrl: z.string().optional(),
   glbUrl: z.string().optional(),
   subcategoryId: uuid.nullable().optional(),

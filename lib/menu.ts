@@ -24,7 +24,7 @@ export interface MenuDish {
   descriptionFr: string | null
   /** An exact two-fraction-digit decimal string, beside the restaurant's ISO 4217 code (API.1); never a float. */
   price: string
-  imageUrl: string
+  imageUrl: string | null
   usdzUrl: string | null
   glbUrl: string | null
   calories: number | null
