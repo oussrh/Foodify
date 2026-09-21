@@ -38,7 +38,6 @@ describe('uploadBrandImage', () => {
   beforeEach(() => {
     env.cloudinaryCloudName = undefined
     env.cloudinaryUploadPreset = undefined
-    vi.spyOn(console, 'warn').mockImplementation(() => {})
   })
   afterEach(() => {
     vi.unstubAllGlobals()

@@ -60,8 +60,7 @@ export async function uploadBrandImage(
 ): Promise<string> {
   try {
     return await uploadDirect(file, kind, slug)
-  } catch (directError) {
-    console.warn('Direct upload failed, using the server:', directError)
+  } catch {
     const body = new FormData()
     body.append('file', file)
     const result = await viaServer(body, slug)

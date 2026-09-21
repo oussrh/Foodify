@@ -25,22 +25,26 @@
     "app/",
     "components/",
     "lib/",
+    "server/",
     "types/",
     "prisma/",
     "scripts/",
     "tests/",
     "e2e/",
     "auth.ts",
-    "proxy.ts"
+    "proxy.ts",
+    "instrumentation.ts"
   ],
   "changelogRequiredFor": [
     ".github/",
     "app/",
     "components/",
     "lib/",
+    "server/",
     "prisma/",
     "auth.ts",
     "proxy.ts",
+    "instrumentation.ts",
     "next.config",
     "eslint.config",
     "tsconfig"
@@ -73,6 +77,8 @@
   "ratchet": {
     "$comment": "The ratchet's configuration (abatty ratchet / abatty baseline): the repository's own probes file, metrics to exclude, kind overrides (hard, ratchet), exempt path patterns; the budgets by kind, the caps and the env module take the standard's defaults unless set here.",
     "local": "abatty.probes.mjs",
+    "$envModule": "lib/env.ts, and the boot hook: instrumentation.ts reads NEXT_RUNTIME as a literal so the bundler drops the other runtime's branch (decision, phase 13)",
+    "envModule": "(^|/)env\\.[cm]?[jt]s$|^instrumentation\\.ts$",
     "exclude": [],
     "hard": [],
     "ratchet": [

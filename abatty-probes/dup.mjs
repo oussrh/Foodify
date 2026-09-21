@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 
 // The same roots as the graph script (package.json → graph), and the same exclusions as the
 // shape rules: a test describes a behaviour per block and repeats itself on purpose.
-const ROOTS = ['app', 'components', 'lib', 'auth.ts', 'proxy.ts']
+const ROOTS = ['app', 'components', 'lib', 'server', 'auth.ts', 'proxy.ts']
 const FLAGS = ['--format', 'typescript,tsx,javascript,jsx', '--ignore', '**/*.test.ts,**/*.test.tsx,**/e2e/**,**/tests/**,**/generated/**']
 
 const require = createRequire(import.meta.url)

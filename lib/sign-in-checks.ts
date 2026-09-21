@@ -1,22 +1,24 @@
 // lib/sign-in-checks.ts
 // What the credentials provider (auth.ts) checks once the form is parsed, in order: the account
 // and its password, the portal the sign-in page serves, then the second factor. A failed
-// account or password is null (logged); a wrong portal or code throws the message the form shows.
+// account or password is null (logged by user id, never by address); a wrong portal or code
+// throws the message the form shows.
 import bcrypt from 'bcryptjs'
 import type { User } from '@/generated/prisma/client'
 import prisma from '@/lib/prisma'
 import { safeEqual, verifyTOTP } from '@/lib/totp'
+import { log } from '@/server/log'
 
 /** The account whose password matches, or null when there is no such account or the password is wrong. */
 export async function userWithPassword(email: string, password: string): Promise<User | null> {
   const user = await prisma.user.findUnique({ where: { email } })
   if (!user) {
-    console.log('User not found:', email)
+    log.info('sign-in refused: no such account')
     return null
   }
   const valid = await bcrypt.compare(password, user.passwordHash)
   if (!valid) {
-    console.log('Invalid password for user:', email)
+    log.info({ userId: user.id }, 'sign-in refused: wrong password')
     return null
   }
   return user
@@ -26,7 +28,7 @@ export async function userWithPassword(email: string, password: string): Promise
 export function assertPortalRole(user: User, role: string | undefined): void {
   if (!role) return
   if (user.role !== role && user.role !== 'SUPER_ADMIN') {
-    console.log('Role mismatch for user:', user.email, 'expected:', role, 'actual:', user.role)
+    log.info({ userId: user.id, portal: role, role: user.role }, 'sign-in refused: wrong portal')
     throw new Error('Unauthorized role')
   }
 }

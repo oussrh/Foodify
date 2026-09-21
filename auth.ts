@@ -8,6 +8,7 @@ import prisma from './lib/prisma'
 import { serverEnv } from './lib/env'
 import { credentials as credentialsSchema } from './lib/schemas/user'
 import { assertPortalRole, completeSecondFactor, userWithPassword } from './lib/sign-in-checks'
+import { log } from './server/log'
 
 declare module 'next-auth' {
   interface User {
@@ -64,7 +65,7 @@ export const {
             role: user.role
           }
         } catch (error) {
-          console.error('Authorization error:', error)
+          log.error({ err: error }, 'authorize: refused or failed')
           throw error
         }
       },

@@ -58,8 +58,6 @@ describe('requestOtp', () => {
 
   it('answers the portal\'s failure message when the server, not the caller, fails', async () => {
     findUnique.mockRejectedValueOnce(new Error('connection refused'))
-    const error = vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(await requestOtp(credentials, portal)).toEqual({ error: portal.failure })
-    error.mockRestore()
   })
 })

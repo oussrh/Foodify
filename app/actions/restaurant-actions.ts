@@ -6,6 +6,7 @@ import { requireRestaurantAccess, requireSuperAdmin } from '@/lib/auth-guard'
 import { firstIssue, uuid } from '@/lib/schemas/common'
 import { idOnly, restaurantPayload } from '@/lib/payloads'
 import { definedFields } from '@/lib/defined-fields'
+import { log } from '@/server/log'
 import { imageUpload, restaurantInput, restaurantPatch, slug, type RestaurantInput, type RestaurantPatch } from '@/lib/schemas/restaurant'
 
 /**
@@ -77,7 +78,7 @@ export async function uploadRestaurantLogo(formData: FormData, rawSlug: string) 
 
     return { success: true, logoUrl }
   } catch (error) {
-    console.error('Logo upload error:', error)
+    log.error({ err: error, restaurantSlug }, 'logo upload: failed')
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Upload failed'
@@ -103,7 +104,7 @@ export async function uploadRestaurantCover(formData: FormData, rawSlug: string)
 
     return { success: true, coverUrl }
   } catch (error) {
-    console.error('Cover upload error:', error)
+    log.error({ err: error, restaurantSlug }, 'cover upload: failed')
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Upload failed'

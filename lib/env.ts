@@ -19,6 +19,8 @@ export const publicEnv = {
   /** Build identity that versions the service worker so every deploy ships a fresh worker and cache. */
   buildId: process.env.NEXT_PUBLIC_VERCEL_GIT_COMMIT_SHA?.slice(0, 8) || process.env.NEXT_PUBLIC_BUILD_ID || 'dev',
   isProduction: process.env.NODE_ENV === 'production',
+  /** Under a test runner: the logger writes nothing. */
+  isTest: process.env.NODE_ENV === 'test',
   /** Public origin of the site, for links sent off-site (JSON-LD, the QR target). */
   appUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://foodify.app',
 } as const

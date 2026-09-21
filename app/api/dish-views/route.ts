@@ -2,6 +2,7 @@ import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
 import { ok, fail } from '@/lib/api'
+import { log } from '@/server/log'
 
 // Public endpoint hit by the customer menu, so the body is validated strictly.
 const dishViewSchema = z.object({
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     return ok({ viewId: dishView.id, arViewed }, { status: 201 })
   } catch (error) {
-    console.error('Error recording dish view:', error)
+    log.error({ err: error, dishId }, 'dish view: not recorded')
     return fail('internal', 'Failed to record dish view', 500)
   }
 }

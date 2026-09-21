@@ -42,13 +42,6 @@ export async function createDish(rawRestaurantId: string, raw: DishInput) {
   const usdzUrl = await storedArUrl(data.usdzUrl, restaurantId)
   const glbUrl = await storedArUrl(data.glbUrl, restaurantId)
 
-  console.log('createDish - Final data being saved to database:', {
-    restaurantId,
-    usdzUrl,
-    glbUrl,
-    imageUrl: data.imageUrl
-  })
-
   return prisma.dish.create({ select: dishPayload,
     data: {
       nameEn: data.nameEn,
@@ -85,15 +78,6 @@ export async function updateDish(rawId: string, raw: DishPatch) {
   // An AR URL is only touched when the patch carries one.
   if (data.usdzUrl) updatedData.usdzUrl = await storedArUrl(data.usdzUrl, restaurantId)
   if (data.glbUrl) updatedData.glbUrl = await storedArUrl(data.glbUrl, restaurantId)
-
-  console.log('updateDish - Final data being saved to database:', {
-    id,
-    updatedData: {
-      usdzUrl: updatedData.usdzUrl,
-      glbUrl: updatedData.glbUrl,
-      imageUrl: updatedData.imageUrl
-    }
-  })
 
   return prisma.dish.update({ select: dishPayload, where: { id }, data: definedFields(updatedData) })
 }

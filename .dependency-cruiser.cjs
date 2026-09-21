@@ -58,7 +58,7 @@ module.exports = {
       comment:
         "Production code importing a devDependency works on the developer's machine and fails in " +
         "the image; a test helper is the usual culprit.",
-      from: { path: "^(src|app|components|server|lib|packages/[^/]+/src)/", pathNot: "[.](?:spec|test|stories)[.](?:js|mjs|cjs|jsx|ts|tsx)$|(^|/)(?:tests?|e2e|__tests__|fixtures)/" },
+      from: { path: "^(src|app|components|server|lib|packages/[^/]+/src)/|^(auth|proxy|instrumentation)[.]ts$", pathNot: "[.](?:spec|test|stories)[.](?:js|mjs|cjs|jsx|ts|tsx)$|(^|/)(?:tests?|e2e|__tests__|fixtures)/" },
       to: { dependencyTypes: ["npm-dev"], dependencyTypesNot: ["type-only"], pathNot: ["node_modules/@types/"] },
     },
     {
@@ -77,8 +77,8 @@ module.exports = {
     {
       name: "data-layer-is-a-leaf",
       severity: "error",
-      comment: "lib/ is the shared layer: it knows nothing of routes or components (boundary map, row `lib`).",
-      from: { path: "^lib/" },
+      comment: "lib/ is the shared layer and server/ the process's: neither knows of routes or components (boundary map, rows `lib`, `server`).",
+      from: { path: "^(?:lib|server)/" },
       to: { path: "^(?:app|components)/" },
     },
     {
@@ -98,9 +98,9 @@ module.exports = {
     {
       name: "server-only-never-reaches-the-client",
       severity: "error",
-      comment: "The database client, the mailer, the Cloudinary signer, and every lib module that reaches one of them (the guards, the sign-in checks, the OTP request, the menu loader: the transitive closure, recomputed when a lib module starts importing one) hold a secret or a connection: a component reaches them through a server action only (CODE-10, SEC-1). lib/env is shared on purpose (publicEnv) and is not listed.",
+      comment: "The database client, the mailer, the Cloudinary signer, every lib module that reaches one of them (the guards, the sign-in checks, the OTP request, the menu loader: the transitive closure, recomputed when a lib module starts importing one) and the process's modules (server/: the logger, the drain) hold a secret, a connection or a signal: a component reaches them through a server action only (CODE-10, SEC-1). lib/env is shared on purpose (publicEnv) and is not listed.",
       from: { path: "^components/" },
-      to: { path: "^(?:lib/(?:prisma|mail|cloudinary|auth-guard|otp-request|sign-in-checks|menu-loader)|auth)(?:[.]ts|/)" },
+      to: { path: "^(?:lib/(?:prisma|mail|cloudinary|auth-guard|otp-request|sign-in-checks|menu-loader)|auth|server/[^/]+)(?:[.]ts|/)" },
     },
     {
       name: "portals-never-import-each-other",
