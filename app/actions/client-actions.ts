@@ -7,6 +7,7 @@ import { password, uuid } from '@/lib/schemas/common'
 import { clientInput, clientPatch, type ClientInput, type ClientPatch } from '@/lib/schemas/user'
 import { slugify } from '@/lib/slug'
 import { userPayload } from '@/lib/payloads'
+import { definedFields } from '@/lib/defined-fields'
 
 export async function createClient(raw: ClientInput) {
   await requireSuperAdmin()
@@ -43,10 +44,8 @@ export async function updateClient(rawId: string, raw: ClientPatch) {
   return prisma.user.update({ select: userPayload,
     where: { id },
     data: {
-      ...rest,
-      restaurants: restaurantIds
-        ? { set: restaurantIds.map((id: string) => ({ id })) }
-        : undefined,
+      ...definedFields(rest),
+      ...(restaurantIds ? { restaurants: { set: restaurantIds.map((id: string) => ({ id })) } } : {}),
     },
   })
 }

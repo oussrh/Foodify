@@ -16,7 +16,7 @@ interface ContactFieldsProps {
   phone: string | undefined
   /** The phone as guests will see it (cleanPhone), '' when none */
   cleanedPhone: string
-  disabled?: boolean
+  disabled?: boolean | undefined
 }
 
 const err = (m?: string) => m && <span className="text-xs text-destructive">{m}</span>

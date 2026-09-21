@@ -17,7 +17,8 @@ export interface Period {
 export interface OpeningHours {
   /** Missing key = not set; empty array = closed that day */
   days: Partial<Record<DayKey, Period[]>>
-  note?: string
+  /** Free text under the schedule, or the legacy text itself; the editor clears it with `undefined` */
+  note?: string | undefined
 }
 
 const DAY_NAMES: Record<Locale, Record<DayKey, { short: string; long: string }>> = {
@@ -153,18 +154,20 @@ export function openStatus(hours: OpeningHours, now = new Date()): OpenStatus | 
   const todayIndex = (now.getDay() + 6) % 7 // Monday = 0
   const nowMin = now.getHours() * 60 + now.getMinutes()
 
-  const periodsOf = (offset: number) => hours.days[DAY_KEYS[(todayIndex + offset + 7) % 7]] ?? []
+  const dayAt = (offset: number) => DAY_KEYS[(todayIndex + offset + 7) % 7]
+  const periodsOf = (day: DayKey | undefined) => (day && hours.days[day]) ?? []
 
   // A period from yesterday that runs past midnight may still be open.
-  const current = currentPeriod(periodsOf(-1), periodsOf(0), nowMin)
+  const current = currentPeriod(periodsOf(dayAt(-1)), periodsOf(dayAt(0)), nowMin)
   if (current) return { open: true, closesAt: current.close }
   // Next opening today
-  const later = firstOpeningAfter(periodsOf(0), nowMin)
+  const later = firstOpeningAfter(periodsOf(dayAt(0)), nowMin)
   if (later) return { open: false, opensAt: later.open }
   // Next opening on a following day
   for (let offset = 1; offset <= 7; offset++) {
-    const first = firstOpeningAfter(periodsOf(offset))
-    if (first) return { open: false, opensAt: first.open, opensOn: DAY_KEYS[(todayIndex + offset) % 7] }
+    const day = dayAt(offset)
+    const first = firstOpeningAfter(periodsOf(day))
+    if (day && first) return { open: false, opensAt: first.open, opensOn: day }
   }
   return { open: false }
 }

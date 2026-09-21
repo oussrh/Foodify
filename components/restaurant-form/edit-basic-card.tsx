@@ -94,7 +94,7 @@ function IdentityFields({ register, errors, setValue, defaultValues }: Omit<Prop
             <DollarSign className="h-4 w-4" />
             Price Range
           </Label>
-          <Select onValueChange={(value) => setValue('priceRange', value as "$" | "$$" | "$$$" | "$$$$", { shouldDirty: true })} defaultValue={defaultValues.priceRange}>
+          <Select onValueChange={(value) => setValue('priceRange', value as "$" | "$$" | "$$$" | "$$$$", { shouldDirty: true })} {...(defaultValues.priceRange !== undefined ? { defaultValue: defaultValues.priceRange } : {})}>
             <SelectTrigger className="border-border">
               <SelectValue placeholder="Select price range" />
             </SelectTrigger>

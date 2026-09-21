@@ -11,7 +11,7 @@ interface ChipGroupProps {
   options: readonly { key: string; en: string; fr: string }[]
   value: string[]
   onChange: (next: string[]) => void
-  disabled?: boolean
+  disabled?: boolean | undefined
 }
 
 function ChipGroup({ id, label, hint, options, value, onChange, disabled }: ChipGroupProps) {

@@ -11,7 +11,7 @@ interface FontPickerProps {
   onChange: (family: string, url: string) => void
   /** Text rendered in each option, typically the restaurant name */
   sample: string
-  disabled?: boolean
+  disabled?: boolean | undefined
 }
 
 const FILTERS: { key: FontCategory | 'all'; label: string }[] = [

@@ -3,7 +3,8 @@
 // uploads set, and the model the guest asked to preview.
 import { useCallback, useState } from 'react'
 
-export type DishAssetUrls = { imageUrl?: string; usdzUrl?: string; glbUrl?: string }
+/** The URLs a form starts from; an unset one is absent or `undefined`, and reads as ''. */
+export type DishAssetUrls = { imageUrl?: string | undefined; usdzUrl?: string | undefined; glbUrl?: string | undefined }
 export type PreviewModel = { url: string; type: 'usdz' | 'glb' }
 
 export function useDishAssets(initial: DishAssetUrls) {

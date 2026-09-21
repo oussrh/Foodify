@@ -4,7 +4,11 @@
 import { z } from 'zod'
 import { uuid } from './common'
 
-export const assignment = (field: string) => z.object({ [field]: z.array(uuid) })
+/** The body under the named field, typed by that name so a route reads its array without a lookup that may miss. */
+export const assignment = <F extends string>(field: F) => {
+  const shape = { [field]: z.array(uuid) } as { [K in F]: z.ZodArray<typeof uuid> }
+  return z.object(shape)
+}
 
 /** The request's JSON, or null when there is none or it does not parse: the schema refuses both alike. */
 export const jsonBody = (req: Request): Promise<unknown> => req.json().catch(() => null)

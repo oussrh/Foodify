@@ -1,10 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { isBrowserUploadConfigured, uploadToCloudinary, uploadWithServerFallback } from './browser-upload'
 import { arModelTarget, brandImageTarget, dishImageTarget, restaurantFolderName } from './targets'
+import { callArgs } from '@/test/mock-calls'
 
 // uploadToCloudinary reads publicEnv on every call, so mutating this hoisted object between
 // tests is enough: no re-import needed.
-const env = vi.hoisted((): { cloudinaryCloudName?: string; cloudinaryUploadPreset?: string } => ({}))
+const env = vi.hoisted((): { cloudinaryCloudName?: string | undefined; cloudinaryUploadPreset?: string | undefined } => ({}))
 vi.mock('@/lib/env', () => ({ publicEnv: env }))
 
 const file = (name: string, type: string, bytes = 16) => new File([new Uint8Array(bytes)], name, { type })
@@ -22,7 +23,7 @@ const cloudinaryAnswers = (response: Partial<Response>) => {
 }
 
 const fieldsOf = (fetchMock: ReturnType<typeof cloudinaryAnswers>) => {
-  const body = fetchMock.mock.calls[0][1]?.body as FormData
+  const body = callArgs(fetchMock)[1]?.body as FormData
   return [...body.entries()].map(([k, v]) => [k, v instanceof File ? `file:${v.name}` : v])
 }
 
@@ -81,8 +82,9 @@ describe('uploadToCloudinary', () => {
     const fetchMock = cloudinaryAnswers({ ok: true, json: async () => answer })
     const result = await uploadToCloudinary(file('dish.glb', ''), { folder: 'restaurants/r/ar', publicId: 'glb_1', resourceType: 'raw' })
     expect(result).toEqual(answer)
-    expect(fetchMock.mock.calls[0][0]).toBe('https://api.cloudinary.com/v1_1/demo/raw/upload')
-    expect(fetchMock.mock.calls[0][1]?.method).toBe('POST')
+    const [endpoint, init] = callArgs(fetchMock)
+    expect(endpoint).toBe('https://api.cloudinary.com/v1_1/demo/raw/upload')
+    expect(init?.method).toBe('POST')
     expect(fieldsOf(fetchMock)).toEqual([
       ['file', 'file:dish.glb'],
       ['upload_preset', 'unsigned'],
@@ -96,7 +98,7 @@ describe('uploadToCloudinary', () => {
     configured()
     const fetchMock = cloudinaryAnswers({ ok: true, json: async () => ({ secure_url: 'u' }) })
     await uploadToCloudinary(file('logo.png', 'image/png'), brandImageTarget('r', 'logo'))
-    expect(fetchMock.mock.calls[0][0]).toBe('https://api.cloudinary.com/v1_1/demo/image/upload')
+    expect(callArgs(fetchMock)[0]).toBe('https://api.cloudinary.com/v1_1/demo/image/upload')
     expect(fieldsOf(fetchMock).map(([k]) => k)).toEqual(['file', 'upload_preset', 'folder', 'public_id'])
   })
 
@@ -144,7 +146,7 @@ describe('uploadWithServerFallback', () => {
     const action = vi.fn().mockResolvedValue({ success: true, coverUrl: 'https://res.cloudinary.com/demo/cover.png' })
     const url = await uploadWithServerFallback(file('cover.png', 'image/png'), brandImageTarget('r', 'cover'), { action, slug: 'r', urlKey: 'coverUrl' })
     expect(url).toBe('https://res.cloudinary.com/demo/cover.png')
-    const [body, slug] = action.mock.calls[0]
+    const [body, slug] = callArgs(action)
     expect(slug).toBe('r')
     expect((body as FormData).get('file')).toBeInstanceOf(File)
   })

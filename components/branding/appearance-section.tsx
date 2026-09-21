@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils'
 interface AppearanceSectionProps {
   value: MenuTheme
   onChange: (theme: MenuTheme) => void
-  disabled?: boolean
+  disabled?: boolean | undefined
 }
 
 const APPEARANCE: { key: MenuTheme; label: string; hint: string; icon: typeof Sun }[] = [

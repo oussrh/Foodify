@@ -2,8 +2,13 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { brandPalette } from '@/lib/brand-color'
 
-/** Cloudinary can pad a logo into a square PNG on the fly; other hosts get the Foodify icons. */
-function iconSet(logoUrl: string | null) {
+type Icon = { src: string; sizes: string; type: string; purpose: string }
+
+/**
+ * The three icons of the manifest, the 192px one first (the shortcuts reuse it). Cloudinary can
+ * pad a logo into a square PNG on the fly; other hosts get the Foodify icons.
+ */
+function iconSet(logoUrl: string | null): [Icon, Icon, Icon] {
   if (logoUrl && logoUrl.includes('/image/upload/')) {
     const t = (transform: string) => logoUrl.replace('/image/upload/', `/image/upload/${transform}/`)
     return [

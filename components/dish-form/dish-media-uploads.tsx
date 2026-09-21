@@ -12,7 +12,7 @@ export default function DishMediaUploads({
   assets,
   onImageUrl,
 }: {
-  restaurantName?: string
+  restaurantName?: string | undefined
   assets: DishAssets
   onImageUrl: (url: string) => void
 }) {

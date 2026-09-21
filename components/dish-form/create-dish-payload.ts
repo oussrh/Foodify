@@ -4,19 +4,19 @@
 // flags given their empty defaults.
 import type { DishAssetUrls } from './use-dish-assets'
 
-/** The create form's values: the dish rules, with calories as the text it is typed in. */
+/** The create form's values: the dish rules, with calories as the text it is typed in; an optional member may be absent or `undefined`. */
 export type CreateDishValues = {
   nameEn: string
   nameFr: string
-  descriptionEn?: string
-  descriptionFr?: string
+  descriptionEn?: string | undefined
+  descriptionFr?: string | undefined
   price: string
   imageUrl: string
-  subcategoryId?: string
-  calories?: string
-  isMostPurchased?: boolean
-  dietary?: string[]
-  allergens?: string[]
+  subcategoryId?: string | undefined
+  calories?: string | undefined
+  isMostPurchased?: boolean | undefined
+  dietary?: string[] | undefined
+  allergens?: string[] | undefined
 }
 
 export function createDishPayload(data: CreateDishValues, calories: number | undefined, assets: DishAssetUrls) {

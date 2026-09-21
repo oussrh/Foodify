@@ -14,7 +14,7 @@ interface RestaurantLogoUploadProps {
   restaurantId?: string
   restaurantSlug: string
   restaurantName: string
-  currentLogoUrl?: string
+  currentLogoUrl?: string | undefined
   onLogoUpload: (url: string) => void
   disabled?: boolean
 }

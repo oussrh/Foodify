@@ -11,7 +11,7 @@ interface BrandColourSectionProps {
   hex: string
   validHex: boolean
   onChange: (hex: string) => void
-  disabled?: boolean
+  disabled?: boolean | undefined
 }
 
 const PRESETS: { hex: string; name: string }[] = [

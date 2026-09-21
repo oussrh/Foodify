@@ -26,7 +26,7 @@ export default async function RestaurantsPage({
             { email: { contains: search, mode: 'insensitive' } },
           ],
         }
-      : undefined,
+      : {},
     orderBy: { name: 'asc' },
     include: {
       dishes: { select: { isActive: true } },

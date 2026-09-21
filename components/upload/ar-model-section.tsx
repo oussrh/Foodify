@@ -48,7 +48,7 @@ const FORMATS = {
 interface ArModelSectionProps {
   type: ArModelType
   /** The model already uploaded, if any. */
-  url?: string
+  url?: string | undefined
   /** True while this format's file is on its way. */
   uploading: boolean
   progress: number

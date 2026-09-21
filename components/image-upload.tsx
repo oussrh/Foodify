@@ -83,9 +83,9 @@ export default function ImageUpload({
     e.preventDefault()
     setIsDragOver(false)
 
-    const files = e.dataTransfer.files
-    if (files.length > 0) {
-      await processFile(files[0])
+    const [file] = e.dataTransfer.files
+    if (file) {
+      await processFile(file)
     }
   }
 

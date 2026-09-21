@@ -10,7 +10,7 @@ describe('restaurant schemas', () => {
   })
 
   it('holds the slug to lowercase letters, digits and hyphens', () => {
-    expect(restaurantInput.safeParse({ ...restaurant, slug: 'Chez Test' }).error?.issues[0].message).toMatch(/lowercase/)
+    expect(restaurantInput.safeParse({ ...restaurant, slug: 'Chez Test' }).error?.issues[0]?.message).toMatch(/lowercase/)
   })
 
   it('accepts a menu theme on a patch and nothing outside the three', () => {
@@ -20,7 +20,7 @@ describe('restaurant schemas', () => {
 
   it('refuses an upload that is not a file, the wrong type, too big or double-extended, in the tile\'s words', () => {
     const upload = imageUpload(5)
-    const message = (v: unknown) => upload.safeParse(v).error?.issues[0].message
+    const message = (v: unknown) => upload.safeParse(v).error?.issues[0]?.message
     expect(message(null)).toBe('No file provided')
     expect(message(new File(['x'], 'a.gif', { type: 'image/gif' }))).toMatch(/Invalid file type/)
     expect(message(new File([new Uint8Array(5 * 1024 * 1024 + 1)], 'a.png', { type: 'image/png' }))).toBe('File size must be less than 5MB')

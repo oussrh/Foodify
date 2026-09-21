@@ -29,7 +29,10 @@ export function encodeCursor(key: Key): string {
 export function decodeCursor(cursor: string): Key | null {
   try {
     const parsed: unknown = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'))
-    if (Array.isArray(parsed) && parsed.length === 2 && parsed.every((v) => typeof v === 'string')) return { sort: parsed[0], id: parsed[1] }
+    if (Array.isArray(parsed) && parsed.length === 2) {
+      const [sort, id]: unknown[] = parsed
+      if (typeof sort === 'string' && typeof id === 'string') return { sort, id }
+    }
   } catch {
     // not a cursor of ours
   }

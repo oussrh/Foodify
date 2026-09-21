@@ -14,7 +14,7 @@ interface RestaurantCoverUploadProps {
   restaurantId?: string
   restaurantSlug: string
   restaurantName: string
-  currentCoverUrl?: string
+  currentCoverUrl?: string | undefined
   onCoverUpload: (url: string) => void
   disabled?: boolean
 }

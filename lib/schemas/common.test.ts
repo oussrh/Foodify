@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { bilingualName, email, money, password, uuid } from './common'
+import { bilingualName, email, firstIssue, money, password, uuid } from './common'
 
 describe('the shared pieces', () => {
   it('accepts a v4 UUID and refuses a cuid', () => {
@@ -8,7 +8,13 @@ describe('the shared pieces', () => {
   })
 
   it('names the email rule in the form\'s words', () => {
-    expect(email.safeParse('not-an-email').error?.issues[0].message).toBe('Please enter a valid email address')
+    expect(email.safeParse('not-an-email').error?.issues[0]?.message).toBe('Please enter a valid email address')
+  })
+
+  it('reads the first issue of a failed parse as the message to show', () => {
+    const r = bilingualName.safeParse({ nameEn: '', nameFr: '' })
+    expect(r.success).toBe(false)
+    if (!r.success) expect(firstIssue(r.error)).toBe('English name is required')
   })
 
   it('wants six characters of password', () => {

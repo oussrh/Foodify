@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { ApiError, call, callAll } from './api-client'
+import { callArgs } from '@/test/mock-calls'
 
 const json = (body: unknown, status = 200) => new Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } })
 
@@ -24,6 +25,6 @@ describe('the browser side of the envelope', () => {
     const fetchMock = vi.fn(async (url: string) => (url.includes('cursor=') ? json({ data: [3], meta: { next: null } }) : json({ data: [1, 2], meta: { next: 'c' } })))
     vi.stubGlobal('fetch', fetchMock)
     await expect(callAll<number>('/api/users?role=RESTAURANT_ADMIN')).resolves.toEqual([1, 2, 3])
-    expect(fetchMock.mock.calls[1][0]).toBe('/api/users?role=RESTAURANT_ADMIN&cursor=c')
+    expect(callArgs(fetchMock, 1)[0]).toBe('/api/users?role=RESTAURANT_ADMIN&cursor=c')
   })
 })

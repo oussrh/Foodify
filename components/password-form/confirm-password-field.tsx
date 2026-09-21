@@ -16,7 +16,7 @@ export default function ConfirmPasswordField({
   passwordsMatch,
 }: {
   field: UseFormRegisterReturn
-  error?: FieldErrorShape
+  error?: FieldErrorShape | undefined
   /** The confirmation as typed. */
   confirmPassword: string
   /** Both typed and equal (the form's `password && confirm && password === confirm`). */

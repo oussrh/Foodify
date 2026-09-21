@@ -11,13 +11,14 @@ import { assertPortalRole, completeSecondFactor, userWithPassword } from './lib/
 
 declare module 'next-auth' {
   interface User {
-    role?: string
+    role?: string | undefined
   }
   interface Session {
     user: {
       id: string
       email: string
-      role?: string
+      /** Copied from the token, which has none for a session older than the roles */
+      role?: string | undefined
     }
   }
 }
@@ -37,8 +38,8 @@ export const {
 } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
-    // The key and sender come from the parsed environment, not a literal.
-    ResendProvider({ apiKey: serverEnv.resendApiKey, from: serverEnv.resendFrom }), // abatty:allow-secret
+    // The key and sender come from the parsed environment, not a literal; set together or not at all (lib/env.ts).
+    ResendProvider(serverEnv.resendApiKey && serverEnv.resendFrom ? { apiKey: serverEnv.resendApiKey, from: serverEnv.resendFrom } : {}), // abatty:allow-secret
     Credentials({
       async authorize(raw) {
         const parsed = credentialsSchema.safeParse(raw)

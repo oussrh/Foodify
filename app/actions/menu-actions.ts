@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma'
 import { requireCategoryAccess, requireRestaurantAccess, requireSubcategoryAccess } from '@/lib/auth-guard'
 import { uuid } from '@/lib/schemas/common'
 import { categoryPayload, idOnly } from '@/lib/payloads'
+import { definedFields } from '@/lib/defined-fields'
 import { categoryInput, categoryPatch, order, type CategoryInput, type CategoryPatch } from '@/lib/schemas/menu'
 
 export async function getMenu(rawRestaurantId: string) {
@@ -34,7 +35,7 @@ export async function updateCategory(rawId: string, raw: CategoryPatch) {
   await requireCategoryAccess(rawId)
   const id = uuid.parse(rawId)
   const data = categoryPatch.parse(raw)
-  return prisma.menuCategory.update({ select: categoryPayload, where: { id }, data })
+  return prisma.menuCategory.update({ select: categoryPayload, where: { id }, data: definedFields(data) })
 }
 
 export async function toggleCategoryStatus(rawId: string) {
@@ -68,7 +69,7 @@ export async function updateSubcategory(rawId: string, raw: CategoryPatch) {
   await requireSubcategoryAccess(rawId)
   const id = uuid.parse(rawId)
   const data = categoryPatch.parse(raw)
-  return prisma.menuSubcategory.update({ select: categoryPayload, where: { id }, data })
+  return prisma.menuSubcategory.update({ select: categoryPayload, where: { id }, data: definedFields(data) })
 }
 
 export async function toggleSubcategoryStatus(rawId: string) {

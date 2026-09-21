@@ -19,3 +19,5 @@ export const bilingualName = z.object({
   nameEn: z.string().min(1, 'English name is required'),
   nameFr: z.string().min(1, 'French name is required'),
 })
+/** The message of a failed parse's first issue, what a toast or a tile shows; a failed parse carries at least one, the error's own message stands in otherwise. */
+export const firstIssue = (error: z.ZodError): string => error.issues[0]?.message ?? error.message

@@ -7,7 +7,7 @@ describe('dish schemas', () => {
   it('accepts the seed dish with its price normalised to two decimals, and refuses a float', () => {
     expect(dishInput.safeParse(dish).data?.price).toBe('12.50')
     expect(dishInput.safeParse({ ...dish, price: 12.5 }).success).toBe(false)
-    expect(dishInput.safeParse({ ...dish, price: '-1' }).error?.issues[0].message).toMatch(/two decimals/)
+    expect(dishInput.safeParse({ ...dish, price: '-1' }).error?.issues[0]?.message).toMatch(/two decimals/)
   })
 
   it('only stores dietary and allergen keys the menu can label', () => {
