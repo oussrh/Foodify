@@ -16,6 +16,14 @@ What we learned the hard way, one entry per lesson, newest first. A line added t
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
 
+## 2026-09-21 · A rule copied from a template holds the template's layout, not yours
+
+The import-graph step was green for twelve phases while two of its boundary rules named `src/features` and
+`src/components`, directories this repository does not have: a rule that matches nothing passes
+forever and reads as "held". Every boundary arrow is now written for this tree (`CLAUDE.md`,
+"Boundary map") and was proven red on a planted import before it was trusted; the same applies to
+any instrument copied in: a check is only real once its red has been seen on this repository.
+
 ## 2026-09-20 · A CRLF checkout silently blinds a probe
 
 abatty's front-matter parser (the ratchet's probes library, inside the package) finds the closing fence with `indexOf("\n---")` and splits the body on `/\r?\n/`, so on a CRLF file the last key keeps its `\r` and its value never parses. `docs/TESTING.md` ends its front matter with `last_verified`; under `core.autocrlf=true` the merge checkout rewrote the file as CRLF, the doc dropped out of `docs.behindCode`, and the hard metric went "SCANNED ZERO" on `main` minutes after the branch was green. The lesson is the plan's own warning about CRLF-blind regexes, met in the tool rather than in our code: `.gitattributes` now pins LF in every checkout (`* text=auto eol=lf`), and the parser bug is an upstream report. When a hard metric scans zero, suspect the probe's input before the floor.

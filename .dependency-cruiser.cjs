@@ -1,17 +1,16 @@
 /**
- * The import graph, checked instead of described (CODE-5). Copy to the repository root.
+ * The import graph, checked instead of described (CODE-5).
  *
  * The first five rules are the same on every repository. The rules under "the boundary map"
- * are the arrows of CLAUDE.md §3 that must not exist, one rule each: edit them to this
- * repository's directories and delete the example. A violation that is there today goes into
- * `.dependency-cruiser-known-violations.json` (`npx depcruise src --baseline`), which the gate
+ * are the arrows of CLAUDE.md ("Boundary map") that must not exist, one rule each. A violation
+ * that is there today goes into `.dependency-cruiser-known-violations.json`
+ * (`pnpm exec depcruise <roots> --config .dependency-cruiser.cjs --baseline`), which the gate
  * passes with `--ignore-known` and which may only shrink - the tool's own per-finding debt,
- * the same principle as the ratchet's `debt`. Regenerating the baseline when a number rose
- * is what `check-direction.mjs` refuses at night.
+ * the same principle as the ratchet's `debt`. It is empty.
  *
- * Run: `npx depcruise src --config .dependency-cruiser.cjs --ignore-known --output-type err`
- *      (exit code = number of error-severity violations; the gate treats non-zero as red)
- * Graph: `npx depcruise src --config .dependency-cruiser.cjs --output-type mermaid > docs/graph.mmd`
+ * Run: `pnpm run graph` (package.json holds the roots: app components lib auth.ts proxy.ts;
+ *      exit code = number of error-severity violations; the gate treats non-zero as red)
+ * Graph: `pnpm run graph:mermaid > docs/graph.mmd`
  *
  * @type {import('dependency-cruiser').IConfiguration}
  */
@@ -70,10 +69,11 @@ module.exports = {
       to: { moreThanOneDependencyType: true, dependencyTypesNot: ["type-only"] },
     },
 
-    // ---- the boundary map: one rule per arrow that must not exist (CLAUDE.md §3) ---------
-    // Direction: shared -> features -> app; features never import each other; the data layer
-    // and anything holding a secret is a leaf. Edit the paths; keep one arrow per rule so a
-    // violation names the arrow, not "architecture".
+    // ---- the boundary map: one rule per arrow that must not exist (CLAUDE.md, "Boundary map") --
+    // Direction: lib -> components -> app. lib knows nothing above it; a component reaches app/
+    // only for a server action; server code renders nothing; a module holding a secret or the
+    // database client is imported by server code only; the two portals share through
+    // components/shell and components/forms, never each other.
     {
       name: "data-layer-is-a-leaf",
       severity: "error",
@@ -82,18 +82,32 @@ module.exports = {
       to: { path: "^(?:app|components)/" },
     },
     {
-      name: "features-never-import-each-other",
+      name: "components-never-import-routes",
       severity: "error",
-      comment: "Two features that need each other share a module under lib/ or one becomes the other's caller (boundary map).",
-      from: { path: "^src/features/([^/]+)/" },
-      to: { path: "^src/features/([^/]+)/", pathNot: "^src/features/$1/" },
+      comment: "A component may import a server action (app/actions); a page, a layout, a route handler or a route's helper is composed by app/, never imported by it (boundary map, row `components`).",
+      from: { path: "^components/" },
+      to: { path: "^app/", pathNot: "^app/actions/" },
+    },
+    {
+      name: "server-code-never-imports-components",
+      severity: "error",
+      comment: "A server action or a route handler answers data, never markup: nothing under app/actions or app/api imports a component (boundary map, row `app/actions`, `app/api`).",
+      from: { path: "^app/(?:actions|api)/" },
+      to: { path: "^components/" },
     },
     {
       name: "server-only-never-reaches-the-client",
       severity: "error",
-      comment: "A module that holds a secret or a database client is imported by server code only (CODE-10, SEC-1).",
-      from: { path: "^src/(?:components|app/.*/_components)/" },
-      to: { path: "^src/(?:lib/db|server|lib/env)" },
+      comment: "The database client, the mailer, the Cloudinary signer, and every lib module that reaches one of them (the guards, the sign-in checks, the OTP request, the menu loader: the transitive closure, recomputed when a lib module starts importing one) hold a secret or a connection: a component reaches them through a server action only (CODE-10, SEC-1). lib/env is shared on purpose (publicEnv) and is not listed.",
+      from: { path: "^components/" },
+      to: { path: "^(?:lib/(?:prisma|mail|cloudinary|auth-guard|otp-request|sign-in-checks|menu-loader)|auth)(?:[.]ts|/)" },
+    },
+    {
+      name: "portals-never-import-each-other",
+      severity: "error",
+      comment: "components/admin and components/manager are the two portals' sections; what both need lives in components/shell or components/forms (boundary map).",
+      from: { path: "^components/(admin|manager)/" },
+      to: { path: "^components/(admin|manager)/", pathNot: "^components/$1/" },
     },
   ],
   options: {
