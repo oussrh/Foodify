@@ -373,7 +373,20 @@
     },
     {
       "id": 12,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-21T10:20:50Z",
+      "numbersBefore": {
+        "rules": {
+          "CODE-ARCH-GRAPH": "present (.dependency-cruiser.cjs run by graph, 0 known violations; the two boundary-map rules still carry the template's src/features and src/components paths, which match nothing here)",
+          "CODE-DEADCODE": "present (knip --max-issues 0 as dead, in the gate)",
+          "CODE-DUP": "missing (not measured)"
+        },
+        "graph": "386 modules, 1031 dependencies, 0 violations; a planted cycle (lib/scratch-a <-> scratch-b) reads no-circular red; the boundary rules that match this layout: data-layer-is-a-leaf only",
+        "dead": "knip 0 issues; two planted unused files read red",
+        "dup": "jscpd 4.3.0 at its defaults over app, components, lib, auth.ts, proxy.ts (tests left out): 82 exact clones, 982 duplicated lines (3.16%) in 512 files; at 10 lines / 70 tokens: 24 clones, 449 lines",
+        "score": "74/100 (74 checks)",
+        "enforcedShare": "78% (45/58)"
+      }
     }
   ]
 }
