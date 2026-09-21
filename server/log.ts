@@ -3,15 +3,16 @@
 // which Vercel and any log shipper index by field. Redaction happens here, by field path, and
 // nowhere else: a call site never masks a value, it passes the record and the paths below
 // decide. `no-console` at error on the server's paths (eslint.config.mjs) keeps this the only
-// way out. No transport and no worker thread: a serverless instance may freeze right after the
-// response, and pino's default destination writes synchronously.
+// way out. No transport and no worker thread, and the destination is `sync: true`: pino's default
+// stream hands each record to an asynchronous write that only the process's exit flushes, and a
+// serverless instance frozen right after the response, or killed, never exits.
 import pino, { type Logger } from 'pino'
 import { publicEnv } from '@/lib/env'
 
 // A field that is a secret wherever it sits: at the top of a record or one level under any key.
 const SECRET_FIELDS = [
   'password', 'currentPassword', 'newPassword', 'passwordHash',
-  'otp', 'emailOtpCode', 'totpSecret', 'token', 'passwordResetToken', 'emailChangeToken',
+  'otp', 'emailOtpCode', 'totpSecret', 'token', 'passwordResetToken', 'emailChangeToken', 'emailVerifyToken',
   'authorization', 'cookie',
   'email', 'newEmail',
   'apiKey', 'api_key', 'secret', 'signature',
@@ -38,8 +39,9 @@ export function levelFor(env: { isTest: boolean; isProduction: boolean }): 'sile
 
 /**
  * A logger with the redaction above; `destination` is for a test that reads the records back,
- * the server uses stdout. `err` is serialised as message, type and stack; no pid or hostname,
- * which mean nothing on a platform that starts an instance per burst.
+ * the server writes to stdout synchronously (an asynchronous write is lost when the instance is
+ * frozen or killed before the exit that flushes it). `err` is serialised as message, type and
+ * stack; no pid or hostname, which mean nothing on a platform that starts an instance per burst.
  */
 export function createLogger(destination?: pino.DestinationStream, level: string = levelFor(publicEnv)): Logger {
   const options: pino.LoggerOptions = {
@@ -48,7 +50,7 @@ export function createLogger(destination?: pino.DestinationStream, level: string
     serializers: { err: pino.stdSerializers.err },
     base: null,
   }
-  return destination ? pino(options, destination) : pino(options)
+  return pino(options, destination ?? pino.destination({ fd: 1, sync: true }))
 }
 
 /** The server's logger; a module takes a child with its name (`log.child({ module: 'auth' })`) so a record says where it came from. */

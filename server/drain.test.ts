@@ -13,20 +13,34 @@ describe('the SIGTERM drain', () => {
     vi.useRealTimers()
   })
 
-  it('fails the health flag at once, releases only after the grace, then hands over the exit', async () => {
-    vi.useFakeTimers()
-    const release = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
-    const exit = vi.fn<(code: number) => void>()
-    unregister = registerDrain({ graceMs: 1000, release, exit })
+  it('fails the health flag the moment the signal arrives', () => {
+    unregister = registerDrain({ graceMs: 1000, release: async () => {} })
     expect(isDraining()).toBe(false)
     sigterm()
     expect(isDraining()).toBe(true)
-    expect(release).not.toHaveBeenCalled()
+  })
+
+  it('releases only once the grace has run out', async () => {
+    vi.useFakeTimers()
+    const release = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
+    unregister = registerDrain({ graceMs: 1000, release })
+    sigterm()
     await vi.advanceTimersByTimeAsync(999)
     expect(release).not.toHaveBeenCalled()
-    expect(exit).not.toHaveBeenCalled()
     await vi.advanceTimersByTimeAsync(1)
     expect(release).toHaveBeenCalledTimes(1)
+  })
+
+  it('hands over the exit after the release, never before', async () => {
+    vi.useFakeTimers()
+    const order: string[] = []
+    const exit = vi.fn<(code: number) => void>(() => void order.push('exit'))
+    unregister = registerDrain({ graceMs: 10, release: async () => void order.push('release'), exit })
+    sigterm()
+    await vi.advanceTimersByTimeAsync(9)
+    expect(exit).not.toHaveBeenCalled()
+    await vi.advanceTimersByTimeAsync(1)
+    expect(order).toEqual(['release', 'exit'])
     expect(exit).toHaveBeenCalledWith(0)
   })
 
@@ -39,12 +53,17 @@ describe('the SIGTERM drain', () => {
     expect(exit).toHaveBeenCalledWith(0)
   })
 
-  it('registers once and drains once: a second registration returns the first remover, a second signal is ignored', async () => {
-    vi.useFakeTimers()
-    const release = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
+  it('registers once: a second call in the same process returns the first remover', () => {
+    const release = async () => {}
     unregister = registerDrain({ graceMs: 10, release })
     expect(registerDrain({ graceMs: 999, release })).toBe(unregister)
     expect(process.listenerCount('SIGTERM')).toBe(1)
+  })
+
+  it('drains once: a second signal is ignored', async () => {
+    vi.useFakeTimers()
+    const release = vi.fn<() => Promise<void>>().mockResolvedValue(undefined)
+    unregister = registerDrain({ graceMs: 10, release })
     sigterm()
     sigterm()
     await vi.advanceTimersByTimeAsync(10)

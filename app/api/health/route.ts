@@ -7,7 +7,7 @@ import prisma from '@/lib/prisma'
 import { isDraining } from '@/server/drain'
 import { log } from '@/server/log'
 
-/** A GET handler that reads no request is prerendered at build unless told otherwise, and a health answer baked at build would say "ok" for good. */
+/** Next 16 does not prerender a route handler unless asked; this pins that, so a future default cannot bake a health answer at build that says "ok" for good. */
 export const dynamic = 'force-dynamic'
 
 /**

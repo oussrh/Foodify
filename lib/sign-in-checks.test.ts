@@ -56,10 +56,6 @@ describe('userWithPassword', () => {
 })
 
 describe('assertPortalRole', () => {
-  beforeEach(() => {
-  })
-  afterEach(() => vi.restoreAllMocks())
-
   it('lets anyone through when the page names no portal', () => {
     expect(() => assertPortalRole(user(), undefined)).not.toThrow()
   })

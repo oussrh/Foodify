@@ -1,9 +1,10 @@
 // server/drain.ts
 // What SIGTERM does to this process (OBS.1): the health check fails first, so a balancer stops
-// routing here while the requests in flight finish; the database pool is released once they had
-// their grace; nothing exits on the spot. Next's own handler (`next start`) closes the HTTP
-// server, waits for the pending requests and exits 143 beside this one; on Vercel the platform
-// sends the same signal before it retires an instance. Registered once, from instrumentation.ts.
+// routing here while the requests in flight finish; nothing exits on the spot. Next's own handler
+// (`next start`, registered before ours) closes the HTTP server, waits for the pending requests
+// and exits 143, so on an ordinary stop the process is gone before the grace ends and the pool
+// goes with it; the release below runs only when a request outlives the grace. Registered once
+// per module instance, from instrumentation.ts (a dev hot reload re-evaluates the module).
 import { log } from './log'
 
 let draining = false
@@ -25,8 +26,8 @@ export type DrainOptions = {
 /**
  * Registers the SIGTERM handler once and returns what removes it. On the signal: mark draining
  * (the health check fails at once), wait the grace period on a timer that does not keep the
- * process alive, release, then hand the exit to `exit` when one is given. A second registration
- * returns the first's remover, so a hot reload cannot stack handlers.
+ * process alive, release, then hand the exit to `exit` when one is given. A second call in the
+ * same process returns the first's remover instead of stacking a handler.
  */
 export function registerDrain(options: DrainOptions): () => void {
   if (unregister) return unregister

@@ -10,19 +10,36 @@ function capture() {
 }
 
 describe('the logger', () => {
-  it('writes one record per call with the level, the message and the fields, and no pid or hostname', () => {
+  it('writes one record per call with the level, the message and the fields', () => {
     const { logger, records, last } = capture()
     logger.info({ dishId: 'd1', arViewed: true }, 'dish view recorded')
     expect(records).toHaveLength(1)
     expect(last()).toMatchObject({ level: 30, msg: 'dish view recorded', dishId: 'd1', arViewed: true })
+  })
+
+  it('carries no pid or hostname', () => {
+    const { logger, last } = capture()
+    logger.info('boot')
     expect(last()).not.toHaveProperty('pid')
     expect(last()).not.toHaveProperty('hostname')
   })
 
-  it('redacts a credential, a token and an address at the top of a record and one level under any key, and keeps the fields beside them', () => {
+  it('redacts a credential, a token and an address at the top of a record', () => {
     const { logger, last } = capture()
-    logger.warn({ email: 'a@b.c', password: 'hunter2', user: { email: 'a@b.c', totpSecret: 'JBSW', role: 'SUPER_ADMIN' }, restaurantId: 'r1' }, 'sign-in refused')
-    expect(last()).toMatchObject({ email: CENSOR, password: CENSOR, user: { email: CENSOR, totpSecret: CENSOR, role: 'SUPER_ADMIN' }, restaurantId: 'r1' })
+    logger.warn({ email: 'a@b.c', password: 'hunter2', emailVerifyToken: 'abc' }, 'sign-in refused')
+    expect(last()).toMatchObject({ email: CENSOR, password: CENSOR, emailVerifyToken: CENSOR })
+  })
+
+  it('redacts the same fields one level under any key', () => {
+    const { logger, last } = capture()
+    logger.warn({ user: { email: 'a@b.c', totpSecret: 'JBSW' } }, 'sign-in refused')
+    expect(last()).toMatchObject({ user: { email: CENSOR, totpSecret: CENSOR } })
+  })
+
+  it('keeps the fields beside a redacted one', () => {
+    const { logger, last } = capture()
+    logger.warn({ password: 'hunter2', user: { totpSecret: 'JBSW', role: 'SUPER_ADMIN' }, restaurantId: 'r1' }, 'sign-in refused')
+    expect(last()).toMatchObject({ user: { role: 'SUPER_ADMIN' }, restaurantId: 'r1' })
   })
 
   it('keeps an error readable (message, type, code, stack) while the one-time code and the credentials are not', () => {
@@ -43,15 +60,21 @@ describe('the logger', () => {
     }
   })
 
-  it('is silent under a test runner, info and up in production, everything in development', () => {
+  it('is silent under a test runner, whatever else the environment says', () => {
     expect(levelFor({ isTest: true, isProduction: true })).toBe('silent')
+  })
+
+  it('is info and up in production', () => {
     expect(levelFor({ isTest: false, isProduction: true })).toBe('info')
+  })
+
+  it('is everything in development', () => {
     expect(levelFor({ isTest: false, isProduction: false })).toBe('debug')
   })
 
-  it('writes nothing at the default level under a test runner', () => {
+  it('writes nothing at the silent level', () => {
     const records: unknown[] = []
-    createLogger({ write: (line: string) => void records.push(line) }).error('nothing')
+    createLogger({ write: (line: string) => void records.push(line) }, levelFor({ isTest: true, isProduction: false })).error('nothing')
     expect(records).toEqual([])
   })
 })
