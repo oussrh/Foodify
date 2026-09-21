@@ -11,17 +11,17 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { ShellRole } from './shell-types'
+import type { ShellPortal } from './shell-types'
 
 interface UserMenuProps {
-  role: ShellRole
+  portal: ShellPortal
   user: { email: string }
 }
 
 /** The avatar button: who is signed in, their account page (managers), sign out. */
-export default function UserMenu({ role, user }: UserMenuProps) {
+export default function UserMenu({ portal, user }: UserMenuProps) {
   const initials = user.email.slice(0, 2).toUpperCase()
-  const loginPath = role === 'admin' ? '/admin/login' : '/manager/login'
+  const loginPath = portal === 'admin' ? '/admin/login' : '/manager/login'
 
   return (
     <DropdownMenu>
@@ -37,10 +37,10 @@ export default function UserMenu({ role, user }: UserMenuProps) {
       <DropdownMenuContent align="end" className="w-60">
         <DropdownMenuLabel className="font-normal">
           <span className="block truncate text-sm font-medium">{user.email}</span>
-          <span className="block text-xs text-muted-foreground">{role === 'admin' ? 'Super admin' : 'Restaurant manager'}</span>
+          <span className="block text-xs text-muted-foreground">{portal === 'admin' ? 'Super admin' : 'Restaurant manager'}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {role === 'manager' && (
+        {portal === 'manager' && (
           <DropdownMenuItem asChild>
             <Link href="/manager/profile">Account settings</Link>
           </DropdownMenuItem>

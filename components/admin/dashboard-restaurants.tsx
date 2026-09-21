@@ -67,7 +67,7 @@ export function DashboardRestaurants({ restaurants }: { restaurants: DashboardRe
                   {r.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </TableCell>
                 <TableCell className="text-right">
-                  <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} role="admin" slug={r.slug} />
+                  <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} portal="admin" slug={r.slug} />
                 </TableCell>
               </TableRow>
             ))}

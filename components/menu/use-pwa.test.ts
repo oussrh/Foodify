@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { registerServiceWorker } from './use-pwa'
 
-// A stand-in for navigator.serviceWorker: records the listeners so a test can fire them.
+// A stand-in for navigator.serviceWorker: records the listeners so a test can fire one by name.
 function fakeServiceWorker(controller: object | null) {
   const listeners: Record<string, () => void> = {}
   const sw = {
@@ -15,7 +15,11 @@ function fakeServiceWorker(controller: object | null) {
   }
   vi.stubGlobal('navigator', { serviceWorker: sw })
   vi.stubGlobal('window', {})
-  return listeners
+  return (type: string) => {
+    const listener = listeners[type]
+    if (!listener) throw new Error(`nothing listens for ${type}`)
+    listener()
+  }
 }
 
 const handlers = () => ({ onPrecached: vi.fn(), onUpdateReady: vi.fn(), onControllerChange: vi.fn(), sendPrecache: vi.fn() })
@@ -27,7 +31,7 @@ describe('registerServiceWorker: a change of controller', () => {
     const fire = fakeServiceWorker(null)
     const h = handlers()
     registerServiceWorker(h)
-    fire.controllerchange()
+    fire('controllerchange')
     expect(h.onControllerChange).not.toHaveBeenCalled()
   })
 
@@ -35,8 +39,8 @@ describe('registerServiceWorker: a change of controller', () => {
     const fire = fakeServiceWorker(null)
     const h = handlers()
     registerServiceWorker(h)
-    fire.controllerchange()
-    fire.controllerchange()
+    fire('controllerchange')
+    fire('controllerchange')
     expect(h.onControllerChange).toHaveBeenCalledTimes(1)
   })
 
@@ -44,7 +48,7 @@ describe('registerServiceWorker: a change of controller', () => {
     const fire = fakeServiceWorker({})
     const h = handlers()
     registerServiceWorker(h)
-    fire.controllerchange()
+    fire('controllerchange')
     expect(h.onControllerChange).toHaveBeenCalledTimes(1)
   })
 
@@ -52,8 +56,8 @@ describe('registerServiceWorker: a change of controller', () => {
     const fire = fakeServiceWorker({})
     const h = handlers()
     registerServiceWorker(h)
-    fire.controllerchange()
-    fire.controllerchange()
+    fire('controllerchange')
+    fire('controllerchange')
     expect(h.onControllerChange).toHaveBeenCalledTimes(1)
   })
 })

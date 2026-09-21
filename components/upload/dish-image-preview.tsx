@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { CheckCircle, Download, Eye, Info, RefreshCw, X } from 'lucide-react'
 
+/** What Cloudinary reported about the upload; each is shown when known. */
 export interface DishImageInfo {
-  dimensions?: string
-  size?: string
-  format?: string
+  dimensions?: string | undefined
+  size?: string | undefined
+  format?: string | undefined
 }
 
 interface DishImagePreviewProps {

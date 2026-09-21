@@ -16,7 +16,7 @@ import { POPULAR_FONTS, getCategoryColor } from './google-fonts'
 import FontPreviewCard from './font-preview-card'
 
 interface GoogleFontsSelectorProps {
-  currentFontUrl?: string
+  currentFontUrl?: string | undefined
   onFontChange: (fontUrl: string, fontFamily: string) => void
   disabled?: boolean
 }
@@ -60,8 +60,8 @@ export default function GoogleFontsSelector({
     // Basic validation for Google Fonts URL
     if (url.includes('fonts.googleapis.com')) {
       // Extract font family name from URL (simplified)
-      const familyMatch = url.match(/family=([^&:]+)/)
-      const fontFamily = familyMatch ? familyMatch[1].replace(/\+/g, ' ') : 'Custom Font'
+      const family = url.match(/family=([^&:]+)/)?.[1]
+      const fontFamily = family ? family.replace(/\+/g, ' ') : 'Custom Font'
       onFontChange(url, fontFamily)
     }
   }

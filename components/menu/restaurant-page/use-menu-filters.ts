@@ -15,7 +15,7 @@ interface MenuFiltersInput {
   uncategorizedDishes: MenuDish[]
   locale: Locale
   /** ?filter= from the URL (manifest shortcuts use filter=ar) */
-  urlFilter?: string | null
+  urlFilter?: string | null | undefined
 }
 
 interface Filter {

@@ -18,7 +18,7 @@ interface ImageTileProps {
   onChange: (url: string) => void
   /** Persist immediately (uploads are saved as soon as they finish). */
   onPersist?: (url: string) => Promise<void>
-  disabled?: boolean
+  disabled?: boolean | undefined
 }
 
 export default function ImageTile({ kind, label, value, restaurantSlug, onChange, onPersist, disabled }: ImageTileProps) {

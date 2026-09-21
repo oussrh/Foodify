@@ -15,7 +15,7 @@ type Subcategory = { id: string; nameEn: string }
 
 type RegisteredField = {
   field: UseFormRegisterReturn
-  error?: FieldErrorShape
+  error?: FieldErrorShape | undefined
   disabled: boolean
   placeholder?: string
 }

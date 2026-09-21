@@ -36,7 +36,7 @@ interface SocialLinksProps {
   /** What the menu makes of it, for the preview under each field */
   handles: SocialHandles
   onChange: (json: string) => void
-  disabled?: boolean
+  disabled?: boolean | undefined
 }
 
 /** One field per network; a handle or a full link both work, and the stored value is JSON. */

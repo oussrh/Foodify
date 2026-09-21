@@ -5,6 +5,7 @@ import { uploadArAsset } from '@/lib/cloudinary'
 import { requireDishAccess, requireIngredientAccess, requireRestaurantAccess } from '@/lib/auth-guard'
 import { uuid } from '@/lib/schemas/common'
 import { dishPayload, idOnly, ingredientPayload } from '@/lib/payloads'
+import { definedFields } from '@/lib/defined-fields'
 import {
   dishInput,
   dishPatch,
@@ -50,7 +51,7 @@ export async function createDish(rawRestaurantId: string, raw: DishInput) {
       descriptionFr: data.descriptionFr || '',
       price: data.price,
       imageUrl: data.imageUrl,
-      subcategoryId: data.subcategoryId,
+      subcategoryId: data.subcategoryId ?? null,
       usdzUrl,
       glbUrl,
       restaurantId,
@@ -82,7 +83,7 @@ export async function updateDish(rawId: string, raw: DishPatch) {
     }
   })
 
-  return prisma.dish.update({ select: dishPayload, where: { id }, data: updatedData })
+  return prisma.dish.update({ select: dishPayload, where: { id }, data: definedFields(updatedData) })
 }
 
 export async function deleteDish(rawId: string) {
@@ -138,7 +139,7 @@ export async function updateIngredient(rawId: string, raw: IngredientPatch) {
   const data = ingredientPatch.parse(raw)
   return prisma.ingredient.update({ select: ingredientPayload,
     where: { id },
-    data
+    data: definedFields(data)
   })
 }
 

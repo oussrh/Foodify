@@ -80,10 +80,10 @@ function lineEntry(line: string): Entry | null {
   const entry = line.trim()
   if (!entry) return null
 
-  const labelled = entry.match(/^([a-z]+)\s*[:\-=]?\s+(.+)$/i)
-  if (labelled) {
-    const platform = PLATFORM_ALIASES[labelled[1].toLowerCase()]
-    if (platform) return { platform, value: labelled[2] }
+  const [, label, labelledValue] = entry.match(/^([a-z]+)\s*[:\-=]?\s+(.+)$/i) ?? []
+  if (label && labelledValue) {
+    const platform = PLATFORM_ALIASES[label.toLowerCase()]
+    if (platform) return { platform, value: labelledValue }
   }
 
   const urlMatch = entry.match(/https?:\/\/[^\s]+/i)

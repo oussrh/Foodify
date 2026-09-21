@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils"
 interface SwitchProps {
   checked?: boolean
   onCheckedChange?: (checked: boolean) => void
-  disabled?: boolean
+  disabled?: boolean | undefined
   className?: string
 }
 

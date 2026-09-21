@@ -10,7 +10,7 @@ export type HSL = [number, number, number]
 
 export function hexToRgb(hex: string): RGB | null {
   let h = hex.trim().replace('#', '')
-  if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2]
+  if (h.length === 3) h = h.replace(/./g, (c) => c + c)
   if (!/^[0-9a-f]{6}$/i.test(h)) return null
   const n = parseInt(h, 16)
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
@@ -61,12 +61,14 @@ export function hslToRgb([h, s, l]: HSL): RGB {
   return [f(h + 1 / 3) * 255, f(h) * 255, f(h - 1 / 3) * 255]
 }
 
+/** The linear value of one sRGB channel. */
+function linear(v: number): number {
+  const c = v / 255
+  return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
+}
+
 function luminance([r, g, b]: RGB): number {
-  const lin = [r, g, b].map((v) => {
-    const c = v / 255
-    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4)
-  })
-  return 0.2126 * lin[0] + 0.7152 * lin[1] + 0.0722 * lin[2]
+  return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b)
 }
 
 export function contrast(a: RGB, b: RGB): number {

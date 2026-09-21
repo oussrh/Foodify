@@ -12,13 +12,18 @@ function tokens(selector: string): Record<string, RGB> {
   const block = css.slice(css.indexOf(selector))
   const body = block.slice(block.indexOf('{') + 1, block.indexOf('}'))
   const out: Record<string, RGB> = {}
-  for (const m of body.matchAll(/--([a-z-]+):\s*([\d.]+)\s+([\d.]+)%\s+([\d.]+)%\s*;/g)) {
-    out[m[1]] = hslToRgb([Number(m[2]) / 360, Number(m[3]) / 100, Number(m[4]) / 100])
+  for (const [, name, h, s, l] of body.matchAll(/--([a-z-]+):\s*([\d.]+)\s+([\d.]+)%\s+([\d.]+)%\s*;/g)) {
+    if (name && h && s && l) out[name] = hslToRgb([Number(h) / 360, Number(s) / 100, Number(l) / 100])
   }
   return out
 }
 
-const themes = { light: tokens('.light {'), dark: tokens('.dark {') }
+/** The token's colour, or a failure naming the token the theme lacks. */
+function rgb(theme: Record<string, RGB>, name: string): RGB {
+  const value = theme[name]
+  if (!value) throw new Error(`no token --${name} in this theme`)
+  return value
+}
 
 /** [text, surface, minimum] */
 const TEXT_PAIRS: [string, string, number][] = [
@@ -49,21 +54,21 @@ const TEXT_PAIRS: [string, string, number][] = [
  * (docs/ADOPTION_DECISIONS.md, phase 3). Surfaces painted with an alpha (bg-warning/12, the tint)
  * are composited at run time and are not computed here.
  */
-const UI_PAIRS: Record<string, [string, string, number][]> = {
-  light: [['ring', 'background', 3], ['input', 'background', 1.46]],
-  dark: [['ring', 'background', 3], ['input', 'background', 1.6]],
-}
+const THEMES: { name: string; t: Record<string, RGB>; uiPairs: [string, string, number][] }[] = [
+  { name: 'light', t: tokens('.light {'), uiPairs: [['ring', 'background', 3], ['input', 'background', 1.46]] },
+  { name: 'dark', t: tokens('.dark {'), uiPairs: [['ring', 'background', 3], ['input', 'background', 1.6]] },
+]
 
-describe.each(Object.entries(themes))('%s theme tokens', (name, t) => {
+describe.each(THEMES)('$name theme tokens', ({ t, uiPairs }) => {
   it('parsed every colour token', () => {
     expect(Object.keys(t).length).toBeGreaterThanOrEqual(20)
   })
 
   it.each(TEXT_PAIRS)('%s on %s reads at least %s:1', (text, surface, min) => {
-    expect(contrast(t[text], t[surface])).toBeGreaterThanOrEqual(min)
+    expect(contrast(rgb(t, text), rgb(t, surface))).toBeGreaterThanOrEqual(min)
   })
 
-  it.each(UI_PAIRS[name])('%s against %s reads at least %s:1', (part, surface, min) => {
-    expect(contrast(t[part], t[surface])).toBeGreaterThanOrEqual(min)
+  it.each(uiPairs)('%s against %s reads at least %s:1', (part, surface, min) => {
+    expect(contrast(rgb(t, part), rgb(t, surface))).toBeGreaterThanOrEqual(min)
   })
 })

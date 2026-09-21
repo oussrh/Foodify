@@ -9,7 +9,7 @@ import { DAY_KEYS, dayName, type DayKey, type OpeningHours, type Period } from '
 interface HoursEditorProps {
   value: OpeningHours
   onChange: (next: OpeningHours) => void
-  disabled?: boolean
+  disabled?: boolean | undefined
 }
 
 const DEFAULT_PERIOD: Period = { open: '12:00', close: '23:00' }

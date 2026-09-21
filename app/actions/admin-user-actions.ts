@@ -6,6 +6,7 @@ import { requireSuperAdmin } from '@/lib/auth-guard'
 import { password, uuid } from '@/lib/schemas/common'
 import { adminInput, adminPatch, type AdminInput, type AdminPatch } from '@/lib/schemas/user'
 import { userPayload } from '@/lib/payloads'
+import { definedFields } from '@/lib/defined-fields'
 
 export async function createAdmin(raw: AdminInput) {
   await requireSuperAdmin()
@@ -26,7 +27,7 @@ export async function updateAdmin(rawId: string, raw: AdminPatch) {
   const data = adminPatch.parse(raw)
   return prisma.user.update({ select: userPayload,
     where: { id },
-    data,
+    data: definedFields(data),
   })
 }
 

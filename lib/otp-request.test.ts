@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { callArgs } from '@/test/mock-calls'
 
 type Update = { where: { id: string }; data: { emailOtpCode: string; emailOtpExpires: Date } }
 // vi.mock is hoisted above these, so the stand-ins come from vi.hoisted.
@@ -48,7 +49,7 @@ describe('requestOtp', () => {
   it('stores a six-digit code for ten minutes and mails it in the portal\'s words', async () => {
     findUnique.mockResolvedValueOnce({ id: 'u1', role: 'RESTAURANT_ADMIN', passwordHash })
     expect(await requestOtp(credentials, portal)).toEqual({ success: true })
-    const call = update.mock.calls[0][0]
+    const [call] = callArgs(update)
     expect(call.where).toEqual({ id: 'u1' })
     expect(call.data.emailOtpCode).toMatch(/^[0-9]{6}$/)
     expect(call.data.emailOtpExpires.getTime()).toBe(Date.now() + OTP_TTL_MS)

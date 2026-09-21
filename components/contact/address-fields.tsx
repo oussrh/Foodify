@@ -12,7 +12,7 @@ interface AddressFieldsProps {
   register: UseFormRegister<ContactFormValues>
   /** The address as the menu formats it, or null while it is empty */
   address: string | null
-  disabled?: boolean
+  disabled?: boolean | undefined
 }
 
 /** Street, postal code, city, region and country, with a link to check the result on a map. */

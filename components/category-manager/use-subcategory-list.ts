@@ -50,6 +50,7 @@ export function useSubcategoryList(
     const newIndex = direction === "up" ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= subs.length) return;
     const [item] = subs.splice(index, 1);
+    if (!item) return;
     subs.splice(newIndex, 0, item);
     setCategories((prev) =>
       prev.map((c: Category) =>

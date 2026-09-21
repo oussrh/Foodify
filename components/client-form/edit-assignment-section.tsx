@@ -23,7 +23,7 @@ export default function EditAssignmentSection({
   restaurants: Restaurant[]
   selected: string[]
   /** The ids assigned when the form opened, for the change badges. */
-  original?: string[]
+  original?: string[] | undefined
   changes: AssignmentChanges
   onAssign: (id: string) => void
   onRemove: (id: string) => void

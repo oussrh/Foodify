@@ -23,7 +23,7 @@ export interface DishListRow {
 }
 
 interface DishesListProps {
-  role: 'admin' | 'manager'
+  portal: 'admin' | 'manager'
   restaurantId: string
   currency: string
   rows: DishListRow[]
@@ -31,8 +31,8 @@ interface DishesListProps {
   emptyAction?: React.ReactNode
 }
 
-export default function DishesList({ role, restaurantId, currency, rows, search, emptyAction }: DishesListProps) {
-  const base = `/${role}/restaurants/${restaurantId}`
+export default function DishesList({ portal, restaurantId, currency, rows, search, emptyAction }: DishesListProps) {
+  const base = `/${portal}/restaurants/${restaurantId}`
   return (
     <div className="flex flex-col gap-4">
       <ListSearch value={search} placeholder="Search dishes" label="Search dishes" />

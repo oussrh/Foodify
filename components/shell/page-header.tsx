@@ -33,7 +33,7 @@ export function PageHeader({ title, description, back, actions, className }: Pag
 interface Stat {
   label: string
   value: string | number
-  hint?: string
+  hint?: string | undefined
 }
 
 /** Four-up (or fewer) numbers in one hairline strip. Only put figures here that exist. */
@@ -54,7 +54,7 @@ export function StatStrip({ stats, className }: { stats: Stat[]; className?: str
 
 interface EmptyStateProps {
   title: string
-  description?: string
+  description?: string | undefined
   action?: React.ReactNode
 }
 

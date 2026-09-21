@@ -27,7 +27,7 @@ export default function SubcategoryRow({
   count: number;
   onRenameSub: (id: string, names: Names) => void;
   onToggleSubStatus: (catId: string, subId: string) => void;
-  onDeleteSub?: (catId: string, id: string) => void;
+  onDeleteSub?: ((catId: string, id: string) => void) | undefined;
   onMoveSub: (catId: string, index: number, dir: "up" | "down") => void;
 }) {
   return (

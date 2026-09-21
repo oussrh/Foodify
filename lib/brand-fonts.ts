@@ -34,5 +34,5 @@ export const BRAND_FONTS: BrandFont[] = [
 /** One stylesheet that loads every option, for previewing the picker. */
 export const BRAND_FONTS_PREVIEW_URL =
   'https://fonts.googleapis.com/css2?' +
-  BRAND_FONTS.map((f) => f.url.split('?family=')[1].split('&display')[0]).map((p) => 'family=' + p).join('&') +
+  BRAND_FONTS.flatMap((f) => f.url.match(/[?&](family=[^&]+)/)?.[1] ?? []).join('&') +
   '&display=swap'

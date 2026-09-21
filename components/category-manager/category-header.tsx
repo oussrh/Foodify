@@ -30,7 +30,7 @@ export default function CategoryHeader({
   dragHandle: { attributes: DraggableAttributes; listeners: DraggableSyntheticListeners };
   onRename: (id: string, names: Names) => void;
   onToggleStatus: (id: string) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: ((id: string) => void) | undefined;
 }) {
   const [editMode, setEditMode] = useState(false);
   const [editNames, setEditNames] = useState({ en: category.nameEn, fr: category.nameFr });

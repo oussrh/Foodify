@@ -4,8 +4,15 @@ import { restaurantJsonLd } from './structured-data'
 
 const origin = 'https://foodify.app'
 
+/** The dishes of the first section, none when there is no section. */
+const firstSectionItems = (ld: ReturnType<typeof restaurantJsonLd>) => ld.hasMenu.hasMenuSection[0]?.hasMenuItem ?? []
+
 /** The first dish of the first section: what most item-level assertions reach for. */
-const firstItem = (ld: ReturnType<typeof restaurantJsonLd>) => ld.hasMenu.hasMenuSection[0].hasMenuItem[0]
+const firstItem = (ld: ReturnType<typeof restaurantJsonLd>) => {
+  const [item] = firstSectionItems(ld)
+  if (!item) throw new Error('the menu has no first item')
+  return item
+}
 
 describe('restaurantJsonLd', () => {
   it('identifies the restaurant by its public URL', () => {
@@ -76,8 +83,9 @@ describe('restaurantJsonLd', () => {
 
   it('states calories only when they are known', () => {
     const [withCal, without] = [makeDish({ id: 'a', calories: 640 }), makeDish({ id: 'b' })]
-    const items = restaurantJsonLd(makeRestaurant(), [makeCategory({ subcategories: [makeSubcategory({ dishes: [withCal, without] })] })], [], origin).hasMenu.hasMenuSection[0].hasMenuItem
-    expect(items[0].nutrition).toEqual({ '@type': 'NutritionInformation', calories: '640 calories' })
-    expect(items[1].nutrition).toBeUndefined()
+    const items = firstSectionItems(restaurantJsonLd(makeRestaurant(), [makeCategory({ subcategories: [makeSubcategory({ dishes: [withCal, without] })] })], [], origin))
+    expect(items).toHaveLength(2)
+    expect(items[0]?.nutrition).toEqual({ '@type': 'NutritionInformation', calories: '640 calories' })
+    expect(items[1]?.nutrition).toBeUndefined()
   })
 })

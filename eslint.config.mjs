@@ -30,10 +30,6 @@ const config = [
     files: ['**/*.{jsx,tsx}'],
     rules: {
       ...jsxA11y.flatConfigs.recommended.rules,
-      // `role="admin" | "manager"` is this app's portal prop on five of its own components, not an
-      // ARIA role; DOM elements and the mapped primitives above stay checked. Renaming the prop
-      // (17 files, a codemod) is recorded as deferred in docs/ADOPTION_DECISIONS.md.
-      'jsx-a11y/aria-role': ['error', { ignoreNonDOM: true }],
       // Radix's Switch and Checkbox render a button, a labelable element the rule does not list.
       'jsx-a11y/label-has-associated-control': ['error', { controlComponents: ['Switch', 'Checkbox'] }],
     },

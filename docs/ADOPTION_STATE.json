@@ -280,7 +280,30 @@
     },
     {
       "id": 9,
-      "status": "pending"
+      "status": "done",
+      "updatedAt": "2026-09-21T06:43:58Z",
+      "numbersBefore": {
+        "rules": {
+          "TYPES-STRICT": "partial (strict, noUncheckedIndexedAccess off, exactOptionalPropertyTypes off)",
+          "TYPES-ESCAPES": "present (0, hard)"
+        },
+        "typecheck": "tsc --noEmit blocking in CI and green under strict; 53 errors with noUncheckedIndexedAccess, 86 with exactOptionalPropertyTypes (140 together), measured 2026-09-20",
+        "score": "72/100 (74 checks)",
+        "enforcedShare": "76% (42/55)"
+      },
+      "numbersAfter": {
+        "rules": {
+          "TYPES-STRICT": "present (strict, noUncheckedIndexedAccess, exactOptionalPropertyTypes)",
+          "TYPES-ESCAPES": "present (0, hard)"
+        },
+        "typecheck": "0 errors with both flags on (140 -> 0: 53 + 86 + 1 cascade); tsc --noEmit blocking in CI",
+        "score": "71/100 (73 checks; the phase 8 close read 68 on its head and 72 on the tree with phase 10 staged)",
+        "enforcedShare": "76% (42/55)",
+        "readability": "100/100",
+        "switches": "pnpm run typecheck red on a planted xs[0] returned as string (TS2322) and a planted { a: undefined } into an exact-optional property (TS2375), green after the removal",
+        "tests": "290 unit (45 files), 20 browser",
+        "also": "the role -> portal rename of the shell components (phase 3 trigger), 20 files by codemod; jsx-a11y/aria-role without its carve-out"
+      }
     },
     {
       "id": 10,

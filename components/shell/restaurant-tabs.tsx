@@ -3,32 +3,32 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import { cn } from '@/lib/utils'
-import type { ShellRole } from './shell-types'
+import type { ShellPortal } from './shell-types'
 
 interface RestaurantTabsProps {
-  role: ShellRole
+  portal: ShellPortal
   restaurantId: string
   pathname: string
 }
 
 /** Sub-navigation shown while working inside one restaurant. */
-function restaurantTabs(role: ShellRole, id: string) {
-  const base = `/${role}/restaurants/${id}`
+function restaurantTabs(portal: ShellPortal, id: string) {
+  const base = `/${portal}/restaurants/${id}`
   const tabs: { href: Route; label: string }[] = [
     { href: `${base}/info` as Route, label: 'Info' },
     { href: `${base}/menu` as Route, label: 'Menu' },
     { href: `${base}/dishes` as Route, label: 'Dishes' },
     { href: `${base}/edit` as Route, label: 'Settings' },
   ]
-  if (role === 'admin') tabs.push({ href: `${base}/users` as Route, label: 'People' })
+  if (portal === 'admin') tabs.push({ href: `${base}/users` as Route, label: 'People' })
   return tabs
 }
 
 /** The strip of tabs under the top bar, the current one filled. */
-export default function RestaurantTabs({ role, restaurantId, pathname }: RestaurantTabsProps) {
+export default function RestaurantTabs({ portal, restaurantId, pathname }: RestaurantTabsProps) {
   return (
     <div className="scrollbar-none flex gap-1 overflow-x-auto px-4 pb-2 md:px-6">
-      {restaurantTabs(role, restaurantId).map((tab) => {
+      {restaurantTabs(portal, restaurantId).map((tab) => {
         const active = pathname.startsWith(tab.href)
         return (
           <Link

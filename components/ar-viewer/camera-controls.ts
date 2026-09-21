@@ -5,7 +5,9 @@
 import { toast } from 'sonner'
 import type { ModelViewer, ViewMode } from '@/components/model-viewer/element'
 
-const DEFAULT_ORBIT = '45deg 75deg auto'
+/** theta, phi, radius: the orbit <model-viewer> starts from and returns to. */
+const DEFAULT_ORBIT_PARTS = ['45deg', '75deg', 'auto'] as const
+const DEFAULT_ORBIT = DEFAULT_ORBIT_PARTS.join(' ')
 
 /** Reset camera view */
 export function resetCamera(modelViewer: ModelViewer) {
@@ -26,9 +28,10 @@ function steppedDistance(distance: string, direction: 'in' | 'out') {
 
 export function zoomCamera(modelViewer: ModelViewer, direction: 'in' | 'out') {
   const currentOrbit = modelViewer.getAttribute('camera-orbit') || DEFAULT_ORBIT
-  const parts = currentOrbit.split(' ')
-  const distance = parts[2] === 'auto' ? '100%' : parts[2]
-  modelViewer.setAttribute('camera-orbit', `${parts[0]} ${parts[1]} ${steppedDistance(distance, direction)}`)
+  // A part the attribute lacks is the default orbit's.
+  const [theta = DEFAULT_ORBIT_PARTS[0], phi = DEFAULT_ORBIT_PARTS[1], radius = DEFAULT_ORBIT_PARTS[2]] = currentOrbit.split(' ')
+  const distance = radius === 'auto' ? '100%' : radius
+  modelViewer.setAttribute('camera-orbit', `${theta} ${phi} ${steppedDistance(distance, direction)}`)
   toast.success(direction === 'in' ? 'Zoomed in' : 'Zoomed out')
 }
 

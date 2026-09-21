@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { BRAND_IMAGE_LIMITS, uploadBrandImage, validateBrandImage, type BrandUploadAction } from './brand-upload'
+import { callArgs } from '@/test/mock-calls'
 
 // uploadDirect reads publicEnv on every call, so mutating this hoisted object between tests is
 // enough: no re-import needed.
-const env = vi.hoisted((): { cloudinaryCloudName?: string; cloudinaryUploadPreset?: string } => ({}))
+const env = vi.hoisted((): { cloudinaryCloudName?: string | undefined; cloudinaryUploadPreset?: string | undefined } => ({}))
 vi.mock('@/lib/env', () => ({ publicEnv: env }))
 
 const file = (name: string, type: string, bytes: number) => new File([new Uint8Array(bytes)], name, { type })
@@ -62,7 +63,7 @@ describe('uploadBrandImage', () => {
     const url = await uploadBrandImage(file('l.png', 'image/png', 10), 'logo', 'dar-zitoun', viaServer)
     expect(url).toBe('https://res.cloudinary.com/demo/logo.png')
     expect(viaServer).not.toHaveBeenCalled()
-    const [target, init] = fetchMock.mock.calls[0]
+    const [target, init] = callArgs(fetchMock)
     expect(target).toBe('https://api.cloudinary.com/v1_1/demo/image/upload')
     expect(init?.body).toBeInstanceOf(FormData)
     if (init?.body instanceof FormData) {
@@ -82,7 +83,7 @@ describe('uploadBrandImage', () => {
     const viaServer = vi.fn<BrandUploadAction>().mockResolvedValue({ success: true, coverUrl: 'https://cdn/cover.jpg' })
     await uploadBrandImage(file('c.jpg', 'image/jpeg', 10), 'cover', 'dar-zitoun', viaServer)
     expect(viaServer).toHaveBeenCalledTimes(1)
-    const [body, slug] = viaServer.mock.calls[0]
+    const [body, slug] = callArgs(viaServer)
     expect(slug).toBe('dar-zitoun')
     const sent = body.get('file')
     expect(sent).toBeInstanceOf(File)

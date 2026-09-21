@@ -22,7 +22,7 @@ export function useScrollSpy(sections: Section[]) {
   useEffect(() => {
     const hero = heroRef.current
     if (!hero) return
-    const io = new IntersectionObserver(([entry]) => setCollapsed(!entry.isIntersecting), {
+    const io = new IntersectionObserver(([entry]) => setCollapsed(entry ? !entry.isIntersecting : false), {
       rootMargin: `-${BAR_HEIGHT}px 0px 0px 0px`,
       threshold: 0,
     })

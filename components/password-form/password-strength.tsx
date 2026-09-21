@@ -21,16 +21,16 @@ export function passwordChecks(password: string): PasswordCheck[] {
 
 type Tier = { level: string; color: string; icon: ReactNode; bar: string }
 
+const VERY_WEAK: Tier = { level: 'Very Weak', color: 'text-destructive bg-muted border-border', icon: <X className="h-3 w-3" />, bar: 'bg-muted0' }
 const TIERS: { min: number; tier: Tier }[] = [
   { min: 5, tier: { level: 'Strong', color: 'text-success bg-muted border-border', icon: <Shield className="h-3 w-3" />, bar: '' } },
   { min: 3, tier: { level: 'Medium', color: 'text-warning bg-muted border-border', icon: <Zap className="h-3 w-3" />, bar: '' } },
   { min: 1, tier: { level: 'Weak', color: 'text-warning bg-muted border-border', icon: <AlertTriangle className="h-3 w-3" />, bar: '' } },
-  { min: 0, tier: { level: 'Very Weak', color: 'text-destructive bg-muted border-border', icon: <X className="h-3 w-3" />, bar: 'bg-muted0' } },
 ]
 
-/** The tier of a score out of five: 5 is strong, 3 and 4 medium, 1 and 2 weak, 0 very weak. */
+/** The tier of a score out of five: 5 is strong, 3 and 4 medium, 1 and 2 weak, anything less very weak. */
 export function strengthTier(score: number): Tier {
-  return (TIERS.find((t) => score >= t.min) ?? TIERS[TIERS.length - 1]).tier
+  return TIERS.find((t) => score >= t.min)?.tier ?? VERY_WEAK
 }
 
 export function PasswordStrengthIndicator({ checks, score }: { checks: PasswordCheck[]; score: number }) {

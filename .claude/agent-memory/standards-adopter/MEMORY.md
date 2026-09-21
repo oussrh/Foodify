@@ -13,3 +13,4 @@
 - [React Compiler refs](patterns_react-compiler-refs.md) - a hook returning refs inside its result object trips react-hooks/refs when passed as a prop; destructure
 - [Type-only cycles](patterns_type-only-cycles.md) - depcruise no-circular still fails a value import that closes a cycle through an import type; shared types in a leaf
 - [Mutation restore](patterns_mutation-restore.md) - restoring a mutation-tested file with `git checkout --` wipes the refactor in progress; undo the mutation itself
+- [Strict flags](patterns_strict-flags.md) - noUncheckedIndexedAccess + exactOptionalPropertyTypes to zero: definedFields at the Prisma boundary, widen the child prop, never zod exactOptional, utf-8 in python edits

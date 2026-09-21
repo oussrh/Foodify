@@ -12,10 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import type { ShellRestaurant, ShellRole } from './shell-types'
+import type { ShellRestaurant, ShellPortal } from './shell-types'
 
 interface RestaurantSwitcherProps {
-  role: ShellRole
+  portal: ShellPortal
   restaurants: ShellRestaurant[]
   current: ShellRestaurant
   /** The section open right now (info, menu, dishes...), kept when switching */
@@ -23,7 +23,7 @@ interface RestaurantSwitcherProps {
 }
 
 /** The current restaurant's name in the top bar; opens the list of the others at the same section. */
-export default function RestaurantSwitcher({ role, restaurants, current, section }: RestaurantSwitcherProps) {
+export default function RestaurantSwitcher({ portal, restaurants, current, section }: RestaurantSwitcherProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -40,14 +40,14 @@ export default function RestaurantSwitcher({ role, restaurants, current, section
         <DropdownMenuSeparator />
         {restaurants.map((r) => (
           <DropdownMenuItem key={r.id} asChild>
-            <Link href={`/${role}/restaurants/${r.id}/${section}` as Route} className={cn(r.id === current.id && 'font-semibold')}>
+            <Link href={`/${portal}/restaurants/${r.id}/${section}` as Route} className={cn(r.id === current.id && 'font-semibold')}>
               {r.name}
             </Link>
           </DropdownMenuItem>
         ))}
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href={`/${role}/restaurants` as Route}>All restaurants</Link>
+          <Link href={`/${portal}/restaurants` as Route}>All restaurants</Link>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

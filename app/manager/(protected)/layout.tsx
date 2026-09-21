@@ -31,7 +31,7 @@ export default async function ManagerLayout({ children }: LayoutProps) {
   }
 
   return (
-    <AppShell role="manager" user={{ email: user.email }} restaurants={user.restaurants}>
+    <AppShell portal="manager" user={{ email: user.email }} restaurants={user.restaurants}>
       {children}
     </AppShell>
   )

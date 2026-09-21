@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
   if (!query.success) return fail('invalid_query', 'limit is 1..500 and cursor an id', 400)
 
   const rows = await prisma.user.findMany({
-    where: { role, ...afterCursor('email', query.data.cursor) },
+    where: { ...(role ? { role } : {}), ...afterCursor('email', query.data.cursor) },
     select: { id: true, email: true, role: true },
     orderBy: [{ email: 'asc' }, { id: 'asc' }],
     ...pageArgs(query.data),

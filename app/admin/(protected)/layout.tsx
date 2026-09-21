@@ -16,7 +16,7 @@ export default async function AdminLayout({ children }: LayoutProps) {
   })
 
   return (
-    <AppShell role="admin" user={{ email: user.email }} restaurants={restaurants}>
+    <AppShell portal="admin" user={{ email: user.email }} restaurants={restaurants}>
       {children}
     </AppShell>
   )

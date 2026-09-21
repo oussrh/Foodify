@@ -26,20 +26,21 @@ import { Edit } from 'lucide-react'
 
 type Subcategory = { id: string; nameEn: string }
 
+/** The edit form's values as the schema below reads them: an optional member may be absent or `undefined`. */
 export interface EditDishValues {
   nameEn: string
   nameFr: string
-  descriptionEn?: string
-  descriptionFr?: string
+  descriptionEn?: string | undefined
+  descriptionFr?: string | undefined
   price: string
   imageUrl: string
-  usdzUrl?: string
-  glbUrl?: string
-  subcategoryId?: string
-  calories?: number
-  isMostPurchased?: boolean
-  dietary?: string[]
-  allergens?: string[]
+  usdzUrl?: string | undefined
+  glbUrl?: string | undefined
+  subcategoryId?: string | undefined
+  calories?: number | undefined
+  isMostPurchased?: boolean | undefined
+  dietary?: string[] | undefined
+  allergens?: string[] | undefined
 }
 
 const schema = dishInput.omit({ subcategoryId: true, calories: true }).extend({

@@ -16,7 +16,7 @@ export default function EditAccountFields({
   disabled,
 }: {
   email: UseFormRegisterReturn
-  error?: FieldErrorShape
+  error?: FieldErrorShape | undefined
   hasEmailChanged: boolean
   disabled: boolean
 }) {

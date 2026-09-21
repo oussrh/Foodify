@@ -88,7 +88,7 @@ export default async function ManagerDashboard() {
                       <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
                         <Link href={`/manager/restaurants/${r.id}/menu`}>Menu</Link>
                       </Button>
-                      <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} role="manager" slug={r.slug} />
+                      <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} portal="manager" slug={r.slug} />
                     </div>
                   </TableCell>
                 </TableRow>

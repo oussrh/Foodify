@@ -23,7 +23,7 @@ export default function PasswordField({
   icon: ReactNode
   field: UseFormRegisterReturn
   placeholder: string
-  error?: FieldErrorShape
+  error?: FieldErrorShape | undefined
   children?: ReactNode
 }) {
   const [show, setShow] = useState(false)

@@ -22,7 +22,7 @@ export default function EditAssignedList({
   restaurants: Restaurant[]
   selected: string[]
   /** The ids assigned when the form opened, for the New badge. */
-  original?: string[]
+  original?: string[] | undefined
   onRemove: (id: string) => void
   onOpenDialog: () => void
   disabled: boolean

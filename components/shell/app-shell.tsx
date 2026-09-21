@@ -9,10 +9,10 @@ import { cn } from '@/lib/utils'
 import UserMenu from './user-menu'
 import RestaurantSwitcher from './restaurant-switcher'
 import RestaurantTabs from './restaurant-tabs'
-import type { ShellRestaurant, ShellRole } from './shell-types'
+import type { ShellRestaurant, ShellPortal } from './shell-types'
 
 interface AppShellProps {
-  role: ShellRole
+  portal: ShellPortal
   user: { email: string }
   restaurants: ShellRestaurant[]
   children: React.ReactNode
@@ -25,7 +25,7 @@ interface NavItem {
   exact?: boolean
 }
 
-const NAV: Record<ShellRole, NavItem[]> = {
+const NAV: Record<ShellPortal, NavItem[]> = {
   admin: [
     { href: '/admin', label: 'Overview', icon: Home, exact: true },
     { href: '/admin/restaurants', label: 'Restaurants', icon: Building2 },
@@ -39,12 +39,12 @@ const NAV: Record<ShellRole, NavItem[]> = {
   ],
 }
 
-export default function AppShell({ role, user, restaurants, children }: AppShellProps) {
+export default function AppShell({ portal, user, restaurants, children }: AppShellProps) {
   const pathname = usePathname()
-  const nav = NAV[role]
+  const nav = NAV[portal]
 
-  // Are we inside /{role}/restaurants/{id}/... ?
-  const match = pathname.match(new RegExp(`^/${role}/restaurants/([^/]+)(?:/([^/]+))?`))
+  // Are we inside /{portal}/restaurants/{id}/... ?
+  const match = pathname.match(new RegExp(`^/${portal}/restaurants/([^/]+)(?:/([^/]+))?`))
   const restaurantId = match && match[1] !== 'create' ? match[1] : null
   const currentRestaurant = restaurantId ? restaurants.find((r) => r.id === restaurantId) : null
   const section = match?.[2] ?? 'info'
@@ -55,7 +55,7 @@ export default function AppShell({ role, user, restaurants, children }: AppShell
     <div className="flex min-h-screen bg-background">
       {/* Rail (desktop) */}
       <aside className="sticky top-0 hidden h-screen w-[216px] shrink-0 flex-col border-r border-border bg-background px-3 py-4 md:flex">
-        <Link href={`/${role}` as Route} className="flex items-center gap-2 px-2 pb-5 pt-1 font-semibold">
+        <Link href={`/${portal}` as Route} className="flex items-center gap-2 px-2 pb-5 pt-1 font-semibold">
           <span className="h-2.5 w-2.5 rounded-full bg-primary" aria-hidden="true" />
           Foodify
         </Link>
@@ -76,7 +76,7 @@ export default function AppShell({ role, user, restaurants, children }: AppShell
           ))}
         </nav>
         <div className="mt-auto flex items-center gap-2 border-t border-border pt-3">
-          <UserMenu role={role} user={user} />
+          <UserMenu portal={portal} user={user} />
           <span className="min-w-0 flex-1 truncate text-xs text-muted-foreground">{user.email}</span>
           <ThemeToggle size="icon-sm" />
         </div>
@@ -86,20 +86,20 @@ export default function AppShell({ role, user, restaurants, children }: AppShell
         {/* Top bar */}
         <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
           <div className="flex h-14 items-center gap-2 px-4 md:px-6">
-            <Link href={`/${role}` as Route} className="flex items-center gap-2 font-semibold md:hidden">
+            <Link href={`/${portal}` as Route} className="flex items-center gap-2 font-semibold md:hidden">
               <span className="h-2.5 w-2.5 rounded-full bg-primary" aria-hidden="true" />
               <span className="sr-only sm:not-sr-only">Foodify</span>
             </Link>
-            {currentRestaurant && <RestaurantSwitcher role={role} restaurants={restaurants} current={currentRestaurant} section={section} />}
+            {currentRestaurant && <RestaurantSwitcher portal={portal} restaurants={restaurants} current={currentRestaurant} section={section} />}
             <div className="flex-1" />
             <div className="md:hidden">
               <ThemeToggle size="icon-sm" />
             </div>
             <div className="md:hidden">
-              <UserMenu role={role} user={user} />
+              <UserMenu portal={portal} user={user} />
             </div>
           </div>
-          {currentRestaurant && <RestaurantTabs role={role} restaurantId={currentRestaurant.id} pathname={pathname} />}
+          {currentRestaurant && <RestaurantTabs portal={portal} restaurantId={currentRestaurant.id} pathname={pathname} />}
         </header>
 
         <main className="min-w-0 flex-1 px-4 py-5 pb-24 md:px-6 md:py-6 md:pb-10">

@@ -3,7 +3,7 @@
 // the field is fine.
 import type { FieldError as FieldErrorShape } from "react-hook-form";
 
-export default function FieldError({ error }: { error?: FieldErrorShape }) {
+export default function FieldError({ error }: { error?: FieldErrorShape | undefined }) {
   if (!error) return null;
   return (
     <p className="text-xs text-destructive flex items-center gap-1">

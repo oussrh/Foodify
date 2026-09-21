@@ -10,11 +10,11 @@ import { requestManagerOtp } from '@/app/actions/manager-auth-actions'
 import CredentialsStep from './credentials-step'
 import CodeStep from './code-step'
 
-type Role = 'admin' | 'manager'
+type Portal = 'admin' | 'manager'
 type Step = 'credentials' | 'code'
 
 interface SignInFlowProps {
-  role: Role
+  portal: Portal
   /** Start on the code step (the /mfa routes). Falls back to credentials if nothing is pending. */
   initialStep?: Step
 }
@@ -40,8 +40,8 @@ const CONFIG = {
 
 const CODE_TTL = 600
 
-export default function SignInFlow({ role, initialStep = 'credentials' }: SignInFlowProps) {
-  const cfg = CONFIG[role]
+export default function SignInFlow({ portal, initialStep = 'credentials' }: SignInFlowProps) {
+  const cfg = CONFIG[portal]
   const router = useRouter()
   const [step, setStep] = useState<Step>(initialStep)
   // On the /mfa routes the credentials step left them in sessionStorage. They are read once, on
