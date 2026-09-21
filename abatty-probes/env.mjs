@@ -15,16 +15,17 @@ export const wholeEnv = {
   standard: ['VALID.3'],
   title: 'The environment object taken whole outside the env module',
   why: 'The built-in read probe sees a member read of the environment; a destructuring, an alias or a function given the whole object reads the same variables past it. The count is the number of such takes outside the env module.',
-  approximates: 'a text reading of the environment object not followed by a member read or an index, outside the env module and outside scripts/ (tooling that hands the environment to a child process)',
+  approximates: 'a text reading of the environment object not followed by a member read or an index, outside the env module and outside the ratchet\'s exempt paths (scripts, tests, bin, the hooks: tooling that hands the environment to a child process)',
   axis: 'boundary-clarity',
   lossAt: 10,
   scan: (c, o) => {
     const env = new RegExp(o.config.envModule)
+    // the ratchet's own exempt paths (scripts, tests, bin, the hooks): tooling that hands the environment to a child process
+    const exempt = (o.config.exempt ?? []).map((p) => new RegExp(p))
     const findings = []
     let scanned = 0
     for (const f of c.sourceFiles) {
-      // scripts/ hands the environment to child processes (a test runner, a migration): tooling, not the app
-      if (!/\.[cm]?[jt]sx?$/.test(f) || env.test(f) || /^scripts\//.test(f)) continue
+      if (!/\.[cm]?[jt]sx?$/.test(f) || env.test(f) || exempt.some((re) => re.test(f))) continue
       scanned++
       const text = c.read(f)
       for (const m of text.matchAll(WHOLE_ENV)) findings.push({ path: f, line: lineAt(text, m.index), detail: `${ENV} taken whole` })

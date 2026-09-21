@@ -110,6 +110,17 @@ export async function requireCategoryAccess(categoryId: string) {
   return requireRestaurantAccess({ id: category.restaurantId })
 }
 
+/**
+ * A dish's subcategory must be one of its own restaurant's: a subcategory id is not a
+ * restaurant grant, and a dish placed under another restaurant's subcategory would render on
+ * that restaurant's public menu. Null (no subcategory) passes.
+ */
+export async function requireSubcategoryOf(restaurantId: string, subcategoryId: string | null | undefined) {
+  if (!subcategoryId) return
+  const owned = await prisma.menuSubcategory.findFirst({ where: { id: subcategoryId, category: { restaurantId } }, select: { id: true } })
+  if (!owned) throw new AuthError('Forbidden', 403)
+}
+
 export async function requireSubcategoryAccess(subcategoryId: string) {
   const subcategory = await prisma.menuSubcategory.findUnique({
     where: { id: subcategoryId },

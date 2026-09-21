@@ -1,13 +1,15 @@
 import { describe, expect, it } from 'vitest'
+import { GET as listRestaurants } from '@/app/api/restaurants/route'
 import { createDish, updateDish } from '@/app/actions/dish-actions'
 import { createCategory } from '@/app/actions/menu-actions'
-import { afterCursor, page, pageArgs } from '@/lib/schemas/list'
 import { withRollback } from './db'
 import { manager, restaurant, superAdmin } from './fixtures'
 import { signInAs } from './session'
 
-// What the unit tests cannot see: the database's constraints, the money column, a keyset page
-// over real rows, and the row a write leaves behind.
+// What the unit tests cannot see: the money column as Postgres stores it, the row a write
+// leaves behind, and the admin list's keyset page over real rows through its own handler. A
+// constraint violation would abort the transaction every test runs in, so the schema's
+// refusals are tested (they happen first) and a constraint's are left to the migrations.
 describe('writes on the real database', () => {
   it('stores a dish with its price exact, and answers the shaped payload only', () =>
     withRollback(async (tx) => {
@@ -41,21 +43,31 @@ describe('writes on the real database', () => {
       expect(first).toMatchObject({ isActive: true, nameFr: 'Entrées' })
     }))
 
-  it('pages restaurants by keyset in name order, and never skips or repeats a row', () =>
+  it('pages the restaurants list by keyset through its handler, in name order, and never skips or repeats a row', () =>
     withRollback(async (tx) => {
       signInAs(await superAdmin(tx))
-      const prefix = `Page ${Math.random().toString(36).slice(2, 8)}`
+      const prefix = 'Page test'
       for (const suffix of ['b', 'a', 'c', 'a']) await restaurant(tx, `${prefix} ${suffix}`)
-      const where = { name: { startsWith: prefix } }
       const seen: string[] = []
-      let cursor: string | undefined
-      for (let pages = 0; pages < 5; pages++) {
-        const rows = await tx.restaurant.findMany({ where: { ...where, ...afterCursor('name', cursor) }, select: { id: true, name: true }, orderBy: [{ name: 'asc' }, { id: 'asc' }], ...pageArgs({ limit: 2, cursor }) })
-        const p = page(rows, 2, 'name')
-        seen.push(...p.data.map((r) => r.name))
-        if (!p.next) break
-        cursor = p.next
+      let cursor: string | null = null
+      for (let pages = 0; pages < 6; pages++) {
+        const url = `http://test/api/restaurants?limit=2${cursor ? `&cursor=${cursor}` : ''}`
+        const res = await listRestaurants(new Request(url))
+        expect(res.status).toBe(200)
+        const body = (await res.json()) as { data: { name: string }[]; meta: { next: string | null } }
+        seen.push(...body.data.map((r) => r.name).filter((n) => n.startsWith(prefix)))
+        cursor = body.meta.next
+        if (!cursor) break
       }
       expect(seen).toEqual([`${prefix} a`, `${prefix} a`, `${prefix} b`, `${prefix} c`])
+    }))
+
+  it('refuses the list to a manager with the envelope\'s forbidden code', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      signInAs(await manager(tx, [mine.id]))
+      const res = await listRestaurants(new Request('http://test/api/restaurants'))
+      expect(res.status).toBe(403)
+      await expect(res.json()).resolves.toMatchObject({ code: 'forbidden' })
     }))
 })

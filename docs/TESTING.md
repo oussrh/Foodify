@@ -28,7 +28,7 @@ no test touches the network (`fetch` is stubbed where a module calls it).
 
 One area today, `lib/`, the shared layer (the only code with a unit surface: the customer-menu
 data formats, brand colour, pricing, locale, TOTP, JSON-LD). The floor is pinned in
-`vitest.config.ts` at the figure measured on 2026-09-20 and only ever raised; branches and
+`vitest.config.ts` at the figure measured on 2026-09-21 (first set on 2026-09-20) and only ever raised; branches and
 functions are what bind (TEST.4). `thresholds.autoUpdate` is never set: a raise is a reviewed
 change with the new number in the log of `STANDARDS_PROGRESS.md`.
 
@@ -82,7 +82,7 @@ revalidation. No coverage here: the unit floors hold the shared layer; this suit
 unit test cannot see: tenant isolation through the guards and the actions (`tenant-isolation.test.ts`,
 the negative proof DATA.3 asks for), the money column, a keyset page over real rows, the sort
 order a write leaves behind. The gate's database suite runs it when a push touches `prisma/` or
-`tests/`; CI runs it on every push after the gate.
+`tests/integration/`; CI runs it on every push after the gate.
 
 ## Still to come
 

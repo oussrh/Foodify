@@ -42,6 +42,8 @@ test.describe('public menu', () => {
     await expectNoSeriousA11yViolations(page)
     await page.getByRole('link', { name: /Grilled Chicken/ }).first().click()
     await expect(page.getByRole('dialog')).toBeVisible()
+    // the page behind the sheet is inert: hidden from assistive tech and out of the tab order
+    await expect(page.locator('[data-hydrated]')).toHaveAttribute('inert', '')
     await expectNoSeriousA11yViolations(page)
   })
 })

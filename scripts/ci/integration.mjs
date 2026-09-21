@@ -13,6 +13,8 @@ const LOCAL_URL = `postgresql://test:test@localhost:${PORT}/test`
 
 const run = (cmd, args, env = {}) => spawnSync(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32', env: { ...process.env, ...env } })
 const quiet = (cmd, args) => spawnSync(cmd, args, { encoding: 'utf8', shell: process.platform === 'win32' })
+// What docker said when it refused, so a pull failure or a taken port is not read as "no Docker".
+const said = (r) => (r.stderr || r.stdout || '').trim()
 
 function dockerDatabase() {
   if (quiet('docker', ['version', '--format', '{{.Server.Version}}']).status !== 0) return null
@@ -20,10 +22,14 @@ function dockerDatabase() {
   if (!running) {
     quiet('docker', ['rm', '-f', CONTAINER])
     const started = quiet('docker', ['run', '-d', '--name', CONTAINER, '-e', 'POSTGRES_USER=test', '-e', 'POSTGRES_PASSWORD=test', '-e', 'POSTGRES_DB=test', '-p', `${PORT}:5432`, 'postgres:16-alpine'])
-    if (started.status !== 0) return null
+    if (started.status !== 0) {
+      console.error(`test:integration: docker could not start ${CONTAINER} on port ${PORT}: ${said(started)}`)
+      return null
+    }
   }
   for (let i = 0; i < 30; i++) {
-    if (quiet('docker', ['exec', CONTAINER, 'pg_isready', '-U', 'test', '-q']).status === 0) return LOCAL_URL
+    // over TCP, not the socket: the image's init phase answers on the socket before it listens
+    if (quiet('docker', ['exec', CONTAINER, 'pg_isready', '-h', 'localhost', '-U', 'test', '-q']).status === 0) return LOCAL_URL
     spawnSync(process.execPath, ['-e', 'setTimeout(() => {}, 1000)'])
   }
   return null
