@@ -12,7 +12,8 @@ export default defineConfig({
   test: {
     environment: 'node',
     // e2e/ is Playwright's (its specs call test.describe from @playwright/test).
-    exclude: [...configDefaults.exclude, 'e2e/**'],
+    // tests/integration is the database suite's (vitest.integration.config.ts, a real Postgres).
+    exclude: [...configDefaults.exclude, 'e2e/**', 'tests/**'],
     coverage: {
       provider: 'v8',
       reportOnFailure: true,

@@ -15,7 +15,7 @@ export const wholeEnv = {
   standard: ['VALID.3'],
   title: 'The environment object taken whole outside the env module',
   why: 'The built-in read probe sees a member read of the environment; a destructuring, an alias or a function given the whole object reads the same variables past it. The count is the number of such takes outside the env module.',
-  approximates: 'a text reading of the environment object not followed by a member read or an index, outside the env module',
+  approximates: 'a text reading of the environment object not followed by a member read or an index, outside the env module and outside scripts/ (tooling that hands the environment to a child process)',
   axis: 'boundary-clarity',
   lossAt: 10,
   scan: (c, o) => {
@@ -23,7 +23,8 @@ export const wholeEnv = {
     const findings = []
     let scanned = 0
     for (const f of c.sourceFiles) {
-      if (!/\.[cm]?[jt]sx?$/.test(f) || env.test(f)) continue
+      // scripts/ hands the environment to child processes (a test runner, a migration): tooling, not the app
+      if (!/\.[cm]?[jt]sx?$/.test(f) || env.test(f) || /^scripts\//.test(f)) continue
       scanned++
       const text = c.read(f)
       for (const m of text.matchAll(WHOLE_ENV)) findings.push({ path: f, line: lineAt(text, m.index), detail: `${ENV} taken whole` })
@@ -37,8 +38,8 @@ export const wholeEnv = {
       expect: 2,
     },
     {
-      name: 'the env module may take it whole; a read of one variable elsewhere is the other probe\'s',
-      files: { 'src/env.ts': `export const env = schema.parse(${ENV})\n`, 'src/service.ts': `export const k = ${ENV}.KEY\n` },
+      name: 'the env module and a CI script may take it whole; a read of one variable elsewhere is the other probe\'s',
+      files: { 'src/env.ts': `export const env = schema.parse(${ENV})\n`, 'src/service.ts': `export const k = ${ENV}.KEY\n`, 'scripts/ci/run.mjs': `spawnSync('x', [], { env: { ...${ENV}, A: '1' } })\n` },
       expect: 0,
     },
   ],

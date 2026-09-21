@@ -307,7 +307,20 @@
     },
     {
       "id": 10,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-21T06:53:45Z",
+      "numbersBefore": {
+        "rules": {
+          "TEST-INTEGRATION": "missing",
+          "DATA-TENANT": "n/a (no tenant column found; no isolation test)",
+          "TEST-UNIT": "present",
+          "TEST-COVERAGE": "present"
+        },
+        "coverageFloors": "lib/** 93.0 / 81.3 / 79.4 / 93.3 (statements / branches / functions / lines), measured 96.7 / 91.7 / 94.0 / 96.9 on 2026-09-21",
+        "integration": "none: no test:integration script, no real-database suite",
+        "score": "71/100 (73 checks)",
+        "enforcedShare": "76% (42/55)"
+      }
     },
     {
       "id": 11,
