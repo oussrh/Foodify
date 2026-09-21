@@ -119,7 +119,7 @@ function LocaleFields({ register, setValue }: Omit<Props, "errors" | "dietaryOpt
             // Auto-set currency symbol based on selection
             setValue("currencySymbol", currencySymbolFor(value));
           }} defaultValue="USD">
-            <SelectTrigger className="border-border">
+            <SelectTrigger id="currency" className="border-border">
               <SelectValue placeholder="Select currency" />
             </SelectTrigger>
             <SelectContent>
@@ -147,7 +147,7 @@ function LocaleFields({ register, setValue }: Omit<Props, "errors" | "dietaryOpt
       <div className="space-y-2">
         <Label htmlFor="defaultLocale">Default Language</Label>
         <Select onValueChange={(value) => setValue("defaultLocale", value as "en" | "fr")} defaultValue="en">
-          <SelectTrigger className="border-border">
+          <SelectTrigger id="defaultLocale" className="border-border">
             <SelectValue placeholder="Select default language" />
           </SelectTrigger>
           <SelectContent>

@@ -20,7 +20,6 @@ export default function EmptyIngredients({ onAdd }: { onAdd: () => void }) {
         </div>
         <Button
           onClick={onAdd}
-          className="bg-muted0 hover:bg-primary"
         >
           <Plus className="h-4 w-4 mr-2" />
           Add First Ingredient

@@ -21,7 +21,7 @@ export function passwordChecks(password: string): PasswordCheck[] {
 
 type Tier = { level: string; color: string; icon: ReactNode; bar: string }
 
-const VERY_WEAK: Tier = { level: 'Very Weak', color: 'text-destructive bg-muted border-border', icon: <X className="h-3 w-3" />, bar: 'bg-muted0' }
+const VERY_WEAK: Tier = { level: 'Very Weak', color: 'text-destructive bg-muted border-border', icon: <X className="h-3 w-3" />, bar: 'bg-destructive' }
 const TIERS: { min: number; tier: Tier }[] = [
   { min: 5, tier: { level: 'Strong', color: 'text-success bg-muted border-border', icon: <Shield className="h-3 w-3" />, bar: '' } },
   { min: 3, tier: { level: 'Medium', color: 'text-warning bg-muted border-border', icon: <Zap className="h-3 w-3" />, bar: '' } },

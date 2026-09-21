@@ -60,7 +60,7 @@ export function DishImageUnavailable() {
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-2">
-        <div className="mx-auto w-16 h-16 bg-muted0/20 rounded-lg flex items-center justify-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-muted">
           <AlertCircle className="h-8 w-8 text-warning" />
         </div>
         <h2 className="text-xl font-bold text-foreground">Image Upload Unavailable</h2>

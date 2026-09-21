@@ -10,6 +10,6 @@ export function precacheUrls(restaurant: MenuRestaurant, categories: MenuCategor
   if (restaurant.logoUrl) urls.push(img(restaurant.logoUrl, 256))
   if (restaurant.coverImageUrl) urls.push(restaurant.coverImageUrl)
   const dishes = [...categories.flatMap((c) => c.subcategories.flatMap((s) => s.dishes)), ...uncategorizedDishes]
-  for (const d of dishes) urls.push(img(d.imageUrl, 640))
+  for (const d of dishes) if (d.imageUrl) urls.push(img(d.imageUrl, 640))
   return urls
 }

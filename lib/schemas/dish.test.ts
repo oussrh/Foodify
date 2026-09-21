@@ -15,6 +15,11 @@ describe('dish schemas', () => {
     expect(dishInput.safeParse({ ...dish, dietary: ['keto'] }).success).toBe(false)
   })
 
+  it('accepts a dish with no image (an image is optional; the menu shows a placeholder)', () => {
+    expect(dishInput.safeParse({ ...dish, imageUrl: '' }).success).toBe(true)
+    expect(dishInput.safeParse({ ...dish, imageUrl: '' }).data?.imageUrl).toBe('')
+  })
+
   it('lets a patch carry any subset, plus the active flag', () => {
     expect(dishPatch.safeParse({ isActive: false }).success).toBe(true)
     expect(dishPatch.safeParse({ calories: 1.5 }).success).toBe(false)

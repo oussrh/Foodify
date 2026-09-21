@@ -11,4 +11,5 @@ export interface ContactFormValues {
   country?: string | undefined
   openingHours?: string | undefined
   socialMedia?: string | undefined
+  socialDisplay?: 'icons' | 'text' | undefined
 }

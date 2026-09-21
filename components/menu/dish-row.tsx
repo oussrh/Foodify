@@ -1,6 +1,6 @@
 "use client"
 
-import Image from 'next/image'
+import DishPhoto from '@/components/menu/dish-photo'
 import { Camera } from 'lucide-react'
 import { MENU_TEXT, dietaryLabel, formatPrice, hasAR, type Locale, type MenuDish, type Money } from '@/lib/menu'
 
@@ -34,7 +34,7 @@ export default function DishRow({ dish, locale, money, href, onOpen, transitioni
         className="grid w-full grid-cols-[76px_1fr_auto] items-center gap-3 py-3 text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring rounded-md"
       >
         <span className="relative block h-[76px] w-[76px] overflow-hidden rounded-md bg-muted" style={transitioning ? { viewTransitionName: 'dish-photo' } : undefined}>
-          <Image src={dish.imageUrl} alt="" fill sizes="76px" className="object-cover" />
+          <DishPhoto src={dish.imageUrl} alt="" sizes="76px" iconClassName="h-6 w-6" />
           {hasAR(dish) && (
             <span className="absolute bottom-1 left-1 inline-flex items-center gap-0.5 rounded-full bg-white/92 px-1.5 py-0.5 text-[10px] font-bold text-[#1B1A17]">
               <Camera className="h-2.5 w-2.5" />

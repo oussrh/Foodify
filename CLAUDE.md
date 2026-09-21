@@ -139,7 +139,7 @@ CLOUDINARY_API_SECRET="..."
 - All user-facing content has `nameEn`/`nameFr` and `descriptionEn`/`descriptionFr` fields
 - Components handle locale switching
 - Default locale set per restaurant
-- `Restaurant.openingHours` is JSON (`lib/opening-hours.ts`: per-day periods + note; legacy free text is kept as the note) and `socialMedia` is JSON `{instagram, facebook, twitter}` (`lib/social-media.ts` still accepts URLs/free text). Edit them through `components/contact/` — never as raw strings.
+- `Restaurant.openingHours` is JSON (`lib/opening-hours.ts`: per-day periods + note; legacy free text is kept as the note) and `socialMedia` is JSON keyed by network (`lib/social.ts`: an extensible registry `SOCIAL_NETWORKS`; a stored handle, phone or URL per network, still accepting legacy free text); the footer shows them as icons or text per `Restaurant.socialDisplay`. Edit them through `components/contact/` — never as raw strings.
 - Dietary attributes and allergens are real data (`Dish.dietary`, `Dish.allergens`, string arrays keyed by `DIETARY_OPTIONS`/`ALLERGEN_OPTIONS` in `lib/menu.ts`) — never infer them from dish names; `Restaurant.dietaryOptions` is the subset a restaurant offers (Settings → General): the dish forms offer only those, the actions keep a dish within them, and the public menu shows only those
 
 ### State Management

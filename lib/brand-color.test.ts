@@ -23,6 +23,13 @@ describe('brandPalette', () => {
     expect(brandPalette(null, '#000000').raw).toBe('#000000')
   })
 
+  it('derives inks that reach AA on the tint they are written over, even from a pale neon', () => {
+    const p = brandPalette('#3F6B8A')
+    const over = (raw: string, ground: RGB, alpha: number) => rgb(raw).map((c, i) => Math.round(ground[i]! * (1 - alpha) + c * alpha)) as RGB
+    expect(contrast(rgb(p.inkLight), over(p.raw, PAPER, 0.14))).toBeGreaterThanOrEqual(4.5)
+    expect(contrast(rgb(p.inkDark), over(p.raw, COAL, 0.16))).toBeGreaterThanOrEqual(4.5)
+  })
+
   it('derives inks that reach AA against both grounds, even from a pale neon', () => {
     const p = brandPalette('#ccff00')
     expect(contrast(rgb(p.inkLight), PAPER)).toBeGreaterThanOrEqual(4.5)

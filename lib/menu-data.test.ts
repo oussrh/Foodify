@@ -21,6 +21,11 @@ describe('serializeDish', () => {
     expect(serializeDish(dish).dietary).toEqual(['halal', 'vegan', 'spicy'])
   })
 
+  it('serializes an empty image to null so the row shows a placeholder', () => {
+    expect(serializeDish(dishRow({ imageUrl: '' })).imageUrl).toBe(null)
+    expect(serializeDish(dishRow({ imageUrl: '/t.jpg' })).imageUrl).toBe('/t.jpg')
+  })
+
   it('carries the ingredients as plain bilingual names', () => {
     const ingredient = { id: 'i1', dishId: 'd1', nameEn: 'Salt', nameFr: 'Sel', createdAt: new Date('2026-09-20T12:00:00Z') }
     expect(serializeDish(dishRow({ ingredients: [ingredient] })).ingredients).toEqual([{ id: 'i1', nameEn: 'Salt', nameFr: 'Sel' }])

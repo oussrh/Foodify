@@ -24,7 +24,7 @@ export interface MenuDish {
   descriptionFr: string | null
   /** An exact two-fraction-digit decimal string, beside the restaurant's ISO 4217 code (API.1); never a float. */
   price: string
-  imageUrl: string
+  imageUrl: string | null
   usdzUrl: string | null
   glbUrl: string | null
   calories: number | null
@@ -78,6 +78,8 @@ export interface MenuRestaurant {
   website: string | null
   openingHours: string | null
   socialMedia: string | null
+  /** How the footer shows the social links: 'icons' or 'text'. */
+  socialDisplay: 'icons' | 'text'
   /** The dietary keys this restaurant offers (Settings → General): the filter chips, and the only tags a dish shows. */
   dietaryOptions: string[]
 }
@@ -183,6 +185,10 @@ export const MENU_TEXT = {
     search: 'Search menu',
     filters: 'Filters',
     ar: 'AR',
+    photo: 'Photo',
+    model3d: '3D',
+    view3d: 'View in 3D',
+    viewPhoto: 'View the photo',
     arOnly: 'Show only dishes with AR',
     dietary: 'Dietary',
     clear: 'Clear filters',
@@ -228,6 +234,10 @@ export const MENU_TEXT = {
     search: 'Rechercher',
     filters: 'Filtres',
     ar: 'RA',
+    photo: 'Photo',
+    model3d: '3D',
+    view3d: 'Voir en 3D',
+    viewPhoto: 'Voir la photo',
     arOnly: 'Afficher uniquement les plats en RA',
     dietary: 'Régime',
     clear: 'Effacer les filtres',

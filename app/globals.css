@@ -16,7 +16,13 @@
   }
 }
 
-@theme {
+/*
+  `inline`, not a plain @theme: the values reference tokens a scope redefines (`--background` under
+  `.dark`, the brand set under `.brand-scope`). A plain @theme computes `--color-*` once at :root, so
+  a nested `.dark` phone preview, a forced menu theme and every `bg-brand`/`text-brand` inherited
+  the root's (unset) value; inline puts the expression in the utility, resolved on the element.
+*/
+@theme inline {
   --color-border: hsl(var(--border));
   --color-border-strong: hsl(var(--border-strong));
   --color-input: hsl(var(--input));

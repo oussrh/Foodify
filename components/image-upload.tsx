@@ -12,6 +12,7 @@ import { ErrorNotice, SuccessNotice } from '@/components/upload/status-notices'
 import { DishImageZone } from '@/components/upload/dish-image-zone'
 import { DishImagePreview, type DishImageInfo } from '@/components/upload/dish-image-preview'
 import { DishImageRequirements, DishImageUnavailable } from '@/components/upload/dish-image-panels'
+import SectionIntro from '@/components/forms/section-intro'
 
 interface ImageUploadProps {
   restaurantName: string
@@ -126,26 +127,17 @@ export default function ImageUpload({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="text-center space-y-3">
-        <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
-          <Camera className="h-8 w-8 text-white" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Dish Image Upload</h2>
-          <p className="text-muted-foreground">Add beautiful images to showcase your dishes</p>
-        </div>
-      </div>
+      <SectionIntro icon={Camera} title="Dish Image Upload" description="Add beautiful images to showcase your dishes" />
 
       <Card className="border-0 overflow-hidden">
-        <CardHeader className="text-white">
+        <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-3">
-            <div className="p-2 bg-card/20 rounded-lg">
-              <ImageIcon className="h-5 w-5" />
+            <div className="rounded-lg bg-muted p-2">
+              <ImageIcon className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
               <span className="text-lg">Image Management</span>
-              <p className="text-blue-100 text-sm font-normal mt-1">
+              <p className="mt-1 text-sm font-normal text-muted-foreground">
                 Upload and manage dish images with cloud storage
               </p>
             </div>

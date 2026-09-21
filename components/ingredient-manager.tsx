@@ -97,7 +97,7 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
         </div>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button size="sm" className="bg-muted0 hover:bg-primary">
+            <Button size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Add Ingredient
             </Button>

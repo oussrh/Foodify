@@ -1,7 +1,7 @@
 "use client"
 
-import Image from 'next/image'
-import { Camera, Share2 } from 'lucide-react'
+import DishMedia from './dish-media'
+import { Share2 } from 'lucide-react'
 import ARLaunchButton from './ar-launch-button'
 import { DishFacts, DishIngredients, DishTags } from './dish-details'
 import { shareLink } from './share-link'
@@ -16,9 +16,12 @@ interface DishBodyProps {
   shareUrl: string
   /** Set inside the sheet so the row thumbnail can morph into this photo */
   photoTransition?: boolean
+  /** The dish page's name is its h1; in the sheet, under the menu's h1, it is an h2. */
+  headingLevel?: 'h1' | 'h2'
 }
 
-export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, photoTransition }: DishBodyProps) {
+export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, photoTransition, headingLevel = 'h2' }: DishBodyProps) {
+  const Heading = headingLevel
   const t = MENU_TEXT[locale]
   const name = locale === 'fr' ? dish.nameFr : dish.nameEn
   const description = locale === 'fr' ? dish.descriptionFr : dish.descriptionEn
@@ -28,26 +31,11 @@ export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, ph
 
   return (
     <article className="flex flex-col gap-4">
-      <div className="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-muted" style={photoTransition ? { viewTransitionName: 'dish-photo' } : undefined}>
-        <Image
-          src={dish.imageUrl}
-          alt={name}
-          fill
-          sizes="(max-width: 640px) 100vw, 640px"
-          className="object-cover"
-          priority
-        />
-        {ar && (
-          <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-bold text-[#1B1A17]">
-            <Camera className="h-3 w-3" />
-            {t.ar}
-          </span>
-        )}
-      </div>
+      <DishMedia dish={dish} name={name} ar={ar} locale={locale} photoTransition={photoTransition} />
 
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-[22px] font-semibold leading-tight tracking-display">{name}</h2>
+          <Heading className="text-[22px] font-semibold leading-tight tracking-display">{name}</Heading>
           {breadcrumb && <p className="mt-0.5 text-[13px] text-muted-foreground">{breadcrumb}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-1">

@@ -92,8 +92,8 @@ export default function EditClientForm({
     <div className="space-y-6">
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
-          <Users className="h-8 w-8 text-white" />
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-muted">
+          <Users className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
         </div>
         <div>
           <h2 className="text-2xl font-bold text-foreground">Edit Administrator</h2>
@@ -102,14 +102,14 @@ export default function EditClientForm({
       </div>
 
       <Card className="overflow-hidden">
-        <CardHeader className="text-white">
+        <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-3">
-            <div className="p-2 bg-card/20 rounded-lg">
-              <Mail className="h-5 w-5" />
+            <div className="rounded-lg bg-muted p-2">
+              <Mail className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
               <span className="text-lg">Restaurant Administrator</span>
-              <p className="text-blue-100 text-sm font-normal mt-1">
+              <p className="mt-1 text-sm font-normal text-muted-foreground">
                 Update account details and manage restaurant access
               </p>
             </div>

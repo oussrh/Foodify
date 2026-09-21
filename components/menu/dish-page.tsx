@@ -72,6 +72,7 @@ export default function DishPage({ dish, restaurant, breadcrumb, brandStyle, sha
 
       <main className="mx-auto max-w-lg px-4 py-4 pb-[max(24px,env(safe-area-inset-bottom))]">
         <DishBody
+          headingLevel="h1"
           dish={dish}
           locale={locale}
           money={money}

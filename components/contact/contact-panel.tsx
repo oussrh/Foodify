@@ -3,7 +3,7 @@
 import { useMemo } from 'react'
 import type { FieldErrors, UseFormRegister } from 'react-hook-form'
 import { cleanPhone, formatAddress } from '@/components/menu/contact-format'
-import { parseSocialMedia } from '@/lib/social-media'
+import { parseSocialMedia } from '@/lib/social'
 import { parseOpeningHours, serializeOpeningHours } from '@/lib/opening-hours'
 import HoursEditor from './hours-editor'
 import ContactFields from './contact-fields'
@@ -19,7 +19,7 @@ interface ContactPanelProps {
   register: UseFormRegister<ContactFormValues>
   errors: FieldErrors<ContactFormValues>
   values: ContactFormValues
-  onChange: (field: 'openingHours' | 'socialMedia', value: string) => void
+  onChange: (field: 'openingHours' | 'socialMedia' | 'socialDisplay', value: string) => void
   disabled?: boolean
 }
 
@@ -55,7 +55,14 @@ export default function ContactPanel({ register, errors, values, onChange, disab
         </section>
 
         {/* Social */}
-        <SocialLinks value={values.socialMedia} handles={socialHandles} onChange={(json) => onChange('socialMedia', json)} disabled={disabled} />
+        <SocialLinks
+          value={values.socialMedia}
+          handles={socialHandles}
+          display={values.socialDisplay === 'text' ? 'text' : 'icons'}
+          onChange={(json) => onChange('socialMedia', json)}
+          onDisplayChange={(d) => onChange('socialDisplay', d)}
+          disabled={disabled}
+        />
       </div>
 
       {/* How guests see it */}
@@ -67,6 +74,7 @@ export default function ContactPanel({ register, errors, values, onChange, disab
         website={values.website}
         hours={hours}
         handles={socialHandles}
+        socialDisplay={values.socialDisplay === 'text' ? 'text' : 'icons'}
       />
     </div>
   )

@@ -1,10 +1,11 @@
 'use client'
 
-import { Copy, Plus, X } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/lib/utils'
 import { DAY_KEYS, dayName, type DayKey, type OpeningHours, type Period } from '@/lib/opening-hours'
+import CopyHoursMenu from './copy-hours-menu'
 
 interface HoursEditorProps {
   value: OpeningHours
@@ -25,11 +26,11 @@ export default function HoursEditor({ value, onChange, disabled }: HoursEditorPr
     onChange({ ...value, days })
   }
 
-  const copyToAll = (day: DayKey) => {
+  const copyTo = (day: DayKey, targets: DayKey[]) => {
     const src = value.days[day]
     if (src === undefined) return
     const days = { ...value.days }
-    for (const d of DAY_KEYS) days[d] = src.map((p) => ({ ...p }))
+    for (const d of targets) days[d] = src.map((p) => ({ ...p }))
     onChange({ ...value, days })
   }
 
@@ -46,7 +47,7 @@ export default function HoursEditor({ value, onChange, disabled }: HoursEditorPr
             <div
               key={day}
               className={cn(
-                'grid grid-cols-[72px_1fr] items-start gap-x-3 gap-y-2 px-3 py-2.5 sm:grid-cols-[88px_auto_1fr_auto] sm:items-center',
+                'grid grid-cols-[72px_1fr] items-start gap-x-3 gap-y-2 px-3 py-2.5 sm:grid-cols-[88px_auto_1fr] sm:items-center',
                 i > 0 && 'border-t border-border',
               )}
             >
@@ -110,22 +111,8 @@ export default function HoursEditor({ value, onChange, disabled }: HoursEditorPr
                     Second period
                   </button>
                 )}
+                {isOpen && <CopyHoursMenu day={day} disabled={disabled} onCopy={(targets) => copyTo(day, targets)} />}
                 {!isSet && <span className="text-xs text-muted-foreground">Turn on to add hours, or leave unset to hide this day.</span>}
-              </div>
-
-              <div className="col-start-2 sm:col-start-auto">
-                {isSet && (
-                  <button
-                    type="button"
-                    disabled={disabled}
-                    onClick={() => copyToAll(day)}
-                    title="Copy to every day"
-                    className="inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
-                  >
-                    <Copy className="h-3.5 w-3.5" />
-                    <span className="hidden md:inline">Copy to all</span>
-                  </button>
-                )}
               </div>
             </div>
           )

@@ -21,7 +21,7 @@ export const TABS: { key: SettingsTab; label: string; fields: (keyof EditRestaur
   {
     key: 'contact',
     label: 'Contact & hours',
-    fields: ['email', 'phone', 'website', 'streetAddress', 'city', 'state', 'postalCode', 'country', 'openingHours', 'socialMedia'],
+    fields: ['email', 'phone', 'website', 'streetAddress', 'city', 'state', 'postalCode', 'country', 'openingHours', 'socialMedia', 'socialDisplay'],
   },
   {
     key: 'branding',

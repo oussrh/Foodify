@@ -39,7 +39,7 @@ export default function ChipGroup({ id, label, hint, options, value, onChange, d
               )}
             >
               {opt.en}
-              <span className="ml-1 font-normal text-current/70">· {opt.fr}</span>
+              <span className={cn('ml-1 font-normal', on ? '' : 'text-muted-foreground')}>· {opt.fr}</span>
             </button>
           )
         })}

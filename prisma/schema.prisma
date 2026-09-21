@@ -51,6 +51,7 @@ model Restaurant {
   dietaryOptions  String[]       @default(["vegetarian", "vegan", "halal", "gluten_free", "spicy"])
   openingHours    String? // JSON string with operating hours
   socialMedia     String? // JSON string with social media links
+  socialDisplay   String         @default("icons") // icons | text: how the menu footer shows the social links
   // Design/Branding
   coverImageUrl   String?
   coverImageStyle String? // "cover" or "repeat"

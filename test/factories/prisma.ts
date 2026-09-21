@@ -50,6 +50,7 @@ export function restaurantRow(overrides: Partial<Restaurant> = {}): Restaurant {
     description: null,
     cuisineType: null,
     dietaryOptions: ['vegetarian', 'vegan', 'halal', 'gluten_free', 'spicy'],
+    socialDisplay: 'icons',
     openingHours: null,
     socialMedia: null,
     coverImageUrl: null,

@@ -69,7 +69,7 @@ export default function EditAssignRow({
             variant="outline"
             size="sm"
             onClick={() => onRemove(restaurant.id)}
-            className="border-border text-destructive dark:text-muted-foreground hover:bg-muted hover:border-border dark:"
+            className="border-border text-destructive dark:text-muted-foreground hover:bg-muted hover:border-border"
             disabled={disabled}
           >
             <X className="h-4 w-4 mr-1" />

@@ -143,11 +143,15 @@ export default function EditRestaurantForm({
         register={register as unknown as UseFormRegister<ContactFormValues>}
         errors={errors}
         values={toContactValues(values)}
-        onChange={(field, value) => setValue(field, value, { shouldDirty: true })}
+        onChange={(field, value) => {
+          if (field === 'socialDisplay') setValue(field, value === 'text' ? 'text' : 'icons', { shouldDirty: true })
+          else setValue(field, value, { shouldDirty: true })
+        }}
         disabled={isSubmitting}
       />
       <input type="hidden" {...register('openingHours')} />
       <input type="hidden" {...register('socialMedia')} />
+      <input type="hidden" {...register('socialDisplay')} />
       </div>
 
       <div role="tabpanel" id="settings-panel-branding" aria-labelledby="settings-tab-branding" hidden={activeTab !== 'branding'} className="space-y-6">

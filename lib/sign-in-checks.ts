@@ -34,9 +34,11 @@ export function assertPortalRole(user: User, role: string | undefined): void {
 }
 
 /**
- * The second factor and the login stamp: a pending emailed code must match and be unexpired
- * (it is consumed), else a TOTP secret must verify the code, else there is no second factor.
- * The last login is stamped whichever applies.
+ * The second factor and the login stamp: a pending emailed code must match and be unexpired (it
+ * is consumed), else a TOTP secret must verify the code, else the sign-in is refused: an account
+ * with no authenticator gets its code from the first step (requestOtp), and credentials alone
+ * never open a session (they did, when nothing was pending: a password was the whole login).
+ * The last login is stamped when a factor passed.
  */
 export async function completeSecondFactor(user: User, code: string | undefined): Promise<void> {
   if (user.emailOtpCode) {
@@ -50,9 +52,12 @@ export async function completeSecondFactor(user: User, code: string | undefined)
     })
     return
   }
-  if (user.totpSecret && (!code || !verifyTOTP(code, user.totpSecret))) {
+  if (!user.totpSecret) {
+    log.info({ userId: user.id }, 'sign-in refused: no second factor pending')
+    throw new Error('Two-factor code required')
+  }
+  if (!code || !verifyTOTP(code, user.totpSecret)) {
     throw new Error('Invalid two-factor code')
   }
-  // Update last login even without 2FA
   await prisma.user.update({ where: { id: user.id }, data: { lastLogin: new Date() } })
 }

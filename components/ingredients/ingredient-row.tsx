@@ -51,24 +51,26 @@ export default function IngredientRow({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1 opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onEdit(ingredient)}
           disabled={loading}
+          aria-label={`Edit ${ingredient.nameEn}`}
           className="h-8 w-8 p-0 hover:bg-muted hover:text-muted-foreground"
         >
-          <Edit2 className="h-4 w-4" />
+          <Edit2 className="h-4 w-4" aria-hidden="true" />
         </Button>
         <Button
           variant="ghost"
           size="sm"
           onClick={() => onDelete(ingredient.id)}
           disabled={loading}
+          aria-label={`Delete ${ingredient.nameEn}`}
           className="h-8 w-8 p-0 hover:bg-muted hover:text-destructive text-muted-foreground"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-4 w-4" aria-hidden="true" />
         </Button>
       </div>
     </div>

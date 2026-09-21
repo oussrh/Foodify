@@ -45,9 +45,11 @@ export default function PasswordField({
         <button
           type="button"
           onClick={() => setShow(!show)}
-          className="absolute right-4 top-1/2 transform -/2 text-muted-foreground hover:text-muted-foreground transition-colors p-1 rounded-lg hover:bg-muted"
+          aria-label={show ? 'Hide password' : 'Show password'}
+          aria-pressed={show}
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-muted-foreground transition-colors p-1 rounded-lg hover:bg-muted"
         >
-          {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          {show ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
         </button>
       </div>
       {error && (

@@ -43,9 +43,10 @@ export function StatStrip({ stats, className }: { stats: Stat[]; className?: str
     <dl className={cn('grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border', cols, className)}>
       {stats.map((s) => (
         <div key={s.label} className="flex flex-col gap-0.5 bg-card px-4 py-3.5 sm:px-5">
-          <dd className="tnum text-2xl font-semibold leading-none tracking-display">{s.value}</dd>
-          <dt className="text-xs text-muted-foreground">{s.label}</dt>
-          {s.hint && <span className="text-xs text-success">{s.hint}</span>}
+          {/* The term comes first in the DOM (a definition list's order, what a reader hears); the value is shown above it. */}
+          <dt className="order-2 text-xs text-muted-foreground">{s.label}</dt>
+          <dd className="tnum order-1 text-2xl font-semibold leading-none tracking-display">{s.value}</dd>
+          {s.hint && <dd className="order-3 text-xs text-success">{s.hint}</dd>}
         </div>
       ))}
     </dl>

@@ -104,6 +104,7 @@ export default function ImageTile({ kind, label, value, restaurantSlug, onChange
           ref={inputRef}
           id={inputId}
           type="file"
+          aria-label={`Choose a ${label.toLowerCase()} file`}
           accept={limits.types.join(',')}
           className="sr-only"
           onChange={(e) => handleFile(e.target.files?.[0])}

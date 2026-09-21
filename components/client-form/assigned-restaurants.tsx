@@ -54,10 +54,11 @@ export default function AssignedRestaurants({
                 variant="ghost"
                 size="sm"
                 onClick={() => onRemove(id)}
+                aria-label={`Remove ${restaurant.name}`}
                 className="text-destructive hover:bg-muted"
                 disabled={disabled}
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4" aria-hidden="true" />
               </Button>
             </div>
           ) : null
