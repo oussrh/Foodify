@@ -188,5 +188,7 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 ## 2026-09-20 · phase 8 · two small non-identities accepted
 
 - The confirm-new page's icon box had a dead `${success ? '' : ''}` in its class, one trailing space in the attribute; it is the plain string, like confirm-old's. Nothing in `confirm-old-email.tsx` was reusable as-is, so the shared shape (status banner, bullet box, the invalid-link card) became three primitives in `components/manager/email-change-notice.tsx` and confirm-old moved onto them (proven identical in three states).
-- The proof ran the menu's browser tests against the running dev server rather than a production build (a build was off limits to the worker); the pre-push gate then ran them against the build.
+- The proof ran the menu's browser tests against the running dev server rather than a production build (a build was off limits to the worker); the full gate run locally before the commit, and the CI run on the push, ran them against the build.
+- `components/shell/dish-list-rows.ts` (a Prisma row to a dish list row) sits under `components/`, outside the `lib/**` coverage floor, with its own test, for the reason `form-defaults.ts` does: its row type is the list component's. The same phase 9/10 tidy applies.
+- The phase 3 entry's trigger ("rename `role` to `portal` when phase 8 touches the shells") fired: the rename is a codemod over the five components and their call sites, done right after phase 9's flags land, so it does not collide with the type work in flight in the same files.
 

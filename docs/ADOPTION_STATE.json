@@ -248,8 +248,8 @@
     },
     {
       "id": 8,
-      "status": "in_progress",
-      "updatedAt": "2026-09-20T21:33:23Z",
+      "status": "done",
+      "updatedAt": "2026-09-21T06:15:13Z",
       "numbersBefore": {
         "rules": {
           "CODE-SIZE-800": "present",
@@ -261,6 +261,21 @@
         "size.overRaw": 0,
         "score": "70/100",
         "enforcedShare": "76% (42/55)"
+      },
+      "numbersAfter": {
+        "rules": {
+          "CODE-SIZE-800": "present",
+          "CODE-BARRELS": "present (0)",
+          "CODE-SIZE-300": "present (no file over its budget)"
+        },
+        "size.overBudget": "0, hard (8 -> 0)",
+        "size.excessCode": "0, hard (228 -> 0)",
+        "size.overRaw": "0",
+        "score": "68/100 measured on the phase's head on 2026-09-21 (70 at the phase 7 close; the day's rollover made the measure write an unindexed dated gap analysis, indexed in this close); 72/100 over 74 checks on the tree that also carries phases 9 and 10",
+        "enforcedShare": "76% (42/55)",
+        "readability": "100/100",
+        "switches": "pnpm run standards red on a planted 102-line page (size.overBudget HARD FAIL 1 / 0, size.excessCode 6 / 0), green after its removal",
+        "tests": "284 unit (43 files), 20 browser"
       }
     },
     {
