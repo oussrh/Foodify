@@ -13,6 +13,11 @@ describe('serializeDish', () => {
   it('turns empty strings into nulls and keeps the vocabulary keys', () => {
     expect(serializeDish(dishRow())).toMatchObject({ descriptionEn: null, descriptionFr: null, usdzUrl: null, glbUrl: null, dietary: ['halal'] })
   })
+
+  it('carries the ingredients as plain bilingual names', () => {
+    const ingredient = { id: 'i1', dishId: 'd1', nameEn: 'Salt', nameFr: 'Sel', createdAt: new Date('2026-09-20T12:00:00Z') }
+    expect(serializeDish(dishRow({ ingredients: [ingredient] })).ingredients).toEqual([{ id: 'i1', nameEn: 'Salt', nameFr: 'Sel' }])
+  })
 })
 
 describe('serializeRestaurant', () => {
@@ -50,5 +55,11 @@ describe('serializeCategories', () => {
       },
       { id: 'c2', nameEn: 'Drinks', nameFr: 'Boissons', subcategories: [] },
     ])
+  })
+})
+
+describe('siteOrigin', () => {
+  it('is the public origin the links off-site use', () => {
+    expect(siteOrigin()).toMatch(/^https?:\/\//)
   })
 })
