@@ -69,7 +69,7 @@ last_verified: "2026-09-21"
 | DOC-RULES | Documents | .claude/rules/*.md path-scoped rules for stack and domain conventions | should | prose | **present** | 5 rule file(s), 4 path-scoped | - | A.1 |
 | DOC-CONVENTIONS | Documents | A CODE_CONVENTIONS.md under docs: how this stack applies the standard | should | prose | **missing** | none | Write it from the standard §3-§7 for this stack | A.1 |
 | DOC-PROGRESS | Documents | A STANDARDS_PROGRESS.md under docs: numbers-only scoreboard and log | must | review | **present** | docs/STANDARDS_PROGRESS.md | - | 0 |
-| DOC-CHANGELOG | Documents | CHANGELOG.md in Keep-a-Changelog shape with an [Unreleased] section | must | hard | **present** | CHANGELOG.md: 89 lines, has [Unreleased] | - | 0 / 11 |
+| DOC-CHANGELOG | Documents | CHANGELOG.md in Keep-a-Changelog shape with an [Unreleased] section | must | hard | **present** | CHANGELOG.md: 91 lines, has [Unreleased] | - | 0 / 11 |
 | DOC-INDEX | Documents | docs index listing every document | must | hard | **present** | docs/README.md | - | 11 |
 | DOC-ADR | Documents | A decisions record (MADR entries or a decision log) | must | prose | **missing** | none | Create a decisions folder under docs with 0001-*.md for the five day-0 decisions | A.1 |
 | DOC-FRONTMATTER | Documents | Every doc opens with front matter | must | hard | **present** | 7/7 docs with front matter | - | 11 |
@@ -94,7 +94,7 @@ last_verified: "2026-09-21"
 | CODE-ARCH-IMPORTS | Code | no-restricted-imports / import boundaries hold the architecture | must | hard | **missing** | none | Ban vendor SDKs outside their provider home and enforce the import direction | 1 |
 | CODE-ARCH-GRAPH | Code | The import graph is checked: dependency-cruiser with no-circular, no-orphans and one rule per arrow of the boundary map, in the gate | must | hard | **present** | .dependency-cruiser.cjs, run by graph, 0 known violation(s) | - | 12 |
 | CODE-DEADCODE | Code | Dead code is a gate: files, dependencies, exports and types at zero issues | must | hard | **present** | javascript: run by dead at 0, knip.jsonc | - | 12 |
-| CODE-DUP | Code | Duplication measured by jscpd as a ratchet metric | should | ratchet | **present** | script dup | - | 12 |
+| CODE-DUP | Code | Duplication measured by jscpd as a ratchet metric | should | ratchet | **present** | dup.clones in the baseline | - | 12 |
 | CODE-SIZE-800 | Code | No source file over the 800-line cap | must | hard | **present** | none | - | 8 |
 | CODE-SIZE-300 | Code | Source files over 300 code lines (the threshold where an agent stops reading a file whole) | should | ratchet | **present** | 0 file(s) | - | 8 |
 | CODE-BARRELS | Code | No wide barrel files | must | ratchet | **present** | none | - | 8 |

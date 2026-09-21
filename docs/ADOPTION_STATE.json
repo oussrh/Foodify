@@ -374,7 +374,7 @@
     {
       "id": 12,
       "status": "done",
-      "updatedAt": "2026-09-21T10:27:05Z",
+      "updatedAt": "2026-09-21T10:56:24Z",
       "numbersBefore": {
         "rules": {
           "CODE-ARCH-GRAPH": "present (.dependency-cruiser.cjs run by graph, 0 known violations; the two boundary-map rules still carry the template's src/features and src/components paths, which match nothing here)",
@@ -393,14 +393,15 @@
           "CODE-DEADCODE": "present (knip 0 issues, proven red on a planted unused export)",
           "CODE-DUP": "present (abatty-probes/dup.mjs: dup.clones 82, dup.clonedLines 1064 in the baseline as ratchet; pnpm dup)"
         },
-        "graph": "386 modules, 1031 dependencies, 0 violations; rules: no-circular, no-orphans, not-to-unresolvable, not-to-dev-dep, no-duplicate-dep-types, data-layer-is-a-leaf, components-never-import-routes, server-code-never-imports-components, server-only-never-reaches-the-client, portals-never-import-each-other",
+        "graph": "386 modules, 1031 dependencies, 0 violations; rules: no-circular, no-orphans, not-to-unresolvable, not-to-dev-dep, no-duplicate-dep-types, data-layer-is-a-leaf, components-never-import-routes, server-code-never-imports-components, server-only-never-reaches-the-client (the transitive closure: prisma, mail, cloudinary, auth-guard, otp-request, sign-in-checks, menu-loader, auth.ts), portals-never-import-each-other",
         "dead": "knip 0 issues",
-        "dup": "jscpd 4.3.0 at its defaults, tests left out: 82 clones / 1064 cloned lines over 45 files, both ratchet (the baseline of 2026-09-21)",
+        "dup": "jscpd 4.3.0 at its defaults, tests left out: 82 clones / 1064 cloned lines over 43 files (each clone charged to the smaller path), both ratchet (the baseline of 2026-09-21); 512 files scanned",
         "score": "76/100 (74 checks)",
         "enforcedShare": "78% (46/59)",
         "readability": "97/100 (navigability 88: the clones)",
         "switches": "graph red on a planted cycle and on one planted import per arrow (five), dead red on a planted unused export and two unimported files, standards red on a planted whole-file copy (dup.clones 83/82, dup.clonedLines 1198/1064); green after each removal; four probe controls",
-        "tests": "297 unit (47 files), 13 integration, 20 browser"
+        "tests": "297 unit (47 files), 13 integration, 20 browser",
+        "caught": "on review: the per-file charge followed jscpd's traversal order, the scan count masked a moved root, the loader missing from the server-only list, the dup script a hand copy of the probe's flags; from the ratchet: CLAUDE.md grew without a lesson"
       }
     },
     {
