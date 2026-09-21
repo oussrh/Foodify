@@ -7,7 +7,7 @@ import ResetAdminPasswordButton from '@/components/reset-admin-password-button'
 interface AdminRow {
   id: string
   email: string
-  totpSecret: string | null
+  usesAuthenticator: boolean
   lastLogin: Date | null
   createdAt: Date
 }
@@ -37,7 +37,7 @@ export function AdminsTable({ admins, meEmail }: { admins: AdminRow[]; meEmail: 
               {meEmail === a.email && <span className="ml-2 text-xs text-muted-foreground">(you)</span>}
             </TableCell>
             <TableCell className="hidden sm:table-cell">
-              <span className="text-xs text-muted-foreground">{a.totpSecret ? 'Authenticator app' : 'Email code'}</span>
+              <span className="text-xs text-muted-foreground">{a.usesAuthenticator ? 'Authenticator app' : 'Email code'}</span>
             </TableCell>
             <TableCell className="tnum hidden text-muted-foreground md:table-cell">
               {a.lastLogin ? a.lastLogin.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Never'}

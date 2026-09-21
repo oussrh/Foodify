@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import Image from 'next/image'
-import { Search, Utensils } from 'lucide-react'
+import { Utensils } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { EmptyState } from '@/components/shell/page-header'
+import { ListSearch } from '@/components/shell/list-search'
 import { RestaurantRowMenu } from '@/components/shell/row-actions'
 
 export interface RestaurantListRow {
@@ -29,17 +30,7 @@ interface RestaurantsListProps {
 export default function RestaurantsList({ role, rows, search, emptyAction }: RestaurantsListProps) {
   return (
     <div className="flex flex-col gap-4">
-      <form method="get" className="relative max-w-md">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -/2 text-muted-foreground" />
-        <input
-          type="search"
-          name="search"
-          defaultValue={search}
-          placeholder="Search restaurants"
-          aria-label="Search restaurants"
-          className="h-10 w-full rounded-md border border-input bg-card pl-9 pr-3 text-sm placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-        />
-      </form>
+      <ListSearch value={search} placeholder="Search restaurants" label="Search restaurants" />
 
       {rows.length === 0 ? (
         <EmptyState
@@ -81,7 +72,7 @@ export default function RestaurantsList({ role, rows, search, emptyAction }: Res
                     </div>
                   </div>
                 </TableCell>
-                <TableCell className="hidden text-muted-foreground sm:table-cell">{r.city || '—'}</TableCell>
+                <TableCell className="hidden text-muted-foreground sm:table-cell">{r.city || '-'}</TableCell>
                 <TableCell className="tnum">
                   {r.dishCount}
                   {r.dishCount > 0 && <span className="text-muted-foreground"> · {r.liveCount} live</span>}

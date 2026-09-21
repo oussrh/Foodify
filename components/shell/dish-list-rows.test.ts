@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { Prisma } from '@/generated/prisma/client'
-import { dishRow } from '@/test/factories/prisma'
+import { categoryRow, dishRow, subcategoryRow } from '@/test/factories/prisma'
 import { dishListRow } from './dish-list-rows'
 
-const category = { id: 'c1', restaurantId: 'r1', nameEn: 'Mains', nameFr: 'Plats', sortOrder: 0, isActive: true }
-const sub = (nameEn: string) => ({ id: 's1', categoryId: 'c1', nameEn, nameFr: nameEn, sortOrder: 0, isActive: true, category })
+const category = categoryRow()
+const sub = (nameEn: string) => ({ ...subcategoryRow({ nameEn, nameFr: nameEn }), category })
 
 describe('dishListRow', () => {
   it('sends money as the two-decimal string and AR as one flag from either asset', () => {

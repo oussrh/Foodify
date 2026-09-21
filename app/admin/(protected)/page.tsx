@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader, StatStrip } from '@/components/shell/page-header'
 import { DashboardRestaurants } from '@/components/admin/dashboard-restaurants'
-import { RecentManagers } from '@/components/admin/dashboard-managers'
+import { DashboardManagers } from '@/components/admin/dashboard-managers'
 import { daysAgo } from '@/lib/time'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
 
@@ -58,7 +58,7 @@ export default async function AdminDashboard() {
 
       <DashboardRestaurants restaurants={restaurants} />
 
-      <RecentManagers managers={recentManagers} />
+      <DashboardManagers managers={recentManagers} />
     </div>
   )
 }

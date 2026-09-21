@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { Prisma } from '@/generated/prisma/client'
-import { dishRow, restaurantRow } from '@/test/factories/prisma'
+import { categoryRow, dishRow, restaurantRow, subcategoryRow } from '@/test/factories/prisma'
 import { serializeCategories, serializeDish, serializeRestaurant } from './menu-data'
 
 describe('serializeDish', () => {
@@ -27,13 +27,13 @@ describe('serializeRestaurant', () => {
 
 describe('serializeCategories', () => {
   it('keeps the tree and both names, serializing every dish, and an empty section stays empty', () => {
-    const category = { id: 'c1', restaurantId: 'r1', nameEn: 'Mains', nameFr: 'Plats', sortOrder: 0, isActive: true }
+    const category = categoryRow()
     const tree = [
       {
         ...category,
         subcategories: [
-          { id: 's1', categoryId: 'c1', nameEn: 'Grill', nameFr: 'Grillades', sortOrder: 0, isActive: true, dishes: [dishRow({ id: 'd1', price: new Prisma.Decimal('9') })] },
-          { id: 's2', categoryId: 'c1', nameEn: 'Soups', nameFr: 'Soupes', sortOrder: 1, isActive: true, dishes: [] },
+          { ...subcategoryRow({ nameEn: 'Grill' }), dishes: [dishRow({ id: 'd1', price: new Prisma.Decimal('9') })] },
+          { ...subcategoryRow({ id: 's2', nameEn: 'Soups', nameFr: 'Soupes', sortOrder: 1 }), dishes: [] },
         ],
       },
       { ...category, id: 'c2', nameEn: 'Drinks', nameFr: 'Boissons', subcategories: [] },

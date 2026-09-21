@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import Image from 'next/image'
-import { Camera, Search, Star } from 'lucide-react'
+import { Camera, Star } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { EmptyState } from '@/components/shell/page-header'
+import { ListSearch } from '@/components/shell/list-search'
 import { DishLiveSwitch, DishRowMenu } from '@/components/shell/row-actions'
 import { cn } from '@/lib/utils'
 
@@ -34,17 +35,7 @@ export default function DishesList({ role, restaurantId, currency, rows, search,
   const base = `/${role}/restaurants/${restaurantId}`
   return (
     <div className="flex flex-col gap-4">
-      <form method="get" className="relative max-w-md">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
-          type="search"
-          name="search"
-          defaultValue={search}
-          placeholder="Search dishes"
-          aria-label="Search dishes"
-          className="h-10 w-full rounded-md border border-input bg-card pl-9 pr-3 text-sm placeholder:text-muted-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
-        />
-      </form>
+      <ListSearch value={search} placeholder="Search dishes" label="Search dishes" />
 
       {rows.length === 0 ? (
         <EmptyState
@@ -93,7 +84,7 @@ export default function DishesList({ role, restaurantId, currency, rows, search,
                   </Link>
                   <span className="block truncate text-xs text-muted-foreground">{d.nameFr}</span>
                 </TableCell>
-                <TableCell className="hidden text-muted-foreground md:table-cell">{d.category || '—'}</TableCell>
+                <TableCell className="hidden text-muted-foreground md:table-cell">{d.category || '-'}</TableCell>
                 <TableCell className="tnum text-right">
                   {currency}
                   {d.price}

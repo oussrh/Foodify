@@ -12,7 +12,7 @@ export default async function AdminsPage({ searchParams }: { searchParams?: Prom
   const sp = searchParams ? await searchParams : undefined
   const search = (sp?.search || '').trim()
 
-  const admins = await prisma.user.findMany({
+  const rows = await prisma.user.findMany({
     where: {
       role: 'SUPER_ADMIN',
       ...(search ? { email: { contains: search, mode: 'insensitive' } } : {}),
@@ -20,6 +20,8 @@ export default async function AdminsPage({ searchParams }: { searchParams?: Prom
     orderBy: { createdAt: 'asc' },
     select: { id: true, email: true, emailVerified: true, totpSecret: true, lastLogin: true, createdAt: true },
   })
+  // the secret stays here: the table only learns which second factor is set
+  const admins = rows.map(({ totpSecret, ...a }) => ({ ...a, usesAuthenticator: Boolean(totpSecret) }))
 
   return (
     <div className="flex flex-col gap-2">

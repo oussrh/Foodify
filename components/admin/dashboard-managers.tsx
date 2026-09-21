@@ -11,7 +11,7 @@ interface RecentManager {
 }
 
 /** The overview's recently added managers section. */
-export function RecentManagers({ managers }: { managers: RecentManager[] }) {
+export function DashboardManagers({ managers }: { managers: RecentManager[] }) {
   return (
     <section className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between">
@@ -40,7 +40,7 @@ export function RecentManagers({ managers }: { managers: RecentManager[] }) {
                   </Link>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {u.restaurants.length === 0 ? '—' : u.restaurants.map((r) => r.name).join(', ')}
+                  {u.restaurants.length === 0 ? '-' : u.restaurants.map((r) => r.name).join(', ')}
                 </TableCell>
                 <TableCell className="tnum hidden text-muted-foreground sm:table-cell">
                   {u.lastLogin ? u.lastLogin.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : 'Never'}

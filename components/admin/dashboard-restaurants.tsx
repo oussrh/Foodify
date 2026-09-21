@@ -57,7 +57,7 @@ export function DashboardRestaurants({ restaurants }: { restaurants: DashboardRe
                   </Link>
                   <span className="block text-xs text-muted-foreground">/{r.slug}</span>
                 </TableCell>
-                <TableCell className="hidden text-muted-foreground sm:table-cell">{r.city || '—'}</TableCell>
+                <TableCell className="hidden text-muted-foreground sm:table-cell">{r.city || '-'}</TableCell>
                 <TableCell className="tnum">
                   {r._count.dishes}
                   <span className="text-muted-foreground"> · {r._count.categories} cat.</span>

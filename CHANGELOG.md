@@ -66,7 +66,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Fixed
 
-- The dish list's search icon carried a broken utility class (`-/2`) and sat off-centre; it is `-translate-y-1/2`.
+- The dish and restaurant lists' search icon carried a broken utility class (`-/2`) and sat off-centre; the three list pages share one `ListSearch`. The admins table no longer receives each admin's TOTP secret, only whether one is set. Empty table cells show `-`.
 - The admin "Delete restaurant" button called `DELETE /api/restaurants/[id]`, a route that does not exist, and always failed; it calls the `deleteRestaurant` action. Creating or editing a dish returned the Prisma row, whose `Decimal` price cannot cross to the client; the actions now return plain payloads.
 - Every admin page re-checks the super-admin role on each render (`requireSuperAdminPage`, one redirect table shared with the layout; five tests): Next keeps a layout mounted across client navigations, so the layout's check ran once per visit and a role change or deletion after it went unseen until a full reload. Creating, renaming or deleting a restaurant refreshes the open dashboard's shell (the restaurant switcher of the preserved layout) through `refreshDashboards()` in `app/actions/restaurant-actions.ts`, a `revalidatePath` on both portal roots, where only a rename did and only the two edit pages were named. The three `console.log` calls that printed a restaurant's patch and row (contact email, phone, address) to the server log are gone.
 - Changing your own password asks for the current one and checks it on the server (the form asked, the action did not look); the new password's rules are the same on both sides.
