@@ -117,7 +117,7 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Situation**: the rule's probe looks for a tenant column and finds none: this schema scopes by `restaurantId`, and `lib/auth-guard.ts` scopes every action to it.
 - **Default taken**: recorded as the probe's blind spot, not as absence. The negative test on a real database (one restaurant's admin reading another's rows) belongs with the integration suite of phase 10.
 - **Alternative set aside**: a unit test against a mocked client, which cannot see a constraint or a query.
-- **Re-read when**: phase 10 opens; write the isolation test first.
+- **Re-read when**: phase 10 opens; write the isolation test first. **Closed 2026-09-21 (phase 10)**: `tests/integration/tenant-isolation.test.ts` is the negative test on the real database, through every guard and the actions; writing it found the subcategory hole (a dish could be placed under another restaurant's subcategory) and closed it.
 
 ## 2026-09-20 · phase 5 · no read is cached on the server; the probe guarantees it
 
@@ -198,4 +198,11 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - **Default taken**: each site was fixed from its own `tsc` error and verified by the next run: a widening only where a parent genuinely passes `undefined` (`disabled` chains, form value types, `hint`/`description`), a conditional spread where the receiver must not see the key (Prisma inputs through `definedFields()`, a Radix `defaultValue`, the provider pair), a guard where the index can miss. The widening is one textual edit in more than ten files, which CODE.11 would call a codemod; it was not written as one because the choice at each site (widen, spread, guard) is what the type error decides, and a transform that widened blindly would have hidden the sites where a spread was right (`Switch.checked`, `RegisteredField.placeholder` stayed narrow).
 - **Alternative set aside**: zod 4.6's `.exactOptional()` on the schemas, which hands `undefined` to the inner type at runtime and fails a form that sends a key with `undefined`; a blanket widening codemod.
 - **Re-read when**: a third flag arrives, or a widened prop turns out to be fed `undefined` by nobody (narrow it then).
+
+## 2026-09-21 · phase 10 · the integration harness: one rolled-back transaction, the singleton proxied, constraints left to the migrations
+
+- **Situation**: TEST.2 wants a real Postgres in a rolled-back transaction with no ORM mocking; the code under test reaches the database through the client singleton and the session through `auth()`.
+- **Default taken**: each test runs inside a Prisma interactive transaction that a sentinel error rolls back; `@/lib/prisma` is a proxy to that transaction (the ORM itself is not mocked: every query, guard and action runs unchanged on real rows), `@/auth` answers the row the test signed in as, `next/cache` is a no-op outside a request. The runner reads `TEST_DATABASE_URL` only (CI's service, or a throwaway container it starts), never `DATABASE_URL`. A constraint violation would abort the transaction every later query shares, so the suite tests the schema's refusals (they come first) and leaves the constraints to the migrations; a savepoint helper is the next step if a constraint test is wanted.
+- **Alternative set aside**: Testcontainers (a dependency for what one docker command does); truncating tables per test (slower, and it would erase the seed the browser suite needs on CI's shared service).
+- **Re-read when**: a test needs to observe a constraint violation, or the suite outgrows one connection.
 

@@ -9,7 +9,10 @@
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
     // loaded by name by abatty (abatty.config.json → ratchet.local); no plugin knows it
-    "abatty.probes.mjs"
+    "abatty.probes.mjs",
+    // the integration suite: its config is named on the vitest command line (scripts/ci/integration.mjs), its setup file by that config
+    "vitest.integration.config.ts",
+    "tests/integration/setup.ts"
   ],
   "project": [
     "src/**/*.{ts,tsx}",
@@ -17,6 +20,7 @@
     "components/**/*.{ts,tsx}",
     "lib/**/*.ts",
     "test/**/*.ts",
+    "tests/**/*.ts",
     "e2e/**/*.ts",
     "prisma/*.ts",
     "*.{ts,js,cjs,mjs}"

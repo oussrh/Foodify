@@ -6,8 +6,8 @@ status: living
 audience: ["developer", "agent"]
 tags: ["testing", "coverage", "vitest"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
-source_truth: ["vitest.config.ts", "package.json"]
-last_verified: "2026-09-20"
+source_truth: ["vitest.config.ts", "vitest.integration.config.ts", "package.json"]
+last_verified: "2026-09-21"
 ---
 
 # Testing
@@ -28,13 +28,13 @@ no test touches the network (`fetch` is stubbed where a module calls it).
 
 One area today, `lib/`, the shared layer (the only code with a unit surface: the customer-menu
 data formats, brand colour, pricing, locale, TOTP, JSON-LD). The floor is pinned in
-`vitest.config.ts` at the figure measured on 2026-09-20 and only ever raised; branches and
+`vitest.config.ts` at the figure measured on 2026-09-21 (first set on 2026-09-20) and only ever raised; branches and
 functions are what bind (TEST.4). `thresholds.autoUpdate` is never set: a raise is a reviewed
 change with the new number in the log of `STANDARDS_PROGRESS.md`.
 
 | Area | Statements | Branches | Functions | Lines | Set on |
 |---|---|---|---|---|---|
-| `lib/**` | 93.0 | 81.3 | 79.4 | 93.3 | 2026-09-20 (raised the same day: `lib/env.ts` tests) |
+| `lib/**` | 96.7 | 91.7 | 94.0 | 96.9 | 2026-09-21, phase 10 (from 93.0 / 81.3 / 79.4 / 93.3 set on 2026-09-20; phases 4 to 9 added the schema, env, mail, sign-in, list, loader and payload tests) |
 | `lib/menu.ts` (money display, per file) | 88.8 | 85 | 63.6 | 86.2 | 2026-09-20 |
 | `lib/totp.ts` (2FA check, per file) | 100 | 100 | 100 | 100 | 2026-09-20 |
 
@@ -67,8 +67,24 @@ or critical violation (TEST.3, A11Y.1). Two projects, a phone and a desktop; ret
 2 in CI; a trace on the first retry. Test data is the seeded restaurant (`prisma/seed.ts`); CI seeds
 a Postgres service before the run. Vitest excludes `e2e/`.
 
+## Integration suite
+
+`pnpm test:integration` runs `tests/integration/**` (`vitest.integration.config.ts`) against a real
+Postgres on the real migrations (TEST.2, DATA.3): `scripts/ci/integration.mjs` takes
+`TEST_DATABASE_URL` when set (CI's service) or starts a throwaway `postgres:16-alpine` container
+on port 5499 (left running for the next run), applies `prisma migrate deploy`, then runs the
+suite. `DATABASE_URL` is never read, so the suite cannot touch the database a developer's `.env`
+names. Every test runs inside a transaction that is rolled back (`tests/integration/db.ts`); the
+code under test reaches that transaction through the `@/lib/prisma` mock in `setup.ts` and the
+session it is signed in as through `session.ts`, so the guards, the actions and the queries run
+unchanged on real rows and constraints, and nothing is mocked but the session and the cache
+revalidation. No coverage here: the unit floors hold the shared layer; this suite holds what a
+unit test cannot see: tenant isolation through the guards and the actions (`tenant-isolation.test.ts`,
+the negative proof DATA.3 asks for), the money column, a keyset page over real rows, the sort
+order a write leaves behind. The gate's database suite runs it when a push touches `prisma/` or
+`tests/integration/`; CI runs it on every push after the gate.
+
 ## Still to come
 
-- Integration (TEST.2): real Postgres in a rolled-back transaction, on real migrations: phase 10.
 - Authenticated journeys in the browser suite: the sign-in needs an emailed code, which the suite
   cannot read; a test-only code source is the seam.

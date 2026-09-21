@@ -307,7 +307,36 @@
     },
     {
       "id": 10,
-      "status": "pending"
+      "status": "done",
+      "updatedAt": "2026-09-21T07:12:28Z",
+      "numbersBefore": {
+        "rules": {
+          "TEST-INTEGRATION": "missing",
+          "DATA-TENANT": "n/a (no tenant column found; no isolation test)",
+          "TEST-UNIT": "present",
+          "TEST-COVERAGE": "present"
+        },
+        "coverageFloors": "lib/** 93.0 / 81.3 / 79.4 / 93.3 (statements / branches / functions / lines), measured 96.7 / 91.7 / 94.0 / 96.9 on 2026-09-21",
+        "integration": "none: no test:integration script, no real-database suite",
+        "score": "71/100 (73 checks)",
+        "enforcedShare": "76% (42/55)"
+      },
+      "numbersAfter": {
+        "rules": {
+          "TEST-INTEGRATION": "present (tests/integration, vitest.integration.config.ts)",
+          "DATA-TENANT": "present (isolation test on the real database)",
+          "TEST-UNIT": "present",
+          "TEST-COVERAGE": "present"
+        },
+        "coverageFloors": "lib/** 96.7 / 91.7 / 94.0 / 96.9 (from 93.0 / 81.3 / 79.4 / 93.3), pinned at the measured figure; per-file floors for menu.ts and totp.ts unchanged",
+        "integration": "13 tests in 2 files on a real Postgres (rolled-back transactions): 4 on the guards, 4 on the actions (tenant isolation), 5 on writes and the paged list; CI runs them after the gate on its Postgres service; the gate runs them when a push touches prisma/ or tests/integration/",
+        "score": "72/100 (74 checks)",
+        "enforcedShare": "77% (44/57)",
+        "readability": "100/100",
+        "switches": "test:integration red on a guard that lets the other tenant through, on the subcategory check removed and on the loader filter removed (each restored: green); pnpm test red on a lib/** floor set above the measurement; the rollback leaves zero rows after every run",
+        "tests": "290 unit (45 files), 13 integration, 20 browser",
+        "caught": "a dish could be placed under another restaurant's subcategory and onto its public menu (fixed in the actions and in the loader)"
+      }
     },
     {
       "id": 11,

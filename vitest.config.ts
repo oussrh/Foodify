@@ -12,7 +12,8 @@ export default defineConfig({
   test: {
     environment: 'node',
     // e2e/ is Playwright's (its specs call test.describe from @playwright/test).
-    exclude: [...configDefaults.exclude, 'e2e/**'],
+    // tests/integration is the database suite's (vitest.integration.config.ts, a real Postgres).
+    exclude: [...configDefaults.exclude, 'e2e/**', 'tests/**'],
     coverage: {
       provider: 'v8',
       reportOnFailure: true,
@@ -26,9 +27,10 @@ export default defineConfig({
         'lib/emails/**', // HTML templates: presentational
       ],
       thresholds: {
-        // The shared layer. Set from `vitest run --coverage` on 2026-09-20; branches and
-        // functions are what bind. Raise when the number does, never lower.
-        'lib/**': { branches: 81.3, functions: 79.4, lines: 93.3, statements: 93.0 },
+        // The shared layer. Set from `vitest run --coverage` on 2026-09-20, raised to the measured
+        // figure on 2026-09-21 (phase 10); branches and functions are what bind. Raise when the
+        // number does, never lower.
+        'lib/**': { branches: 91.7, functions: 94.0, lines: 96.9, statements: 96.7 },
         // Money display and the 2FA check get their own floor (TEST.4: per-file for money and
         // legal logic), so a drop there cannot hide behind a gain elsewhere in lib/.
         'lib/menu.ts': { branches: 85, functions: 63.6, lines: 86.2, statements: 88.8, perFile: true },

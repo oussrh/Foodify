@@ -2,7 +2,7 @@
 
 import prisma from '@/lib/prisma'
 import { uploadArAsset } from '@/lib/cloudinary'
-import { requireDishAccess, requireIngredientAccess, requireRestaurantAccess } from '@/lib/auth-guard'
+import { requireDishAccess, requireIngredientAccess, requireRestaurantAccess, requireSubcategoryOf } from '@/lib/auth-guard'
 import { uuid } from '@/lib/schemas/common'
 import { dishPayload, idOnly, ingredientPayload } from '@/lib/payloads'
 import { definedFields } from '@/lib/defined-fields'
@@ -31,6 +31,7 @@ export async function createDish(rawRestaurantId: string, raw: DishInput) {
   await requireRestaurantAccess({ id: rawRestaurantId })
   const restaurantId = uuid.parse(rawRestaurantId)
   const data = dishInput.parse(raw)
+  await requireSubcategoryOf(restaurantId, data.subcategoryId)
   const count = await prisma.dish.count({ where: { restaurantId } })
 
   const usdzUrl = await storedArUrl(data.usdzUrl, restaurantId)
@@ -68,6 +69,7 @@ export async function updateDish(rawId: string, raw: DishPatch) {
   const { restaurantId } = await requireDishAccess(rawId)
   const id = uuid.parse(rawId)
   const data = dishPatch.parse(raw)
+  await requireSubcategoryOf(restaurantId, data.subcategoryId)
   const updatedData = { ...data }
 
   // An AR URL is only touched when the patch carries one.
