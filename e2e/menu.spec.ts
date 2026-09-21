@@ -52,6 +52,15 @@ test.describe('public menu', () => {
     expect(errors).toEqual([])
   })
 
+  test('highlights the last category in the bar when it is tapped', async ({ page }) => {
+    await openMenu(page, `${MENU}?lang=en`)
+    const chips = page.locator('nav[aria-label="Categories"] a[data-chip]')
+    const last = chips.last()
+    await last.click()
+    // The tapped category becomes current even though it is the short last section.
+    await expect(last).toHaveAttribute('aria-current', 'location')
+  })
+
   test('has no serious accessibility violation, closed and with the sheet open', async ({ page }) => {
     await openMenu(page, `${MENU}?lang=en`)
     await expectNoSeriousA11yViolations(page)

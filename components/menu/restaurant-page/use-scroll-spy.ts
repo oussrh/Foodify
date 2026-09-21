@@ -41,6 +41,10 @@ export function useScrollSpy(sections: Section[]) {
           const el = sectionEl(s.id)
           if (el && el.getBoundingClientRect().top <= line) current = s.id
         }
+        // The last section is often too short to reach the line: at the bottom of the page it is
+        // the current one, so tapping the last chip (Desserts, Drinks…) actually highlights it.
+        const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2
+        if (atBottom) current = sections[sections.length - 1]?.id ?? current
         setActiveSection(current ?? sections[0]?.id ?? null)
       })
     }
