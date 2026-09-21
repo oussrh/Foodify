@@ -88,7 +88,15 @@ export default function RestaurantPage({
   }
 
   return (
-    <div lang={locale} data-hydrated={hydrated || undefined} className={cn('brand-scope min-h-screen bg-background text-foreground', themeClass)} style={pageStyle}>
+    // While a sheet is open the page behind it is inert: Radix hides it from assistive tech, inert
+    // also takes its links and buttons out of the tab order (axe: aria-hidden-focus).
+    <div
+      lang={locale}
+      data-hydrated={hydrated || undefined}
+      inert={sheet.openDish !== null || filtersOpen || undefined}
+      className={cn('brand-scope min-h-screen bg-background text-foreground', themeClass)}
+      style={pageStyle}
+    >
       <a
         href="#menu"
         className="sr-only z-50 rounded-md bg-foreground px-3 py-2 text-sm font-semibold text-background focus:not-sr-only focus:fixed focus:left-3 focus:top-3"
