@@ -31,6 +31,7 @@ export function restaurantFormValues(restaurant: Restaurant): EditRestaurantValu
     dietaryOptions: restaurant.dietaryOptions,
     coverImageStyle: restaurant.coverImageStyle as 'cover' | 'repeat' | undefined,
     menuTheme: (['light', 'dark'].includes(restaurant.menuTheme) ? restaurant.menuTheme : 'system') as 'system' | 'light' | 'dark',
+    socialDisplay: (restaurant.socialDisplay === 'text' ? 'text' : 'icons') as 'icons' | 'text',
   }
 }
 

@@ -44,5 +44,6 @@ export function toContactValues(values: Partial<EditRestaurantValues>): ContactF
     country: values.country,
     openingHours: values.openingHours,
     socialMedia: values.socialMedia,
+    socialDisplay: values.socialDisplay,
   }
 }

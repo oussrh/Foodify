@@ -9,7 +9,7 @@ const optionalUrl = z.url('Invalid URL format').optional().or(z.literal(''))
  * A whole restaurant as the create form and the settings forms submit it. `slug` here is the
  * rule a typed slug must meet (lowercase, digits, hyphens; lib/slug makes a generated one
  * conform), where `slug` below is the loose lookup key. `openingHours` and `socialMedia` are
- * JSON in a string column (lib/opening-hours, lib/social-media); the URL fields take '' as
+ * JSON in a string column (lib/opening-hours, lib/social); the URL fields take '' as
  * "not set" so a cleared field still validates. `menuTheme` is not here: the branding tab alone
  * sets it, through `restaurantPatch`. `dietaryOptions` is the subset of the menu's dietary vocabulary
  * this restaurant offers: what the dish forms show and what the public menu filters by.
@@ -36,6 +36,7 @@ export const restaurantInput = z.object({
   dietaryOptions: z.array(dietaryKey).optional(),
   openingHours: z.string().optional(),
   socialMedia: z.string().optional(),
+  socialDisplay: z.enum(['icons', 'text']).optional(),
   // Design
   coverImageUrl: optionalUrl,
   coverImageStyle: z.enum(['cover', 'repeat']).optional(),

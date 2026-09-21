@@ -78,6 +78,8 @@ export interface MenuRestaurant {
   website: string | null
   openingHours: string | null
   socialMedia: string | null
+  /** How the footer shows the social links: 'icons' or 'text'. */
+  socialDisplay: 'icons' | 'text'
   /** The dietary keys this restaurant offers (Settings → General): the filter chips, and the only tags a dish shows. */
   dietaryOptions: string[]
 }

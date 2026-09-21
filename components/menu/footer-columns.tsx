@@ -1,12 +1,12 @@
 "use client"
 
 import { Clock, Globe, Mail, MapPin, Phone } from 'lucide-react'
-import { Facebook, Instagram, Twitter } from '@/components/social-icons'
 import { MENU_TEXT, type Locale, type MenuRestaurant } from '@/lib/menu'
-import type { SocialHandles } from '@/lib/social-media'
+import type { SocialHandles } from '@/lib/social'
 import { summarizeOpeningHours, type OpeningHours } from '@/lib/opening-hours'
 import OpeningHoursLines from '@/components/opening-hours-lines'
 import { cleanPhone } from './contact-format'
+import SocialList from './social-list'
 
 const row = 'flex items-start gap-2.5 text-sm text-muted-foreground'
 const icon = 'mt-0.5 h-4 w-4 shrink-0 text-brand'
@@ -82,32 +82,13 @@ export function FooterHours({ hours, locale }: { hours: OpeningHours; locale: Lo
   )
 }
 
-const socialLink =
-  'inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-border-strong hover:text-foreground'
-
-/** One icon link per network the restaurant is on. */
-export function FooterSocial({ social, locale }: { social: SocialHandles; locale: Locale }) {
+/** The restaurant's social links, as icons or text (its choice). */
+export function FooterSocial({ social, display, locale }: { social: SocialHandles; display: 'icons' | 'text'; locale: Locale }) {
   const t = MENU_TEXT[locale]
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm font-semibold">{t.follow}</p>
-      <div className="flex gap-2">
-        {social.instagram && (
-          <a href={`https://instagram.com/${social.instagram}`} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className={socialLink}>
-            <Instagram className="h-4 w-4" />
-          </a>
-        )}
-        {social.facebook && (
-          <a href={`https://facebook.com/${social.facebook}`} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className={socialLink}>
-            <Facebook className="h-4 w-4" />
-          </a>
-        )}
-        {social.twitter && (
-          <a href={`https://x.com/${social.twitter}`} target="_blank" rel="noopener noreferrer" aria-label="X" className={socialLink}>
-            <Twitter className="h-4 w-4" />
-          </a>
-        )}
-      </div>
+      <SocialList handles={social} display={display} />
     </div>
   )
 }

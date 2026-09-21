@@ -1,10 +1,10 @@
 'use client'
 
 import { Clock, Globe, Mail, MapPin, Phone } from 'lucide-react'
-import type { SocialHandles } from '@/lib/social-media'
+import type { SocialHandles } from '@/lib/social'
 import { dayName, hasStructuredHours, openStatus, summarizeOpeningHours, type OpeningHours } from '@/lib/opening-hours'
 import { cn } from '@/lib/utils'
-import { SOCIAL } from './social-links'
+import SocialList from '@/components/menu/social-list'
 import OpeningHoursLines from '@/components/opening-hours-lines'
 
 interface ContactPreviewProps {
@@ -16,6 +16,7 @@ interface ContactPreviewProps {
   website: string | undefined
   hours: OpeningHours
   handles: SocialHandles
+  socialDisplay: 'icons' | 'text'
 }
 
 /** Open or closed on the guest's clock, and when that changes. */
@@ -47,7 +48,7 @@ function HoursRow({ hours, summary }: { hours: OpeningHours; summary: ReturnType
 }
 
 /** The footer of the public menu as the current values would render it. */
-export default function ContactPreview({ name, address, phone, email, website, hours, handles }: ContactPreviewProps) {
+export default function ContactPreview({ name, address, phone, email, website, hours, handles, socialDisplay }: ContactPreviewProps) {
   const summary = summarizeOpeningHours(hours, 'en')
   const rows = [
     { key: 'address', icon: MapPin, text: address, className: 'text-muted-foreground' },
@@ -75,11 +76,7 @@ export default function ContactPreview({ name, address, phone, email, website, h
           {hasHours && <HoursRow hours={hours} summary={summary} />}
         </ul>
 
-        {SOCIAL.some((s) => handles[s.key]) && (
-          <div className="mt-4 flex gap-2">
-            {SOCIAL.filter((s) => handles[s.key]).map((s) => <s.icon key={s.key} className="h-4 w-4 text-muted-foreground" />)}
-          </div>
-        )}
+        <SocialList handles={handles} display={socialDisplay} className="mt-4" />
 
         {rows.length === 0 && !hasHours && (
           <p className="mt-3 text-sm text-muted-foreground">Nothing to show yet. Fill in the fields on the left.</p>

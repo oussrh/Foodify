@@ -1,7 +1,7 @@
 "use client"
 
 import { MENU_TEXT, type Locale, type MenuRestaurant } from '@/lib/menu'
-import type { SocialHandles } from '@/lib/social-media'
+import type { SocialHandles } from '@/lib/social'
 import { hasStructuredHours, parseOpeningHours } from '@/lib/opening-hours'
 import { formatAddress } from './contact-format'
 import { FooterBrand, FooterContact, FooterHours, FooterSocial } from './footer-columns'
@@ -18,7 +18,7 @@ export default function MenuFooter({ restaurant, social, locale }: MenuFooterPro
   const hours = parseOpeningHours(restaurant.openingHours)
   const hasHours = hasStructuredHours(hours) || Boolean(hours.note)
   const hasContact = address || restaurant.phone || restaurant.email || restaurant.website
-  const hasSocial = social.instagram || social.facebook || social.twitter
+  const hasSocial = Object.values(social).some(Boolean)
   const year = new Date().getFullYear()
 
   return (
@@ -31,7 +31,7 @@ export default function MenuFooter({ restaurant, social, locale }: MenuFooterPro
         {(hasHours || hasSocial) && (
           <div className="flex flex-col gap-6">
             {hasHours && <FooterHours hours={hours} locale={locale} />}
-            {hasSocial && <FooterSocial social={social} locale={locale} />}
+            {hasSocial && <FooterSocial social={social} display={restaurant.socialDisplay} locale={locale} />}
           </div>
         )}
       </div>
