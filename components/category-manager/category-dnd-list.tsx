@@ -1,9 +1,11 @@
 // components/category-manager/category-dnd-list.tsx
 // The sortable shell around the category cards: the pointer sensor, the drag context and the
-// vertical sorting strategy. The cards themselves are the children.
+// vertical sorting strategy. The cards themselves are the children. The context takes React's
+// id: dnd-kit numbers its aria-describedby ids from a module counter otherwise, which differs
+// between the server render and the client and made every card a hydration mismatch.
 "use client";
 
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import {
   DndContext,
   closestCenter,
@@ -24,6 +26,7 @@ export default function CategoryDndList({
   onDragEnd: (event: DragEndEvent) => void;
   children: ReactNode;
 }) {
+  const id = useId();
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 5 },
@@ -32,6 +35,7 @@ export default function CategoryDndList({
 
   return (
     <DndContext
+      id={id}
       sensors={sensors}
       collisionDetection={closestCenter}
       onDragEnd={onDragEnd}
