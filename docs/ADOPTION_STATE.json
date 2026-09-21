@@ -406,7 +406,42 @@
     },
     {
       "id": 13,
-      "status": "pending"
+      "status": "done",
+      "updatedAt": "2026-09-21T11:35:16Z",
+      "numbersBefore": {
+        "rules": {
+          "OBS-STRUCTURED": "missing (no logging dependency and no logger module)",
+          "OBS-REDACTION": "missing (no redaction configured at the logger)",
+          "OBS-CONSOLE": "missing (no-console not in the lint configuration; 1 console call in app/api, 13 on the server paths overall)",
+          "OBS-SIGTERM": "missing (no SIGTERM handler; next start closes the server and exits 143 on its own, nothing fails the health first or releases the pool)",
+          "OBS-HEALTH": "missing (no health endpoint)",
+          "OBS-TRACKER": "missing (no error tracker)"
+        },
+        "console": "13 console calls on the server paths (auth.ts 1, app/api/dish-views 1, app/actions 4, lib/sign-in-checks 3 printing the address, lib/otp-request 1, lib/cloudinary 2 printing the signing parameters and the signature, lib/brand-upload 1 in browser code); 60 more under components/ (the browser's)",
+        "score": "76/100 (74 checks)",
+        "enforcedShare": "78% (46/59)"
+      },
+      "numbersAfter": {
+        "rules": {
+          "OBS-STRUCTURED": "present (pino; server/log.ts)",
+          "OBS-REDACTION": "present (configured at the logger, no hand-written masking)",
+          "OBS-CONSOLE": "present (no-console configured; no console call in the server)",
+          "OBS-SIGTERM": "present (a SIGTERM handler that drains before exiting)",
+          "OBS-HEALTH": "present (app/api/health/route.ts)",
+          "OBS-TRACKER": "missing on purpose (no error tracker; decision recorded)"
+        },
+        "console": "0 console calls on the server paths; no-console at error on lib, app, server, auth.ts, proxy.ts, instrumentation.ts (error.tsx and tests excepted); 57 under components/ untouched (the browser's)",
+        "logger": "server/log.ts: pino 10.3.1, JSON lines on stdout through a synchronous destination, no transport; REDACTED_PATHS (24 secret fields at the top and under any key, plus code and credentials.code), censor <redacted>; silent under a test runner",
+        "health": "GET /api/health (force-dynamic): 200 { status, database } on SELECT 1, 503 unavailable, 503 draining; unit-tested with the client and the drain mocked, browser-tested on the production build",
+        "drain": "server/drain.ts registered from instrumentation.ts on the Node runtime: flag first, Next exits after the pending requests (143), prisma.$disconnect() only when a request outlives the 10 s unref grace; idempotent per module instance, returns its remover; 6 tests. proxy.ts never rewrites /api/* (4 tests)",
+        "score": "82/100 (74 checks)",
+        "enforcedShare": "73% (47/64)",
+        "readability": "97/100 (navigability 88)",
+        "switches": "lint red on a planted console call in lib and in a route; tests red on email dropped from the redaction list, on the health route not asking the drain, on the drain not flipping its flag; green after each restore; the build clean; the health spec green on the production build",
+        "tests": "322 unit (51 files), 13 integration, 22 browser; server/** pinned at 100",
+        "left": "the SIGTERM drill under load on Linux; request-scoped records; an error tracker (OBS-TRACKER, should); the console calls under components/; the server-only lib modules not under server/; whether _next/* should pass the host rewrite",
+        "caught": "on review: the logger's stated synchronous default was false (now sync: true), the release presented as every stop's sequence, emailVerifyToken off the redaction list, the force-dynamic reason wrong for Next 16, /api/health unreachable from a rewritten host, test names with an and, the silent-level test on the shell's NODE_ENV"
+      }
     }
   ]
 }

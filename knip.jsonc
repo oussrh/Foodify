@@ -19,6 +19,7 @@
     "app/**/*.{ts,tsx}",
     "components/**/*.{ts,tsx}",
     "lib/**/*.ts",
+    "server/**/*.ts",
     "test/**/*.ts",
     "tests/**/*.ts",
     "e2e/**/*.ts",

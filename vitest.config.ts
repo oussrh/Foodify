@@ -18,9 +18,10 @@ export default defineConfig({
       provider: 'v8',
       reportOnFailure: true,
       reporter: ['text-summary', 'json-summary'],
-      include: ['lib/**/*.ts'],
+      include: ['lib/**/*.ts', 'server/**/*.ts'],
       exclude: [
         'lib/**/*.test.ts',
+        'server/**/*.test.ts',
         'lib/prisma.ts', // client singleton, no logic
         'lib/cloudinary.ts', // SDK wrapper over the network: integration, not unit
         'lib/auth-guard.ts', // needs a session and Postgres: the phase-10 integration suite
@@ -31,6 +32,9 @@ export default defineConfig({
         // figure on 2026-09-21 (phase 10); branches and functions are what bind. Raise when the
         // number does, never lower.
         'lib/**': { branches: 91.7, functions: 94.0, lines: 96.9, statements: 96.7 },
+        // The process's modules (phase 13): the logger's redaction and the drain are the two things
+        // that must never regress unseen; measured at 100 on 2026-09-21 and pinned there.
+        'server/**': { branches: 100, functions: 100, lines: 100, statements: 100 },
         // Money display and the 2FA check get their own floor (TEST.4: per-file for money and
         // legal logic), so a drop there cannot hide behind a gain elsewhere in lib/.
         'lib/menu.ts': { branches: 85, functions: 63.6, lines: 86.2, statements: 88.8, perFile: true },

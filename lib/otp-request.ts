@@ -7,6 +7,7 @@ import { randomInt } from 'crypto'
 import prisma from '@/lib/prisma'
 import { sendMail } from '@/lib/mail'
 import type { OtpRequest } from '@/lib/schemas/user'
+import { log } from '@/server/log'
 
 /** How long a mailed sign-in code stays valid; the two OTP mails (lib/emails) say "ten minutes", so the three move together. */
 export const OTP_TTL_MS = 10 * 60 * 1000
@@ -35,7 +36,7 @@ export async function requestOtp({ email, password }: OtpRequest, portal: Portal
     await sendMail({ to: email, subject: portal.subject, html: portal.html(code), text: portal.text(code) })
     return { success: true }
   } catch (error) {
-    console.error(`${portal.role} OTP request error:`, error)
+    log.error({ err: error, portal: portal.role }, 'otp request: failed')
     return { error: portal.failure }
   }
 }

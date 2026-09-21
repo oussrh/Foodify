@@ -4,7 +4,7 @@
 // switch on and the error a sentence for a log. A handler never builds a Response itself.
 
 /** Every failure code a handler may answer; a client switching on them cannot fall through a typo. */
-export type ApiCode = 'unauthenticated' | 'forbidden' | 'invalid_query' | 'invalid_id' | 'invalid_json' | 'invalid_payload' | 'not_found' | 'internal'
+export type ApiCode = 'unauthenticated' | 'forbidden' | 'invalid_query' | 'invalid_id' | 'invalid_json' | 'invalid_payload' | 'not_found' | 'internal' | 'unavailable' | 'draining'
 /** The failure body as `fail` writes it; `details` exists only when the handler passed some (Zod issues, mostly), so a client cannot rely on it. */
 export type ApiFailure = { error: string; code: ApiCode; details?: unknown }
 

@@ -35,7 +35,6 @@ const user = (overrides: Partial<User> = {}): User => ({
 describe('userWithPassword', () => {
   beforeEach(async () => {
     passwordHash = await bcrypt.hash('correct horse', 4)
-    vi.spyOn(console, 'log').mockImplementation(() => {})
   })
   afterEach(() => {
     vi.restoreAllMocks()
@@ -57,11 +56,6 @@ describe('userWithPassword', () => {
 })
 
 describe('assertPortalRole', () => {
-  beforeEach(() => {
-    vi.spyOn(console, 'log').mockImplementation(() => {})
-  })
-  afterEach(() => vi.restoreAllMocks())
-
   it('lets anyone through when the page names no portal', () => {
     expect(() => assertPortalRole(user(), undefined)).not.toThrow()
   })

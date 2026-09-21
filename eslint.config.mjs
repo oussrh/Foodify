@@ -63,11 +63,20 @@ const config = [
   },
   { rules: { 'no-debugger': 'error' } },
   {
+    // Bare console output from the server is a lint error (OBS.1, phase 13): server/log.ts is the
+    // one writer, with the redaction; a console call bypasses it. A client error boundary
+    // (error.tsx) writes to the browser's console and is not the server's; scripts, the seed and
+    // the tests are not on these paths.
+    files: ['lib/**/*.ts', 'app/**/*.{ts,tsx}', 'auth.ts', 'proxy.ts', 'instrumentation.ts', 'server/**/*.ts'],
+    ignores: ['**/*.test.ts', '**/error.tsx'],
+    rules: { 'no-console': 'error' },
+  },
+  {
     // JSDoc on the boundary surface (CODE.7, phase 11): every export of the shared layer, the
     // server actions, the route handlers and the two auth modules carries a block that says
     // what a reader would get wrong; types stay in TypeScript (no-types). Components are read
     // by their props and their markup, not held by this rule.
-    files: ['lib/**/*.ts', 'app/actions/**/*.ts', 'app/api/**/*.ts', 'auth.ts', 'proxy.ts'],
+    files: ['lib/**/*.ts', 'app/actions/**/*.ts', 'app/api/**/*.ts', 'auth.ts', 'proxy.ts', 'instrumentation.ts', 'server/**/*.ts'],
     ignores: ['**/*.test.ts'],
     plugins: { jsdoc },
     rules: {

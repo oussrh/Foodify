@@ -92,14 +92,10 @@ export async function uploadRestaurantAsset(
     .map(key => `${key}=${params[key]}`)
     .join('&');
   
-  console.log('Parameters to sign:', sortedParams);
-  
   const signature = crypto
     .createHash("sha1")
     .update(sortedParams + CLOUDINARY_API_SECRET)
     .digest("hex");
-
-  console.log('Generated signature:', signature);
 
   const formData = new FormData();
   formData.append("file", file);
