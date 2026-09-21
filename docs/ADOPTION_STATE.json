@@ -406,7 +406,21 @@
     },
     {
       "id": 13,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-21T11:03:28Z",
+      "numbersBefore": {
+        "rules": {
+          "OBS-STRUCTURED": "missing (no logging dependency and no logger module)",
+          "OBS-REDACTION": "missing (no redaction configured at the logger)",
+          "OBS-CONSOLE": "missing (no-console not in the lint configuration; 1 console call in app/api, 13 on the server paths overall)",
+          "OBS-SIGTERM": "missing (no SIGTERM handler; next start closes the server and exits 143 on its own, nothing fails the health first or releases the pool)",
+          "OBS-HEALTH": "missing (no health endpoint)",
+          "OBS-TRACKER": "missing (no error tracker)"
+        },
+        "console": "13 console calls on the server paths (auth.ts 1, app/api/dish-views 1, app/actions 4, lib/sign-in-checks 3 printing the address, lib/otp-request 1, lib/cloudinary 2 printing the signing parameters and the signature, lib/brand-upload 1 in browser code); 60 more under components/ (the browser's)",
+        "score": "76/100 (74 checks)",
+        "enforcedShare": "78% (46/59)"
+      }
     }
   ]
 }
