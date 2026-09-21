@@ -103,7 +103,7 @@ last_verified: "2026-09-21"
 | DATA-MIGRATIONS | Data | Migrations are the source of truth | must | hard | **present** | prisma; 5 migration file(s) | - | 0 |
 | DATA-TENANT | Data | Tenant isolation proven: RLS or a scoped service plus an isolation test | must | hard | **present** | no tenant column found; isolation test present | - | 4 / 10 |
 | DATA-BACKUP | Data | A restore drill exists | must | review | **n/a** | does not apply: not at this stage: build (a rule of the run stage) | - | - |
-| TEST-UNIT | Tests | A unit test runner and tests, for every language in the tree | must | hard | **present** | vitest, 56 test file(s) | - | 2 / 10 |
+| TEST-UNIT | Tests | A unit test runner and tests, for every language in the tree | must | hard | **present** | vitest, 57 test file(s) | - | 2 / 10 |
 | TEST-INTEGRATION | Tests | Integration tests against a real database | must | hard | **present** | tests/integration/db.ts | - | 10 |
 | TEST-COVERAGE | Tests | Coverage is gated on the change, with a floor under the tree | must | hard | **present** | a floor on the total, a gate on the change, reportOnFailure | - | 2 |
 | TEST-E2E | Tests | A browser suite with an accessibility scan on the same run | must | hard | **present** | playwright + axe | - | 3 |

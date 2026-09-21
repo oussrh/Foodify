@@ -81,7 +81,7 @@ Key models and relationships:
 
 ### Observability
 - `server/log.ts` is the one writer of server output (pino, JSON lines; redaction by field path there and nowhere else: never mask at a call site, add the path); `no-console` is an error on `lib/`, `app/`, `server/`, `auth.ts`, `proxy.ts`, `instrumentation.ts`. Log ids, never addresses.
-- `GET /api/health` answers 200 with `SELECT 1`, 503 `unavailable` without it, 503 `draining` after SIGTERM; `instrumentation.ts` registers the drain (`server/drain.ts`: health fails first, the pool is released after the grace, Next's own handler exits).
+- `GET /api/health` answers 200 with `SELECT 1`, 503 `unavailable` without it, 503 `draining` after SIGTERM; `instrumentation.ts` registers the drain (`server/drain.ts`: health fails first, Next's own handler finishes the requests and exits; the pool is released only when a request outlives the ten-second grace). `/api/*` is never rewritten by `proxy.ts`, whatever the host.
 
 ### Server Actions Pattern
 All data mutations use Next.js server actions in `app/actions/`:
@@ -150,7 +150,7 @@ CLOUDINARY_API_SECRET="..."
 
 ## Testing & Quality
 
-- `pnpm test`: Vitest, colocated `*.test.ts`, the `lib/**` coverage floor pinned in `vitest.config.ts` (raised with the measurement, never lowered; `docs/TESTING.md`).
+- `pnpm test`: Vitest, colocated `*.test.ts`, the `lib/**` and `server/**` coverage floors pinned in `vitest.config.ts` (raised with the measurement, never lowered; `docs/TESTING.md`).
 - `pnpm test:integration`: `tests/integration/**` on a real Postgres in rolled-back transactions (the ORM is not mocked); `pnpm e2e`: Playwright + axe on the production build.
 - `pnpm run gate:fast` before a push (the pre-push hook runs it); `pnpm run standards` is the ratchet.
 
