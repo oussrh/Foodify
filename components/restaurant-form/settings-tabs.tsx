@@ -1,10 +1,12 @@
 // components/restaurant-form/settings-tabs.tsx
 // The settings form's three sections and their tab strip: which fields each section holds
 // (the tab that has a failing field shows a dot, and the submit switches to the first one),
-// and the tablist itself.
+// the tablist itself, and at its end the link to the public menu as guests see it (a new tab,
+// the saved slug: what is on the page is what is saved, not what the form holds).
 'use client'
 
 import type { FieldErrors } from 'react-hook-form'
+import { ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { EditRestaurantValues } from './edit-restaurant-schema'
 
@@ -32,13 +34,17 @@ export default function SettingsTabs({
   activeTab,
   errors,
   onSelect,
+  slug,
 }: {
   activeTab: SettingsTab
   errors: FieldErrors<EditRestaurantValues>
   onSelect: (tab: SettingsTab) => void
+  /** The saved slug: the public menu the preview opens. */
+  slug: string
 }) {
   return (
-    <div role="tablist" aria-label="Settings sections" className="scrollbar-none -mx-4 flex gap-1 overflow-x-auto border-b border-border px-4 md:mx-0 md:px-0">
+    <div className="scrollbar-none -mx-4 flex items-stretch gap-1 overflow-x-auto border-b border-border px-4 md:mx-0 md:px-0">
+    <div role="tablist" aria-label="Settings sections" className="flex gap-1">
       {TABS.map((tab) => {
         const hasError = tab.fields.some((field) => field in errors)
         const active = activeTab === tab.key
@@ -61,6 +67,17 @@ export default function SettingsTabs({
           </button>
         )
       })}
+    </div>
+    <a
+      href={`/restaurant/${slug}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="-mb-px ml-auto flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 border-transparent px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+    >
+      <ExternalLink className="h-4 w-4" aria-hidden="true" />
+      Preview menu
+      <span className="sr-only"> (opens in a new tab)</span>
+    </a>
     </div>
   )
 }

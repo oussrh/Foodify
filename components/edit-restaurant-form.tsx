@@ -131,7 +131,7 @@ export default function EditRestaurantForm({
   return (
     <div className="relative">
       <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-6">
-      <SettingsTabs activeTab={activeTab} errors={errors} onSelect={showTab} />
+      <SettingsTabs activeTab={activeTab} errors={errors} onSelect={showTab} slug={defaultValues.slug} />
 
       <div role="tabpanel" id="settings-panel-general" aria-labelledby="settings-tab-general" hidden={activeTab !== 'general'} className="space-y-6">
       {/* Basic Information Section */}
