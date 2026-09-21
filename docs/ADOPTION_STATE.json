@@ -280,7 +280,17 @@
     },
     {
       "id": 9,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-21T06:25:43Z",
+      "numbersBefore": {
+        "rules": {
+          "TYPES-STRICT": "partial (strict, noUncheckedIndexedAccess off, exactOptionalPropertyTypes off)",
+          "TYPES-ESCAPES": "present (0, hard)"
+        },
+        "typecheck": "tsc --noEmit blocking in CI and green under strict; 53 errors with noUncheckedIndexedAccess, 86 with exactOptionalPropertyTypes (140 together), measured 2026-09-20",
+        "score": "72/100 (74 checks)",
+        "enforcedShare": "76% (42/55)"
+      }
     },
     {
       "id": 10,
