@@ -11,5 +11,6 @@ export type DefinedFields<T> = { [K in keyof T as undefined extends T[K] ? never
 
 /** The object without its `undefined` members; `null` stays, the input is not touched. */
 export function definedFields<T extends object>(obj: T): DefinedFields<T> {
+  // fromEntries answers Record<string, unknown>; the filter is the whole proof, so the cast states it
   return Object.fromEntries(Object.entries(obj).filter(([, v]) => v !== undefined)) as DefinedFields<T>
 }

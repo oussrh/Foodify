@@ -192,3 +192,10 @@ related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 - `components/shell/dish-list-rows.ts` (a Prisma row to a dish list row) sits under `components/`, outside the `lib/**` coverage floor, with its own test, for the reason `form-defaults.ts` does: its row type is the list component's. The same phase 9/10 tidy applies.
 - The phase 3 entry's trigger ("rename `role` to `portal` when phase 8 touches the shells") fired: the rename is a codemod over the five components and their call sites, done right after phase 9's flags land, so it does not collide with the type work in flight in the same files.
 
+## 2026-09-21 · phase 9 · the two strict flags: how 140 errors were fixed, and what was not a codemod
+
+- **Situation**: `noUncheckedIndexedAccess` (53 errors) and `exactOptionalPropertyTypes` (86) went on together. Two fix shapes repeated: an index read guarded or replaced by a typed shape, and a forwarded optional prop widened to `?: T | undefined` (about 55 declarations in 37 files).
+- **Default taken**: each site was fixed from its own `tsc` error and verified by the next run: a widening only where a parent genuinely passes `undefined` (`disabled` chains, form value types, `hint`/`description`), a conditional spread where the receiver must not see the key (Prisma inputs through `definedFields()`, a Radix `defaultValue`, the provider pair), a guard where the index can miss. The widening is one textual edit in more than ten files, which CODE.11 would call a codemod; it was not written as one because the choice at each site (widen, spread, guard) is what the type error decides, and a transform that widened blindly would have hidden the sites where a spread was right (`Switch.checked`, `RegisteredField.placeholder` stayed narrow).
+- **Alternative set aside**: zod 4.6's `.exactOptional()` on the schemas, which hands `undefined` to the inner type at runtime and fails a form that sends a key with `undefined`; a blanket widening codemod.
+- **Re-read when**: a third flag arrives, or a widened prop turns out to be fed `undefined` by nobody (narrow it then).
+

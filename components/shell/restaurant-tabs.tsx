@@ -3,16 +3,16 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import { cn } from '@/lib/utils'
-import type { ShellRole } from './shell-types'
+import type { ShellPortal } from './shell-types'
 
 interface RestaurantTabsProps {
-  portal: ShellRole
+  portal: ShellPortal
   restaurantId: string
   pathname: string
 }
 
 /** Sub-navigation shown while working inside one restaurant. */
-function restaurantTabs(portal: ShellRole, id: string) {
+function restaurantTabs(portal: ShellPortal, id: string) {
   const base = `/${portal}/restaurants/${id}`
   const tabs: { href: Route; label: string }[] = [
     { href: `${base}/info` as Route, label: 'Info' },

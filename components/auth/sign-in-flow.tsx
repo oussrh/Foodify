@@ -10,11 +10,11 @@ import { requestManagerOtp } from '@/app/actions/manager-auth-actions'
 import CredentialsStep from './credentials-step'
 import CodeStep from './code-step'
 
-type Role = 'admin' | 'manager'
+type Portal = 'admin' | 'manager'
 type Step = 'credentials' | 'code'
 
 interface SignInFlowProps {
-  portal: Role
+  portal: Portal
   /** Start on the code step (the /mfa routes). Falls back to credentials if nothing is pending. */
   initialStep?: Step
 }

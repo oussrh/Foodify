@@ -12,10 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
-import type { ShellRestaurant, ShellRole } from './shell-types'
+import type { ShellRestaurant, ShellPortal } from './shell-types'
 
 interface RestaurantSwitcherProps {
-  portal: ShellRole
+  portal: ShellPortal
   restaurants: ShellRestaurant[]
   current: ShellRestaurant
   /** The section open right now (info, menu, dishes...), kept when switching */

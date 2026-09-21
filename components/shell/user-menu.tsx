@@ -11,10 +11,10 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import type { ShellRole } from './shell-types'
+import type { ShellPortal } from './shell-types'
 
 interface UserMenuProps {
-  portal: ShellRole
+  portal: ShellPortal
   user: { email: string }
 }
 

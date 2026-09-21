@@ -25,7 +25,7 @@ export const DECLARING_FILES = [
 const PORTAL_VALUE = /\brole=("(?:admin|manager)"|\{(?:role|portal)\})/g
 // In a declaring file: the prop in a type, a destructuring, a JSX attribute or an expression,
 // but not an ARIA attribute (`role="alert"`) and not the `role:` key sent to signIn.
-const IDENTIFIER = /(?<![\w.'"$])role(?=\s*[:,}\]]|\s*\)|\s*&&|\s*===|\s*\?|\s*\.|\s*\[)|\brole=\{role\}/g
+const IDENTIFIER = /(?<![\w.'"$])role(?=\s*[:,}\]]|\s*\)|\s*&&|\s*===|\s*\?|\s*\.|\s*\[)/g
 
 /** A call site's source with `role="admin" | "manager"` and `role={role}` renamed to `portal`. */
 export function renameCallSite(src) {
@@ -36,7 +36,7 @@ export function renameCallSite(src) {
 export function renameDeclaring(src) {
   let out = renameCallSite(src)
   out = out.replace(/\brole: cfg\.authRole\b/g, '__SIGNIN_ROLE__')
-  out = out.replace(IDENTIFIER, (m) => (m === 'role={role}' ? 'portal={portal}' : 'portal'))
+  out = out.replace(IDENTIFIER, 'portal')
   return out.replace(/__SIGNIN_ROLE__/g, 'role: cfg.authRole')
 }
 

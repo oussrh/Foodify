@@ -9,10 +9,10 @@ import { cn } from '@/lib/utils'
 import UserMenu from './user-menu'
 import RestaurantSwitcher from './restaurant-switcher'
 import RestaurantTabs from './restaurant-tabs'
-import type { ShellRestaurant, ShellRole } from './shell-types'
+import type { ShellRestaurant, ShellPortal } from './shell-types'
 
 interface AppShellProps {
-  portal: ShellRole
+  portal: ShellPortal
   user: { email: string }
   restaurants: ShellRestaurant[]
   children: React.ReactNode
@@ -25,7 +25,7 @@ interface NavItem {
   exact?: boolean
 }
 
-const NAV: Record<ShellRole, NavItem[]> = {
+const NAV: Record<ShellPortal, NavItem[]> = {
   admin: [
     { href: '/admin', label: 'Overview', icon: Home, exact: true },
     { href: '/admin/restaurants', label: 'Restaurants', icon: Building2 },

@@ -6,7 +6,7 @@ import { uuid } from './common'
 
 /** The body under the named field, typed by that name so a route reads its array without a lookup that may miss. */
 export const assignment = <F extends string>(field: F) => {
-  const shape = { [field]: z.array(uuid) } as { [K in F]: z.ZodArray<typeof uuid> }
+  const shape = { [field]: z.array(uuid) } as { [K in F]: z.ZodArray<typeof uuid> } // a computed key types as string; F is what it is
   return z.object(shape)
 }
 
