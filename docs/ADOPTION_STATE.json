@@ -340,7 +340,20 @@
     },
     {
       "id": 11,
-      "status": "pending"
+      "status": "in_progress",
+      "updatedAt": "2026-09-21T09:26:28Z",
+      "numbersBefore": {
+        "rules": {
+          "DOC-CHANGELOG": "present",
+          "DOC-INDEX": "present",
+          "DOC-FRONTMATTER": "present (7/7)",
+          "DOC-FRESHNESS": "partial (3/7 dated, 1 with source_truth)",
+          "CODE-JSDOC": "missing"
+        },
+        "jsdoc": "308 exports without a JSDoc at publicOnly over lib, app/actions, app/api, components, auth.ts, proxy.ts (measured 2026-09-21 with eslint-plugin-jsdoc 64.5.4): 121 on the boundary surface (lib 75, app/actions 36, app/api 5, auth.ts 4, proxy.ts 1), 187 on components",
+        "score": "72/100 (74 checks)",
+        "enforcedShare": "77% (44/57)"
+      }
     },
     {
       "id": 12,
