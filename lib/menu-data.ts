@@ -27,8 +27,8 @@ export function serializeDish(dish: DishRow, offered?: readonly string[]): MenuD
     glbUrl: dish.glbUrl || null,
     calories: dish.calories ?? null,
     isMostPurchased: dish.isMostPurchased,
-    dietary: offered ? (dish.dietary ?? []).filter((k) => offered.includes(k)) : (dish.dietary ?? []),
-    allergens: dish.allergens ?? [],
+    dietary: offered ? dish.dietary.filter((k) => offered.includes(k)) : dish.dietary,
+    allergens: dish.allergens,
     ingredients: dish.ingredients.map((i) => ({ id: i.id, nameEn: i.nameEn, nameFr: i.nameFr })),
   }
 }

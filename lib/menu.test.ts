@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, offeredDietary, resolveInitialLocale, localName } from './menu'
+import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, MENU_TEXT, offeredDietary, resolveInitialLocale, localName } from './menu'
 
 describe('formatPrice', () => {
   it('formats with the ISO code through Intl, French style in French', () => {
@@ -23,12 +23,25 @@ describe('labels', () => {
     expect(offeredDietary([])).toEqual([])
   })
 
+  it('counts the matching dishes with the right plural in both languages', () => {
+    expect(MENU_TEXT.en.results(1)).toBe('1 dish matches')
+    expect(MENU_TEXT.en.results(3)).toBe('3 dishes match')
+    expect(MENU_TEXT.fr.results(1)).toBe('1 plat correspond')
+    expect(MENU_TEXT.fr.results(3)).toBe('3 plats correspondent')
+  })
+
+  it('names the menu after the restaurant in both languages', () => {
+    expect(MENU_TEXT.en.menuOf('Chez Test')).toBe('Menu of Chez Test')
+    expect(MENU_TEXT.fr.menuOf('Chez Test')).toBe('Menu de Chez Test')
+  })
+
   it('translates a known dietary or allergen key', () => {
     expect(dietaryLabel('gluten_free', 'fr')).toBe('Sans gluten')
     expect(allergenLabel('nuts', 'en')).toBe('Nuts')
   })
 
   it('echoes an unknown key rather than hiding it', () => {
+    expect(allergenLabel('pollen', 'en')).toBe('pollen')
     expect(dietaryLabel('keto', 'en')).toBe('keto')
   })
 

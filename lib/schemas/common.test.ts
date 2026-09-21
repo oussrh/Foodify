@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { z } from 'zod'
 import { bilingualName, email, firstIssue, money, password, uuid } from './common'
 
 describe('the shared pieces', () => {
@@ -15,6 +16,10 @@ describe('the shared pieces', () => {
     const r = bilingualName.safeParse({ nameEn: '', nameFr: '' })
     expect(r.success).toBe(false)
     if (!r.success) expect(firstIssue(r.error)).toBe('English name is required')
+  })
+
+  it("falls back to the error's own message when a failed parse carries no issue", () => {
+    expect(firstIssue(new z.ZodError([]))).toBe(new z.ZodError([]).message)
   })
 
   it('wants six characters of password', () => {
