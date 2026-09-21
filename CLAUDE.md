@@ -141,10 +141,9 @@ CLOUDINARY_API_SECRET="..."
 
 ## Testing & Quality
 
-Currently no test framework is configured. When adding tests, use the project's existing patterns and ensure compatibility with:
-- TypeScript configuration
-- Prisma database schema
-- NextAuth session handling
+- `pnpm test`: Vitest, colocated `*.test.ts`, the `lib/**` coverage floor pinned in `vitest.config.ts` (raised with the measurement, never lowered; `docs/TESTING.md`).
+- `pnpm test:integration`: `tests/integration/**` on a real Postgres in rolled-back transactions (the ORM is not mocked); `pnpm e2e`: Playwright + axe on the production build.
+- `pnpm run gate:fast` before a push (the pre-push hook runs it); `pnpm run standards` is the ratchet.
 
 ## Vercel Build Compatibility
 - All code contributions must be Vercel-compatible. This means:

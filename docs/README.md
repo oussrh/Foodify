@@ -5,6 +5,8 @@ category: governance
 status: living
 audience: ["developer", "agent"]
 tags: ["index", "docs"]
+source_truth: ["docs/ADOPTION_STATE.json", "abatty.config.json"]
+last_verified: "2026-09-21"
 ---
 
 # Documentation index

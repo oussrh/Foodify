@@ -340,8 +340,8 @@
     },
     {
       "id": 11,
-      "status": "in_progress",
-      "updatedAt": "2026-09-21T09:26:28Z",
+      "status": "done",
+      "updatedAt": "2026-09-21T09:53:46Z",
       "numbersBefore": {
         "rules": {
           "DOC-CHANGELOG": "present",
@@ -353,6 +353,22 @@
         "jsdoc": "308 exports without a JSDoc at publicOnly over lib, app/actions, app/api, components, auth.ts, proxy.ts (measured 2026-09-21 with eslint-plugin-jsdoc 64.5.4): 121 on the boundary surface (lib 75, app/actions 36, app/api 5, auth.ts 4, proxy.ts 1), 187 on components",
         "score": "72/100 (74 checks)",
         "enforcedShare": "77% (44/57)"
+      },
+      "numbersAfter": {
+        "rules": {
+          "DOC-CHANGELOG": "present",
+          "DOC-INDEX": "present",
+          "DOC-FRONTMATTER": "present (7/7)",
+          "DOC-FRESHNESS": "present (7/7 dated, 5 with source_truth)",
+          "CODE-JSDOC": "present (jsdoc/require-jsdoc publicOnly + no-types at error on lib, app/actions, app/api, auth.ts, proxy.ts), fixer off"
+        },
+        "jsdoc": "0 exports without a JSDoc on the held surface (147 blocks on 44 files: lib 103, app/actions 36, app/api 5, auth.ts 1, proxy.ts 2; the rule sees every exported declaration and the default export, not only arrows; the fixer is off); components/** not held (187 exports, decision recorded)",
+        "score": "74/100 (74 checks)",
+        "enforcedShare": "78% (45/58)",
+        "readability": "100/100 (docs-freshness 100)",
+        "switches": "pnpm lint red on a planted exported const without a block, on a block removed from a function and on a @param {string} added (jsdoc/no-types), green after each restore",
+        "tests": "290 unit (45 files), 13 integration, 20 browser",
+        "caught": "uploadArAsset named by slug but called with the id; FORCE_CHANGE stamp read by nothing; the confirm-email actions are token-only; the JWT keeps the old address; deletes fail at the database under ON DELETE RESTRICT on Ingredient/DishView (needs a decision: migration or child deletes); on review: the fixer left on, 16 alias blocks paraphrasing, export default unseen, a garbled LESSONS paragraph and a stale CLAUDE.md testing section"
       }
     },
     {
