@@ -17,12 +17,13 @@ import ResetIntro from "@/components/reset-password/reset-intro"
 import NewPasswordPanel from "@/components/reset-password/new-password-panel"
 import ResetFooter from "@/components/reset-password/reset-footer"
 
+/** The trigger is a real button in both places: a full-width outline one in the admin's quick actions, a small ghost one in the admins table's row (a span with a click handler is not a control). */
 export default function ResetAdminPasswordButton({
   id,
-  className,
+  appearance = 'card',
 }: {
   id: string
-  className?: string
+  appearance?: 'card' | 'row'
 }) {
   const [loading, setLoading] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
@@ -85,7 +86,7 @@ export default function ResetAdminPasswordButton({
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        {className?.includes('flex-1') ? (
+        {appearance === 'card' ? (
           <Button
             variant="outline"
             className="w-full justify-start border-border text-warning hover:bg-muted hover:border-border transition-colors"
@@ -95,21 +96,17 @@ export default function ResetAdminPasswordButton({
             Reset Password
           </Button>
         ) : (
-          <span
-            className={`flex items-center gap-2 w-full cursor-pointer hover:bg-muted px-2 py-1 rounded transition-colors duration-200 ${className} ${
- loading ? "opacity-50 pointer-events-none" : ""
- }`}
-          >
+          <Button size="sm" variant="ghost" disabled={loading}>
             <Key className="h-4 w-4" />
-            <span>Reset Password</span>
-          </span>
+            Reset password
+          </Button>
         )}
       </DialogTrigger>
 
       <DialogContent className="max-w-lg">
         <DialogHeader className="text-center space-y-3">
-          <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
-            <Key className="h-8 w-8 text-white" />
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-muted">
+            <Key className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
           </div>
           <DialogTitle className="text-2xl font-bold text-foreground">
             Reset Administrator Password

@@ -31,7 +31,7 @@ export default async function ChangeEmailPage() {
 
   return (
     <div className="space-y-4 max-w-md">
-      <h2 className="text-2xl font-semibold tracking-tight">Change Email</h2>
+      <h1 className="text-2xl font-semibold tracking-tight">Change Email</h1>
       <p className="text-sm">Current email: {user.email}</p>
       <p className="text-xs text-muted-foreground">You’ll need to confirm this from your current address</p>
       {progress && <p className="text-sm">{progress}</p>}

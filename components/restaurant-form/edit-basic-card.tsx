@@ -115,7 +115,7 @@ function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omi
             const newSymbol = currencySymbolFor(value);
             setValue("currencySymbol", newSymbol, { shouldDirty: true });
           }} defaultValue={defaultValues.currency || "USD"}>
-            <SelectTrigger className="border-border">
+            <SelectTrigger id="currency" className="border-border">
               <SelectValue placeholder="Select currency" />
             </SelectTrigger>
             <SelectContent>
@@ -147,7 +147,7 @@ function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omi
       <div className="space-y-2">
         <Label htmlFor="defaultLocale">Default Language</Label>
         <Select onValueChange={(value) => setValue('defaultLocale', value as 'en' | 'fr', { shouldDirty: true })} defaultValue={defaultValues.defaultLocale}>
-          <SelectTrigger className="border-border">
+          <SelectTrigger id="defaultLocale" className="border-border">
             <SelectValue placeholder="Select default language" />
           </SelectTrigger>
           <SelectContent>

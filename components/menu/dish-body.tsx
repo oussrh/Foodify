@@ -16,9 +16,12 @@ interface DishBodyProps {
   shareUrl: string
   /** Set inside the sheet so the row thumbnail can morph into this photo */
   photoTransition?: boolean
+  /** The dish page's name is its h1; in the sheet, under the menu's h1, it is an h2. */
+  headingLevel?: 'h1' | 'h2'
 }
 
-export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, photoTransition }: DishBodyProps) {
+export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, photoTransition, headingLevel = 'h2' }: DishBodyProps) {
+  const Heading = headingLevel
   const t = MENU_TEXT[locale]
   const name = locale === 'fr' ? dish.nameFr : dish.nameEn
   const description = locale === 'fr' ? dish.descriptionFr : dish.descriptionEn
@@ -47,7 +50,7 @@ export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, ph
 
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <h2 className="text-[22px] font-semibold leading-tight tracking-display">{name}</h2>
+          <Heading className="text-[22px] font-semibold leading-tight tracking-display">{name}</Heading>
           {breadcrumb && <p className="mt-0.5 text-[13px] text-muted-foreground">{breadcrumb}</p>}
         </div>
         <div className="flex shrink-0 items-center gap-1">

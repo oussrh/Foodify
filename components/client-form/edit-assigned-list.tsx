@@ -91,10 +91,11 @@ export default function EditAssignedList({
                     variant="ghost"
                     size="sm"
                     onClick={() => onRemove(restaurantId)}
+                    aria-label={`Remove ${restaurant.name}`}
                     className="text-destructive dark:text-muted-foreground hover:bg-muted hover:text-destructive dark:hover:text-muted-foreground"
                     disabled={disabled}
                   >
-                    <X className="h-4 w-4" />
+                    <X className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 </div>
               ) : null

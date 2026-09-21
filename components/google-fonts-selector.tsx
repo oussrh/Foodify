@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useCallback, useId } from 'react'
-import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { 
@@ -11,7 +10,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select'
-import { Type, Search, Check } from 'lucide-react'
+import { Type, Check } from 'lucide-react'
 import { POPULAR_FONTS, getCategoryColor } from './google-fonts'
 import FontPreviewCard from './font-preview-card'
 
@@ -112,9 +111,6 @@ export default function GoogleFontsSelector({
             disabled={disabled}
             onChange={(e) => handleCustomUrl(e.target.value)}
           />
-          <Button variant="outline" size="sm" disabled={disabled}>
-            <Search className="h-4 w-4" />
-          </Button>
         </div>
         <p className="text-xs text-muted-foreground">
           Visit <a href="https://fonts.google.com" target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:underline">Google Fonts</a> to find more fonts and get the URL

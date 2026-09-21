@@ -77,7 +77,7 @@ export default function IngredientDialogContent({
           <Button
             onClick={onSubmit}
             disabled={loading || !nameEn.trim()}
-            className="flex-1 bg-muted0 hover:bg-primary"
+            className="flex-1"
           >
             {loading ? (
               <>

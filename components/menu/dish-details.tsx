@@ -51,8 +51,8 @@ export function DishFacts({ dish, locale }: DishDetailsProps) {
     <dl className="flex flex-wrap gap-x-5 gap-y-1 text-[13px] text-muted-foreground">
       {dish.calories !== null && (
         <div className="flex gap-1">
-          <dd className="tnum font-medium text-foreground">{dish.calories}</dd>
-          <dt>{t.kcal}</dt>
+          <dt className="order-2">{t.kcal}</dt>
+          <dd className="tnum order-1 font-medium text-foreground">{dish.calories}</dd>
         </div>
       )}
       {dish.allergens.length > 0 && (

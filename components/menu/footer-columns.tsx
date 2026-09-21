@@ -5,6 +5,7 @@ import { Facebook, Instagram, Twitter } from '@/components/social-icons'
 import { MENU_TEXT, type Locale, type MenuRestaurant } from '@/lib/menu'
 import type { SocialHandles } from '@/lib/social-media'
 import { summarizeOpeningHours, type OpeningHours } from '@/lib/opening-hours'
+import OpeningHoursLines from '@/components/opening-hours-lines'
 import { cleanPhone } from './contact-format'
 
 const row = 'flex items-start gap-2.5 text-sm text-muted-foreground'
@@ -75,15 +76,7 @@ export function FooterHours({ hours, locale }: { hours: OpeningHours; locale: Lo
       <p className="text-sm font-semibold">{t.hours}</p>
       <div className={row}>
         <Clock className={icon} />
-        <span className="flex flex-col gap-0.5">
-          {hoursLines.map((l) => (
-            <span key={l.days} className="flex justify-between gap-4">
-              <span>{l.days}</span>
-              <span className="tnum">{l.hours}</span>
-            </span>
-          ))}
-          {hours.note && <span className={hoursLines.length > 0 ? 'mt-1 text-xs' : 'whitespace-pre-line'}>{hours.note}</span>}
-        </span>
+        <OpeningHoursLines lines={hoursLines} note={hours.note} noteClassName={hoursLines.length > 0 ? 'mt-1 text-xs' : 'whitespace-pre-line'} />
       </div>
     </div>
   )

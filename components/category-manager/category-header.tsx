@@ -53,16 +53,19 @@ export default function CategoryHeader({
             variant="ghost"
             size="icon"
             onClick={toggleCollapsed}
+            aria-expanded={!collapsed}
+            aria-label={`${collapsed ? 'Expand' : 'Collapse'} ${category.nameEn}`}
             className="shrink-0"
           >
             {collapsed ? (
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
             ) : (
-              <ChevronDown className="w-4 h-4" />
+              <ChevronDown className="w-4 h-4" aria-hidden="true" />
             )}
           </Button>
           <GripVertical
             className="text-muted-foreground shrink-0 cursor-grab"
+            aria-label={`Drag to reorder ${category.nameEn}`}
             {...dragHandle.attributes}
             {...dragHandle.listeners}
           />
@@ -72,12 +75,14 @@ export default function CategoryHeader({
               <Input
                 value={editNames.en}
                 onChange={(e) => setEditNames({ ...editNames, en: e.target.value })}
+                aria-label="English name"
                 className="border-border focus:border-border-strong"
                 placeholder="English name"
               />
               <Input
                 value={editNames.fr}
                 onChange={(e) => setEditNames({ ...editNames, fr: e.target.value })}
+                aria-label="French name"
                 className="border-border focus:border-border-strong"
                 placeholder="French name"
               />
@@ -112,6 +117,7 @@ export default function CategoryHeader({
               <Switch
                 checked={category.isActive !== false}
                 onCheckedChange={() => onToggleStatus(category.id)}
+                aria-label={`${category.nameEn} is shown on the menu`}
                 className="data-[state=checked]:bg-primary"
               />
             </div>
@@ -119,15 +125,16 @@ export default function CategoryHeader({
               variant="ghost"
               size="sm"
               onClick={() => setEditMode(true)}
+              aria-label={`Rename ${category.nameEn}`}
               className="text-muted-foreground hover:text-muted-foreground"
             >
-              <Edit2 className="h-4 w-4" />
+              <Edit2 className="h-4 w-4" aria-hidden="true" />
             </Button>
             {onDelete && (
               <DeleteDialog
                 trigger={
-                  <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-muted">
-                    <Trash2 className="h-4 w-4" />
+                  <Button variant="ghost" size="sm" aria-label={`Delete ${category.nameEn}`} className="text-destructive hover:text-destructive hover:bg-muted">
+                    <Trash2 className="h-4 w-4" aria-hidden="true" />
                   </Button>
                 }
                 title="Delete Category"

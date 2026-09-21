@@ -22,6 +22,12 @@ describe('sendMail', () => {
     expect(send).toHaveBeenCalledWith({ from: 'Foodify <no-reply@foodify.test>', to: 'a@b.c', subject: 'Hi', html: '<p>Hi</p>' })
   })
 
+  it('says nothing was sent when the provider refuses, instead of claiming a send', async () => {
+    send.mockResolvedValueOnce({ data: null, error: { name: 'validation_error', message: 'domain not verified' } } as never)
+    const { sendMail } = await load({ DATABASE_URL: 'postgresql://x', RESEND_API_KEY: 're_1', RESEND_FROM: 'Foodify <no-reply@foodify.test>' })
+    await expect(sendMail({ to: 'a@b.c', subject: 'Hi', html: '' })).resolves.toEqual({ sent: false })
+  })
+
   it('sends nothing without a key and says so', async () => {
     const { sendMail } = await load({ DATABASE_URL: 'postgresql://x', RESEND_API_KEY: '', RESEND_FROM: '' })
     await expect(sendMail({ to: 'a@b.c', subject: 'Hi', html: '' })).resolves.toEqual({ sent: false })

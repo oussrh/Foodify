@@ -3,6 +3,7 @@
 // the caller is told; it decides what that means for its flow.
 import { Resend } from 'resend'
 import { serverEnv } from '@/lib/env'
+import { log } from '@/server/log'
 
 /** One message as a caller composes it; `from` is not here because the env holds it, and `text` is the optional plain-text alternative. */
 export type Mail = { to: string; subject: string; html: string; text?: string }
@@ -15,6 +16,11 @@ export type Mail = { to: string; subject: string; html: string; text?: string }
 export async function sendMail(mail: Mail): Promise<{ sent: boolean }> {
   const { resendApiKey, resendFrom } = serverEnv
   if (!resendApiKey || !resendFrom) return { sent: false }
-  await new Resend(resendApiKey).emails.send({ from: resendFrom, ...mail })
+  // The SDK answers a refusal (an unverified domain, a bad key) as `error`, it does not throw.
+  const { error } = await new Resend(resendApiKey).emails.send({ from: resendFrom, ...mail })
+  if (error) {
+    log.error({ err: error, subject: mail.subject }, 'mail: refused by the provider')
+    return { sent: false }
+  }
   return { sent: true }
 }

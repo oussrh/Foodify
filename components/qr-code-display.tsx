@@ -80,8 +80,8 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
 
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader className="text-center space-y-3">
-            <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
-              <QrCode className="h-8 w-8 text-white" />
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-lg bg-muted">
+              <QrCode className="h-8 w-8 text-muted-foreground" aria-hidden="true" />
             </div>
             <DialogTitle className="text-2xl font-bold text-foreground">
               QR Code Menu

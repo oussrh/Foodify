@@ -38,16 +38,18 @@ export default function ConfirmPasswordField({
           className="pl-4 pr-12 h-12 border-2 focus:ring-4 rounded-md transition-colors group-hover:border-border border-border focus:border-border-strong"
           placeholder="Confirm your new password"
         />
-        <div className="absolute right-4 top-1/2 transform -/2 flex items-center gap-1">
+        <div className="absolute right-4 top-1/2 flex -translate-y-1/2 items-center gap-1">
           {confirmPassword && passwordsMatch && (
-            <CheckCircle className="h-4 w-4 text-success" />
+            <CheckCircle className="h-4 w-4 text-success" aria-label="Passwords match" role="img" />
           )}
           <button
             type="button"
             onClick={() => setShow(!show)}
+            aria-label={show ? 'Hide password' : 'Show password'}
+            aria-pressed={show}
             className="text-muted-foreground hover:text-muted-foreground transition-colors p-1 rounded-lg hover:bg-muted"
           >
-            {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {show ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
           </button>
         </div>
       </div>

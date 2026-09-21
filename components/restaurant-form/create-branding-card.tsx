@@ -86,6 +86,7 @@ export default function CreateBrandingCard({
               <Input
                 type="text"
                 {...register("colorTheme")}
+                aria-label="Brand color as a hex value"
                 placeholder="#3B82F6"
                 className="flex-1 border-border font-mono"
               />
@@ -104,6 +105,7 @@ export default function CreateBrandingCard({
               <Input
                 type="text"
                 {...register("secondaryColor")}
+                aria-label="Secondary color as a hex value"
                 placeholder="#6B7280"
                 className="flex-1 border-border font-mono"
               />
@@ -130,7 +132,7 @@ export default function CreateBrandingCard({
             Cover Image Background Style
           </Label>
           <Select onValueChange={(value) => setValue("coverImageStyle", value as "cover" | "repeat")} defaultValue="cover">
-            <SelectTrigger className="border-border">
+            <SelectTrigger id="coverImageStyle" className="border-border">
               <SelectValue placeholder="Select background style" />
             </SelectTrigger>
             <SelectContent>

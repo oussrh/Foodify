@@ -107,8 +107,9 @@ describe('completeSecondFactor', () => {
     expect(update).not.toHaveBeenCalled()
   })
 
-  it('stamps the login when the account has no second factor', async () => {
-    await completeSecondFactor(user(), undefined)
-    expect(update).toHaveBeenCalledWith({ where: { id: 'u1' }, data: { lastLogin: now } })
+  it('refuses credentials alone when no code is pending and there is no authenticator: the emailed code is not optional', async () => {
+    await expect(completeSecondFactor(user(), undefined)).rejects.toThrow('Two-factor code required')
+    await expect(completeSecondFactor(user(), '123456')).rejects.toThrow('Two-factor code required')
+    expect(update).not.toHaveBeenCalled()
   })
 })

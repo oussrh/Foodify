@@ -10,6 +10,7 @@ import { useUploadProgress } from '@/components/upload/use-upload-progress'
 import { ConfigurationNotice, ErrorNotice, SuccessNotice } from '@/components/upload/status-notices'
 import { ArModelSection } from '@/components/upload/ar-model-section'
 import { ArReadyStatus, ArRequirements, ArUploadUnavailable } from '@/components/upload/ar-model-panels'
+import SectionIntro from '@/components/forms/section-intro'
 
 interface ARFileUploadProps {
   restaurantName: string
@@ -96,26 +97,17 @@ export default function ARFileUpload({
 
   return (
     <div className="space-y-6">
-      {/* Header Section */}
-      <div className="text-center space-y-3">
-        <div className="mx-auto w-16 h-16 rounded-lg flex items-center justify-center">
-          <Camera className="h-8 w-8 text-white" />
-        </div>
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">AR Model Management</h2>
-          <p className="text-muted-foreground">Upload 3D models to enable AR experiences for your dishes</p>
-        </div>
-      </div>
+      <SectionIntro icon={Camera} title="AR Model Management" description="Upload 3D models to enable AR experiences for your dishes" />
 
       <Card className="border-0 overflow-hidden">
-        <CardHeader className="text-white">
+        <CardHeader className="border-b">
           <CardTitle className="flex items-center gap-3">
-            <div className="p-2 bg-card/20 rounded-lg">
-              <Camera className="h-5 w-5" />
+            <div className="rounded-lg bg-muted p-2">
+              <Camera className="h-5 w-5 text-muted-foreground" />
             </div>
             <div>
               <span className="text-lg">AR Model Upload</span>
-              <p className="text-purple-100 text-sm font-normal mt-1">
+              <p className="mt-1 text-sm font-normal text-muted-foreground">
                 Bring your dishes to life with augmented reality
               </p>
             </div>

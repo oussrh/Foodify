@@ -50,7 +50,7 @@ export function AdminsTable({ admins, meEmail }: { admins: AdminRow[]; meEmail: 
                 <Button asChild size="sm" variant="ghost">
                   <Link href={`/admin/admins/${a.id}/edit`}>Edit</Link>
                 </Button>
-                <ResetAdminPasswordButton id={a.id} className="flex-1" />
+                <ResetAdminPasswordButton id={a.id} appearance="row" />
               </div>
             </TableCell>
           </TableRow>
