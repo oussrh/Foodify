@@ -99,19 +99,11 @@ export default function EditDishForm({
 
       const finalData = {
         ...data,
-        imageUrl: imageUrl || data.imageUrl,
+        imageUrl,
         subcategoryId: data.subcategoryId || null,
         usdzUrl: usdzUrl || '',
         glbUrl: glbUrl || '',
       }
-
-      console.log('Form submission data:', {
-        formData: data,
-        usdzUrl,
-        glbUrl,
-        imageUrl,
-        finalData
-      })
 
       await updateDish(id, finalData)
 
@@ -189,7 +181,7 @@ export default function EditDishForm({
           </CardContent>
         </Card>
 
-        <DishMediaUploads restaurantName={restaurantName} assets={assets} onImageUrl={(url) => setValue('imageUrl', url)} />
+        <DishMediaUploads restaurantName={restaurantName} assets={assets} onImageUrl={(url) => setValue('imageUrl', url, { shouldDirty: true })} />
 
         {/* Save bar: only when there is something to save */}
         <SaveBar saveStatus={saveStatus} hasUnsavedChanges={hasUnsavedChanges} isSubmitting={isSubmitting} onDiscard={handleCancel} onSave={submitForm} />

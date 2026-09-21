@@ -113,17 +113,17 @@ export default function HoursEditor({ value, onChange, disabled }: HoursEditorPr
                 {!isSet && <span className="text-xs text-muted-foreground">Turn on to add hours, or leave unset to hide this day.</span>}
               </div>
 
-              <div className="col-start-2 sm:col-start-auto">
-                {isSet && (
+              <div className="col-start-2 justify-self-start sm:col-start-auto sm:justify-self-end">
+                {isOpen && (
                   <button
                     type="button"
                     disabled={disabled}
                     onClick={() => copyToAll(day)}
-                    title="Copy to every day"
-                    className="inline-flex h-7 items-center gap-1 rounded-md px-2 text-xs text-muted-foreground hover:bg-accent hover:text-foreground"
+                    aria-label={`Copy ${dayName(day, 'en', 'long')}'s hours to every day`}
+                    className="inline-flex h-7 items-center gap-1.5 rounded-md px-2 text-xs font-medium text-muted-foreground hover:bg-accent hover:text-foreground"
                   >
-                    <Copy className="h-3.5 w-3.5" />
-                    <span className="hidden md:inline">Copy to all</span>
+                    <Copy className="h-3.5 w-3.5" aria-hidden="true" />
+                    Copy to all days
                   </button>
                 )}
               </div>
