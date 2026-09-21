@@ -38,7 +38,7 @@ test.describe('accessibility sweep', () => {
 
   test('the manager portal', async ({ page }, info) => {
     const { restaurantId, dishId } = await seededIds()
-    const account = await auditAccount('manager', info.project.name)
+    const account = await auditAccount('manager', info.testId)
     await signInAs(page, 'manager', account.email)
     const r = `/manager/restaurants/${restaurantId}`
     for (const path of ['/manager', '/manager/restaurants', '/manager/profile', '/manager/change-email', `${r}/dishes`, `${r}/dishes/create`, `${r}/dishes/${dishId}/edit`, `${r}/menu`, `${r}/info`]) {
@@ -50,7 +50,7 @@ test.describe('accessibility sweep', () => {
 
   test('the admin portal', async ({ page }, info) => {
     const { restaurantId, dishId, adminId, managerId } = await seededIds()
-    const account = await auditAccount('admin', info.project.name)
+    const account = await auditAccount('admin', info.testId)
     await signInAs(page, 'admin', account.email)
     const r = `/admin/restaurants/${restaurantId}`
     const pages = [

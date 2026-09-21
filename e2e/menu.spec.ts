@@ -37,15 +37,18 @@ test.describe('public menu', () => {
     await expect(sheet).toBeHidden()
   })
 
-  test('shows a Photo / 3D toggle on a dish with a model and turns to the 3D view without a page error', async ({ page }) => {
+  test('opens a dish with a model on the 3D view and switches to the photo without a page error', async ({ page }) => {
     const errors: string[] = []
     page.on('pageerror', (e) => errors.push(e.message))
     await openMenu(page, `${MENU}?lang=en`)
     await page.getByRole('link', { name: /Grilled Chicken/ }).first().click()
     const sheet = page.getByRole('dialog')
+    // A dish with a GLB opens on the 3D view by default.
+    await expect(sheet.locator('model-viewer')).toBeVisible()
+    await sheet.getByRole('button', { name: /view the photo/i }).click()
+    await expect(sheet.locator('model-viewer')).toBeHidden()
     await sheet.getByRole('button', { name: /view in 3d/i }).click()
     await expect(sheet.locator('model-viewer')).toBeVisible()
-    await expect(sheet.getByRole('button', { name: /view the photo/i })).toBeVisible()
     expect(errors).toEqual([])
   })
 

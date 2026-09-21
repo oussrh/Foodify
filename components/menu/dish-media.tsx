@@ -12,8 +12,9 @@ import Dish3D from './dish-3d'
 
 export default function DishMedia({ dish, name, ar, locale, photoTransition }: { dish: MenuDish; name: string; ar: boolean; locale: Locale; photoTransition?: boolean | undefined }) {
   const t = MENU_TEXT[locale]
-  const [mode, setMode] = useState<'photo' | '3d'>('photo')
   const has3d = Boolean(dish.glbUrl)
+  // A dish with a model opens on the 3D view; the guest can switch to the photo.
+  const [mode, setMode] = useState<'photo' | '3d'>(has3d ? '3d' : 'photo')
 
   return (
     <div className="relative aspect-4/3 w-full overflow-hidden rounded-lg bg-muted" style={photoTransition && mode === 'photo' ? { viewTransitionName: 'dish-photo' } : undefined}>
@@ -31,7 +32,7 @@ export default function DishMedia({ dish, name, ar, locale, photoTransition }: {
       )}
 
       {has3d && (
-        <div role="group" aria-label={t.view3d} className="absolute right-2.5 top-2.5 flex rounded-md border border-white/40 bg-black/45 p-0.5 text-white backdrop-blur-sm">
+        <div role="group" aria-label={t.view3d} className="absolute right-2.5 top-2.5 flex rounded-md bg-[#1B1A17] p-0.5 text-white shadow-sm">
           {(['photo', '3d'] as const).map((m) => (
             <button
               key={m}
@@ -39,7 +40,7 @@ export default function DishMedia({ dish, name, ar, locale, photoTransition }: {
               aria-pressed={mode === m}
               aria-label={m === 'photo' ? t.viewPhoto : t.view3d}
               onClick={() => setMode(m)}
-              className={cn('inline-flex items-center gap-1 rounded-[4px] px-2 py-1 text-[11px] font-semibold transition-colors', mode === m ? 'bg-white text-[#1B1A17]' : 'text-white/85 hover:text-white')}
+              className={cn('inline-flex items-center gap-1 rounded-[4px] px-2 py-1 text-[11px] font-semibold transition-colors', mode === m ? 'bg-white text-[#1B1A17]' : 'text-white hover:bg-white/15')}
             >
               {m === 'photo' ? <ImageIcon className="h-3 w-3" aria-hidden="true" /> : <Box className="h-3 w-3" aria-hidden="true" />}
               {m === 'photo' ? t.photo : t.model3d}
