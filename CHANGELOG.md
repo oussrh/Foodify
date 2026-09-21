@@ -38,6 +38,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Changed
 
+- The seed (`prisma/seed.ts`) now builds a realistic Moroccan menu — 5 categories, 10 subcategories, 27 dishes with descriptions, prices, dietary tags, allergens, calories and some ingredients — and is idempotent: it matches by name, creates only what is missing, and never overwrites the restaurant's own settings, so it is safe to re-run.
 - A dish image is optional: the picker no longer requires one, `Dish.imageUrl` may be empty, and the menu shows a neutral placeholder (a utensils icon on the muted surface) wherever a dish has no photo — the row, the dish sheet, the JSON-LD `image` (omitted) and the offline precache (skipped). `components/menu/dish-photo.tsx` renders the image or the placeholder in both places.
 - Opening hours: a set day has a “Copy” button that opens a popover of the other days as checkboxes, so you copy that day’s hours to the days you pick (or “Select every other day”); it replaces the earlier copy-to-every-day button (`components/contact/copy-hours-menu.tsx`).
 - The dish forms' details block is two fields per row: price and calories, then the category and the popular flag, with the dietary and allergen pickers on a full row below (the category select no longer hangs at the bottom of a third column).
