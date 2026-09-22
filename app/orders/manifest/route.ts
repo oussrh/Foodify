@@ -3,14 +3,23 @@ import prisma from '@/lib/prisma'
 import { uuid } from '@/lib/schemas/common'
 import { z } from 'zod'
 
-const query = z.object({ id: uuid, portal: z.enum(['admin', 'manager', 'kitchen']) })
+const query = z.object({ id: uuid, portal: z.enum(['admin', 'manager', 'kitchen', 'waiter']) })
+
+/** What each staff app is called on a home screen, and where tapping its icon lands. */
+const APPS = {
+  admin: { path: (id: string) => `/admin/orders/${id}`, name: 'Orders', of: (n: string) => `The kitchen board for ${n}: new orders as they arrive.` },
+  manager: { path: (id: string) => `/manager/orders/${id}`, name: 'Orders', of: (n: string) => `The kitchen board for ${n}: new orders as they arrive.` },
+  kitchen: { path: (id: string) => `/kitchen/orders/${id}`, name: 'Orders', of: (n: string) => `The kitchen board for ${n}: new orders as they arrive.` },
+  waiter: { path: (id: string) => `/waiter/${id}`, name: 'Service', of: (n: string) => `Taking orders at the table in ${n}, and what is ready to carry out.` },
+} as const
 
 /**
- * GET, public: the web app manifest that makes one restaurant's kitchen board installable on a
- * tablet. Query `id` (the restaurant) and `portal`; a bad pair is 400. It carries the
- * restaurant's name and the board's URL and nothing else — a manifest is fetched without the
- * session cookie, so it must hold nothing a signed-out reader may not see; the board behind it
- * is guarded. Answers the manifest with an hour's cache, or 404 for an unknown restaurant.
+ * GET, public: the web app manifest that makes one restaurant's staff app installable — the
+ * kitchen board on a tablet, or the waiter's app on a phone. Query `id` (the restaurant) and
+ * `portal`; a bad pair is 400. It carries the restaurant's name and the app's URL and nothing
+ * else — a manifest is fetched without the session cookie, so it must hold nothing a signed-out
+ * reader may not see; the app behind it is guarded. Answers with an hour's cache, or 404 for an
+ * unknown restaurant.
  */
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams
@@ -20,17 +29,19 @@ export async function GET(request: Request) {
   const restaurant = await prisma.restaurant.findUnique({ where: { id: parsed.data.id }, select: { name: true } })
   if (!restaurant) return new NextResponse('Not found', { status: 404 })
 
-  const board = `/${parsed.data.portal}/orders/${parsed.data.id}`
+  const app = APPS[parsed.data.portal]
+  const board = app.path(parsed.data.id)
   const manifest = {
     id: board,
-    name: `Orders · ${restaurant.name}`,
-    short_name: 'Orders',
-    description: `The kitchen board for ${restaurant.name}: new orders as they arrive.`,
+    name: `${app.name} · ${restaurant.name}`,
+    short_name: app.name,
+    description: app.of(restaurant.name),
     start_url: board,
     scope: board,
     display: 'standalone',
     display_override: ['standalone', 'minimal-ui'],
-    // A kitchen tablet stands in a landscape dock as often as it is held; neither is forced.
+    // A kitchen tablet stands in a landscape dock as often as it is held, and a waiter's phone
+    // is whichever way up they grabbed it; neither is forced.
     orientation: 'any',
     categories: ['business', 'food'],
     background_color: '#FAFAF8',
@@ -40,7 +51,7 @@ export async function GET(request: Request) {
       { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
       { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
     ],
-    // Tapping the icon focuses the board that is already open rather than opening a second one.
+    // Tapping the icon focuses the app that is already open rather than opening a second one.
     launch_handler: { client_mode: ['navigate-existing', 'auto'] },
     prefer_related_applications: false,
   }

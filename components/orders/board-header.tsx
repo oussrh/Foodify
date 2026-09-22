@@ -11,7 +11,7 @@ import { ArrowLeft, BellRing, Download, Ban, RefreshCw, Sun, WifiOff } from 'luc
 import { Button } from '@/components/ui/button'
 import type { BoardView } from '@/lib/orders'
 import { cn } from '@/lib/utils'
-import type { OrdersPwa } from './use-orders-pwa'
+import type { StaffPwa } from '@/components/staff/use-staff-pwa'
 import type { WakeLock } from './use-wake-lock'
 
 interface BoardHeaderProps {
@@ -24,7 +24,7 @@ interface BoardHeaderProps {
   onRefresh: () => void
   onTestSound: () => void
   wakeLock: WakeLock
-  pwa: OrdersPwa
+  pwa: StaffPwa
   /** Absent on a kitchen tablet: there is no portal behind it to go back to. */
   backHref?: Route | undefined
   /** The sold-out screen for this restaurant: the pass is where a dish runs out. */

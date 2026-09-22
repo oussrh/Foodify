@@ -17,7 +17,7 @@ import ServedList from './served-list'
 import { useChime } from './use-chime'
 import { useMinuteClock } from './use-minute-clock'
 import { useOrderBoard } from './use-order-board'
-import { useOrdersPwa } from './use-orders-pwa'
+import { useStaffPwa } from '@/components/staff/use-staff-pwa'
 import { useWakeLock } from './use-wake-lock'
 
 interface OrderBoardProps {
@@ -34,7 +34,7 @@ export default function OrderBoard({ restaurantId, restaurantName, money, backHr
   const [view, setView] = useState<BoardView>('open')
   const { orders, online, loading, arrived, refresh } = useOrderBoard(restaurantId, view, chime)
   const wakeLock = useWakeLock()
-  const pwa = useOrdersPwa()
+  const pwa = useStaffPwa()
   const [busyId, setBusyId] = useState<string | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
 

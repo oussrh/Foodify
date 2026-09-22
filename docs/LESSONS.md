@@ -16,6 +16,25 @@ What we learned the hard way, one entry per lesson, newest first. A line added t
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
 
+## 2026-09-22 · The same event wants a different medium in each room it lands in
+
+An order coming up is one event. On the pass it rings: a bell that carries over extraction fans
+and a line of people who are all facing away from the screen, which is why the board's alert is
+three and a half seconds of struck bell and has a Test sound button. The same alert on a waiter's
+phone, held a metre from a table of guests, is rude — and a waiter who is embarrassed by their
+tools silences them, which costs you every later alert as well.
+
+So the waiter's phone buzzes and does not ring, and sound is a choice it remembers per device
+rather than per account, because it belongs to the room someone works in and not to who they are.
+The visual carries the same fact independently: the tile fills, changes its wording, gains an
+icon and pulses for twenty seconds, so a phone face-down in an apron and a phone on silent both
+still work the moment it is looked at.
+
+The general point: when the same domain event reaches two audiences, do not reuse the
+notification — reuse the *event* and choose the medium where it lands. Ask what the person is
+doing, who else is in earshot, and what it costs them to turn it off. An alert that gets muted is
+worse than one that was never loud, because it fails silently and for ever.
+
 ## 2026-09-22 · State a human has to clear is state that stays set
 
 "This dish has run out" wants to be a boolean. It is the obvious model, it is one column, and it

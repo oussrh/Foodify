@@ -1,8 +1,15 @@
 import { redirect } from 'next/navigation'
+import type { Metadata } from 'next'
+import { staffAppMetadata } from '@/lib/order-board-page'
 import { serializeCategories, serializeDish } from '@/lib/menu-data'
 import type { Locale, Money } from '@/lib/menu'
 import { loadWaiterMenu } from '@/lib/restaurant-loader'
 import WaiterApp from '@/components/waiter/waiter-app'
+
+/** A waiter installs this one: the manifest names the restaurant and opens straight onto its tables. */
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  return staffAppMetadata((await params).id, 'waiter', 'Service')
+}
 
 /**
  * The waiter app for one restaurant: its tables and its live menu. A reader who may not order for
