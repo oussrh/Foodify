@@ -6,6 +6,7 @@
 'use client'
 
 import { Bell, Clock } from 'lucide-react'
+import { STATUS_LABEL } from '@/lib/orders'
 import type { TableTile as Tile } from '@/lib/waiter-floor'
 import { cn } from '@/lib/utils'
 
@@ -23,7 +24,8 @@ const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`
 function tileLabel(tile: Tile): string {
   if (tile.state === 'ready') return `Table ${tile.table}, ${plural(tile.ready.length, 'order')} ready to carry out`
   if (tile.state === 'cooking') {
-    return `Table ${tile.table}, ${plural(tile.items, 'item')} with the kitchen, waiting ${tile.waitingMinutes} minutes`
+    const stage = tile.stage ? STATUS_LABEL[tile.stage].toLowerCase() : 'with the kitchen'
+    return `Table ${tile.table}, ${stage}, ${plural(tile.items, 'item')}, waiting ${tile.waitingMinutes} minutes`
   }
   return `Table ${tile.table}, free`
 }
@@ -53,18 +55,21 @@ export function TableTile({ tile, onOpen, flashing }: TableTileProps) {
       {state === 'free' && <span className="text-[13px] opacity-70">Free</span>}
 
       {state === 'cooking' && (
-        <span className="text-[13px] leading-tight text-muted-foreground">
-          <span className="block font-semibold text-foreground">{plural(items, 'item')}</span>
+        <span className="w-full text-[13px] leading-tight text-muted-foreground">
+          {/* Which stage, not just "busy": a waiter wants to know whether the kitchen has started. */}
+          <span className="block truncate text-base font-bold text-foreground">
+            {tile.stage ? STATUS_LABEL[tile.stage] : 'With the kitchen'}
+          </span>
           <span className="tnum flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-            {waitingMinutes} min
+            {waitingMinutes} min · {plural(items, 'item')}
           </span>
         </span>
       )}
 
       {state === 'ready' && (
-        <span className="text-[13px] leading-tight">
-          <span className="block text-base font-bold">Ready</span>
+        <span className="w-full text-[13px] leading-tight">
+          <span className="block text-base font-bold">{STATUS_LABEL.READY}</span>
           <span className="tnum opacity-90">{plural(ready.length, 'order')} to carry</span>
         </span>
       )}

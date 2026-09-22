@@ -93,6 +93,27 @@ describe('floorTiles', () => {
     expect(tile!.waitingMinutes).toBe(0)
   })
 
+  it('names the stage the table is at, so a waiter knows if the kitchen has started', () => {
+    expect(floorTiles([3], [order({ table: '3', status: 'NEW' })], [], NOW)[0]!.stage).toBe('NEW')
+    expect(floorTiles([3], [order({ table: '3', status: 'ACCEPTED' })], [], NOW)[0]!.stage).toBe('ACCEPTED')
+    expect(floorTiles([3], [], [order({ table: '3', status: 'READY' })], NOW)[0]!.stage).toBe('READY')
+    expect(floorTiles([3], [], [], NOW)[0]!.stage).toBeNull()
+  })
+
+  it('reads the least advanced order, not the furthest along', () => {
+    // One dish plated and one not started is still waiting on the kitchen. A tile saying "Ready"
+    // would send a waiter over for half an order.
+    const tile = floorTiles(
+      [3],
+      [order({ id: 'a', table: '3', status: 'NEW' })],
+      [order({ id: 'b', table: '3', status: 'READY' })],
+      NOW,
+    )[0]
+    expect(tile!.stage).toBe('NEW')
+    // The tile is still lit as ready, because there is something to carry now.
+    expect(tile!.state).toBe('ready')
+  })
+
   it('keeps the room in the order it was given', () => {
     expect(floorTiles([2, 1, 3], [], [], NOW).map((t) => t.table)).toEqual(['2', '1', '3'])
   })
