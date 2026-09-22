@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { chimeNotes, chimeSeconds } from './chime-pattern'
+import { chimeNotes, chimeSeconds, KITCHEN_CHIME, WAITER_CHIME, waiterChimeNotes } from './chime-pattern'
 
 describe('chimeNotes', () => {
   it('is a rising arpeggio answered by a softer echo', () => {
@@ -37,5 +37,30 @@ describe('chimeNotes', () => {
   it('rings for between two and four seconds', () => {
     expect(chimeSeconds()).toBeGreaterThan(2)
     expect(chimeSeconds()).toBeLessThan(4)
+  })
+})
+
+describe('the waiter alert', () => {
+  it('falls where the kitchen alert rises: a notification, not a summons', () => {
+    const notes = waiterChimeNotes()
+    expect(notes).toHaveLength(2)
+    expect(notes[1]!.frequency).toBeLessThan(notes[0]!.frequency)
+    const kitchen = chimeNotes()
+    expect(kitchen[1]!.frequency).toBeGreaterThan(kitchen[0]!.frequency)
+  })
+
+  it('sits below the kitchen register, so the two are told apart in one room', () => {
+    const highest = (notes: { frequency: number }[]) => Math.max(...notes.map((n) => n.frequency))
+    expect(highest(waiterChimeNotes())).toBeLessThan(highest(chimeNotes()))
+  })
+
+  it('is over in about a second, where the kitchen rings for three', () => {
+    const length = (notes: { startsIn: number; duration: number }[]) => Math.max(...notes.map((n) => n.startsIn + n.duration))
+    expect(length(waiterChimeNotes())).toBeLessThan(1.5)
+    expect(chimeSeconds()).toBeGreaterThan(2)
+  })
+
+  it('rings quieter than the kitchen: a dining room, not a line', () => {
+    expect(WAITER_CHIME.volume).toBeLessThan(KITCHEN_CHIME.volume)
   })
 })

@@ -128,6 +128,13 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
             test the alert
           </button>
         </p>
+        {/* Said once, plainly: an iPhone has no vibration API and no app can add one, so a waiter
+            on one knows to leave the sound on rather than wondering why nothing buzzes. */}
+        {!alert.canVibrate && (
+          <p className="pt-1 text-center text-xs text-muted-foreground">
+            This phone cannot vibrate from a web app. Turn the sound on, or watch for the tile.
+          </p>
+        )}
       </main>
 
       <WaiterNav restaurantId={restaurant.id} active="tables" />

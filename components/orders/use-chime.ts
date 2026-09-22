@@ -9,14 +9,12 @@
 'use client'
 
 import { useCallback, useRef } from 'react'
-import { chimeNotes, type ChimeNote } from './chime-pattern'
+import { KITCHEN_CHIME, type ChimeNote, type ChimeVoice } from './chime-pattern'
 
 type AudioContextClass = typeof AudioContext
 const audioContextClass = (): AudioContextClass | undefined =>
   typeof window === 'undefined' ? undefined : window.AudioContext ?? (window as { webkitAudioContext?: AudioContextClass }).webkitAudioContext
 
-/** How loud the alert is overall, before the compressor evens the overlaps out. */
-const VOLUME = 0.85
 /** A bell's tone is its fundamental plus quieter partials above: the ratio to the note, and its share of the level. */
 const PARTIALS = [
   { ratio: 1, share: 1 },
@@ -41,9 +39,9 @@ function partial(context: AudioContext, bus: GainNode, voice: { at: number; freq
 }
 
 /** The bus every note rings into: one gain for the whole alert, then a compressor so the overlaps stay loud rather than clipping. */
-function makeBus(context: AudioContext): GainNode {
+function makeBus(context: AudioContext, volume: number): GainNode {
   const bus = context.createGain()
-  bus.gain.value = VOLUME
+  bus.gain.value = volume
   const compressor = context.createDynamicsCompressor()
   compressor.threshold.value = -18
   compressor.ratio.value = 6
@@ -60,8 +58,13 @@ function ring(context: AudioContext, bus: GainNode, note: ChimeNote, at: number)
   }
 }
 
-/** Plays the alert; silent, and never throwing, where the browser has no audio or has not been touched yet. */
-export function useChime(): () => void {
+/**
+ * Plays an alert; silent, and never throwing, where the browser has no audio or has not been
+ * touched yet. `voice` must be a module-level constant (KITCHEN_CHIME, WAITER_CHIME): the
+ * returned callback is a poll's dependency, and a fresh object each render would restart its
+ * timer on every tick.
+ */
+export function useChime(voice: ChimeVoice = KITCHEN_CHIME): () => void {
   const context = useRef<AudioContext | null>(null)
 
   return useCallback(() => {
@@ -72,11 +75,11 @@ export function useChime(): () => void {
       const ctx = context.current
       // Suspended until the page has been interacted with, and again after a tablet wakes.
       void ctx.resume()
-      const bus = makeBus(ctx)
+      const bus = makeBus(ctx, voice.volume)
       const start = ctx.currentTime + 0.02
-      for (const note of chimeNotes()) ring(ctx, bus, note, start + note.startsIn)
+      for (const note of voice.notes) ring(ctx, bus, note, start + note.startsIn)
     } catch {
       // no audio on this device: the board is still readable
     }
-  }, [])
+  }, [voice])
 }

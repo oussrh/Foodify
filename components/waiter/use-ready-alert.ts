@@ -6,16 +6,24 @@
 'use client'
 
 import { useCallback, useState } from 'react'
+import { WAITER_CHIME } from '@/components/orders/chime-pattern'
 import { useChime } from '@/components/orders/use-chime'
 import { useClientValue } from '@/components/use-client-value'
 
 const SOUND_KEY = 'foodify-waiter-sound'
-/** Two short pulses: felt through an apron pocket, invisible to the table being served. */
-const PATTERN = [120, 90, 120]
+/**
+ * Buzz, buzz, buzzzz: two taps and a longer third. A single short pulse is lost against a phone
+ * bumping about in an apron pocket while someone walks, and a steady repeat reads as a phone
+ * call. The rising length is what makes it feel deliberate, and the whole thing is under a
+ * second so it is never felt as an alarm.
+ */
+const PATTERN = [180, 90, 180, 90, 320]
 
 export interface ReadyAlert {
   /** Fire it: a buzz, and the chime when the waiter has asked for one. */
   alert: () => void
+  /** Whether this device has a vibration API at all; an iPhone does not, and no app can add one. */
+  canVibrate: boolean
   soundOn: boolean
   toggleSound: () => void
   /** Play it now, so a waiter can check the phone is not on silent before service. */
@@ -32,8 +40,14 @@ function storedSound(): boolean {
   }
 }
 
+/** Whether the browser exposes vibration. iOS Safari does not, on any iPhone, by design. */
+const vibrationAvailable = () => typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'
+
 export function useReadyAlert(): ReadyAlert {
-  const chime = useChime()
+  // The waiter's own voice: lower, falling and quieter than the kitchen's bell, so the two are
+  // told apart in a room where both can be heard.
+  const chime = useChime(WAITER_CHIME)
+  const canVibrate = useClientValue(vibrationAvailable, false)
   // Read through useSyncExternalStore rather than set from an effect, so the first client render
   // already knows. `chosen` is this session's override, which is what a tap changes.
   const remembered = useClientValue(storedSound, false)
@@ -42,7 +56,8 @@ export function useReadyAlert(): ReadyAlert {
 
   const buzz = useCallback(() => {
     try {
-      // Android and desktop Chrome honour it; iOS Safari has no vibration API and simply does not.
+      // Android and desktop Chrome honour it; iOS Safari has no vibration API and simply does
+      // not, which is why the tile glows and the band appears whatever the phone can do.
       navigator.vibrate?.(PATTERN)
     } catch {
       // never worth an error: the tile is already glowing
@@ -71,5 +86,5 @@ export function useReadyAlert(): ReadyAlert {
     chime()
   }, [buzz, chime])
 
-  return { alert, soundOn, toggleSound, test }
+  return { alert, canVibrate, soundOn, toggleSound, test }
 }
