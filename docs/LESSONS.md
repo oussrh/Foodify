@@ -16,6 +16,27 @@ What we learned the hard way, one entry per lesson, newest first. A line added t
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
 
+## 2026-09-22 · A test that reads the code's own list proves only that the list agrees with itself
+
+`lib/roles.ts` was written after a waiter account could be given a second factor and lock itself
+out for good: the guard named `KITCHEN` instead of asking what made that role a device. The
+module states the fact once, in `DEVICE_ROLES`, and every guard reads it. It shipped with no test.
+
+The obvious test is the wrong one. Walking `UserRole` and asserting that `isDeviceAccount(role)`
+matches `DEVICE_ROLES.includes(role)` is green whatever the list contains — including the list
+that caused the original lockout. It restates the implementation in the assertion, so the
+implementation can never fail it. The load-bearing version names the four roles one at a time,
+in the test, as a second statement of the truth that does not come from the code. Both are kept:
+dropping WAITER from `DEVICE_ROLES` reddens the literal assertions and leaves the consistency
+one green, which is the whole distinction, checked rather than assumed.
+
+The general shape: an oracle that shares the code's source of truth is not an oracle. When a test
+imports the constant, the map, the schema or the fixture that the code under test derives its
+answer from, ask what it would take for that test to fail. If the answer is "a typo", it is
+testing the compiler. Say the expected value independently — literally, or from a second source
+such as a fixture file or the specification — and keep the consistency check beside it if it
+earns its place, rather than in place of it.
+
 ## 2026-09-22 · A contract in a comment is not a contract
 
 `DishPhoto` renders `next/image` with `fill` and left the positioning to its callers — a comment
