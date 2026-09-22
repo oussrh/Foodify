@@ -41,7 +41,17 @@ const argv = raw
   .replace(/<<-?\s*(['"]?)([A-Za-z_]\w*)\1[\s\S]*?\n[ \t]*\2\b/g, " ")
   .replace(/\s+/g, " ")
   .trim();
-const hasFlag = (re) => re.test(argv);
+// The comment above says a quoted argument is still a real bypass, and it was right about the
+// intent and wrong about the reach. Every matcher below anchors a short flag on the whitespace
+// in front of it (`\s-f`), and a quote sits exactly there: ` "-f"` has no `\s-`, so `git push
+// "--force" origin dev` and `git commit "-nm" x` were allowed by every version through 0.3.2.
+// `--no-verify` in quotes survived only because its alternative carries no leading `\s`, which
+// is luck rather than design and would not survive somebody splitting that alternation.
+// 0.3.2 gave the push TARGET a shell's treatment and left the flags with a regex's; this is the
+// other half of the same word. Both forms are tested rather than the stripped one alone, so the
+// check is provably additive: nothing an earlier version refused can become allowed here.
+const unquoted = argv.replace(/['"]/g, "");
+const hasFlag = (re) => re.test(argv) || re.test(unquoted);
 function deny(reason) {
   if (NIGHT) appendLog("guard-denials", { tool: event.tool_name, command: cmd.slice(0, 300), reason });
   decide("deny", reason);
@@ -100,6 +110,15 @@ if (NIGHT && trailer && /\bgit commit\b.*\s-m\b/.test(cmd) && !cmd.includes(trai
 // to the current branch's upstream, which is the current branch. A redirection is not an
 // argument: `git push origin main 2>&1` targets main, and reading `2>&1` as the target was the
 // hole that let a push to main through (an outside trial found it in a day).
+/**
+ * Quotes belong to the shell, not to git: by the time git is handed `"main"` the shell has
+ * taken them off, so a target compared with them still attached matches no branch name at all.
+ * `git push origin "main"` was allowed by every version up to 0.3.1 for exactly that reason,
+ * and quoting a branch name is not a trick somebody has to know, it is ordinary typing. A
+ * trailing quote left by a wrapper (`sh -c "git push origin main"`) goes the same way.
+ * @param {string} w
+ */
+const unquote = (w) => w.replace(/^['"]+/, "").replace(/['"]+$/, "");
 function pushTarget() {
   const m = argv.match(/\bgit push\b([^;&|]*)/);
   if (!m) return null;
@@ -107,7 +126,8 @@ function pushTarget() {
   const args = [];
   for (const w of words) {
     if (/^\d*>{1,2}|^<|^&>/.test(w)) break; // `>`, `>>`, `2>`, `2>&1`, `&>`, `<`: the shell's, not git's
-    if (!w.startsWith("-")) args.push(w);
+    const bare = unquote(w);
+    if (bare && !bare.startsWith("-")) args.push(bare);
   }
   if (args.length < 2) return branch;
   const spec = args[args.length - 1];

@@ -257,6 +257,22 @@ try {
   cases.push(["a push to the base branch is refused", bash("git push origin main"), {}, "deny"]);
   cases.push(["a push to the base by refspec is refused", bash("git push origin HEAD:main"), {}, "deny"]);
   cases.push(["deleting the base branch is refused", bash("git push origin :main"), {}, "deny"]);
+  // Quotes are the shell's: git never sees them, so a target compared with them still attached
+  // matches no branch. Quoting a branch name is ordinary typing, not a trick.
+  cases.push(["a quoted base branch is still the base", bash(`git push origin "main"`), {}, "deny"]);
+  cases.push(["single quotes too", bash("git push origin 'main'"), {}, "deny"]);
+  cases.push(["a quoted refspec to the base is still the base", bash(`git push origin "HEAD:main"`), {}, "deny"]);
+  cases.push(["a quoted branch elsewhere is still elsewhere", bash(`git push -u origin "feat/x"`), {}, "none"]);
+  // The other half of the same word: a quote sits where the matchers anchor a short flag, so
+  // ` "-f"` carries no `\s-`. The last of these passes even without the fix, because the bypass
+  // alternative has no leading `\s`; it is pinned anyway, since it holds by luck and the luck
+  // would not survive somebody splitting that alternation.
+  cases.push(["a quoted force flag is still a force push", bash(`git push "--force" origin dev`), {}, "deny"]);
+  cases.push(["in single quotes too", bash("git push '-f' origin dev"), {}, "deny"]);
+  cases.push(["a quoted cluster is still one", bash(`git push "-fu" origin dev`), {}, "deny"]);
+  cases.push(["a quoted forced refspec is still forced", bash(`git push origin "+main"`), {}, "deny"]);
+  cases.push(["a quoted bypass cluster is still a bypass", bash(`git commit "-nm" "x"`), {}, "deny"]);
+  cases.push([`a quoted long bypass flag is still one`, bash(`git commit "${bypass}" -m "x"`), {}, "deny"]);
   // HEAD is not a branch name: git resolves it to the branch you are standing on, so on the base
   // branch it IS the base, and reading it as a literal let a push to main through. Judged from
   // two throwaway repositories, one standing on the base and one not, because where the guard
@@ -266,6 +282,11 @@ try {
   cases.push(["pushing HEAD from the base branch is a push to the base", bash("git push origin HEAD"), {}, "deny", onBase]);
   cases.push(["so is the alias @, with -u", bash("git push -u origin @"), {}, "deny", onBase]);
   cases.push(["pushing HEAD from another branch is not", bash("git push origin HEAD"), {}, "none", offBase]);
+  // Quoting defeated the HEAD resolution too, by the same one character: `"HEAD"` is neither
+  // HEAD nor @. The unquoting below covers it, but a case that holds incidentally is not a
+  // case, so both spellings are pinned here.
+  cases.push(["a quoted HEAD from the base branch is still the base", bash(`git push origin "HEAD"`), {}, "deny", onBase]);
+  cases.push(["and a quoted alias", bash(`git push -u origin "@"`), {}, "deny", onBase]);
   cases.push(["a branch whose name carries the base's is not the base", bash("git push -u origin fix/merge-to-main-1"), {}, "none"]);
   cases.push(["nor is one that starts with it", bash("git push -u origin main-nav-rework"), {}, "none"]);
   // A redirection is the shell's, not git's: it was read as the target, and the push went through.
