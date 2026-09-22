@@ -58,28 +58,55 @@ function ring(context: AudioContext, bus: GainNode, note: ChimeNote, at: number)
   }
 }
 
+/** What `useChime` hands back: the alert itself, and a way to get the browser ready to play it. */
+export interface Chime {
+  /** Rings the alert. Silent, and never throwing, where the device has no audio. */
+  play: () => void
+  /**
+   * Opens and resumes the audio context without making a sound. A browser will not let a page
+   * play anything until a gesture has happened on it, so a control that turns sound *on* calls
+   * this: the tap is the gesture, the context wakes, and the first real alert is audible — with
+   * nobody startled by a noise they did not ask to hear.
+   */
+  prime: () => void
+}
+
 /**
- * Plays an alert; silent, and never throwing, where the browser has no audio or has not been
- * touched yet. `voice` must be a module-level constant (KITCHEN_CHIME, WAITER_CHIME): the
- * returned callback is a poll's dependency, and a fresh object each render would restart its
- * timer on every tick.
+ * `voice` must be a module-level constant (KITCHEN_CHIME, WAITER_CHIME): `play` is a poll's
+ * dependency, and a fresh object each render would restart its timer on every tick.
  */
-export function useChime(voice: ChimeVoice = KITCHEN_CHIME): () => void {
+export function useChime(voice: ChimeVoice = KITCHEN_CHIME): Chime {
   const context = useRef<AudioContext | null>(null)
 
-  return useCallback(() => {
+  /** The context, opened on first use and woken if the device suspended it; null where there is no audio. */
+  const open = useCallback((): AudioContext | null => {
+    const Ctor = audioContextClass()
+    if (!Ctor) return null
+    context.current ??= new Ctor()
+    // Suspended until the page has been interacted with, and again after a tablet wakes.
+    void context.current.resume()
+    return context.current
+  }, [])
+
+  const prime = useCallback(() => {
     try {
-      const Ctor = audioContextClass()
-      if (!Ctor) return
-      context.current ??= new Ctor()
-      const ctx = context.current
-      // Suspended until the page has been interacted with, and again after a tablet wakes.
-      void ctx.resume()
+      open()
+    } catch {
+      // no audio on this device: the screen carries the alert on its own
+    }
+  }, [open])
+
+  const play = useCallback(() => {
+    try {
+      const ctx = open()
+      if (!ctx) return
       const bus = makeBus(ctx, voice.volume)
       const start = ctx.currentTime + 0.02
       for (const note of voice.notes) ring(ctx, bus, note, start + note.startsIn)
     } catch {
       // no audio on this device: the board is still readable
     }
-  }, [voice])
+  }, [open, voice])
+
+  return { play, prime }
 }

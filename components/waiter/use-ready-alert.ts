@@ -46,7 +46,7 @@ const vibrationAvailable = () => typeof navigator !== 'undefined' && typeof navi
 export function useReadyAlert(): ReadyAlert {
   // The waiter's own voice: lower, falling and quieter than the kitchen's bell, so the two are
   // told apart in a room where both can be heard.
-  const chime = useChime(WAITER_CHIME)
+  const { play: chime, prime } = useChime(WAITER_CHIME)
   const canVibrate = useClientValue(vibrationAvailable, false)
   // Read through useSyncExternalStore rather than set from an effect, so the first client render
   // already knows. `chosen` is this session's override, which is what a tap changes.
@@ -77,9 +77,12 @@ export function useReadyAlert(): ReadyAlert {
     } catch {
       // the session keeps the choice even when storage will not
     }
-    // Play it on the way on: the tap is the gesture a browser needs before it will make a sound.
-    if (next) chime()
-  }, [chime, soundOn])
+    // Wake the audio without ringing. The tap is the gesture a browser needs before it will
+    // play anything, so it has to be used — but a switch that plays the alert every time it is
+    // turned on is a switch that shouts at whoever is only checking it is on. "Test the alert"
+    // is the control for hearing it, and that one is asked for.
+    if (next) prime()
+  }, [prime, soundOn])
 
   const test = useCallback(() => {
     buzz()

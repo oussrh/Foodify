@@ -30,7 +30,7 @@ interface OrderBoardProps {
 }
 
 export default function OrderBoard({ restaurantId, restaurantName, money, backHref }: OrderBoardProps) {
-  const chime = useChime()
+  const { play: chime } = useChime()
   const [view, setView] = useState<BoardView>('open')
   const { orders, online, loading, arrived, refresh } = useOrderBoard(restaurantId, view, chime)
   const wakeLock = useWakeLock()
