@@ -35,7 +35,11 @@ env:
   TEST_DATABASE_URL: postgresql://ci:ci@localhost:5432/ci
 jobs:
   checks:
-    runs-on: ubuntu-latest
+    # Pinned, not `ubuntu-latest`: that label is a moving target, and GitHub repoints it at a new
+    # Ubuntu on a date of its choosing (26.04 on 19 October 2026). A moving runner turns an image
+    # change into a red build on a morning nobody chose, on a commit that did not cause it. Pinned,
+    # the upgrade is a one-line change whose CI run is the proof, which is what this one is.
+    runs-on: ubuntu-26.04
     services:
       # The browser suite needs the seeded restaurant behind the production build (DATABASE_URL above).
       postgres:
@@ -48,13 +52,17 @@ jobs:
         options: >-
           --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
     steps:
-      - uses: actions/checkout@v4
+      # v5 moved these three off Node 20; v6 and v7 of checkout followed with a credential
+      # change (the token goes to a file beside the git config rather than into it) that the
+      # `range` step's `git fetch` exercises directly, which is why the bump is worth a run of
+      # its own rather than riding along with a feature.
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # the ratchet judges the pushed range from the fork point off origin/main
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with:
           version: 10
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: pnpm

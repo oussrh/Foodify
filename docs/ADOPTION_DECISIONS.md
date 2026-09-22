@@ -35,6 +35,14 @@ last_verified: "2026-09-21"
 - **Reviewer (must, SEC-AUDIT)**: fix the dependencies or record dated allowances. Response: `pnpm audit` reads no allowance file, so an allowance would be a non-blocking step by another name; the upgrade is the fix and is the next change by day (origin carries `vercel/react-server-components-cve-vu-a9ohli`, Vercel's own bump for the flight-protocol RCE, to read first).
 - **Re-read when**: the upgrade lands; the step goes green by itself and this entry is closed.
 
+## 2026-09-22 · CI · the runner is pinned and the actions are on their current majors
+
+- **Situation**: GitHub annotated every run with two deprecations — `actions/checkout@v4`, `actions/setup-node@v4` and `pnpm/action-setup@v4` run on Node 20, which is being forced onto Node 24, and `ubuntu-latest` becomes Ubuntu 26 on 19 October 2026. Neither blocks a build today and neither is caused by anything in this repository; both land on a date GitHub chooses.
+- **Default taken**: `ubuntu-26.04` pinned, `checkout@v7`, `setup-node@v7`, `action-setup@v6`, in one change whose CI run is the evidence. The pin is the durable half: a floating label means an image change arrives as a red build on an unrelated commit, and the person reading it starts by suspecting their own diff. Pinned, the same change is a one-line PR that either goes green or does not.
+- **Alternative set aside**: pinning to `ubuntu-24.04` and taking 26 later. It defers the same work to a second PR and leaves the repository one deprecation behind on purpose; the image is available now and CI can say whether it holds. Also set aside: stopping at `checkout@v5`, which clears the Node 20 warning alone. Two majors behind is where this started, and the credential change in v6 (the token to a file beside the git config, not into it) is exactly the kind of thing to meet on a CI run that tests nothing else — the `range` step's `git fetch` is the one caller that depends on it.
+- **Not taken**: `node-version` stays at 22. The actions moving to Node 24 is the *action runtime*, not the Node this project builds under; Vercel builds on 24 and CI on 22, and closing that gap is a change with its own risk and its own run.
+- **Re-read when**: 19 October passes (the pin means nothing happens, which is the point), or a fourth major lands on one of the three.
+
 ## 2026-09-20 · phase 0 · `abatty ci` output adapted, not taken as is
 
 - **Situation**: the generated `checks.yml` assumes npm (`npm ci` fails: no `package-lock.json`), a `.prettierrc`, and `test`, `test:integration`, `coverage`, `e2e` scripts that do not exist: every job would be red for a reason unrelated to the code (INST-DEAD-CI).
