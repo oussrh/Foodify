@@ -4,7 +4,8 @@
 'use client'
 
 import { CheckCircle2 } from 'lucide-react'
-import { MENU_TEXT, type Locale } from '@/lib/menu'
+import { type Locale } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import type { PlacedOrder } from '@/lib/schemas/order'
 
 export default function OrderSent({ order, onDone, locale }: { order: PlacedOrder; onDone: () => void; locale: Locale }) {

@@ -4,10 +4,11 @@
 // they are assigned, a super admin any. The pages hold only their redirect, and the guard is
 // asked once here rather than rewritten per page.
 import prisma from '@/lib/prisma'
-import { AuthError, requireBoardAccess, requireOrderingStaff, requireRestaurantAccess, requireUser } from '@/lib/auth-guard'
+import { AuthError, requireBoardAccess, requireOrderingStaff, requireRestaurantAccess, requireServiceStaff, requireUser } from '@/lib/auth-guard'
 import { loadMenu } from '@/lib/menu-loader'
 import { boardOrderSelect, serializeOrder } from '@/lib/order-data'
 import { daysAgo } from '@/lib/time'
+import { parseRestaurantCode } from '@/lib/restaurant-code'
 
 /** Whether the guard passes, as a boolean: a page redirects rather than throwing at a signed-out reader. */
 async function passes(guard: () => Promise<unknown>): Promise<boolean> {
@@ -18,6 +19,19 @@ async function passes(guard: () => Promise<unknown>): Promise<boolean> {
     if (error instanceof AuthError) return false
     throw error
   }
+}
+
+/**
+ * The restaurant a device route was given, as a uuid. The path may carry either form: the short
+ * code the links now hand out, or the uuid the links used to — a tablet with the old address
+ * saved to its home screen must keep working, and a printed one cannot be recalled. Null when the
+ * code matches nothing, which the caller turns into the same redirect every other miss gets.
+ */
+export async function restaurantIdFromParam(param: string): Promise<string | null> {
+  const code = parseRestaurantCode(param)
+  if (!code) return param
+  const found = await prisma.restaurant.findUnique({ where: { code }, select: { id: true } })
+  return found?.id ?? null
 }
 
 /** Whether the signed-in user may manage this restaurant; false for a stranger, a kitchen tablet, and nobody signed in. */
@@ -32,8 +46,9 @@ export async function loadRestaurantInfo(id: string) {
   if (!(await mayOpen(id))) return null
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
-    // `tableCount` so the QR section can say whether the per-table sheet has anything on it yet.
-    select: { id: true, name: true, slug: true, tableCount: true },
+    // `tableCount` so the QR section can say whether the per-table sheet has anything on it yet;
+    // `code` because the device links are built from it rather than from the uuid.
+    select: { id: true, name: true, slug: true, code: true, tableCount: true },
   })
   if (!restaurant) return null
   const dish = { restaurantId: id }
@@ -100,17 +115,28 @@ export async function loadKitchenRestaurants() {
 }
 
 /**
- * What the waiter app needs to take an order: the restaurant with its live menu, exactly as the
- * public page reads it (`loadMenu`), so a waiter and a guest can never be looking at different
- * menus. Null when the restaurant is not this user's to order for — a kitchen tablet is refused
- * here: it cooks what comes in, it does not write orders.
+ * The restaurant's live menu for a staff screen, read exactly as the public page reads it
+ * (`loadMenu`), so staff and guests can never be looking at different menus. Null when `guard`
+ * refuses; which staff that is depends on the screen, which is why the guard is the argument.
  */
-export async function loadWaiterMenu(id: string) {
-  if (!(await passes(() => requireOrderingStaff(id)))) return null
+async function staffMenu(id: string, guard: (restaurantId: string) => Promise<unknown>) {
+  if (!(await passes(() => guard(id)))) return null
   const found = await prisma.restaurant.findUnique({ where: { id }, select: { slug: true } })
   if (!found) return null
   return loadMenu(found.slug)
 }
+
+/**
+ * What the waiter app needs to take an order. A kitchen tablet is refused here: it cooks what
+ * comes in, it does not write orders.
+ */
+export const loadWaiterMenu = (id: string) => staffMenu(id, requireOrderingStaff)
+
+/**
+ * What the sold-out screen needs: the same menu, for anyone who works this restaurant's service —
+ * a manager, an order tablet or a waiter. Whoever notices the pan is empty can say so.
+ */
+export const loadServiceMenu = (id: string) => staffMenu(id, requireServiceStaff)
 
 /**
  * The People tab's read: the restaurant and everyone who works on it — its managers, its order
@@ -138,6 +164,6 @@ export async function loadBoardRestaurant(id: string) {
   if (!(await passes(() => requireBoardAccess(id)))) return null
   return prisma.restaurant.findUnique({
     where: { id },
-    select: { id: true, name: true, orderingEnabled: true, currency: true, currencySymbol: true, defaultLocale: true },
+    select: { id: true, code: true, name: true, orderingEnabled: true, currency: true, currencySymbol: true, defaultLocale: true },
   })
 }

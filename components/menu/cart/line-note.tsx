@@ -7,7 +7,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { Pencil, Plus } from 'lucide-react'
 import { MAX_NOTE } from '@/lib/cart'
-import { MENU_TEXT, type Locale } from '@/lib/menu'
+import { type Locale } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 
 interface LineNoteProps {
   /** The dish this note is about, for the field's label. */

@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { MoreHorizontal, Star, Trash2 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
+import { setDishAvailability } from '@/app/actions/dish-availability-actions'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,8 +56,63 @@ export function DishLiveSwitch({ dishId, isActive }: { dishId: string; isActive:
   )
 }
 
+/**
+ * Sold out for the rest of the service, from the dishes table. A button rather than a switch on
+ * purpose: `Live` sits beside it and is on when the dish is shown, so a second switch that is on
+ * when the dish is *not* available would put two opposite polarities side by side. A button that
+ * says what the dish is now cannot be read the wrong way round.
+ */
+export function DishSoldOutButton({ dishId, soldOut }: { dishId: string; soldOut: boolean }) {
+  const [off, setOff] = useState(soldOut)
+  const [pending, startTransition] = useTransition()
+  const router = useRouter()
+
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      aria-pressed={off}
+      aria-label={off ? 'Sold out — tap to put it back on the menu' : 'Available — tap to mark it sold out for the rest of the service'}
+      onClick={() => {
+        const next = !off
+        setOff(next)
+        startTransition(async () => {
+          try {
+            await setDishAvailability(dishId, { soldOut: next })
+            router.refresh()
+          } catch {
+            setOff(!next)
+            toast.error('Could not change that dish')
+          }
+        })
+      }}
+      className={cn(
+        'rounded-full px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-60',
+        off ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:bg-accent',
+      )}
+    >
+      {off ? 'Sold out' : 'Available'}
+    </button>
+  )
+}
+
 const menuButton =
   'inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring'
+
+/**
+ * The button every row menu opens from. Same size, same label shape, and dimmed while a move is
+ * in flight, so two lists of different things still behave like one control.
+ */
+function RowMenuTrigger({ label, pending }: { label: string; pending: boolean }) {
+  return (
+    <DropdownMenuTrigger asChild>
+      <button type="button" className={cn(menuButton, pending && 'opacity-50')} aria-label={`Actions for ${label}`}>
+        <MoreHorizontal className="h-4 w-4" />
+      </button>
+    </DropdownMenuTrigger>
+  )
+}
+
 
 interface DishRowMenuProps {
   dishId: string
@@ -84,11 +140,7 @@ export function DishRowMenu({ dishId, dishName, editHref, isMostPurchased }: Dis
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={cn(menuButton, pending && 'opacity-50')} aria-label={`Actions for ${dishName}`}>
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
+        <RowMenuTrigger label={dishName} pending={pending} />
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
             <Link href={editHref}>Edit</Link>
@@ -144,11 +196,7 @@ export function RestaurantRowMenu({ restaurantId, restaurantName, portal, slug }
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={cn(menuButton, pending && 'opacity-50')} aria-label={`Actions for ${restaurantName}`}>
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
+        <RowMenuTrigger label={restaurantName} pending={pending} />
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
             <Link href={`${base}/menu` as Route}>Menu</Link>

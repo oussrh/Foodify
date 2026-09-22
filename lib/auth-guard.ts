@@ -113,6 +113,17 @@ export async function requireBoardAccess(restaurantId: string) {
 }
 
 /**
+ * Anyone who works this restaurant's service: its managers, its order tablets, its waiters, and a
+ * super admin. The same population as `requireBoardAccess`, but this one grants a write, so it is
+ * named for what it is rather than borrowed from a read: marking a dish sold out is a service
+ * decision, taken by whoever notices the pan is empty, and it expires by itself. It is the only
+ * write a device has over the menu, and it changes no price, name or dish.
+ */
+export async function requireServiceStaff(restaurantId: string) {
+  return requireBoardAccess(restaurantId)
+}
+
+/**
  * Who may MOVE one of its orders along — take it on, serve it, cancel it. The same people as
  * `requireBoardAccess` minus the waiters: a waiter reads the board to answer "is my food coming?",
  * and the kitchen alone says what has been made.
@@ -121,6 +132,16 @@ export async function requireBoardAction(restaurantId: string) {
   const user = await requireBoardAccess(restaurantId)
   if (user.role === 'WAITER') throw new AuthError('Forbidden', 403)
   return user
+}
+
+/**
+ * Carrying an order out to the table: the one move that belongs to the floor rather than the
+ * pass, so a waiter passes this where `requireBoardAction` refuses them. A tablet and a manager
+ * may do it too — a kitchen that plates and hands over in one motion should not have to find a
+ * waiter to record it.
+ */
+export async function requireDeliverAction(restaurantId: string) {
+  return requireBoardAccess(restaurantId)
 }
 
 /**

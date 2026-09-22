@@ -1,8 +1,11 @@
 "use client"
 
 import DishPhoto from '@/components/menu/dish-photo'
+import { SoldOutMark } from '@/components/menu/sold-out-mark'
+import { DishTags } from '@/components/menu/dish-tags'
 import { Camera } from 'lucide-react'
-import { MENU_TEXT, dietaryLabel, formatPrice, hasAR, type Locale, type MenuDish, type Money } from '@/lib/menu'
+import { formatPrice, hasAR, type Locale, type MenuDish, type Money } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import AddButton from './cart/add-button'
 
 interface DishRowProps {
@@ -38,7 +41,8 @@ export default function DishRow({ dish, locale, money, href, onOpen, transitioni
       >
         <span className="relative block h-[76px] w-[76px] overflow-hidden rounded-md bg-muted" style={transitioning ? { viewTransitionName: 'dish-photo' } : undefined}>
           <DishPhoto src={dish.imageUrl} alt="" sizes="76px" iconClassName="h-6 w-6" />
-          {hasAR(dish) && (
+          {dish.soldOut && <SoldOutMark locale={locale} />}
+          {!dish.soldOut && hasAR(dish) && (
             <span className="absolute bottom-1 left-1 inline-flex items-center gap-0.5 rounded-full bg-white/92 px-1.5 py-0.5 text-[10px] font-bold text-[#1B1A17]">
               <Camera className="h-2.5 w-2.5" />
               {t.ar}
@@ -49,24 +53,14 @@ export default function DishRow({ dish, locale, money, href, onOpen, transitioni
         <span className="flex min-w-0 flex-col gap-0.5">
           <span className="truncate text-[15px] font-semibold leading-snug">{name}</span>
           {description && <span className="truncate text-[13px] text-muted-foreground">{description}</span>}
-          {(tags.length > 0 || dish.isMostPurchased) && (
-            <span className="mt-0.5 flex gap-1.5">
-              {dish.isMostPurchased && (
-                <span className="rounded-full bg-brand-tint px-1.5 py-px text-[11px] font-medium text-brand">{t.popular}</span>
-              )}
-              {tags.map((key) => (
-                <span key={key} className="rounded-full border border-border-strong px-1.5 py-px text-[11px] text-muted-foreground">
-                  {dietaryLabel(key, locale)}
-                </span>
-              ))}
-            </span>
-          )}
+          <DishTags dish={dish} tags={tags} locale={locale} />
         </span>
 
         <span className="tnum self-start pt-0.5 text-[15px] font-semibold">{formatPrice(dish.price, money)}</span>
       </a>
 
-      {order && <AddButton name={name} quantity={order.quantity} onAdd={order.onAdd} locale={locale} />}
+      {/* Nothing to add: the kitchen has run out, and the endpoint refuses it too. */}
+      {order && !dish.soldOut && <AddButton name={name} quantity={order.quantity} onAdd={order.onAdd} locale={locale} />}
     </li>
   )
 }

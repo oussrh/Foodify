@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { Camera, Loader2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { MENU_TEXT, type Locale } from '@/lib/menu'
+import { type Locale } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import { useClientValue } from '@/components/use-client-value'
 import { isAndroid, isIOS } from '@/lib/device'
 

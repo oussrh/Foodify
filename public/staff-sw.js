@@ -1,11 +1,17 @@
-/* Foodify kitchen board service worker (v1).
-   Scope: one portal's /orders routes only — the public menu has its own worker and the two never
-   meet. It exists so the board opens when the tablet's wifi is down, and for nothing else:
+/* Foodify staff service worker (v2).
+   One file, three scopes: a portal's /orders board, the kitchen tablet, and the waiter's phone.
+   The cache is named after the registration scope, so two staff apps on one device never share
+   or evict each other's shell, and the public menu's worker never meets any of them. It exists
+   so a staff app opens when the wifi is down, and for nothing else:
    - Pages in scope: network-first, the cached shell as a fallback.
    - Next static assets: cache-first (they are content-hashed).
    - The API is NEVER cached. A cached order list would show a kitchen work it has already done,
      which is worse than showing nothing; the board says it is offline instead. */
-const VERSION = 'foodify-orders-' + (new URL(self.location.href).searchParams.get('v') || 'dev')
+// The scope decides the cache: `/waiter/` and `/manager/orders/` are different apps on the same
+// origin, and a shared cache would let one serve the other's shell.
+const SCOPE_KEY = new URL(self.registration.scope).pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'root'
+const PREFIX = 'foodify-staff-' + SCOPE_KEY + '-'
+const VERSION = PREFIX + (new URL(self.location.href).searchParams.get('v') || 'dev')
 
 const sameOrigin = (url) => url.origin === self.location.origin
 const isStatic = (url) => sameOrigin(url) && url.pathname.startsWith('/_next/static/')
@@ -19,7 +25,7 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     (async () => {
       const keys = await caches.keys()
-      await Promise.all(keys.filter((key) => key.startsWith('foodify-orders-') && key !== VERSION).map((key) => caches.delete(key)))
+      await Promise.all(keys.filter((key) => key.startsWith(PREFIX) && key !== VERSION).map((key) => caches.delete(key)))
       await self.clients.claim()
     })(),
   )

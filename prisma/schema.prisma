@@ -38,6 +38,10 @@ model Restaurant {
   id              String         @id @default(uuid())
   name            String
   slug            String         @unique
+  // The short name this restaurant goes by in a link handed to a device (`lib/restaurant-code.ts`):
+  // six Crockford characters, assigned once and never changed. The slug follows the restaurant's
+  // name and would break a tab left open on the pass when somebody renames it; this does not.
+  code            String         @unique
   email           String?
   phone           String?
   tagline         String?
@@ -152,6 +156,10 @@ model Dish {
   usdzUrl         String
   glbUrl          String
   isActive        Boolean          @default(true)
+  // Sold out for the rest of the service: the dish stays on the menu, marked, and cannot be
+  // ordered until this moment passes. Null is available. `isActive` is the other axis and means
+  // "off the menu entirely"; this one is the kitchen running out, and it expires by itself.
+  soldOutUntil    DateTime?
   calories        Int?
   isMostPurchased Boolean          @default(false)
   sortOrder       Int
@@ -217,6 +225,9 @@ model ActivityLog {
 enum OrderStatus {
   NEW
   ACCEPTED
+  // The food is up and waiting on the pass. The kitchen's work is finished; the floor's has not
+  // started. DONE means a waiter carried it out, which is a different fact and a different person.
+  READY
   DONE
   CANCELLED
 }
@@ -246,6 +257,8 @@ model Order {
   // so the history can say how long a table waited before it was started and before it was served.
   // `updatedAt` cannot answer that — it moves again on any later change.
   acceptedAt   DateTime?
+  // Stamped when the kitchen called it up, which is the moment the waiter is told about.
+  readyAt      DateTime?
   servedAt     DateTime?
   lines        OrderLine[]
 

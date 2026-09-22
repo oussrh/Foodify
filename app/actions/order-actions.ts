@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { requireBoardAction } from '@/lib/auth-guard'
+import { requireBoardAction, requireDeliverAction } from '@/lib/auth-guard'
 import { nextStatus, type OrderStatus } from '@/lib/orders'
 import { orderAction, type OrderAction } from '@/lib/schemas/order-board'
 
@@ -16,7 +16,8 @@ export async function setOrderStatus(raw: OrderAction) {
   const { orderId, action } = orderAction.parse(raw)
   const order = await prisma.order.findUnique({ where: { id: orderId }, select: { restaurantId: true, status: true } })
   if (!order) throw new Error('Order not found')
-  await requireBoardAction(order.restaurantId)
+  // Carrying an order out belongs to the floor, so a waiter may do that one and nothing else.
+  await (action === 'done' ? requireDeliverAction(order.restaurantId) : requireBoardAction(order.restaurantId))
 
   const next = nextStatus(order.status as OrderStatus, action)
   if (!next) return { id: orderId, status: order.status as OrderStatus }
@@ -24,7 +25,12 @@ export async function setOrderStatus(raw: OrderAction) {
     where: { id: orderId },
     // The moment is stamped with the move that caused it, and only that move: a later change
     // (a cancel after a serve is refused, but an edit elsewhere is not) leaves these alone.
-    data: { status: next, ...(next === 'ACCEPTED' ? { acceptedAt: new Date() } : {}), ...(next === 'DONE' ? { servedAt: new Date() } : {}) },
+    data: {
+      status: next,
+      ...(next === 'ACCEPTED' ? { acceptedAt: new Date() } : {}),
+      ...(next === 'READY' ? { readyAt: new Date() } : {}),
+      ...(next === 'DONE' ? { servedAt: new Date() } : {}),
+    },
     select: { id: true, status: true },
   })
   return { id: updated.id, status: updated.status as OrderStatus }

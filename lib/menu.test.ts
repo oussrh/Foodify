@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, MENU_TEXT, offeredDietary, resolveInitialLocale, localName } from './menu'
+import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, offeredDietary, resolveInitialLocale, localName } from './menu'
+import { MENU_TEXT } from './menu-text'
 
 describe('formatPrice', () => {
   it('formats with the ISO code through Intl, French style in French', () => {
@@ -56,6 +57,8 @@ describe('labels', () => {
       orderSent: [12],
       orderSentHint: ['7'],
       noteFor: ['Harira'],
+      soldOutSince: ['Harira'],
+      soldOutSincePlural: ['Harira, Taktouka'],
     }
     for (const locale of ['en', 'fr'] as const) {
       for (const [key, value] of Object.entries(MENU_TEXT[locale])) {

@@ -1,7 +1,8 @@
 "use client"
 
 import { Clock, Globe, Mail, MapPin, Phone } from 'lucide-react'
-import { MENU_TEXT, type Locale, type MenuRestaurant } from '@/lib/menu'
+import { type Locale, type MenuRestaurant } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import type { SocialHandles } from '@/lib/social'
 import { summarizeOpeningHours, type OpeningHours } from '@/lib/opening-hours'
 import OpeningHoursLines from '@/components/opening-hours-lines'

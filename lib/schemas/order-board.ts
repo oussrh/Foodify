@@ -11,10 +11,10 @@ export const orderBoardQuery = z.object({
   restaurantId: uuid,
   status: z.array(z.enum(ORDER_STATUSES)).min(1).optional(),
 })
-/** A staff action on one order: take it on, call it served, or cancel it. */
+/** A staff action on one order: take it on, call it up, call it served, or cancel it. */
 export const orderAction = z.object({
   orderId: uuid,
-  action: z.enum(['accept', 'done', 'cancel']),
+  action: z.enum(['accept', 'ready', 'done', 'cancel']),
 })
 /** `orderAction` after parsing; `setOrderStatus` takes it after the action's parse. */
 export type OrderAction = z.infer<typeof orderAction>

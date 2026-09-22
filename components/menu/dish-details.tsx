@@ -1,6 +1,7 @@
 "use client"
 
-import { MENU_TEXT, allergenLabel, dietaryLabel, type Locale, type MenuDish } from '@/lib/menu'
+import { allergenLabel, dietaryLabel, type Locale, type MenuDish } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 
 interface DishDetailsProps {
   dish: MenuDish

@@ -15,6 +15,7 @@ import OrderDetailsSheet from './order-details-sheet'
 const STATUS_VARIANT: Record<OrderStatus, BadgeProps['variant']> = {
   NEW: 'default',
   ACCEPTED: 'secondary',
+  READY: 'warning',
   DONE: 'success',
   CANCELLED: 'outline',
 }

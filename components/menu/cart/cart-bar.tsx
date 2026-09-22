@@ -4,7 +4,8 @@
 'use client'
 
 import { ShoppingBag } from 'lucide-react'
-import { formatPrice, MENU_TEXT, type Locale, type Money } from '@/lib/menu'
+import { formatPrice, type Locale, type Money } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 
 interface CartBarProps {
   count: number

@@ -3,6 +3,7 @@
 import type { Dish, Ingredient, MenuCategory as CategoryRow, MenuSubcategory as SubcategoryRow, Restaurant } from '@/generated/prisma/client'
 import { publicEnv } from '@/lib/env'
 import type { CoverStyle, Locale, MenuCategory, MenuDish, MenuRestaurant, MenuTheme } from './menu'
+import { isSoldOut } from './availability'
 
 type DishRow = Dish & { ingredients: Ingredient[] }
 type CategoryTree = CategoryRow & { subcategories: (SubcategoryRow & { dishes: DishRow[] })[] }
@@ -27,6 +28,9 @@ export function serializeDish(dish: DishRow, offered?: readonly string[]): MenuD
     glbUrl: dish.glbUrl || null,
     calories: dish.calories ?? null,
     isMostPurchased: dish.isMostPurchased,
+    // Read here rather than sent as a moment: the menu says available or not, and a guest's clock
+    // never decides it.
+    soldOut: isSoldOut(dish.soldOutUntil),
     dietary: offered ? dish.dietary.filter((k) => offered.includes(k)) : dish.dietary,
     allergens: dish.allergens,
     ingredients: dish.ingredients.map((i) => ({ id: i.id, nameEn: i.nameEn, nameFr: i.nameFr })),

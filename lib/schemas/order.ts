@@ -44,8 +44,14 @@ export const orderLineInput = z.object({
 export const orderInput = z.object({
   restaurantId: uuid,
   table: orderTable,
-  /** The guest's number. Absent only when a member of staff is ordering at the table, which the handler checks. */
-  phone: orderPhone.optional(),
+  /**
+   * The guest's number. Absent only when a member of staff is ordering at the table, which the
+   * handler checks. An empty string is read as absent rather than as a phone that fails to parse:
+   * a form with nothing typed in it sends `''`, and `.optional()` alone does not cover that — it
+   * covers a missing key. Getting this wrong refused every order a waiter placed, with a message
+   * about the menu having changed.
+   */
+  phone: z.preprocess((value) => (typeof value === 'string' && value.trim() === '' ? undefined : value), orderPhone.optional()),
   /** The language the guest is reading the menu in; the confirmation is written in it. */
   locale: z.enum(['en', 'fr']).optional(),
   note: orderNote.optional(),

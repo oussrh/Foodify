@@ -5,7 +5,8 @@
 'use client'
 
 import { useState } from 'react'
-import { formatPrice, MENU_TEXT, type Locale, type Money } from '@/lib/menu'
+import { formatPrice, type Locale, type Money } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'

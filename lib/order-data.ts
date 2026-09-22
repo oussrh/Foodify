@@ -18,6 +18,7 @@ export const boardOrderSelect = {
   createdAt: true,
   updatedAt: true,
   acceptedAt: true,
+  readyAt: true,
   servedAt: true,
   placedBy: { select: { email: true } },
   lines: { select: { id: true, nameEn: true, nameFr: true, quantity: true, note: true } },
@@ -33,6 +34,7 @@ export function serializeOrder(row: OrderRow): BoardOrder {
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
     acceptedAt: row.acceptedAt?.toISOString() ?? null,
+    readyAt: row.readyAt?.toISOString() ?? null,
     servedAt: row.servedAt?.toISOString() ?? null,
   }
 }

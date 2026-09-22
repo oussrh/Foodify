@@ -8,6 +8,7 @@ import { clientInput, clientPatch, type ClientInput, type ClientPatch } from '@/
 import { slugify } from '@/lib/slug'
 import { userPayload } from '@/lib/payloads'
 import { definedFields } from '@/lib/defined-fields'
+import { withRestaurantCode } from '@/server/restaurant-code-assign'
 
 /**
  * Super admin only. Parses `clientInput` (email, temporary password, optional restaurant ids, optional restaurant name);
@@ -21,13 +22,16 @@ export async function createClient(raw: ClientInput) {
 
   const restaurantIds = [...(data.restaurantIds ?? [])]
   if (data.restaurantName) {
-    const restaurant = await prisma.restaurant.create({
-      data: {
-        name: data.restaurantName,
-        slug: slugify(data.restaurantName),
-        defaultLocale: 'en',
-      },
-    })
+    const restaurant = await withRestaurantCode((code) =>
+      prisma.restaurant.create({
+        data: {
+          name: data.restaurantName!,
+          slug: slugify(data.restaurantName!),
+          defaultLocale: 'en',
+          code,
+        },
+      }),
+    )
     restaurantIds.push(restaurant.id)
   }
 

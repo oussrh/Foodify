@@ -10,16 +10,19 @@
 export class ApiError extends Error {
   code: string
   status: number
-  constructor(code: string, message: string, status: number) {
+  /** Whatever the handler passed to `fail`: zod issues, or the dishes an order was refused over. */
+  details: unknown
+  constructor(code: string, message: string, status: number, details?: unknown) {
     super(message)
     this.name = 'ApiError'
     this.code = code
     this.status = status
+    this.details = details
   }
 }
 
 type Success<T> = { data: T; meta?: { next?: string | null } }
-type Failure = { error: string; code: string }
+type Failure = { error: string; code: string; details?: unknown }
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === 'object' && v !== null
 const isSuccess = <T>(b: unknown): b is Success<T> => isObject(b) && 'data' in b
 const isFailure = (b: unknown): b is Failure => isObject(b) && typeof b.code === 'string' && typeof b.error === 'string'
@@ -33,8 +36,8 @@ export async function call<T>(input: string, init?: RequestInit): Promise<{ data
   const res = await fetch(input, init)
   const body: unknown = await res.json().catch(() => null)
   if (!res.ok || !isSuccess<T>(body)) {
-    const failure = isFailure(body) ? body : { code: 'unknown', error: `HTTP ${res.status}` }
-    throw new ApiError(failure.code, failure.error, res.status)
+    const failure: Failure = isFailure(body) ? body : { code: 'unknown', error: `HTTP ${res.status}` }
+    throw new ApiError(failure.code, failure.error, res.status, failure.details)
   }
   return { data: body.data, next: body.meta?.next ?? null }
 }

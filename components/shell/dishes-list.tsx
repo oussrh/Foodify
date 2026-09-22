@@ -5,7 +5,7 @@ import { Camera, Star } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { EmptyState } from '@/components/shell/page-header'
 import { ListSearch } from '@/components/shell/list-search'
-import { DishLiveSwitch, DishRowMenu } from '@/components/shell/row-actions'
+import { DishLiveSwitch, DishRowMenu, DishSoldOutButton } from '@/components/shell/row-actions'
 import { cn } from '@/lib/utils'
 
 export interface DishListRow {
@@ -16,6 +16,8 @@ export interface DishListRow {
   /** A two-decimal string, as money travels (API.1). */
   price: string
   isActive: boolean
+  /** The kitchen has run out for the rest of the service; it expires by itself. */
+  soldOut: boolean
   isMostPurchased: boolean
   hasAR: boolean
   category: string | null
@@ -63,6 +65,7 @@ export default function DishesList({ portal, restaurantId, currency, rows, searc
               <TableHead className="text-right">Price</TableHead>
               <TableHead className="hidden sm:table-cell">AR</TableHead>
               <TableHead>Live</TableHead>
+              <TableHead>Stock</TableHead>
               <TableHead className="hidden lg:table-cell">Added</TableHead>
               <TableHead className="w-[1%]">
                 <span className="sr-only">Actions</span>
@@ -104,6 +107,9 @@ export default function DishesList({ portal, restaurantId, currency, rows, searc
                 </TableCell>
                 <TableCell>
                   <DishLiveSwitch dishId={d.id} isActive={d.isActive} />
+                </TableCell>
+                <TableCell>
+                  <DishSoldOutButton dishId={d.id} soldOut={d.soldOut} />
                 </TableCell>
                 <TableCell className="tnum hidden text-muted-foreground lg:table-cell">
                   {d.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}

@@ -5,7 +5,8 @@
 'use client'
 
 import { QrCode } from 'lucide-react'
-import { MENU_TEXT, type Locale } from '@/lib/menu'
+import { type Locale } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 

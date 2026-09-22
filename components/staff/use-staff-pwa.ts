@@ -1,7 +1,8 @@
-// components/orders/use-orders-pwa.ts
-// The board as an app on the tablet: the worker that lets it open without wifi, and the prompt
-// that puts it on the home screen. Registered in production only and scoped to this portal's
-// /orders routes, so it can never take over the public menu's worker (or be taken over by it).
+// components/staff/use-staff-pwa.ts
+// A staff app on the device it is used from: the worker that lets it open without wifi, and the
+// prompt that puts it on the home screen. Serves the kitchen board, the tablet and the waiter's
+// phone; the caller gives its own scope, so one app can never take over another's worker, and
+// none of them can take over the public menu's (or be taken over by it). Production only.
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
@@ -10,21 +11,28 @@ import { publicEnv } from '@/lib/env'
 
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> }
 
-export interface OrdersPwa {
-  /** The browser has offered an install prompt and the board is not already installed. */
+export interface StaffPwa {
+  /** The browser has offered an install prompt and the app is not already installed. */
   canInstall: boolean
   /** Running from the home screen rather than a browser tab. */
   installed: boolean
   install: () => void
 }
 
-/** `/manager/orders/` or `/admin/orders/`: the worker controls one portal's board and nothing else. */
-function scopeOf(pathname: string): string | null {
-  const match = /^\/(admin|manager)\/orders\//.exec(pathname)
-  return match ? `/${match[1]}/orders/` : null
+/**
+ * The scope a staff app's worker controls, from the path it is open at: one portal's board, the
+ * kitchen tablet, or the waiter's phone. Null anywhere else, and nothing is registered — a worker
+ * with too wide a scope would answer for pages it knows nothing about.
+ */
+export function staffScope(pathname: string): string | null {
+  const portal = /^\/(admin|manager)\/orders\//.exec(pathname)
+  if (portal) return `/${portal[1]}/orders/`
+  if (pathname.startsWith('/kitchen/')) return '/kitchen/'
+  if (pathname.startsWith('/waiter/')) return '/waiter/'
+  return null
 }
 
-export function useOrdersPwa(): OrdersPwa {
+export function useStaffPwa(): StaffPwa {
   const [prompt, setPrompt] = useState<InstallEvent | null>(null)
   // How the board was opened is a browser fact; installing it during the session is the event's.
   const openedStandalone = useClientValue(() => window.matchMedia('(display-mode: standalone)').matches, false)
@@ -44,9 +52,9 @@ export function useOrdersPwa(): OrdersPwa {
     window.addEventListener('beforeinstallprompt', onPrompt)
     window.addEventListener('appinstalled', onInstalled)
 
-    const scope = scopeOf(window.location.pathname)
+    const scope = staffScope(window.location.pathname)
     if (publicEnv.isProduction && scope && 'serviceWorker' in navigator) {
-      void navigator.serviceWorker.register(`/orders-sw.js?v=${publicEnv.buildId}`, { scope }).catch(() => undefined)
+      void navigator.serviceWorker.register(`/staff-sw.js?v=${publicEnv.buildId}`, { scope }).catch(() => undefined)
     }
 
     return () => {

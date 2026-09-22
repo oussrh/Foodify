@@ -45,3 +45,36 @@ export function chimeNotes(): ChimeNote[] {
 export function chimeSeconds(): number {
   return Math.max(...chimeNotes().map((note) => note.startsIn + note.duration))
 }
+
+/**
+ * The waiter's phone says something different, on purpose. Both alerts can be audible in the
+ * same room, and two apps that sound alike are two apps nobody can tell apart across a dining
+ * room — so this is lower than the kitchen's arpeggio, falls instead of rising, and is over in
+ * about a second. A rising phrase summons; a falling one informs, and informing is all this does.
+ * It is also quieter, because it rings a metre from a table of guests rather than across a line.
+ */
+const WAITER_FALL = [880, 659.25] as const
+const WAITER_GAP = 0.16
+const WAITER_RING = 0.9
+
+/** Two notes, A5 down to E5: a falling fourth, the shape of a soft notification rather than a bell. */
+export function waiterChimeNotes(): ChimeNote[] {
+  return WAITER_FALL.map((frequency, index) => ({
+    startsIn: index * WAITER_GAP,
+    frequency,
+    duration: WAITER_RING,
+    level: index === 0 ? 1 : 0.85,
+  }))
+}
+
+/** A tune and how loud to ring it; `useChime` takes one of these. */
+export interface ChimeVoice {
+  notes: ChimeNote[]
+  /** The bus gain before the compressor. A kitchen carries; a dining room does not want to. */
+  volume: number
+}
+
+/** The board's alert: loud enough to cross a kitchen. */
+export const KITCHEN_CHIME: ChimeVoice = { notes: chimeNotes(), volume: 0.85 }
+/** The waiter's: quieter, lower and shorter, so it is heard by the person holding the phone. */
+export const WAITER_CHIME: ChimeVoice = { notes: waiterChimeNotes(), volume: 0.45 }

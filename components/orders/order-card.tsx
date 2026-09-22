@@ -40,7 +40,9 @@ export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }
   return (
     <article className={cn('flex flex-col overflow-hidden rounded-lg border-2 bg-card', fresh ? 'border-brand' : 'border-border')}>
       {/* The whole card opens the order: one big target rather than a small "details" link. */}
-      <button type="button" onClick={onOpen} className="flex flex-col gap-3 p-4 text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
+      {/* flex-1: cards in a row stretch to the tallest, and the move belongs at the bottom of the
+          card rather than under the text with white space beneath it. */}
+      <button type="button" onClick={onOpen} className="flex flex-1 flex-col gap-3 p-4 text-left focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring">
         <header className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate text-[28px] font-semibold leading-none tracking-display">Table {order.table}</p>
@@ -79,11 +81,11 @@ export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }
         onClick={onAdvance}
         disabled={busy}
         className={cn(
-          'h-16 w-full text-lg font-semibold transition-opacity focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-60',
-          order.status === 'NEW' ? 'bg-brand text-brand-on' : 'bg-success text-white',
+          'mt-auto h-16 w-full shrink-0 text-lg font-semibold transition-opacity focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-60',
+          order.status === 'NEW' ? 'bg-brand text-brand-on' : order.status === 'ACCEPTED' ? 'bg-warning text-white' : 'bg-success text-white',
         )}
       >
-        {busy ? 'Saving…' : order.status === 'NEW' ? 'Start' : 'Served'}
+        {busy ? 'Saving…' : order.status === 'NEW' ? 'Start' : order.status === 'ACCEPTED' ? 'Ready to serve' : 'Served'}
       </button>
     </article>
   )

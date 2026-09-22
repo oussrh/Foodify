@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { GET as listRestaurants } from '@/app/api/restaurants/route'
 import { createDish, updateDish } from '@/app/actions/dish-actions'
 import { createCategory } from '@/app/actions/menu-actions'
+import { newRestaurantCode } from '@/lib/restaurant-code'
 import { withRollback } from './db'
 import { manager, restaurant, superAdmin } from './fixtures'
 import { signInAs } from './session'
@@ -33,7 +34,10 @@ describe('writes on the real database', () => {
       expect((await tx.dish.findUniqueOrThrow({ where: { id: created.id } })).dietary).toEqual(['vegan'])
       await updateDish(created.id, { dietary: ['spicy', 'vegan', 'halal'] })
       expect((await tx.dish.findUniqueOrThrow({ where: { id: created.id } })).dietary).toEqual(['vegan'])
-      const fresh = await tx.restaurant.create({ data: { name: 'Fresh', slug: `fresh-${created.id.slice(0, 8)}`, defaultLocale: 'en' }, select: { dietaryOptions: true } })
+      const fresh = await tx.restaurant.create({
+        data: { name: 'Fresh', slug: `fresh-${created.id.slice(0, 8)}`, code: newRestaurantCode(), defaultLocale: 'en' },
+        select: { dietaryOptions: true },
+      })
       expect(fresh.dietaryOptions).toEqual(['vegetarian', 'vegan', 'halal', 'gluten_free', 'spicy'])
     }))
 

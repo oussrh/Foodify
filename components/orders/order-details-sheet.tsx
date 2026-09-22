@@ -11,13 +11,13 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 import { Button } from '@/components/ui/button'
 import { formatPrice, type Money } from '@/lib/menu'
 import { cn } from '@/lib/utils'
-import { isClosed, itemCount, minutesWaiting, STATUS_LABEL, type BoardOrder } from '@/lib/orders'
+import { isClosed, itemCount, minutesWaiting, STATUS_LABEL, type BoardOrder, type OrderMove } from '@/lib/orders'
 import OrderTimeline from './order-timeline'
 
 interface OrderDetailsSheetProps {
   order: BoardOrder | null
   onClose: () => void
-  onAction: (action: 'accept' | 'done' | 'cancel') => void
+  onAction: (action: OrderMove) => void
   busy: boolean
   money: Money
   now: number

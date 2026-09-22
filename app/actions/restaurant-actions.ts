@@ -7,6 +7,7 @@ import { firstIssue, uuid } from '@/lib/schemas/common'
 import { idOnly, restaurantPayload } from '@/lib/payloads'
 import { definedFields } from '@/lib/defined-fields'
 import { log } from '@/server/log'
+import { withRestaurantCode } from '@/server/restaurant-code-assign'
 import { imageUpload, restaurantInput, restaurantPatch, slug, type RestaurantInput, type RestaurantPatch } from '@/lib/schemas/restaurant'
 
 /**
@@ -23,12 +24,15 @@ function refreshDashboards() {
 /**
  * Super admin only. Parses `restaurantInput` (name, a lowercase slug, defaultLocale en or fr; the rest optional), stores
  * the row and revalidates both dashboards' layouts so the switcher lists it without a reload. Answers `restaurantPayload`
- * (id, slug); a taken slug is Prisma's unique error, not a shaped one.
+ * (id, slug); a taken slug is Prisma's unique error, not a shaped one. The short link code is
+ * assigned here and never afterwards: it is the restaurant's name in a link on a tablet.
  */
 export async function createRestaurant(raw: RestaurantInput) {
   await requireSuperAdmin()
   const data = restaurantInput.parse(raw)
-  const restaurant = await prisma.restaurant.create({ data: definedFields(data), select: restaurantPayload })
+  const restaurant = await withRestaurantCode((code) =>
+    prisma.restaurant.create({ data: { ...definedFields(data), code }, select: restaurantPayload }),
+  )
   refreshDashboards()
   return restaurant
 }

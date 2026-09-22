@@ -7,17 +7,47 @@
 import { useState } from 'react'
 import { ApiError, call } from '@/lib/api-client'
 import type { CartLine } from '@/lib/cart'
-import { MENU_TEXT, type Locale } from '@/lib/menu'
+import { type Locale } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import type { PlacedOrder } from '@/lib/schemas/order'
 
 type State = { status: 'idle' | 'sending'; error: string } | { status: 'sent'; order: PlacedOrder }
 
-/** The message for a failure the guest can act on; anything else is the generic one. */
+/** What `POST /api/orders` sends with a 409: the dishes it would not take, and why. */
+interface RefusedDish {
+  nameEn: string | null
+  nameFr: string | null
+  reason: 'sold_out' | 'off_menu'
+}
+
+/** The dishes the server named, in the guest's language; empty when it named none it could name. */
+function soldOutNames(details: unknown, locale: Locale): string[] {
+  if (!Array.isArray(details)) return []
+  return (details as RefusedDish[])
+    .filter((dish) => dish && dish.reason === 'sold_out')
+    .map((dish) => (locale === 'fr' ? dish.nameFr : dish.nameEn))
+    .filter((name): name is string => typeof name === 'string' && name.length > 0)
+}
+
+/**
+ * The message for a failure the guest can act on; anything else is the generic one. A dish that
+ * sold out between picking it and sending is named, because "the menu has changed" leaves someone
+ * re-sending the same order and failing the same way.
+ */
 function messageFor(error: unknown, locale: Locale): string {
   const t = MENU_TEXT[locale]
   if (!(error instanceof ApiError)) return t.orderFailed
   if (error.code === 'forbidden') return t.orderingOff
-  if (error.code === 'invalid_payload' || error.code === 'not_found') return t.menuChanged
+  if (error.code === 'unavailable') {
+    const names = soldOutNames(error.details, locale)
+    if (names.length === 1) return t.soldOutSince(names[0]!)
+    if (names.length > 1) return t.soldOutSincePlural(names.join(', '))
+    return t.menuChanged
+  }
+  // `invalid_payload` is something in what was sent, not the menu moving under it: saying "the
+  // menu has changed" sends somebody to look at their order for a problem that is not there.
+  if (error.code === 'invalid_payload') return t.orderRejected
+  if (error.code === 'not_found') return t.menuChanged
   return t.orderFailed
 }
 
@@ -41,7 +71,16 @@ export function usePlaceOrder(locale: Locale, onSent: () => void): PlaceOrder {
       const { data } = await call<PlacedOrder>('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ restaurantId, table: table.trim(), phone: phone.trim(), locale, note: note.trim() || undefined, lines }),
+        // An empty phone is left out rather than sent as '': a waiter has nobody to text, and the
+        // shape reads a missing key as "no phone" (the schema also folds '' to the same thing).
+        body: JSON.stringify({
+          restaurantId,
+          table: table.trim(),
+          phone: phone.trim() || undefined,
+          locale,
+          note: note.trim() || undefined,
+          lines,
+        }),
       })
       setState({ status: 'sent', order: data })
       onSent()

@@ -5,7 +5,8 @@ import { Share2 } from 'lucide-react'
 import ARLaunchButton from './ar-launch-button'
 import { DishFacts, DishIngredients, DishTags } from './dish-details'
 import { shareLink } from './share-link'
-import { MENU_TEXT, formatPrice, hasAR, type Locale, type MenuDish, type Money } from '@/lib/menu'
+import { formatPrice, hasAR, type Locale, type MenuDish, type Money } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import DishOrderControl, { type DishOrder } from './cart/dish-order-control'
 
 interface DishBodyProps {

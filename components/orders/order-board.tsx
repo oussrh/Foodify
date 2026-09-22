@@ -5,23 +5,27 @@
 // has lost the server rather than showing an empty room.
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import type { Route } from 'next'
 import type { Money } from '@/lib/menu'
-import type { BoardOrder, BoardView } from '@/lib/orders'
+import type { BoardOrder, BoardView, OrderMove } from '@/lib/orders'
 import { setOrderStatus } from '@/app/actions/order-actions'
 import BoardHeader from './board-header'
 import OrderColumns from './order-columns'
 import OrderDetailsSheet from './order-details-sheet'
 import ServedList from './served-list'
 import { useChime } from './use-chime'
+import { useSoundSetting } from '@/components/staff/use-sound-setting'
+import ReadyDrawer from './ready-drawer'
 import { useMinuteClock } from './use-minute-clock'
 import { useOrderBoard } from './use-order-board'
-import { useOrdersPwa } from './use-orders-pwa'
+import { useStaffPwa } from '@/components/staff/use-staff-pwa'
 import { useWakeLock } from './use-wake-lock'
 
 interface OrderBoardProps {
   restaurantId: string
+  /** The restaurant's short code: what its own links are built from, never the uuid. */
+  restaurantCode: string
   restaurantName: string
   /** The restaurant's currency, for the total in the details sheet. */
   money: Money
@@ -29,12 +33,18 @@ interface OrderBoardProps {
   backHref?: Route | undefined
 }
 
-export default function OrderBoard({ restaurantId, restaurantName, money, backHref }: OrderBoardProps) {
-  const chime = useChime()
+export default function OrderBoard({ restaurantId, restaurantCode, restaurantName, money, backHref }: OrderBoardProps) {
+  const { play: chime, prime } = useChime()
+  // A pass wants sound: it is the whole reason the board is there, so it starts on. Turning it
+  // off is a choice the room makes, remembered on the tablet.
+  const sound = useSoundSetting('foodify-board-sound', true, prime)
+  const announce = useCallback(() => {
+    if (sound.on) chime()
+  }, [sound.on, chime])
   const [view, setView] = useState<BoardView>('open')
-  const { orders, online, loading, arrived, refresh } = useOrderBoard(restaurantId, view, chime)
+  const { orders, online, loading, arrived, refresh } = useOrderBoard(restaurantId, view, announce)
   const wakeLock = useWakeLock()
-  const pwa = useOrdersPwa()
+  const pwa = useStaffPwa()
   const [busyId, setBusyId] = useState<string | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
 
@@ -45,7 +55,12 @@ export default function OrderBoard({ restaurantId, restaurantName, money, backHr
   // back — and an order that left the board (served on another tablet) simply closes it.
   const openOrder = orders.find((order) => order.id === openId) ?? null
 
-  const act = async (orderId: string, action: 'accept' | 'done' | 'cancel') => {
+  // What the kitchen is working, and what is up waiting for the floor. The lanes show the first;
+  // the second is behind the drawer, because it is the floor's job and not the pass's.
+  const working = orders.filter((order) => order.status !== 'READY')
+  const ready = orders.filter((order) => order.status === 'READY')
+
+  const act = async (orderId: string, action: OrderMove) => {
     setBusyId(orderId)
     if (action !== 'accept') setOpenId(null)
     try {
@@ -66,10 +81,13 @@ export default function OrderBoard({ restaurantId, restaurantName, money, backHr
         online={online}
         loading={loading}
         onRefresh={refresh}
-        onTestSound={chime}
+        soundOn={sound.on}
+        onToggleSound={sound.toggle}
+        readyDrawer={<ReadyDrawer orders={ready} now={now} busyId={busyId} onDeliver={(order) => act(order.id, 'done')} />}
         wakeLock={wakeLock}
         pwa={pwa}
         backHref={backHref}
+        soldOutHref={`/kitchen/menu/${restaurantCode}` as Route}
       />
 
       <main className="flex-1 px-3 py-4 pb-[max(16px,env(safe-area-inset-bottom))] sm:px-4">
@@ -91,12 +109,14 @@ export default function OrderBoard({ restaurantId, restaurantName, money, backHr
           </div>
         ) : view === 'open' ? (
           <OrderColumns
-            orders={orders}
+            orders={working}
             now={now}
             busyId={busyId}
             arrived={arrived}
             onOpen={(order: BoardOrder) => setOpenId(order.id)}
-            onAdvance={(order: BoardOrder) => act(order.id, order.status === 'NEW' ? 'accept' : 'done')}
+            // One button per card, and which move it makes is the lane it is in: start it, call
+            // it up, or mark it carried out.
+            onAdvance={(order: BoardOrder) => act(order.id, order.status === 'NEW' ? 'accept' : order.status === 'ACCEPTED' ? 'ready' : 'done')}
           />
         ) : (
           <ServedList orders={orders} money={money} onOpen={(order: BoardOrder) => setOpenId(order.id)} />

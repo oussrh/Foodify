@@ -5,13 +5,25 @@ describe('nextStatus', () => {
   it('takes a new order on, and only a new one', () => {
     expect(nextStatus('NEW', 'accept')).toBe('ACCEPTED')
     expect(nextStatus('ACCEPTED', 'accept')).toBeNull()
+    expect(nextStatus('READY', 'accept')).toBeNull()
     expect(nextStatus('DONE', 'accept')).toBeNull()
     expect(nextStatus('CANCELLED', 'accept')).toBeNull()
   })
 
-  it('serves an order that is new or being prepared, and not one already finished', () => {
+  it('calls up an order the kitchen is working, and only one it is working', () => {
+    expect(nextStatus('NEW', 'ready')).toBe('READY')
+    expect(nextStatus('ACCEPTED', 'ready')).toBe('READY')
+    // Pressing Ready twice moves nothing, which is what makes two tablets safe.
+    expect(nextStatus('READY', 'ready')).toBeNull()
+    expect(nextStatus('DONE', 'ready')).toBeNull()
+    expect(nextStatus('CANCELLED', 'ready')).toBeNull()
+  })
+
+  it('carries out anything not already finished, including one never called up', () => {
+    // A kitchen that plates and hands over in one motion must not have to press twice.
     expect(nextStatus('NEW', 'done')).toBe('DONE')
     expect(nextStatus('ACCEPTED', 'done')).toBe('DONE')
+    expect(nextStatus('READY', 'done')).toBe('DONE')
     expect(nextStatus('DONE', 'done')).toBeNull()
     expect(nextStatus('CANCELLED', 'done')).toBeNull()
   })
@@ -19,6 +31,7 @@ describe('nextStatus', () => {
   it('cancels anything that has not been served', () => {
     expect(nextStatus('NEW', 'cancel')).toBe('CANCELLED')
     expect(nextStatus('ACCEPTED', 'cancel')).toBe('CANCELLED')
+    expect(nextStatus('READY', 'cancel')).toBe('CANCELLED')
     expect(nextStatus('CANCELLED', 'cancel')).toBe('CANCELLED')
     // A served order is history: the board cannot take it back.
     expect(nextStatus('DONE', 'cancel')).toBeNull()
@@ -26,9 +39,11 @@ describe('nextStatus', () => {
 })
 
 describe('the board\'s vocabulary', () => {
-  it('names every status, and the open ones are the two the kitchen works through', () => {
+  it('names every status, and the open ones are the three service works through', () => {
     for (const status of ORDER_STATUSES) expect(STATUS_LABEL[status]).toBeTruthy()
-    expect([...OPEN_STATUSES]).toEqual(['NEW', 'ACCEPTED'])
+    // READY is open, not closed: the kitchen has finished but the order has not left, and an
+    // order nobody has carried is exactly the one a board must keep showing.
+    expect([...OPEN_STATUSES]).toEqual(['NEW', 'ACCEPTED', 'READY'])
   })
 })
 
@@ -92,7 +107,7 @@ describe('itemCount', () => {
 
 describe('the two views', () => {
   it('asks for the open statuses or the finished ones, and the two sets do not overlap', () => {
-    expect(viewStatuses('open')).toEqual(['NEW', 'ACCEPTED'])
+    expect(viewStatuses('open')).toEqual(['NEW', 'ACCEPTED', 'READY'])
     expect(viewStatuses('served')).toEqual(['DONE', 'CANCELLED'])
     const open = new Set<string>(OPEN_STATUSES)
     expect(CLOSED_STATUSES.some((status) => open.has(status))).toBe(false)

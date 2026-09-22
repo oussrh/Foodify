@@ -19,6 +19,7 @@ const row = (over: Partial<Parameters<typeof serializeOrder>[0]> = {}) =>
     createdAt: new Date('2026-09-22T12:00:00Z'),
     updatedAt: new Date('2026-09-22T12:05:00Z'),
     acceptedAt: null,
+    readyAt: null,
     servedAt: null,
     placedBy: null,
     lines: [{ id: 'l1', nameEn: 'Chicken', nameFr: 'Poulet', quantity: 2, note: 'No onions' }],

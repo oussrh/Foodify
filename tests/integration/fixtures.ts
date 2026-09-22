@@ -4,6 +4,7 @@
 // each other within a test: a counter does that and is deterministic.
 import bcrypt from 'bcryptjs'
 import type { Tx } from './db'
+import { newRestaurantCode } from '@/lib/restaurant-code'
 
 // The lowest cost bcrypt accepts: the hash is compared, never cracked, in a test.
 const HASH_COST = 4
@@ -13,7 +14,11 @@ let n = 0
 const tag = () => `t${++n}`
 
 export async function restaurant(tx: Tx, name = `Test ${tag()}`, extra: { dietaryOptions?: string[] } = {}) {
-  return tx.restaurant.create({ data: { name, slug: `test-${tag()}`, defaultLocale: 'en', ...extra }, select: { id: true, slug: true, name: true } })
+  // The code is the restaurant's short name in a link; a fixture's only needs to be unique.
+  return tx.restaurant.create({
+    data: { name, slug: `test-${tag()}`, code: newRestaurantCode(), defaultLocale: 'en', ...extra },
+    select: { id: true, slug: true, name: true, code: true },
+  })
 }
 
 async function user(tx: Tx, role: 'SUPER_ADMIN' | 'RESTAURANT_ADMIN' | 'KITCHEN' | 'WAITER', restaurantIds: string[]) {
