@@ -148,7 +148,7 @@
     --destructive: 8 59% 44.5%;        /* #B4412F */
     --destructive-foreground: 0 0% 100%;
     --success: 153 55% 27%;
-    --warning: 42 100% 28%;            /* #8F6400: 4.6:1 on muted, was 4.11 at 30% */
+    --warning: 42 100% 24%;            /* #7A5600: 4.94:1 as ink on its own 12% tint over muted, the worst surface it is painted on. Was 28% (#8F6400), which cleared 4.6:1 on muted but only 3.95:1 on that tint — the warning badge. */
     --border: 47 15% 88.4%;            /* Line    #E6E4DD */
     --border-strong: 49 11% 80.6%;     /* #D3D1C8 */
     --input: 49 11% 80.6%;

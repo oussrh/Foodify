@@ -48,11 +48,31 @@ const TEXT_PAIRS: [string, string, number][] = [
   ['destructive', 'muted', 4.5],
 ]
 /**
+ * A badge writes its accent on a 12% wash of itself (`bg-warning/12 text-warning`). The browser
+ * mixes that with whatever is under it, so comparing the two tokens says nothing about what a
+ * reader sees: the wash has to be composited first, over each surface a badge sits on. Not doing
+ * so is how the warning badge shipped at 3.95:1 on a muted surface with every token pair green;
+ * the browser suite's axe scan caught it, which is the job this table now does earlier.
+ */
+const TINT = 0.12
+/** [accent, surface, minimum] — the accent as ink, over its own tint composited on the surface. */
+const TINT_PAIRS: [string, string, number][] = [
+  ['success', 'card', 4.5],
+  ['success', 'muted', 4.5],
+  ['warning', 'card', 4.5],
+  ['warning', 'muted', 4.5],
+]
+
+/** `fg` at `alpha` over `bg`: what a browser paints for a translucent fill. */
+function composite(fg: RGB, bg: RGB, alpha: number): RGB {
+  return [0, 1, 2].map((i) => Math.round(fg[i]! * alpha + bg[i]! * (1 - alpha))) as RGB
+}
+
+/**
  * Non-text UI against the surface it sits on (WCAG 1.4.11 asks 3:1 for a control's boundary).
  * The focus ring meets it. The input border does not yet: pinned at what it measures (1.46 in the
  * light theme, 1.60 in the dark) so it cannot fall further, to be raised to 3 when the token moves
- * (docs/ADOPTION_DECISIONS.md, phase 3). Surfaces painted with an alpha (bg-warning/12, the tint)
- * are composited at run time and are not computed here.
+ * (docs/ADOPTION_DECISIONS.md, phase 3).
  */
 const THEMES: { name: string; t: Record<string, RGB>; uiPairs: [string, string, number][] }[] = [
   { name: 'light', t: tokens('.light {'), uiPairs: [['ring', 'background', 3], ['input', 'background', 1.46]] },
@@ -70,5 +90,10 @@ describe.each(THEMES)('$name theme tokens', ({ t, uiPairs }) => {
 
   it.each(uiPairs)('%s against %s reads at least %s:1', (part, surface, min) => {
     expect(contrast(rgb(t, part), rgb(t, surface))).toBeGreaterThanOrEqual(min)
+  })
+
+  it.each(TINT_PAIRS)('%s on its own tint over %s reads at least %s:1', (accent, surface, min) => {
+    const ink = rgb(t, accent)
+    expect(contrast(ink, composite(ink, rgb(t, surface), TINT))).toBeGreaterThanOrEqual(min)
   })
 })

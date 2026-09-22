@@ -15,6 +15,19 @@ async function openMenu(page: Page, url: string) {
   await page.locator('[data-hydrated]').waitFor()
 }
 
+/**
+ * The run's own table, short enough to be one. `orderTable` caps a table at 20 characters, which
+ * is what a table number is; a Playwright test id is the whole test title and runs to eighty-odd,
+ * so slugging it built a table the endpoint rightly refused (400, no order, and an assertion that
+ * failed several steps later for a reason that looked nothing like the cause). Hashed, not
+ * truncated: two projects run the same title and must not collide.
+ */
+function tableFor(testId: string): string {
+  let hash = 7
+  for (const char of testId) hash = Math.imul(hash, 31) + char.charCodeAt(0)
+  return `e2e-${Math.abs(hash).toString(36)}`.slice(0, 20)
+}
+
 /** The orders this run placed, by the table it used; the table is the run's own so two workers never delete each other's. */
 async function removeOrdersFor(table: string) {
   await db().order.deleteMany({ where: { table, restaurant: { slug: SLUG } } })
@@ -22,7 +35,7 @@ async function removeOrdersFor(table: string) {
 
 test.describe('ordering', () => {
   test('adds a dish from a row, changes it in the sheet, and sends the order with the table from the link', async ({ page }, info) => {
-    const table = `e2e-${info.testId.replace(/[^a-z0-9]/gi, '')}`
+    const table = tableFor(info.testId)
     await openMenu(page, `${MENU}?lang=en&table=${table}`)
 
     // The row's + puts one in the order and then shows the count.
