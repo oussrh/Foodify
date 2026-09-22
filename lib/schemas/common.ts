@@ -10,6 +10,19 @@ import { ALLERGEN_OPTIONS, DIETARY_OPTIONS } from '@/lib/menu'
 export const uuid = z.uuid()
 /** An address as every form and action takes it; the two sign-in schemas alone (`otpRequest`, `credentials`) stay looser, on purpose. */
 export const email = z.email('Please enter a valid email address')
+/**
+ * How a device account signs in: a short name typed on a tablet keyboard, not an address. Letters,
+ * digits, dot, dash and underscore, folded to lower case so `Kitchen1` and `kitchen1` are one name
+ * and nobody is locked out by a capital.
+ */
+export const username = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .min(3, 'A username is at least 3 characters')
+  .max(32, 'A username is at most 32 characters')
+  .regex(/^[a-z0-9._-]+$/, 'A username may use letters, digits, dot, dash and underscore')
+
 /** What an admin sets for someone else, at creation or on a reset: temporary, hence short. A user's own change is `passwordChange`. */
 export const password = z.string().min(6, 'Password must be at least 6 characters')
 /** A monetary amount as it travels: a decimal string with at most two fraction digits, normalised to two (API.1; never a float). */

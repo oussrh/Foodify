@@ -81,12 +81,56 @@ export async function requireSuperAdminPage() {
 export async function requireRestaurantAccess(where: { id: string } | { slug: string }) {
   const user = await requireUser()
   if (user.role === 'SUPER_ADMIN') return user
+  // A tablet and a waiter are assigned to the restaurant but manage nothing: they are refused
+  // here and admitted only by the board guards, so adding one to a restaurant never grants a
+  // write to its menu, its dishes, its settings or its people.
+  if (user.role === 'KITCHEN' || user.role === 'WAITER') throw new AuthError('Forbidden', 403)
 
   const restaurant = await prisma.restaurant.findFirst({
     where: { ...where, users: { some: { id: user.id } } },
     select: { id: true },
   })
   if (!restaurant) throw new AuthError('Forbidden', 403)
+  return user
+}
+
+/**
+ * Who may READ one restaurant's orders: a super admin, and anyone assigned to that restaurant —
+ * its managers, its kitchen tablets and its waiters. Everything else a restaurant has (its menu,
+ * its dishes, its settings, its people) goes through `requireRestaurantAccess`, which refuses a
+ * tablet and a waiter.
+ */
+export async function requireBoardAccess(restaurantId: string) {
+  const user = await requireUser()
+  if (user.role === 'SUPER_ADMIN') return user
+
+  const restaurant = await prisma.restaurant.findFirst({
+    where: { id: restaurantId, users: { some: { id: user.id } } },
+    select: { id: true },
+  })
+  if (!restaurant) throw new AuthError('Forbidden', 403)
+  return user
+}
+
+/**
+ * Who may MOVE one of its orders along — take it on, serve it, cancel it. The same people as
+ * `requireBoardAccess` minus the waiters: a waiter reads the board to answer "is my food coming?",
+ * and the kitchen alone says what has been made.
+ */
+export async function requireBoardAction(restaurantId: string) {
+  const user = await requireBoardAccess(restaurantId)
+  if (user.role === 'WAITER') throw new AuthError('Forbidden', 403)
+  return user
+}
+
+/**
+ * Who may place an order for a table from inside the restaurant: a super admin, a manager, or a
+ * waiter of that restaurant. A kitchen tablet is refused — it cooks what comes in, it does not
+ * write orders. Answers the user, whose id the order is stamped with.
+ */
+export async function requireOrderingStaff(restaurantId: string) {
+  const user = await requireBoardAccess(restaurantId)
+  if (user.role === 'KITCHEN') throw new AuthError('Forbidden', 403)
   return user
 }
 

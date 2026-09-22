@@ -9,7 +9,7 @@ import { loadMenu } from '@/lib/menu-loader'
 import { menuMetadata, menuViewport } from '@/lib/menu-metadata'
 import { restaurantJsonLd } from '@/lib/structured-data'
 
-type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<{ lang?: string; filter?: string }> }
+type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<{ lang?: string; filter?: string; table?: string }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -59,6 +59,7 @@ export default async function RestaurantRoute({ params, searchParams }: Props) {
         origin={origin}
         urlLang={sp?.lang ?? null}
         urlFilter={sp?.filter ?? null}
+        urlTable={sp?.table ?? null}
       />
     </>
   )

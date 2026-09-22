@@ -30,6 +30,16 @@ export type ClientInput = z.infer<typeof clientInput>
 /** `clientPatch` after parsing. */
 export type ClientPatch = z.infer<typeof clientPatch>
 
+/**
+ * A manager added to one restaurant from its People tab, by address. The address is typed rather
+ * than picked: a list of candidates is every other client's managers, which one restaurant may
+ * not see. `password` is read only when the address is new here — an account that already exists
+ * keeps the password it has, and joins the restaurant with it.
+ */
+export const restaurantManager = z.object({ email, password: password.optional() })
+/** `restaurantManager` after parsing. */
+export type RestaurantManager = z.infer<typeof restaurantManager>
+
 /** The address a manager asks to move to; not checked for being taken, here or by initiateEmailChange: a taken one fails at the confirmation, on the unique constraint. */
 export const emailChange = z.object({ email })
 /** `emailChange` after parsing. */
@@ -47,6 +57,10 @@ export const passwordChange = z.object({
 })
 /** `passwordChange` after parsing; `updatePassword` takes it after the action's parse. */
 export type PasswordChange = z.infer<typeof passwordChange>
+/** The signed-in user's own second-factor switch (Account settings, both portals); `setMfaEnabled` takes it after the action's parse. */
+export const mfaSetting = z.object({ mfaEnabled: z.boolean() })
+/** `mfaSetting` after parsing. */
+export type MfaSetting = z.infer<typeof mfaSetting>
 /** `crypto.randomBytes(32).toString('hex')`: the change-email and verify tokens. */
 export const emailToken = z.string().regex(/^[0-9a-f]{64}$/, 'Invalid token')
 
@@ -62,5 +76,5 @@ export const credentials = z.object({
   email: z.string().min(1),
   password: z.string().min(1),
   code: z.string().optional(),
-  role: z.enum(['SUPER_ADMIN', 'RESTAURANT_ADMIN']).optional(),
+  role: z.enum(['SUPER_ADMIN', 'RESTAURANT_ADMIN', 'KITCHEN', 'WAITER']).optional(),
 })

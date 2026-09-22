@@ -63,3 +63,12 @@ RESEND_FROM="Foodify <no-reply@yourdomain.com>"
 ```
 
 If the `RESEND_FROM` value is missing Resend will return a `missing_required_field` error.
+
+The order confirmation a diner receives goes out over [Brevo](https://www.brevo.com)'s
+transactional SMS. The account is not linked yet: with these unset nothing is sent, the order is
+still taken, and the server logs `order: placed, confirmation not sent`.
+
+```bash
+BREVO_API_KEY="your-brevo-api-key"
+BREVO_SMS_SENDER="Foodify"   # the sender name or number Brevo has approved
+```

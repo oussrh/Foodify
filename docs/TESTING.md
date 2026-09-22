@@ -35,7 +35,7 @@ change with the new number in the log of `STANDARDS_PROGRESS.md`.
 
 | Area | Statements | Branches | Functions | Lines | Set on |
 |---|---|---|---|---|---|
-| `lib/**` | 96.7 | 91.7 | 94.0 | 96.9 | 2026-09-21, phase 10 (from 93.0 / 81.3 / 79.4 / 93.3 set on 2026-09-20; phases 4 to 9 added the schema, env, mail, sign-in, list, loader and payload tests) |
+| `lib/**` | 97.5 | 93.5 | 97.5 | 97.7 | 2026-09-22, with the insights report's arithmetic (from 96.7 / 91.7 / 94.0 / 96.9 on 2026-09-21, phase 10, itself from 93.0 / 81.3 / 79.4 / 93.3 on 2026-09-20). `lib/insights-loader.ts` is excluded like the other loaders: it is grouped SQL, held by `tests/integration/insights.test.ts` |
 | `lib/menu.ts` (money display, per file) | 88.8 | 85 | 63.6 | 86.2 | 2026-09-20 |
 | `lib/totp.ts` (2FA check, per file) | 100 | 100 | 100 | 100 | 2026-09-20 |
 | `server/**` (the logger's redaction, the drain) | 100 | 100 | 100 | 100 | 2026-09-21, phase 13 |

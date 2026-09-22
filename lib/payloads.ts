@@ -5,8 +5,8 @@ import type { Prisma } from '@/generated/prisma/client'
 
 /** What a delete answers: the id and nothing else, so a client cannot read a row that no longer exists. */
 export const idOnly = { id: true } satisfies Prisma.UserSelect & Prisma.DishSelect & Prisma.RestaurantSelect
-/** A user as a mutation answers it: never the password hash, the OTP or a reset token (a User row carries all three). */
-export const userPayload = { id: true, email: true } satisfies Prisma.UserSelect
+/** A user as a mutation answers it: never the password hash, the OTP or a reset token (a User row carries all three). `username` is how a device account is known; null for a person. */
+export const userPayload = { id: true, email: true, username: true } satisfies Prisma.UserSelect
 /** A dish as a mutation answers it: the two flags the lists toggle; `price` (a Decimal the wire cannot carry) stays off it. */
 export const dishPayload = { id: true, isActive: true, isMostPurchased: true } satisfies Prisma.DishSelect
 /** An ingredient as a mutation answers it: what the ingredient manager renders in place. */

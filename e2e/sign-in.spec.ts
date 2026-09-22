@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { expectNoSeriousA11yViolations } from './axe'
+import { auditAccount, signInAs } from './session'
 
 test.describe('sign-in', () => {
   for (const portal of ['manager', 'admin'] as const) {
@@ -26,5 +27,13 @@ test.describe('sign-in', () => {
   test('an /mfa visit with nothing pending returns to the login', async ({ page }) => {
     await page.goto('/manager/mfa')
     await expect(page).toHaveURL(/\/manager\/login$/)
+  })
+
+  // The second factor is a per-account switch (Account settings): off, the password alone lands
+  // on the home with no code step, and no code is stored for the account.
+  test('an account with the second factor off signs in on the password alone', async ({ page }, info) => {
+    const account = await auditAccount('manager', info.testId, { mfa: false })
+    await signInAs(page, 'manager', account.email, { mfa: false })
+    await account.remove()
   })
 })

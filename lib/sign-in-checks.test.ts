@@ -5,11 +5,11 @@ import type { User } from '@/generated/prisma/client'
 
 type Update = { where: { id: string }; data: Record<string, unknown> }
 // vi.mock is hoisted above these, so the stand-ins come from vi.hoisted.
-const { findUnique, update } = vi.hoisted(() => ({
-  findUnique: vi.fn(),
+const { findFirst, update } = vi.hoisted(() => ({
+  findFirst: vi.fn(),
   update: vi.fn<(args: Update) => Promise<object>>(async () => ({})),
 }))
-vi.mock('@/lib/prisma', () => ({ default: { user: { findUnique, update } } }))
+vi.mock('@/lib/prisma', () => ({ default: { user: { findFirst, update } } }))
 
 import { assertPortalRole, completeSecondFactor, userWithPassword } from './sign-in-checks'
 
@@ -22,6 +22,7 @@ const user = (overrides: Partial<User> = {}): User => ({
   email: 'owner@foodify.test',
   passwordHash,
   role: 'RESTAURANT_ADMIN',
+  mfaEnabled: true,
   totpSecret: null,
   emailOtpCode: null,
   emailOtpExpires: null,
@@ -42,16 +43,23 @@ describe('userWithPassword', () => {
   })
 
   it('is null for an unknown account and for a wrong password', async () => {
-    findUnique.mockResolvedValueOnce(null)
+    findFirst.mockResolvedValueOnce(null)
     expect(await userWithPassword('nobody@foodify.test', 'correct horse')).toBeNull()
-    findUnique.mockResolvedValueOnce(user())
+    findFirst.mockResolvedValueOnce(user())
     expect(await userWithPassword('owner@foodify.test', 'wrong')).toBeNull()
   })
 
   it('is the account when the password matches', async () => {
-    findUnique.mockResolvedValueOnce(user())
+    findFirst.mockResolvedValueOnce(user())
     expect(await userWithPassword('owner@foodify.test', 'correct horse')).toMatchObject({ id: 'u1' })
-    expect(findUnique).toHaveBeenCalledWith({ where: { email: 'owner@foodify.test' } })
+  })
+
+  // A person types an address and a device types the name it was set up with: one lookup answers
+  // both, and a name typed with a capital on a tablet keyboard still finds its account.
+  it('looks the account up by address or by username, folding the name to lower case', async () => {
+    findFirst.mockResolvedValueOnce(user())
+    await userWithPassword('Kitchen1', 'correct horse')
+    expect(findFirst).toHaveBeenCalledWith({ where: { OR: [{ email: 'Kitchen1' }, { username: 'kitchen1' }] } })
   })
 })
 
@@ -111,5 +119,15 @@ describe('completeSecondFactor', () => {
     await expect(completeSecondFactor(user(), undefined)).rejects.toThrow('Two-factor code required')
     await expect(completeSecondFactor(user(), '123456')).rejects.toThrow('Two-factor code required')
     expect(update).not.toHaveBeenCalled()
+  })
+
+  it('stamps the login on the password alone when the second factor is off, whatever the account carries', async () => {
+    await completeSecondFactor(user({ mfaEnabled: false }), undefined)
+    expect(update).toHaveBeenCalledWith({ where: { id: 'u1' }, data: { lastLogin: now } })
+    // a stale code or a secret does not bring the factor back
+    const stale = user({ mfaEnabled: false, emailOtpCode: '123456', emailOtpExpires: new Date(now.getTime() + 60_000), totpSecret: secret })
+    await completeSecondFactor(stale, undefined)
+    expect(update).toHaveBeenCalledTimes(2)
+    expect(update).toHaveBeenLastCalledWith({ where: { id: 'u1' }, data: { lastLogin: now } })
   })
 })

@@ -2,9 +2,10 @@
 // A signed-in session for the browser suite, through the real two-step sign-in: the first step
 // stores a random code and mails it (nothing is sent without a Resend key); the test then writes
 // a code it knows over the stored one, the way the mail would have told the user, and submits
-// it. The app is not weakened for the test: the credentials callback still refuses a sign-in
-// without a pending code. Each test signs in as an account of its own (created here, removed
-// after), so two workers never race on one row's code. The client reads DATABASE_URL like the
+// it. The app is not weakened for the test: an audit account has the second factor on unless the
+// test asks for it off, and the credentials callback still refuses such a sign-in without a
+// pending code. Each test signs in as an account of its own (created here, removed after), so
+// two workers never race on one row's code. The client reads DATABASE_URL like the
 // server under test (dotenv, as prisma.config.ts does).
 import 'dotenv/config'
 import bcrypt from 'bcryptjs'
@@ -34,8 +35,8 @@ export async function seededIds() {
   return { restaurantId: restaurant.id, dishId: dish.id, adminId: admin.id, managerId: manager.id }
 }
 
-/** An account for this test alone (its name carries the portal and a tag, the worker's project); `remove` deletes it. */
-export async function auditAccount(portal: Portal, tag: string) {
+/** An account for this test alone (its name carries the portal and a tag, the worker's project), with the second factor on unless `mfa` is false; `remove` deletes it. */
+export async function auditAccount(portal: Portal, tag: string, { mfa = true } = {}) {
   const email = `audit-${portal}-${tag.replace(/[^a-z0-9]/gi, '')}@foodify.test`
   const restaurant = await db().restaurant.findUniqueOrThrow({ where: { slug: SEEDED_SLUG }, select: { id: true } })
   await db().user.deleteMany({ where: { email } })
@@ -43,6 +44,7 @@ export async function auditAccount(portal: Portal, tag: string) {
     data: {
       email,
       passwordHash: await bcrypt.hash(PASSWORD, 4),
+      mfaEnabled: mfa,
       role: portal === 'admin' ? 'SUPER_ADMIN' : 'RESTAURANT_ADMIN',
       ...(portal === 'manager' ? { restaurants: { connect: { id: restaurant.id } } } : {}),
     },
@@ -50,18 +52,28 @@ export async function auditAccount(portal: Portal, tag: string) {
   return { email, remove: () => db().user.deleteMany({ where: { email } }) }
 }
 
-/** Signs the page in through the portal's sign-in flow as `email` (an audit account) and lands on its home. */
-export async function signInAs(page: Page, portal: Portal, email: string) {
+/**
+ * Signs the page in through the portal's sign-in flow as `email` (an audit account) and lands on
+ * the portal; with `mfa` false the password alone is expected to do it. Where exactly it lands is
+ * the portal's business — an admin gets the overview, a manager with one restaurant is sent
+ * straight into that restaurant — so what is asserted is that it is inside the portal, is not the
+ * login page under it (navigating away earlier aborts the sign-in request and no cookie is ever
+ * set), and has rendered a page rather than an error.
+ */
+export async function signInAs(page: Page, portal: Portal, email: string, { mfa = true } = {}) {
   await page.goto(`/${portal}/login`)
   await page.getByLabel(/email/i).fill(email)
   await page.getByLabel(/password/i).fill(PASSWORD)
   await page.getByRole('button', { name: /sign in|continue|log in/i }).click()
-  const code = page.getByLabel(/code/i)
-  await expect(code).toBeVisible()
-  await db().user.update({ where: { email }, data: { emailOtpCode: CODE, emailOtpExpires: new Date(Date.now() + 10 * 60 * 1000) } })
-  await code.fill(CODE)
-  await page.getByRole('button', { name: /^sign in$/i }).click()
-  // The home, not the login page under it: navigating away earlier aborts the sign-in request and no cookie is ever set.
-  await expect(page).toHaveURL(new RegExp(`/${portal}$`))
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Overview')
+  if (mfa) {
+    const code = page.getByLabel(/code/i)
+    await expect(code).toBeVisible()
+    await db().user.update({ where: { email }, data: { emailOtpCode: CODE, emailOtpExpires: new Date(Date.now() + 10 * 60 * 1000) } })
+    await code.fill(CODE)
+    await page.getByRole('button', { name: /^sign in$/i }).click()
+  }
+  // One assertion, not two: Playwright retries until it holds, and `/{portal}/login` satisfies a
+  // bare "inside the portal" the moment it is clicked, before the sign-in has navigated anywhere.
+  await expect(page).toHaveURL(new RegExp(`/${portal}/(?!login|mfa)|/${portal}$`))
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 }

@@ -18,9 +18,14 @@ function restaurantTabs(portal: ShellPortal, id: string) {
     { href: `${base}/info` as Route, label: 'Info' },
     { href: `${base}/menu` as Route, label: 'Menu' },
     { href: `${base}/dishes` as Route, label: 'Dishes' },
+    // Orders inside the shell: the history, and the link to the tablet board (which is outside it).
+    { href: `${base}/orders` as Route, label: 'Orders' },
+    { href: `${base}/tables` as Route, label: 'Tables' },
+    { href: `${base}/insights` as Route, label: 'Insights' },
     { href: `${base}/edit` as Route, label: 'Settings' },
+    // Every restaurant has its people; what a reader may do with them is the page's business.
+    { href: `${base}/users` as Route, label: 'People' },
   ]
-  if (portal === 'admin') tabs.push({ href: `${base}/users` as Route, label: 'People' })
   return tabs
 }
 

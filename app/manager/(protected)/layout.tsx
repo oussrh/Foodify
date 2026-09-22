@@ -2,6 +2,8 @@ import AppShell from '@/components/shell/app-shell'
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
+import type { Route } from 'next'
+import { ROLE_HOME } from '@/lib/roles'
 
 interface LayoutProps {
   children: React.ReactNode
@@ -23,11 +25,10 @@ export default async function ManagerLayout({ children }: LayoutProps) {
     redirect('/manager/login')
   }
 
+  // Anyone who is not a manager is sent to their own home rather than to the front page: a
+  // tablet to its board, a waiter to its tables, a super admin to the admin portal.
   if (user.role !== 'RESTAURANT_ADMIN') {
-    if (user.role === 'SUPER_ADMIN') {
-      redirect('/admin')
-    }
-    redirect('/')
+    redirect(ROLE_HOME[user.role] as Route)
   }
 
   return (

@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { BarChart3, Building2, Calendar, ExternalLink, Lightbulb, Mail, Settings, Star } from 'lucide-react'
-import ResetPasswordButton from '@/components/reset-password-button'
+import SetPasswordButton from '@/components/admin/set-password-button'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -68,7 +68,7 @@ function UserOverviewCard({ createdAt, stats }: { createdAt: Date; stats: UserSt
   )
 }
 
-function UserQuickActionsCard({ id, restaurants }: { id: string; restaurants: { id: string; name: string }[] }) {
+function UserQuickActionsCard({ id, email, restaurants }: { id: string; email: string; restaurants: { id: string; name: string }[] }) {
   return (
     <Card className="border-0">
       <CardHeader className="border-b">
@@ -88,9 +88,7 @@ function UserQuickActionsCard({ id, restaurants }: { id: string; restaurants: { 
           </Link>
         </Button>
               
-        <div className="w-full">
-          <ResetPasswordButton id={id} />
-        </div>
+        <SetPasswordButton userId={id} email={email} />
               
         {restaurants.length > 0 && (
           <div className="space-y-2">
@@ -151,7 +149,7 @@ function UserTipsCard() {
             <Star className="h-4 w-4 text-warning mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-medium text-foreground">Password Reset</p>
-              <p className="text-xs text-muted-foreground">Use the reset button to generate new temporary passwords</p>
+              <p className="text-xs text-muted-foreground">You type the new password and hand it over; ask them to change it</p>
             </div>
           </div>
         </div>
@@ -162,20 +160,21 @@ function UserTipsCard() {
 
 interface UserEditAsideProps {
   id: string
+  email: string
   createdAt: Date
   restaurants: { id: string; name: string }[]
   stats: UserStats
 }
 
 /** The right column of the user edit page: the overview, the quick actions, the tips. */
-export function UserEditAside({ id, createdAt, restaurants, stats }: UserEditAsideProps) {
+export function UserEditAside({ id, email, createdAt, restaurants, stats }: UserEditAsideProps) {
   return (
     <div className="space-y-6">
       {/* User Overview */}
       <UserOverviewCard createdAt={createdAt} stats={stats} />
 
       {/* Quick Actions */}
-      <UserQuickActionsCard id={id} restaurants={restaurants} />
+      <UserQuickActionsCard id={id} email={email} restaurants={restaurants} />
 
       {/* Tips */}
       <UserTipsCard />

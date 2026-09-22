@@ -18,6 +18,14 @@ enum Locale {
 enum UserRole {
   SUPER_ADMIN
   RESTAURANT_ADMIN
+  // A tablet in the kitchen, not a person: it signs in with a password, never a second factor,
+  // and may do one thing only — work its restaurant's order board (lib/auth-guard's
+  // requireBoardAccess). Every management guard refuses it.
+  KITCHEN
+  // Someone on the floor, taking an order for a guest who would rather not use their own phone.
+  // Places orders and reads the board; it cannot move an order along (that is the kitchen's), and
+  // every management guard refuses it.
+  WAITER
 }
 
 enum DeviceType {
@@ -52,6 +60,13 @@ model Restaurant {
   openingHours    String? // JSON string with operating hours
   socialMedia     String? // JSON string with social media links
   socialDisplay   String         @default("icons") // icons | text: how the menu footer shows the social links
+  // Ordering (Settings → General): with it on, the public menu shows the cart and POST /api/orders
+  // takes an order; nextOrderNumber is the number the next order gets, incremented atomically.
+  orderingEnabled Boolean        @default(false)
+  nextOrderNumber Int            @default(1)
+  // How many tables the room has: the per-table QR sheet makes one code per table (1..N), each
+  // opening the menu with its number, and 0 means no per-table codes.
+  tableCount      Int            @default(0)
   // Design/Branding
   coverImageUrl   String?
   coverImageStyle String? // "cover" or "repeat"
@@ -66,13 +81,21 @@ model Restaurant {
   users           User[]
   categories      MenuCategory[]
   dishes          Dish[]
+  orders          Order[]
+  cartAdds        CartAdd[]
 }
 
 model User {
   id                      String           @id @default(uuid())
+  // Every account has one, but only a person's is an address anyone reads: a device account's is
+  // derived from its username on the reserved `.invalid` domain, which can never be routed.
   email                   String           @unique
+  // How a device account signs in. People sign in with their address and have none; a tablet or a
+  // waiter has no mailbox, so they are given a name instead.
+  username                String?          @unique
   emailVerified           DateTime?
   passwordHash            String
+  mfaEnabled              Boolean          @default(false) // the second factor is opt-in: off, a password alone opens a session
   totpSecret              String?
   emailOtpCode            String?
   emailOtpExpires         DateTime?
@@ -84,6 +107,7 @@ model User {
   role                    UserRole
   restaurants             Restaurant[]
   activityLogs            ActivityLog[]
+  ordersPlaced            Order[]
   createdAt               DateTime         @default(now())
   lastLogin               DateTime?
   passwordResetToken      String?
@@ -136,6 +160,8 @@ model Dish {
   createdAt       DateTime         @default(now())
   ingredients     Ingredient[]
   views           DishView[]
+  cartAdds        CartAdd[]
+  orderLines      OrderLine[]
 }
 
 model Ingredient {
@@ -153,6 +179,26 @@ model DishView {
   viewedAt   DateTime   @default(now())
   deviceType DeviceType
   arViewed   Boolean
+
+  // The insights report reads views by restaurant and time, reachable only through the dish.
+  @@index([dishId, viewedAt])
+}
+
+// A guest putting a dish in their order on the public menu: the step between reading the menu and
+// sending an order, which nothing else records (a cart lives in the guest's browser and most are
+// never sent). One row per add, so the insights report can say how far down the funnel a menu
+// gets. `restaurantId` is carried rather than joined through the dish: every read of this table
+// groups by restaurant and time. A waiter's cart is not counted here — a staff order is an order,
+// and the report counts it as one.
+model CartAdd {
+  id           String     @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  dishId       String
+  dish         Dish       @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@index([restaurantId, createdAt])
 }
 
 model ActivityLog {
@@ -166,6 +212,61 @@ model ActivityLog {
   ipAddress String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum OrderStatus {
+  NEW
+  ACCEPTED
+  DONE
+  CANCELLED
+}
+
+// A guest's order from the public menu (POST /api/orders): the table it is for, the phone the
+// confirmation goes to, one line per dish with the name and price as they were, the subtotal the
+// server computed. `number` is the short label the kitchen sees (#12), per restaurant, from
+// Restaurant.nextOrderNumber. `phone` is personal data: never logged (server/log.ts).
+model Order {
+  id           String      @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  number       Int
+  table        String
+  // The guest's number, for the confirmation text. Empty when a waiter took the order at the
+  // table: there is nobody to text, and `placedById` says who took it instead.
+  phone        String
+  placedById   String?
+  placedBy     User?       @relation(fields: [placedById], references: [id], onDelete: SetNull)
+  note         String?
+  status       OrderStatus @default(NEW)
+  subtotal     Decimal     @db.Decimal(10, 2)
+  currency     String? // the restaurant's ISO 4217 code when the order was placed
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  // When the kitchen took the order on and when it went out: stamped once by the board's action,
+  // so the history can say how long a table waited before it was started and before it was served.
+  // `updatedAt` cannot answer that — it moves again on any later change.
+  acceptedAt   DateTime?
+  servedAt     DateTime?
+  lines        OrderLine[]
+
+  @@unique([restaurantId, number])
+  @@index([restaurantId, status, createdAt])
+}
+
+// One dish of an order, its name and unit price copied at the time: a dish edited or deleted
+// later (dishId is then null) leaves the order as it was placed. `note` is what the guest asked
+// for on this dish ("no onions"), one per dish rather than per portion.
+model OrderLine {
+  id        String  @id @default(uuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  dishId    String?
+  dish      Dish?   @relation(fields: [dishId], references: [id], onDelete: SetNull)
+  nameEn    String
+  nameFr    String
+  unitPrice Decimal @db.Decimal(10, 2)
+  quantity  Int
+  note      String?
 }
 
 model UserSessionLog {

@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-21"
+last_verified: "2026-09-22"
 ---
 
 # Lessons
@@ -15,6 +15,65 @@ last_verified: "2026-09-21"
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
+
+## 2026-09-22 · A contract in a comment is not a contract
+
+`DishPhoto` renders `next/image` with `fill` and left the positioning to its callers — a comment
+said "both pass their own sizing on the wrapper". Three of the four callers wrote `relative`. The
+fourth, the cart line, did not, so the photo positioned against the sheet instead of against its
+48px box and covered the order: the heading, the lines, the subtotal and the form were all still
+there, black on white, behind a stretched image. Nothing threw, nothing was missing from the DOM,
+and every value read back correct — which is why it was read as an empty sheet and looked for in
+the data for weeks. Next had been warning about it in the console on every render the whole time.
+
+Two things to take from it. A component that needs something of its parent should provide it
+itself rather than document it; the comment cost more than the `<span className="relative">`
+would have. And when a page renders blank but the accessibility tree is complete, stop looking at
+the data: hit-test the element that should be visible (`document.elementFromPoint`) and see what
+is actually on top of it.
+
+## 2026-09-22 · A password is the account, not one restaurant's key
+
+Letting a restaurant run its own People tab meant letting a manager set a colleague's password.
+Within one restaurant that is fine — managers there are already peers with full control of the
+menu, the dishes and the settings. But an account is not scoped to a restaurant: a manager who
+also runs a second one carries that access inside the same password, so resetting it from the
+first restaurant hands over the second. The guard is therefore not "may I manage this
+restaurant" but "does this account reach further than the restaurant we share": a reset is
+refused when the target manages more than one, and left to a super admin. Removal needed no such
+limit, because it detaches one restaurant and touches nothing else.
+
+The same reading says why the control it replaced could only ever have been a super admin's: it
+offered a checkbox list of every manager on the platform, so using it at all meant reading other
+clients' people. Typing the address does the same job and shows nothing. When a permission feels
+like it belongs to a tenant, check what the object it acts on can reach outside that tenant —
+the answer is usually the boundary, not the caller's role.
+
+## 2026-09-22 · Name the property, not the member
+
+`setMfaEnabled` refused a second factor to `KITCHEN`. A waiter account, added later, was not
+`KITCHEN`, so it could turn one on — and would then have been locked out for good, because the
+code is mailed and a device's address is on `staff.invalid`, which can never be routed. The guard
+had been written against the role in front of it rather than against what made that role
+different: it has no mailbox. It now reads `isDeviceAccount()`, defined once beside the roles, so
+the next device role is covered the day it is added rather than the day someone remembers this
+call site. The same reading found the manager layout sending an unknown role to the front page
+because it enumerated two of the four; it now reads `ROLE_HOME`, which is total by its type.
+A condition that lists members is a condition that goes stale as the set grows: ask what the
+members have in common, put that somewhere the set lives, and let the type make it exhaustive.
+
+## 2026-09-22 · A value derived at the wrong moment is a bug types cannot see
+
+The guest's cart shipped two faults with one root. The per-dish note was trimmed on every
+keystroke, so the space the guest had just typed was swallowed and the next letter landed against
+the last word ("No onions" typed as "Noonions"); trimming belongs where the value leaves (the
+send, and the zod parse), not where it is stored. The menu row's `+` counted from
+`quantityOf(cart)` as the render had it, so two taps in one frame both computed the same next
+quantity and the second was lost; it now counts from the stored cart. Neither was visible to
+TypeScript, ESLint or the unit tests — both passed every gate and only appeared under real typing
+and real tapping in a browser. A derived value has a moment as well as a formula: ask which
+snapshot it is reading, and whether anything can happen between that read and its use. The same
+question is why `useClientValue` exists here rather than a setState in an effect.
 
 ## 2026-09-21 · A library's default is a fact to read, not to assume
 

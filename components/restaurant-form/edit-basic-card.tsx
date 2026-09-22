@@ -1,8 +1,8 @@
 // components/restaurant-form/edit-basic-card.tsx
 // The "Basic Information" card of the settings form's General tab: the identity fields (name,
-// slug, tagline, description, cuisine, the dietary options offered) and the money and language fields
-// (currency, its read-only symbol carried by hidden inputs, default language). Every change
-// dirties the form.
+// slug, tagline, description, cuisine, the dietary options offered), the money and language fields
+// (currency, its read-only symbol carried by hidden inputs, default language) and the online
+// ordering switch. Every change dirties the form.
 'use client'
 
 import type { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form'
@@ -13,6 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building2, Globe, ChefHat, CreditCard } from 'lucide-react'
 import DietaryOptionsField from './dietary-options-field'
+import OrderingField from './ordering-field'
 import { CURRENCIES, currencySymbolFor } from './currencies'
 import type { EditRestaurantValues } from './edit-restaurant-schema'
 
@@ -23,9 +24,11 @@ type Props = {
   defaultValues: EditRestaurantValues
   currencySymbol: string | undefined
   dietaryOptions: string[]
+  orderingEnabled: boolean
+  tableCount: number
 }
 
-function IdentityFields({ register, errors, setValue, dietaryOptions }: Omit<Props, 'currencySymbol' | 'defaultValues'>) {
+function IdentityFields({ register, errors, setValue, dietaryOptions }: Omit<Props, 'currencySymbol' | 'defaultValues' | 'orderingEnabled' | 'tableCount'>) {
   return (
     <>
       <div className="grid md:grid-cols-2 gap-6">
@@ -99,7 +102,7 @@ function IdentityFields({ register, errors, setValue, dietaryOptions }: Omit<Pro
   )
 }
 
-function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omit<Props, 'errors' | 'dietaryOptions'>) {
+function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omit<Props, 'errors' | 'dietaryOptions' | 'orderingEnabled' | 'tableCount'>) {
   return (
     <>
       {/* Currency Selection */}
@@ -172,6 +175,14 @@ export default function EditBasicCard(props: Props) {
       <CardContent className="p-6 space-y-6">
         <IdentityFields register={props.register} errors={props.errors} setValue={props.setValue} dietaryOptions={props.dietaryOptions} />
         <LocaleFields register={props.register} setValue={props.setValue} defaultValues={props.defaultValues} currencySymbol={props.currencySymbol} />
+        <div className="border-t border-border pt-6">
+          <OrderingField
+            value={props.orderingEnabled}
+            onChange={(next) => props.setValue('orderingEnabled', next, { shouldDirty: true })}
+            tableCount={props.tableCount}
+            onTableCount={(next) => props.setValue('tableCount', next, { shouldDirty: true })}
+          />
+        </div>
       </CardContent>
     </Card>
   )

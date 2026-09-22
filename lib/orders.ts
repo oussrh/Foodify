@@ -1,0 +1,129 @@
+// lib/orders.ts
+// The kitchen board's vocabulary: an order as the board renders it (plain JSON, no Decimal),
+// what each status means and which one a staff action moves it to. Client-safe: the board and
+// the endpoint that feeds it share these, so a status never means two things.
+
+/** Where an order stands. `NEW` is what POST /api/orders writes; the rest are the board's own doing. */
+export const ORDER_STATUSES = ['NEW', 'ACCEPTED', 'DONE', 'CANCELLED'] as const
+/** One of ORDER_STATUSES; the same set as Prisma's OrderStatus enum. */
+export type OrderStatus = (typeof ORDER_STATUSES)[number]
+
+/** The two the board works through, in the order the kitchen does: what is waiting, then what is being made. */
+export const OPEN_STATUSES = ['NEW', 'ACCEPTED'] as const satisfies readonly OrderStatus[]
+/** The two an order ends on: off the working board, but not gone — the Served view lists them. */
+export const CLOSED_STATUSES = ['DONE', 'CANCELLED'] as const satisfies readonly OrderStatus[]
+
+/** Which orders the board is showing: the ones being worked, or the ones already finished. */
+export type BoardView = 'open' | 'served'
+
+/** The statuses a view asks the endpoint for. */
+export function viewStatuses(view: BoardView): readonly OrderStatus[] {
+  return view === 'open' ? OPEN_STATUSES : CLOSED_STATUSES
+}
+
+/** Whether an order is finished: the Served view shows these, and they take no further move. */
+export function isClosed(status: OrderStatus): boolean {
+  return (CLOSED_STATUSES as readonly OrderStatus[]).includes(status)
+}
+
+/** What the board calls each status. */
+export const STATUS_LABEL: Record<OrderStatus, string> = {
+  NEW: 'New',
+  ACCEPTED: 'Preparing',
+  DONE: 'Served',
+  CANCELLED: 'Cancelled',
+}
+
+/** One dish of an order as the board shows it: the name as it was ordered, how many, what the guest asked for. */
+export interface BoardLine {
+  id: string
+  nameEn: string
+  nameFr: string
+  quantity: number
+  note: string | null
+}
+
+/** When an order was placed, taken on and served; the ones that have not happened yet are null. */
+export interface OrderMoments {
+  createdAt: string
+  acceptedAt: string | null
+  servedAt: string | null
+}
+
+/**
+ * How long each stage took, in whole minutes, or null while that stage has not finished: `toStart`
+ * is the table's wait before the kitchen took it on, `toServe` the cooking, `total` the wait the
+ * guest actually felt. A clock that ran backwards (a device with the wrong time) reads 0, never
+ * a negative duration.
+ */
+export function orderTimings(moments: OrderMoments): { toStart: number | null; toServe: number | null; total: number | null } {
+  const placed = new Date(moments.createdAt).getTime()
+  const accepted = moments.acceptedAt ? new Date(moments.acceptedAt).getTime() : null
+  const served = moments.servedAt ? new Date(moments.servedAt).getTime() : null
+  const minutes = (from: number, to: number) => Math.max(0, Math.round((to - from) / 60000))
+  return {
+    toStart: accepted === null ? null : minutes(placed, accepted),
+    toServe: served === null || accepted === null ? null : minutes(accepted, served),
+    total: served === null ? null : minutes(placed, served),
+  }
+}
+
+/** An order as the board renders it: the dates are ISO strings (JSON has no Date) and the money a decimal string. */
+export interface BoardOrder {
+  id: string
+  number: number
+  table: string
+  phone: string
+  note: string | null
+  status: OrderStatus
+  subtotal: string
+  createdAt: string
+  /** When the order last moved: for a finished one, when it was served or cancelled. */
+  updatedAt: string
+  /** When the kitchen took it on, and when it went out; null until each happens. */
+  acceptedAt: string | null
+  servedAt: string | null
+  /** The member of staff who took the order at the table; null when the guest ordered for themselves. */
+  placedBy: { email: string } | null
+  lines: BoardLine[]
+}
+
+/** The status a board action moves an order to, or null when the action does not apply to it. */
+export function nextStatus(status: OrderStatus, action: 'accept' | 'done' | 'cancel'): OrderStatus | null {
+  if (action === 'cancel') return status === 'DONE' ? null : 'CANCELLED'
+  if (action === 'accept') return status === 'NEW' ? 'ACCEPTED' : null
+  return status === 'NEW' || status === 'ACCEPTED' ? 'DONE' : null
+}
+
+/** How long an order has been waiting, as the board colours it: new, getting on, late. */
+export type WaitingTier = 'fresh' | 'warning' | 'late'
+
+/** Minutes after which an order is no longer fresh: a kitchen reads colour before it reads numbers. */
+export const WAIT_WARNING_MIN = 6
+/** Minutes after which an order is late, and the board says so in red. */
+export const WAIT_LATE_MIN = 12
+
+/** The tier of a wait in minutes. */
+export function waitingTier(minutes: number): WaitingTier {
+  if (minutes >= WAIT_LATE_MIN) return 'late'
+  if (minutes >= WAIT_WARNING_MIN) return 'warning'
+  return 'fresh'
+}
+
+/** The board's two columns: what is waiting to be started, and what is being made. An order of any other status is not on the board. */
+export function byStatus<T extends { status: OrderStatus }>(orders: T[]): Record<(typeof OPEN_STATUSES)[number], T[]> {
+  return {
+    NEW: orders.filter((order) => order.status === 'NEW'),
+    ACCEPTED: orders.filter((order) => order.status === 'ACCEPTED'),
+  }
+}
+
+/** How many items an order is, over every line: what the board shows before the details are opened. */
+export function itemCount(order: { lines: { quantity: number }[] }): number {
+  return order.lines.reduce((total, line) => total + line.quantity, 0)
+}
+
+/** Whole minutes since the order was placed, never negative; the board turns it into "4 min ago". */
+export function minutesWaiting(createdAt: string, now: number = Date.now()): number {
+  return Math.max(0, Math.floor((now - new Date(createdAt).getTime()) / 60000))
+}

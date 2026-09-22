@@ -7,6 +7,12 @@ import { ListSearch } from '@/components/shell/list-search'
 import { AdminsTable } from '@/components/admin/admins-table'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
 
+/** What the list says of an account's second factor: off, or which of the two it uses. */
+function secondFactorOf(mfaEnabled: boolean, usesAuthenticator: boolean) {
+  if (!mfaEnabled) return 'off' as const
+  return usesAuthenticator ? ('authenticator' as const) : ('email' as const)
+}
+
 export default async function AdminsPage({ searchParams }: { searchParams?: Promise<{ search?: string }> }) {
   const me = await requireSuperAdminPage()
   const sp = searchParams ? await searchParams : undefined
@@ -18,10 +24,10 @@ export default async function AdminsPage({ searchParams }: { searchParams?: Prom
       ...(search ? { email: { contains: search, mode: 'insensitive' } } : {}),
     },
     orderBy: { createdAt: 'asc' },
-    select: { id: true, email: true, emailVerified: true, totpSecret: true, lastLogin: true, createdAt: true },
+    select: { id: true, email: true, emailVerified: true, mfaEnabled: true, totpSecret: true, lastLogin: true, createdAt: true },
   })
-  // the secret stays here: the table only learns which second factor is set
-  const admins = rows.map(({ totpSecret, ...a }) => ({ ...a, usesAuthenticator: Boolean(totpSecret) }))
+  // the secret stays here: the table only learns which second factor is set, if any
+  const admins = rows.map(({ totpSecret, mfaEnabled, ...a }) => ({ ...a, secondFactor: secondFactorOf(mfaEnabled, Boolean(totpSecret)) }))
 
   return (
     <div className="flex flex-col gap-2">

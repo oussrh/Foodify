@@ -36,6 +36,8 @@ const serverSchema = z
     DATABASE_URL: z.string().min(1),
     RESEND_API_KEY: optional,
     RESEND_FROM: optional,
+    BREVO_API_KEY: optional,
+    BREVO_SMS_SENDER: optional,
     NEXTAUTH_URL: optional,
     NEXT_PUBLIC_APP_URL: optional,
     CLOUDINARY_CLOUD_NAME: optional,
@@ -45,6 +47,9 @@ const serverSchema = z
   })
   .refine((e) => Boolean(e.RESEND_API_KEY) === Boolean(e.RESEND_FROM), {
     message: 'RESEND_API_KEY and RESEND_FROM are set together or not at all',
+  })
+  .refine((e) => Boolean(e.BREVO_API_KEY) === Boolean(e.BREVO_SMS_SENDER), {
+    message: 'BREVO_API_KEY and BREVO_SMS_SENDER are set together or not at all',
   })
   .refine((e) => [e.CLOUDINARY_CLOUD_NAME, e.CLOUDINARY_API_KEY, e.CLOUDINARY_API_SECRET].every(Boolean) === Boolean(e.CLOUDINARY_CLOUD_NAME), {
     message: 'CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET are set together or not at all',
@@ -77,6 +82,15 @@ export const serverEnv = {
     const url = server().NEXTAUTH_URL ?? server().NEXT_PUBLIC_APP_URL
     if (!url) throw new Error('NEXTAUTH_URL (or NEXT_PUBLIC_APP_URL) is not set; no origin for the link')
     return url
+  },
+  /**
+   * Brevo's transactional SMS, for the order confirmation a guest gets. Both or neither, and
+   * null until the account is linked: `sendSms` then sends nothing and says so, so an order is
+   * taken whether or not a message can go out (lib/sms.ts).
+   */
+  get brevoSms() {
+    const { BREVO_API_KEY: apiKey, BREVO_SMS_SENDER: sender } = server()
+    return apiKey && sender ? { apiKey, sender } : null
   },
   /** Signed server-side uploads (AR assets, logos, covers); all three or none. */
   get cloudinary() {

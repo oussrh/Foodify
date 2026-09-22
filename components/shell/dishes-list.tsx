@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Route } from 'next'
-import Image from 'next/image'
+import DishPhoto from '@/components/menu/dish-photo'
 import { Camera, Star } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { EmptyState } from '@/components/shell/page-header'
@@ -74,7 +74,10 @@ export default function DishesList({ portal, restaurantId, currency, rows, searc
               <TableRow key={d.id} className={cn(!d.isActive && 'text-muted-foreground')}>
                 <TableCell className="pr-0">
                   <span className="relative block h-10 w-10 overflow-hidden rounded-md bg-muted">
-                    <Image src={d.imageUrl} alt="" fill sizes="40px" className={cn('object-cover', !d.isActive && 'opacity-60')} />
+                    {/* A dish's photo is optional: an empty src makes the browser re-fetch the page (Next warns), so the placeholder stands in. */}
+                    <span className={cn('block h-full w-full', !d.isActive && 'opacity-60')}>
+                      <DishPhoto src={d.imageUrl || null} alt="" sizes="40px" iconClassName="h-4 w-4" />
+                    </span>
                   </span>
                 </TableCell>
                 <TableCell>

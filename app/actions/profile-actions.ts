@@ -8,8 +8,10 @@ import {
   oldEmailConfirmationEmail,
   newEmailVerificationEmail,
 } from '@/lib/emails/change-email'
+import { requireUser } from '@/lib/auth-guard'
+import { isDeviceAccount } from '@/lib/roles'
 import { sendMail } from '@/lib/mail'
-import { emailChange, emailToken, passwordChange, type PasswordChange } from '@/lib/schemas/user'
+import { emailChange, emailToken, mfaSetting, passwordChange, type MfaSetting, type PasswordChange } from '@/lib/schemas/user'
 import { userPayload } from '@/lib/payloads'
 
 /**
@@ -139,7 +141,8 @@ export async function confirmNewEmail(rawToken: string) {
 /**
  * The signed-in user of either portal, for their own account only. Parses `passwordChange` (the current password and a
  * strong new one: eight characters with upper, lower, digit and symbol), throws 'Current password is incorrect' when the
- * current one does not match the hash, stores the new hash and answers `userPayload`; a FORCE_CHANGE stamp stays.
+ * current one does not match the hash, stores the new hash, logs `password_changed` and answers `userPayload`; a
+ * FORCE_CHANGE stamp stays.
  */
 export async function updatePassword(raw: PasswordChange) {
   const session = await auth()
@@ -152,8 +155,34 @@ export async function updatePassword(raw: PasswordChange) {
     throw new Error('Current password is incorrect')
   }
   const passwordHash = await bcrypt.hash(password, 10)
-  return prisma.user.update({ select: userPayload,
-    where: { id: user.id },
-    data: { passwordHash },
-  })
+  const [updated] = await prisma.$transaction([
+    prisma.user.update({ select: userPayload, where: { id: user.id }, data: { passwordHash } }),
+    prisma.activityLog.create({ data: { userId: user.id, action: 'password_changed', status: 'done' } }),
+  ])
+  return updated
+}
+
+/**
+ * The signed-in user of either portal, for their own account only. Parses `mfaSetting` and stores the choice: on, every
+ * sign-in asks for the emailed code (or the authenticator, when one is set) after the password; off, the password alone
+ * opens a session, and a device account (an order tablet, a waiter) is refused outright: its address is unroutable, so
+ * a second factor would lock it out for good. A pending emailed code is
+ * dropped either way, so a code sent under the old setting is spent; the
+ * change is logged (`two_factor_enabled` / `two_factor_disabled`, what the account page lists). Answers `{ id, mfaEnabled }`.
+ */
+export async function setMfaEnabled(raw: MfaSetting) {
+  const me = await requireUser()
+  // A device signs in with a password and nothing else. Turning a second factor on for one would
+  // lock it out for good: the code is mailed, and its address is on the unroutable `.invalid`.
+  if (isDeviceAccount(me.role)) throw new Error('A device account cannot use two-factor authentication')
+  const { mfaEnabled } = mfaSetting.parse(raw)
+  const [updated] = await prisma.$transaction([
+    prisma.user.update({
+      select: { id: true, mfaEnabled: true },
+      where: { id: me.id },
+      data: { mfaEnabled, emailOtpCode: null, emailOtpExpires: null },
+    }),
+    prisma.activityLog.create({ data: { userId: me.id, action: mfaEnabled ? 'two_factor_enabled' : 'two_factor_disabled', status: 'done' } }),
+  ])
+  return updated
 }

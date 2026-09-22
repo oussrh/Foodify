@@ -27,6 +27,10 @@ RESEND_API_KEY="your-resend-api-key"
 RESEND_FROM="noreply@yourdomain.com"
 RESEND_DOMAIN="yourdomain.com"
 
+# Order confirmations by SMS (Brevo) - optional: unset, no message is sent and the order is still taken
+BREVO_API_KEY="your-brevo-api-key"
+BREVO_SMS_SENDER="Foodify"
+
 # Cloudinary
 CLOUDINARY_CLOUD_NAME="your-cloudinary-cloud-name"
 CLOUDINARY_API_KEY="your-cloudinary-api-key"

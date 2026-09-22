@@ -25,13 +25,15 @@ export default defineConfig({
         'lib/prisma.ts', // client singleton, no logic
         'lib/cloudinary.ts', // SDK wrapper over the network: integration, not unit
         'lib/auth-guard.ts', // needs a session and Postgres: the phase-10 integration suite
+        'lib/restaurant-loader.ts', // the same guard over the same database: tests/integration/order-board.test.ts
+        'lib/insights-loader.ts', // grouped SQL over the same database: tests/integration/insights.test.ts
         'lib/emails/**', // HTML templates: presentational
       ],
       thresholds: {
         // The shared layer. Set from `vitest run --coverage` on 2026-09-20, raised to the measured
-        // figure on 2026-09-21 (phase 10); branches and functions are what bind. Raise when the
-        // number does, never lower.
-        'lib/**': { branches: 91.7, functions: 94.0, lines: 96.9, statements: 96.7 },
+        // figure on 2026-09-21 (phase 10) and again on 2026-09-22 with the insights report's
+        // arithmetic; branches are what bind. Raise when the number does, never lower.
+        'lib/**': { branches: 93.5, functions: 97.5, lines: 97.7, statements: 97.5 },
         // The process's modules (phase 13): the logger's redaction and the drain are the two things
         // that must never regress unseen; measured at 100 on 2026-09-21 and pinned there.
         'server/**': { branches: 100, functions: 100, lines: 100, statements: 100 },

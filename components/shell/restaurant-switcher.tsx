@@ -22,8 +22,17 @@ interface RestaurantSwitcherProps {
   section: string
 }
 
-/** The current restaurant's name in the top bar; opens the list of the others at the same section. */
+/**
+ * The current restaurant's name in the top bar; opens the list of the others at the same section.
+ * With nothing to switch to it is not a control: a reader who manages one restaurant was being
+ * offered a menu whose every entry led back to the page they were already on. The name stays,
+ * because it still says which restaurant the tabs below belong to.
+ */
 export default function RestaurantSwitcher({ portal, restaurants, current, section }: RestaurantSwitcherProps) {
+  if (restaurants.length < 2) {
+    return <span className="max-w-[60vw] truncate text-sm font-medium md:max-w-xs">{current.name}</span>
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>

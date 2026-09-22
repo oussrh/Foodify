@@ -13,6 +13,8 @@ const optionalUrl = z.url('Invalid URL format').optional().or(z.literal(''))
  * "not set" so a cleared field still validates. `menuTheme` is not here: the branding tab alone
  * sets it, through `restaurantPatch`. `dietaryOptions` is the subset of the menu's dietary vocabulary
  * this restaurant offers: what the dish forms show and what the public menu filters by.
+ * `orderingEnabled` puts the cart on the public menu and lets POST /api/orders take an order;
+ * `tableCount` is how many per-table QR codes the Tables tab prints (0 for none).
  */
 export const restaurantInput = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -34,6 +36,8 @@ export const restaurantInput = z.object({
   description: z.string().optional(),
   cuisineType: z.string().optional(),
   dietaryOptions: z.array(dietaryKey).optional(),
+  orderingEnabled: z.boolean().optional(),
+  tableCount: z.number().int().min(0, 'Tables cannot be negative').max(300, 'That is more tables than the sheet can print').optional(),
   openingHours: z.string().optional(),
   socialMedia: z.string().optional(),
   socialDisplay: z.enum(['icons', 'text']).optional(),

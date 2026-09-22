@@ -43,7 +43,7 @@ export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProp
                 alt={`QR Code for ${restaurantName} digital menu`}
                 width={128}
                 height={128}
-                className="w-24 h-24 lg:w-32 lg:h-32 transition-transform duration-300"
+                className="w-32 h-32 lg:w-40 lg:h-40 transition-transform duration-300"
                 priority
               />
               <div className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
