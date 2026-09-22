@@ -2,6 +2,7 @@
 // A dish row with its category tree, as Prisma returns it, to the row the dishes table shows.
 import type { Dish, MenuCategory, MenuSubcategory } from '@/generated/prisma/client'
 import type { DishListRow } from '@/components/shell/dishes-list'
+import { isSoldOut } from '@/lib/availability'
 
 type DishWithCategory = Dish & { subcategory: (MenuSubcategory & { category: MenuCategory }) | null }
 
@@ -21,6 +22,9 @@ export function dishListRow(d: DishWithCategory): DishListRow {
     imageUrl: d.imageUrl,
     price: d.price.toFixed(2),
     isActive: d.isActive,
+    // Read here, not sent as a moment: the table says sold out or not, and nothing downstream
+    // has to know that the state expires by itself.
+    soldOut: isSoldOut(d.soldOutUntil),
     isMostPurchased: d.isMostPurchased,
     hasAR: Boolean(d.usdzUrl || d.glbUrl),
     category: d.subcategory ? categoryLabel(d.subcategory) : null,

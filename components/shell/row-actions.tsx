@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { MoreHorizontal, Star, Trash2 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
+import { setDishAvailability } from '@/app/actions/dish-availability-actions'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -52,6 +53,46 @@ export function DishLiveSwitch({ dishId, isActive }: { dishId: string; isActive:
         })
       }}
     />
+  )
+}
+
+/**
+ * Sold out for the rest of the service, from the dishes table. A button rather than a switch on
+ * purpose: `Live` sits beside it and is on when the dish is shown, so a second switch that is on
+ * when the dish is *not* available would put two opposite polarities side by side. A button that
+ * says what the dish is now cannot be read the wrong way round.
+ */
+export function DishSoldOutButton({ dishId, soldOut }: { dishId: string; soldOut: boolean }) {
+  const [off, setOff] = useState(soldOut)
+  const [pending, startTransition] = useTransition()
+  const router = useRouter()
+
+  return (
+    <button
+      type="button"
+      disabled={pending}
+      aria-pressed={off}
+      aria-label={off ? 'Sold out — tap to put it back on the menu' : 'Available — tap to mark it sold out for the rest of the service'}
+      onClick={() => {
+        const next = !off
+        setOff(next)
+        startTransition(async () => {
+          try {
+            await setDishAvailability(dishId, { soldOut: next })
+            router.refresh()
+          } catch {
+            setOff(!next)
+            toast.error('Could not change that dish')
+          }
+        })
+      }}
+      className={cn(
+        'rounded-full px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-60',
+        off ? 'bg-foreground text-background' : 'bg-muted text-muted-foreground hover:bg-accent',
+      )}
+    >
+      {off ? 'Sold out' : 'Available'}
+    </button>
   )
 }
 

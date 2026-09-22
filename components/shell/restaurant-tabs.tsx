@@ -20,7 +20,6 @@ function restaurantTabs(portal: ShellPortal, id: string) {
     { href: `${base}/dishes` as Route, label: 'Dishes' },
     // Orders inside the shell: the history, and the link to the tablet board (which is outside it).
     { href: `${base}/orders` as Route, label: 'Orders' },
-    { href: `${base}/availability` as Route, label: 'Sold out' },
     { href: `${base}/tables` as Route, label: 'Tables' },
     { href: `${base}/insights` as Route, label: 'Insights' },
     { href: `${base}/edit` as Route, label: 'Settings' },

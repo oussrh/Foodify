@@ -1,18 +1,21 @@
 // components/availability/availability-screen.tsx
-// "We've run out." One screen, three places: the tablet on the pass, the waiter's phone and the
-// manager's portal, because whoever notices the pan is empty is whoever should be able to say so
-// — and on a Saturday that is rarely the person with the portal open.
+// "We've run out." The screen the two device apps use — the tablet on the pass and the waiter's
+// phone — because whoever notices the pan is empty is rarely the person with the portal open. A
+// manager does the same thing from the Stock column of the Dishes tab, which is a table they are
+// already reading rather than a tenth tab to remember.
 //
-// Built for a thumb in a hurry: one row per dish, one tap, no confirmation step and no save
-// button. The tap is the save, and it is reversible with the same tap, which is what makes going
-// without a confirmation safe. Rows stay where they are when toggled — a list that reorders under
-// a moving thumb marks the wrong dish.
+// Built for a thumb in a hurry: one row per dish, the photo first because a picture is read
+// faster than a name across a hot pass, one tap, no confirmation step and no save button. The tap
+// is the save, and it is reversible with the same tap, which is what makes going without a
+// confirmation safe. Rows stay where they are when toggled — a list that reorders under a moving
+// thumb marks the wrong dish.
 'use client'
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { setDishAvailability } from '@/app/actions/dish-availability-actions'
+import DishPhoto from '@/components/menu/dish-photo'
 import { MENU_TEXT } from '@/lib/menu-text'
 import { localName, type Locale, type MenuCategory, type MenuDish } from '@/lib/menu'
 import { cn } from '@/lib/utils'
@@ -98,6 +101,9 @@ export function AvailabilityScreen({ restaurantName, categories, loose, locale }
                       soldOut ? 'border-border bg-muted text-muted-foreground' : 'border-border bg-card hover:bg-accent',
                     )}
                   >
+                    <span className={cn('relative block h-12 w-12 shrink-0 overflow-hidden rounded-md bg-muted', soldOut && 'opacity-50')}>
+                      <DishPhoto src={dish.imageUrl} alt="" sizes="48px" iconClassName="h-5 w-5" />
+                    </span>
                     <span className={cn('min-w-0 flex-1 truncate text-[15px] font-medium', soldOut && 'line-through')}>
                       {localName(locale, dish.nameEn, dish.nameFr)}
                     </span>

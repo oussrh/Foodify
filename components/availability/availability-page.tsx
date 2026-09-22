@@ -1,7 +1,7 @@
 // components/availability/availability-page.tsx
-// The sold-out screen with the restaurant's menu already read and serialized. The three routes
-// that mount it (the tablet, the waiter's phone, the portal) differ only in how they redirect a
-// reader who may not be there, so everything else lives here rather than three times over.
+// The sold-out screen with the restaurant's menu already read and serialized. The two routes that
+// mount it (the tablet, the waiter's phone) differ only in where they send a reader who may not be
+// there, so everything else lives here rather than twice over. A manager uses the Dishes tab.
 import { serializeCategories, serializeDish } from '@/lib/menu-data'
 import type { Locale } from '@/lib/menu'
 import { AvailabilityScreen } from './availability-screen'
