@@ -80,8 +80,9 @@ describe('POST /api/orders', () => {
       await tx.dish.update({ where: { id: hidden.id }, data: { isActive: false } })
       for (const dishId of [theirDish.id, hidden.id]) {
         const res = await post({ restaurantId: mine.id, table: '3', phone: '0600112233', lines: [{ dishId, quantity: 1 }] })
-        expect(res.status).toBe(400)
-        await expect(res.json()).resolves.toMatchObject({ code: 'invalid_payload' })
+        // 409, not 400: the body was well formed and the menu answered differently.
+        expect(res.status).toBe(409)
+        await expect(res.json()).resolves.toMatchObject({ code: 'unavailable' })
       }
       expect(await tx.order.count({ where: { restaurantId: mine.id } })).toBe(0)
     }))

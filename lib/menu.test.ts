@@ -57,6 +57,8 @@ describe('labels', () => {
       orderSent: [12],
       orderSentHint: ['7'],
       noteFor: ['Harira'],
+      soldOutSince: ['Harira'],
+      soldOutSincePlural: ['Harira, Taktouka'],
     }
     for (const locale of ['en', 'fr'] as const) {
       for (const [key, value] of Object.entries(MENU_TEXT[locale])) {

@@ -1,0 +1,107 @@
+// components/waiter/waiter-orders.tsx
+// Every order on the floor as one list, which the table grid cannot show: the grid answers "what
+// is happening at table 6" and this answers "what is happening at all", which is the question a
+// waiter asks when they walk back in and want to know where to go first.
+//
+// Ready first and then oldest first, because both are the same instruction — deal with this one
+// next. A finished order drops off by itself (`READY_WINDOW_MINUTES`), so the list is the shift's
+// present tense and never its history; the portal's Orders tab is where the history lives.
+'use client'
+
+import { useCallback } from 'react'
+import { useMinuteClock } from '@/components/orders/use-minute-clock'
+import { useOrderBoard } from '@/components/orders/use-order-board'
+import { itemCount, minutesWaiting, STATUS_LABEL, type BoardOrder } from '@/lib/orders'
+import { readyOrders } from '@/lib/waiter-floor'
+import { cn } from '@/lib/utils'
+import { WaiterHeader } from './waiter-header'
+import { WaiterNav } from './waiter-nav'
+
+/** A waiter placed these; nothing here should announce them a second time. */
+const silent = () => undefined
+
+function OrderCard({ order, now, ready }: { order: BoardOrder; now: number; ready: boolean }) {
+  const waiting = minutesWaiting(order.createdAt, now)
+  const items = itemCount(order)
+
+  return (
+    <li className={cn('rounded-lg border-2 p-3', ready ? 'border-success bg-success/10' : 'border-border bg-card')}>
+      <div className="flex items-baseline gap-2">
+        <span className="text-2xl font-semibold leading-none tracking-display">{order.table}</span>
+        <span className="text-xs text-muted-foreground">Table</span>
+        <span className="flex-1" />
+        <span className={cn('rounded-full px-2.5 py-1 text-xs font-bold', ready ? 'bg-success text-white' : 'bg-muted text-foreground')}>
+          {ready ? 'Ready' : STATUS_LABEL[order.status]}
+        </span>
+      </div>
+
+      <p className="tnum pt-1 text-[13px] text-muted-foreground">
+        #{order.number} · {items} item{items === 1 ? '' : 's'} · {waiting} min
+        {order.placedBy ? ' · taken at the table' : ''}
+      </p>
+
+      <ul className="pt-2 text-[13px]">
+        {order.lines.map((line) => (
+          <li key={line.id} className="flex gap-2">
+            <span className="tnum shrink-0 font-semibold">{line.quantity}×</span>
+            <span className="min-w-0">
+              <span className="block truncate">{line.nameEn}</span>
+              {line.note && <span className="block truncate italic text-muted-foreground">{line.note}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {order.note && <p className="pt-2 text-[13px] italic text-muted-foreground">“{order.note}”</p>}
+    </li>
+  )
+}
+
+export function WaiterOrders({ restaurant }: { restaurant: { id: string; name: string } }) {
+  const now = useMinuteClock()
+  const open = useOrderBoard(restaurant.id, 'open', silent)
+  const finished = useOrderBoard(restaurant.id, 'served', silent)
+
+  const ready = readyOrders(finished.orders, new Date(now))
+  const readyIds = new Set(ready.map((order) => order.id))
+  // Ready first, then whatever has waited longest: both mean "this one next".
+  const all = [...ready, ...open.orders].sort((a, b) => {
+    if (readyIds.has(a.id) !== readyIds.has(b.id)) return readyIds.has(a.id) ? -1 : 1
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  })
+
+  const refresh = useCallback(() => {
+    open.refresh()
+    finished.refresh()
+  }, [open, finished])
+
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
+        <WaiterHeader
+          title="Orders"
+          restaurantName={restaurant.name}
+          online={open.online}
+          loading={open.loading || finished.loading}
+          onRefresh={refresh}
+        />
+      </header>
+
+      <main className="flex-1 px-3 pb-28 pt-4">
+        {all.length === 0 ? (
+          <p className="py-20 text-center text-sm text-muted-foreground">
+            {open.loading ? 'Asking the kitchen…' : 'Nothing with the kitchen right now.'}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {all.map((order) => (
+              <OrderCard key={order.id} order={order} now={now} ready={readyIds.has(order.id)} />
+            ))}
+          </ul>
+        )}
+      </main>
+
+      <WaiterNav restaurantId={restaurant.id} active="orders" />
+    </div>
+  )
+}

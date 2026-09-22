@@ -90,7 +90,12 @@ describe('ordering a dish that is sold out', () => {
       const body = { restaurantId: mine.id, table: '4', phone: '+212600112233', locale: 'en', lines: [{ dishId: d.id, quantity: 1 }] }
       const res = await post(body)
 
-      expect(res.status).toBe(400)
+      // 409 and the dish named: "the menu has changed" leaves someone re-sending the same order.
+      expect(res.status).toBe(409)
+      await expect(res.json()).resolves.toMatchObject({
+        code: 'unavailable',
+        details: [{ dishId: d.id, reason: 'sold_out' }],
+      })
       expect(await tx.order.count({ where: { restaurantId: mine.id } })).toBe(0)
     }))
 

@@ -9,10 +9,12 @@ import { AvailabilityScreen } from './availability-screen'
 /** The shape `loadServiceMenu` answers with. */
 type ServiceMenu = NonNullable<Awaited<ReturnType<typeof import('@/lib/restaurant-loader').loadServiceMenu>>>
 
-export function AvailabilityPage({ data }: { data: ServiceMenu }) {
+export function AvailabilityPage({ data, backHref, padded }: { data: ServiceMenu; backHref?: string | undefined; padded?: boolean | undefined }) {
   const { restaurant } = data
   return (
     <AvailabilityScreen
+      backHref={backHref}
+      padded={padded}
       restaurantName={restaurant.name}
       categories={serializeCategories(restaurant.categories, restaurant.dietaryOptions)}
       loose={data.uncategorizedDishes.map((dish) => serializeDish(dish, restaurant.dietaryOptions))}

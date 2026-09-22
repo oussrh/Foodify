@@ -6,18 +6,17 @@
 'use client'
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
-import type { Route } from 'next'
-import { Ban, Bell, BellOff, Download, RefreshCw, WifiOff } from 'lucide-react'
+import { Bell, BellOff, Download } from 'lucide-react'
 import { useMinuteClock } from '@/components/orders/use-minute-clock'
 import { useOrderBoard } from '@/components/orders/use-order-board'
 import { useStaffPwa } from '@/components/staff/use-staff-pwa'
 import { Button } from '@/components/ui/button'
 import { floorTiles, newlyReady, readyOrders } from '@/lib/waiter-floor'
 import { tableNumbers } from '@/components/qr/table-qr'
-import { cn } from '@/lib/utils'
 import { TableTile } from './table-tile'
 import { useReadyAlert } from './use-ready-alert'
+import { WaiterHeader } from './waiter-header'
+import { WaiterNav } from './waiter-nav'
 
 /** The kitchen's poll announces new orders; a waiter's must not — they placed them. */
 const silent = () => undefined
@@ -77,17 +76,13 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="flex items-center gap-2 px-3 py-2.5">
-          <div className="min-w-0 flex-1">
-            <h1 className="truncate text-xl font-semibold leading-tight tracking-display">Tables</h1>
-            <p className="truncate text-xs text-muted-foreground">{restaurant.name}</p>
-          </div>
-          {!open.online && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground">
-              <WifiOff className="h-3.5 w-3.5" aria-hidden="true" />
-              Offline
-            </span>
-          )}
+        <WaiterHeader
+          title="Tables"
+          restaurantName={restaurant.name}
+          online={open.online}
+          loading={open.loading || finished.loading}
+          onRefresh={refresh}
+        >
           {pwa.canInstall && (
             <Button variant="outline" className={CONTROL} onClick={pwa.install} aria-label="Install this app on the phone">
               <Download className="h-5 w-5" />
@@ -102,15 +97,7 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
           >
             {alert.soundOn ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
           </Button>
-          <Button asChild variant="outline" className={CONTROL}>
-            <Link href={`/waiter/${restaurant.id}/availability` as Route} aria-label="Mark a dish sold out">
-              <Ban className="h-5 w-5" />
-            </Link>
-          </Button>
-          <Button variant="outline" className={CONTROL} onClick={refresh} aria-label="Check the kitchen again">
-            <RefreshCw className={cn('h-5 w-5', (open.loading || finished.loading) && 'animate-spin')} />
-          </Button>
-        </div>
+        </WaiterHeader>
 
         {readyTables.length > 0 && (
           // The one line worth putting above everything: what is going cold.
@@ -120,7 +107,8 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
         )}
       </header>
 
-      <main className="flex-1 px-3 py-4">
+      {/* Room for the tab bar: a list that ends under it hides its own last row. */}
+      <main className="flex-1 px-3 pb-28 pt-4">
         {tables === 0 ? (
           <p className="py-20 text-center text-sm text-muted-foreground">
             No tables are set for this restaurant yet. An administrator sets how many in Settings.
@@ -142,6 +130,8 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
           </button>
         </p>
       </main>
+
+      <WaiterNav restaurantId={restaurant.id} active="tables" />
     </div>
   )
 }

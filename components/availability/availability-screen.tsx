@@ -14,8 +14,12 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import Link from 'next/link'
+import type { Route } from 'next'
+import { ChevronLeft } from 'lucide-react'
 import { setDishAvailability } from '@/app/actions/dish-availability-actions'
 import DishPhoto from '@/components/menu/dish-photo'
+import { Button } from '@/components/ui/button'
 import { MENU_TEXT } from '@/lib/menu-text'
 import { localName, type Locale, type MenuCategory, type MenuDish } from '@/lib/menu'
 import { cn } from '@/lib/utils'
@@ -26,9 +30,13 @@ interface AvailabilityScreenProps {
   /** Dishes with no category; they still sell, so they still run out. */
   loose: MenuDish[]
   locale: Locale
+  /** Where the back arrow goes. A device screen is reached from somewhere and must return there. */
+  backHref?: string | undefined
+  /** Room at the foot for a tab bar, on the screens that have one. */
+  padded?: boolean | undefined
 }
 
-export function AvailabilityScreen({ restaurantName, categories, loose, locale }: AvailabilityScreenProps) {
+export function AvailabilityScreen({ restaurantName, categories, loose, locale, backHref, padded }: AvailabilityScreenProps) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   // What the screen shows for a dish while its write is in flight, so the row answers the tap at
@@ -64,9 +72,18 @@ export function AvailabilityScreen({ restaurantName, categories, loose, locale }
   const soldOutCount = sections.reduce((n, s) => n + s.dishes.filter(soldOutOf).length, 0)
 
   return (
-    <div className="flex flex-col gap-5 pb-8">
-      <header className="flex flex-wrap items-baseline justify-between gap-2">
-        <h1 className="text-xl font-semibold">{localName(locale, 'Sold out', 'Ruptures')}</h1>
+    <div className={cn('flex flex-col gap-5', padded ? 'pb-28' : 'pb-8')}>
+      <header className="flex flex-wrap items-center justify-between gap-2">
+        <span className="flex min-w-0 items-center gap-1">
+          {backHref && (
+            <Button asChild variant="ghost" size="icon" className="-ml-2 h-12 w-12 shrink-0">
+              <Link href={backHref as Route} aria-label={localName(locale, 'Back', 'Retour')}>
+                <ChevronLeft className="h-5 w-5" />
+              </Link>
+            </Button>
+          )}
+          <h1 className="truncate text-xl font-semibold">{localName(locale, 'Sold out', 'Ruptures')}</h1>
+        </span>
         <p className="text-sm text-muted-foreground">
           {restaurantName} ·{' '}
           {soldOutCount === 0

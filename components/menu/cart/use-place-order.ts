@@ -13,11 +13,37 @@ import type { PlacedOrder } from '@/lib/schemas/order'
 
 type State = { status: 'idle' | 'sending'; error: string } | { status: 'sent'; order: PlacedOrder }
 
-/** The message for a failure the guest can act on; anything else is the generic one. */
+/** What `POST /api/orders` sends with a 409: the dishes it would not take, and why. */
+interface RefusedDish {
+  nameEn: string | null
+  nameFr: string | null
+  reason: 'sold_out' | 'off_menu'
+}
+
+/** The dishes the server named, in the guest's language; empty when it named none it could name. */
+function soldOutNames(details: unknown, locale: Locale): string[] {
+  if (!Array.isArray(details)) return []
+  return (details as RefusedDish[])
+    .filter((dish) => dish && dish.reason === 'sold_out')
+    .map((dish) => (locale === 'fr' ? dish.nameFr : dish.nameEn))
+    .filter((name): name is string => typeof name === 'string' && name.length > 0)
+}
+
+/**
+ * The message for a failure the guest can act on; anything else is the generic one. A dish that
+ * sold out between picking it and sending is named, because "the menu has changed" leaves someone
+ * re-sending the same order and failing the same way.
+ */
 function messageFor(error: unknown, locale: Locale): string {
   const t = MENU_TEXT[locale]
   if (!(error instanceof ApiError)) return t.orderFailed
   if (error.code === 'forbidden') return t.orderingOff
+  if (error.code === 'unavailable') {
+    const names = soldOutNames(error.details, locale)
+    if (names.length === 1) return t.soldOutSince(names[0]!)
+    if (names.length > 1) return t.soldOutSincePlural(names.join(', '))
+    return t.menuChanged
+  }
   if (error.code === 'invalid_payload' || error.code === 'not_found') return t.menuChanged
   return t.orderFailed
 }

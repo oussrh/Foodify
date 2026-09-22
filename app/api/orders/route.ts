@@ -52,6 +52,32 @@ async function confirmByText(order: PlacedOrder, phone: string, restaurant: Rest
 }
 
 /**
+ * Why the dishes an order asked for were not all orderable, named so the guest can act on it. A
+ * refusal that says "the menu has changed" and nothing else leaves them re-sending the same order
+ * and failing the same way; this says "Chicken Couscous has just sold out".
+ */
+async function refusedDishes(restaurantId: string, asked: string[], priced: readonly { dishId: string }[]) {
+  const got = new Set(priced.map((line) => line.dishId))
+  const missing = asked.filter((id) => !got.has(id))
+  const rows = await prisma.dish.findMany({
+    where: { id: { in: missing }, restaurantId },
+    select: { id: true, nameEn: true, nameFr: true, soldOutUntil: true },
+    take: MAX_LINES,
+  })
+  // A dish of another restaurant, or one deleted outright, is in `missing` but not in `rows`: it
+  // has no name to give, and "off the menu" is all that can honestly be said about it.
+  return missing.map((id) => {
+    const row = rows.find((dish) => dish.id === id)
+    return {
+      dishId: id,
+      nameEn: row?.nameEn ?? null,
+      nameFr: row?.nameFr ?? null,
+      reason: row && row.soldOutUntil && row.soldOutUntil > new Date() ? ('sold_out' as const) : ('off_menu' as const),
+    }
+  })
+}
+
+/**
  * The dishes of this order that may actually be ordered: this restaurant's, on the menu, and not
  * sold out. A dish the kitchen has run out of is refused here and not only hidden from the menu's
  * add button, because a cart is built in the guest's browser and can be minutes old by the time
@@ -107,7 +133,11 @@ export async function POST(request: NextRequest) {
 
     const dishes = await orderableDishes(restaurantId, lines.map((l) => l.dishId))
     const priced = priceLines(lines, dishes)
-    if (priced.length !== lines.length) return fail('invalid_payload', 'A dish is not on this menu, or is sold out', 400)
+    if (priced.length !== lines.length) {
+      // 409, not 400: the request was well formed and the kitchen's answer changed under it.
+      const refused = await refusedDishes(restaurantId, lines.map((l) => l.dishId), priced)
+      return fail('unavailable', 'A dish is not on this menu, or has sold out', 409, refused)
+    }
     const subtotal = sumPrices(priced.map((p) => ({ price: p.unitPrice, quantity: p.quantity })))
 
     const { nextOrderNumber } = await prisma.restaurant.update({
