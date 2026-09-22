@@ -6,6 +6,7 @@ import ARLaunchButton from './ar-launch-button'
 import { DishFacts, DishIngredients, DishTags } from './dish-details'
 import { shareLink } from './share-link'
 import { MENU_TEXT, formatPrice, hasAR, type Locale, type MenuDish, type Money } from '@/lib/menu'
+import DishOrderControl, { type DishOrder } from './cart/dish-order-control'
 
 interface DishBodyProps {
   dish: MenuDish
@@ -18,9 +19,11 @@ interface DishBodyProps {
   photoTransition?: boolean
   /** The dish page's name is its h1; in the sheet, under the menu's h1, it is an h2. */
   headingLevel?: 'h1' | 'h2'
+  /** How many of this dish are in the order and the way to change that; absent when the restaurant takes no orders. */
+  order?: DishOrder | undefined
 }
 
-export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, photoTransition, headingLevel = 'h2' }: DishBodyProps) {
+export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, photoTransition, headingLevel = 'h2', order }: DishBodyProps) {
   const Heading = headingLevel
   const t = MENU_TEXT[locale]
   const name = locale === 'fr' ? dish.nameFr : dish.nameEn
@@ -50,6 +53,8 @@ export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, ph
           </button>
         </div>
       </div>
+
+      {order && <DishOrderControl dish={dish} order={order} locale={locale} money={money} />}
 
       {ar && <ARLaunchButton dish={dish} locale={locale} />}
 

@@ -16,6 +16,9 @@ import MenuSections from './restaurant-page/menu-sections'
 import DishSheet from './restaurant-page/dish-sheet'
 import FiltersSheet from './restaurant-page/filters-sheet'
 import { precacheUrls } from './restaurant-page/menu-urls'
+import CartBar from './cart/cart-bar'
+import CartSheet from './cart/cart-sheet'
+import { useMenuCart } from './restaurant-page/use-menu-cart'
 import { useMenuFilters } from './restaurant-page/use-menu-filters'
 import { useScrollSpy } from './restaurant-page/use-scroll-spy'
 import { useDishSheet } from './restaurant-page/use-dish-sheet'
@@ -32,6 +35,8 @@ interface RestaurantPageProps {
   urlLang?: string | null
   /** ?filter= from the URL (manifest shortcuts use filter=ar) */
   urlFilter?: string | null
+  /** ?table= from the URL: a QR code printed for one table fills the order form in advance */
+  urlTable?: string | null
 }
 
 export default function RestaurantPage({
@@ -43,6 +48,7 @@ export default function RestaurantPage({
   origin,
   urlLang,
   urlFilter,
+  urlTable,
 }: RestaurantPageProps) {
   const [locale, chooseLocale] = useMenuLocale(restaurant.defaultLocale, urlLang)
   // Rendered only after hydration: the rows are plain links until React attaches to them, and the
@@ -80,6 +86,7 @@ export default function RestaurantPage({
   const filters = useMenuFilters({ categories, uncategorizedDishes, locale, urlFilter })
   const { heroRef, chipsRef, activeSection, collapsed, jumpTo } = useScrollSpy(filters.sections)
   const sheet = useDishSheet()
+  const order = useMenuCart(restaurant, categories, uncategorizedDishes, urlTable)
 
   const themeClass = restaurant.menuTheme === 'system' ? '' : restaurant.menuTheme
   const pageStyle: CSSProperties = {
@@ -93,7 +100,7 @@ export default function RestaurantPage({
     <div
       lang={locale}
       data-hydrated={hydrated || undefined}
-      inert={sheet.openDish !== null || filtersOpen || undefined}
+      inert={sheet.openDish !== null || filtersOpen || order.open || undefined}
       className={cn('brand-scope min-h-screen bg-background text-foreground', themeClass)}
       style={pageStyle}
     >
@@ -128,9 +135,20 @@ export default function RestaurantPage({
       />
 
       {/* Menu */}
-      <MenuSections slug={restaurant.slug} locale={locale} money={money} filters={filters} onOpen={sheet.showDish} transitioningDishId={sheet.rowTransitionId} />
+      <MenuSections
+        slug={restaurant.slug}
+        locale={locale}
+        money={money}
+        filters={filters}
+        onOpen={sheet.showDish}
+        transitioningDishId={sheet.rowTransitionId}
+        orderFor={order.rowOrder}
+      />
 
       <MenuFooter restaurant={restaurant} social={social} locale={locale} />
+
+      {/* Order bar: what is in the order, and the way into it */}
+      <CartBar count={order.count} subtotal={order.subtotal} onOpen={() => order.setOpen(true)} locale={locale} money={money} />
 
       {/* Dish sheet */}
       <DishSheet
@@ -143,7 +161,25 @@ export default function RestaurantPage({
         origin={origin}
         themeClass={themeClass}
         brandStyle={brandStyle}
+        order={order.dishOrder(sheet.openDish)}
       />
+
+      {/* Order sheet */}
+      {order.enabled && (
+        <CartSheet
+          open={order.open}
+          onOpenChange={order.setOpen}
+          restaurantId={restaurant.id}
+          restaurantName={restaurant.name}
+          lines={order.lines}
+          cart={order.cart}
+          tableLocked={order.tableLocked}
+          locale={locale}
+          money={money}
+          themeClass={themeClass}
+          brandStyle={brandStyle}
+        />
+      )}
 
       {/* Filters sheet */}
       <FiltersSheet

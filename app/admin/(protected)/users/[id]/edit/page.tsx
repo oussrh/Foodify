@@ -67,7 +67,7 @@ export default async function EditUserPage({
         </div>
 
         {/* Right Column - User Info & Actions */}
-        <UserEditAside id={user.id} createdAt={user.createdAt} restaurants={user.restaurants} stats={stats} />
+        <UserEditAside id={user.id} email={user.email} createdAt={user.createdAt} restaurants={user.restaurants} stats={stats} />
       </div>
     </div>
   )

@@ -7,11 +7,13 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
 import { MENU_TEXT, type Locale, type MenuDish, type MenuRestaurant, type Money } from '@/lib/menu'
 import { useMenuLocale } from './use-menu-locale'
+import { useCart } from './cart/use-cart'
 import DishBody from './dish-body'
+import { useDishView } from './use-dish-view'
 
 interface DishPageProps {
   dish: MenuDish
-  restaurant: Pick<MenuRestaurant, 'name' | 'slug' | 'defaultLocale' | 'fontFamily' | 'currencySymbol' | 'currency' | 'menuTheme'>
+  restaurant: Pick<MenuRestaurant, 'id' | 'name' | 'slug' | 'defaultLocale' | 'fontFamily' | 'currencySymbol' | 'currency' | 'menuTheme' | 'orderingEnabled'>
   breadcrumb: { en: string; fr: string } | null
   brandStyle: Record<string, string>
   shareUrl: string
@@ -20,8 +22,11 @@ interface DishPageProps {
 
 /** Full-page version of the dish sheet, for shared links and QR codes that point at one dish. */
 export default function DishPage({ dish, restaurant, breadcrumb, brandStyle, shareUrl, urlLang }: DishPageProps) {
+  useDishView(dish.id)
   const [locale, setLocale] = useMenuLocale(restaurant.defaultLocale, urlLang)
   const t = MENU_TEXT[locale]
+  // The same cart as the menu's, so a dish added from a shared link is in the order there too.
+  const cart = useCart(restaurant.id)
   const money: Money = { locale, symbol: restaurant.currencySymbol, code: restaurant.currency }
 
   useEffect(() => {
@@ -78,6 +83,16 @@ export default function DishPage({ dish, restaurant, breadcrumb, brandStyle, sha
           money={money}
           breadcrumb={breadcrumb ? (locale === 'fr' ? breadcrumb.fr : breadcrumb.en) : null}
           shareUrl={shareUrl}
+          order={
+            restaurant.orderingEnabled
+              ? {
+                  quantity: cart.quantityOf(dish.id),
+                  onChange: (quantity) => cart.setQuantity(dish.id, quantity),
+                  note: cart.noteOf(dish.id),
+                  onNote: (note) => cart.setNote(dish.id, note),
+                }
+              : undefined
+          }
         />
       </main>
     </div>

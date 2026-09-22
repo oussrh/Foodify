@@ -77,7 +77,10 @@ export const {
       },
     }),
   ],
-  session: { strategy: 'jwt' },
+  // A month, set here rather than left to the library's default: a kitchen tablet is signed in
+  // once when it is set up and must not be asked again mid-service, and the same window is a
+  // reasonable one for a manager on their own phone.
+  session: { strategy: 'jwt', maxAge: 30 * 24 * 60 * 60 },
   callbacks: {
     async jwt({ token, user }) {
       if (user?.role) {

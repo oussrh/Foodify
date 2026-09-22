@@ -13,10 +13,12 @@ interface MenuSectionsProps {
   onOpen: (dish: MenuDish) => void
   /** The row whose thumbnail is morphing into the sheet photo */
   transitioningDishId: string | null
+  /** The order handle of one dish, or null when the restaurant takes no orders. */
+  orderFor: (dish: MenuDish) => { quantity: number; onAdd: () => void } | undefined
 }
 
 /** The menu itself: one section per category with its dishes, or the empty state when nothing matches. */
-export default function MenuSections({ slug, locale, money, filters, onOpen, transitioningDishId }: MenuSectionsProps) {
+export default function MenuSections({ slug, locale, money, filters, onOpen, transitioningDishId, orderFor }: MenuSectionsProps) {
   const t = MENU_TEXT[locale]
   const { sections, totalMatches, isFiltering, clearFilters } = filters
   const hasResults = sections.length > 0
@@ -65,6 +67,7 @@ export default function MenuSections({ slug, locale, money, filters, onOpen, tra
                       href={dishHref(slug, dish)}
                       onOpen={onOpen}
                       transitioning={transitioningDishId === dish.id}
+                      order={orderFor(dish)}
                     />
                   ))}
                 </ul>

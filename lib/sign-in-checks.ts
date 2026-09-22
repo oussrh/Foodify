@@ -9,9 +9,17 @@ import prisma from '@/lib/prisma'
 import { safeEqual, verifyTOTP } from '@/lib/totp'
 import { log } from '@/server/log'
 
+/**
+ * The account someone signed in as: a person types their address, a tablet or a waiter types the
+ * username it was set up with. Both columns are unique, so at most one row can answer.
+ */
+export async function accountFor(identifier: string): Promise<User | null> {
+  return prisma.user.findFirst({ where: { OR: [{ email: identifier }, { username: identifier.toLowerCase() }] } })
+}
+
 /** The account whose password matches, or null when there is no such account or the password is wrong. */
-export async function userWithPassword(email: string, password: string): Promise<User | null> {
-  const user = await prisma.user.findUnique({ where: { email } })
+export async function userWithPassword(identifier: string, password: string): Promise<User | null> {
+  const user = await accountFor(identifier)
   if (!user) {
     log.info('sign-in refused: no such account')
     return null
@@ -34,13 +42,18 @@ export function assertPortalRole(user: User, role: string | undefined): void {
 }
 
 /**
- * The second factor and the login stamp: a pending emailed code must match and be unexpired (it
- * is consumed), else a TOTP secret must verify the code, else the sign-in is refused: an account
- * with no authenticator gets its code from the first step (requestOtp), and credentials alone
- * never open a session (they did, when nothing was pending: a password was the whole login).
- * The last login is stamped when a factor passed.
+ * The second factor and the login stamp. An account with `mfaEnabled` off (the default; Account
+ * settings turn it on) is stamped and let through on its password alone, whatever code or secret
+ * it carries. With it on, a pending emailed code must match and be unexpired (it is consumed),
+ * else a TOTP secret must verify the code, else the sign-in is refused: an account with no
+ * authenticator gets its code from the first step (requestOtp), and credentials alone never open
+ * a session. The last login is stamped when a factor passed.
  */
 export async function completeSecondFactor(user: User, code: string | undefined): Promise<void> {
+  if (!user.mfaEnabled) {
+    await prisma.user.update({ where: { id: user.id }, data: { lastLogin: new Date() } })
+    return
+  }
   if (user.emailOtpCode) {
     const expired = user.emailOtpExpires && user.emailOtpExpires < new Date()
     if (!code || !safeEqual(code, user.emailOtpCode) || expired) {

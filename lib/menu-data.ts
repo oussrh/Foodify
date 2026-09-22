@@ -67,6 +67,7 @@ export function serializeRestaurant(restaurant: Restaurant): MenuRestaurant {
     socialMedia: restaurant.socialMedia,
     socialDisplay: restaurant.socialDisplay === 'text' ? 'text' : 'icons',
     dietaryOptions: restaurant.dietaryOptions,
+    orderingEnabled: restaurant.orderingEnabled,
   }
 }
 

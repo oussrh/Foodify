@@ -6,11 +6,13 @@ import { useRouter } from 'next/navigation'
 import type { Route } from 'next'
 import { signIn } from 'next-auth/react'
 import { requestAdminOtp } from '@/app/actions/admin-auth-actions'
+import { requestKitchenSignIn } from '@/app/actions/kitchen-auth-actions'
 import { requestManagerOtp } from '@/app/actions/manager-auth-actions'
+import { requestWaiterSignIn } from '@/app/actions/waiter-auth-actions'
 import CredentialsStep from './credentials-step'
 import CodeStep from './code-step'
 
-type Portal = 'admin' | 'manager'
+type Portal = 'admin' | 'manager' | 'kitchen' | 'waiter'
 type Step = 'credentials' | 'code'
 
 interface SignInFlowProps {
@@ -22,6 +24,8 @@ interface SignInFlowProps {
 const CONFIG = {
   admin: {
     label: 'Super admin',
+    identifier: 'email' as const,
+    hint: 'We’ll email you a one-time code after this step.',
     request: requestAdminOtp,
     authRole: 'SUPER_ADMIN',
     home: '/admin' as Route,
@@ -30,11 +34,35 @@ const CONFIG = {
   },
   manager: {
     label: 'Restaurant manager',
+    identifier: 'email' as const,
+    hint: 'We’ll email you a one-time code after this step.',
     request: requestManagerOtp,
     authRole: 'RESTAURANT_ADMIN',
     home: '/manager' as Route,
     login: '/manager/login' as Route,
     storage: ['managerEmail', 'managerPassword'] as const,
+  },
+  // Someone on the floor with a phone: a password and nothing else, and they land on the tables.
+  waiter: {
+    label: 'Waiter',
+    identifier: 'username' as const,
+    hint: 'You’ll be signed in straight away, and stay signed in for a month.',
+    request: requestWaiterSignIn,
+    authRole: 'WAITER',
+    home: '/waiter' as Route,
+    login: '/waiter/login' as Route,
+    storage: ['waiterEmail', 'waiterPassword'] as const,
+  },
+  // The tablet in the kitchen: a password and nothing else, and it lands on its board.
+  kitchen: {
+    label: 'Kitchen tablet',
+    identifier: 'username' as const,
+    hint: 'The tablet will be signed in straight away, and stay signed in for a month.',
+    request: requestKitchenSignIn,
+    authRole: 'KITCHEN',
+    home: '/kitchen' as Route,
+    login: '/kitchen/login' as Route,
+    storage: ['kitchenEmail', 'kitchenPassword'] as const,
   },
 }
 
@@ -79,17 +107,32 @@ export default function SignInFlow({ portal, initialStep = 'credentials' }: Sign
     return () => clearInterval(timer)
   }, [step])
 
+  // The credentials callback, with or without a code; a session opened clears the stored credentials and goes home.
+  const finishSignIn = async (code?: string) => {
+    const res = await signIn('credentials', { email, password, code, role: cfg.authRole, redirect: false })
+    if (res?.error) return false
+    sessionStorage.removeItem(ek)
+    sessionStorage.removeItem(pk)
+    router.push(cfg.home)
+    router.refresh()
+    return true
+  }
+
   const submitCredentials = async (e: React.FormEvent) => {
     e.preventDefault()
     setBusy(true)
     setError('')
     try {
       const res = await cfg.request(email, password)
-      if (res?.error) {
+      if ('error' in res) {
         setError(res.error)
         return
       }
-      const [ek, pk] = cfg.storage
+      // The account has the second factor off: the same credentials open the session now.
+      if (!res.mfa) {
+        if (!(await finishSignIn())) setError('Something went wrong. Try again.')
+        return
+      }
       sessionStorage.setItem(ek, email)
       sessionStorage.setItem(pk, password)
       setTimeLeft(CODE_TTL)
@@ -106,16 +149,7 @@ export default function SignInFlow({ portal, initialStep = 'credentials' }: Sign
     setBusy(true)
     setError('')
     try {
-      const res = await signIn('credentials', { email, password, code, role: cfg.authRole, redirect: false })
-      if (res?.error) {
-        setError('That code is not right or has expired.')
-        return
-      }
-      const [ek, pk] = cfg.storage
-      sessionStorage.removeItem(ek)
-      sessionStorage.removeItem(pk)
-      router.push(cfg.home)
-      router.refresh()
+      if (!(await finishSignIn(code))) setError('That code is not right or has expired.')
     } catch {
       setError('Something went wrong. Try again.')
     } finally {
@@ -128,7 +162,7 @@ export default function SignInFlow({ portal, initialStep = 'credentials' }: Sign
     setError('')
     try {
       const res = await cfg.request(email, password)
-      if (res?.error) setError(res.error)
+      if ('error' in res) setError(res.error)
       else {
         setTimeLeft(CODE_TTL)
         setCode('')
@@ -141,7 +175,6 @@ export default function SignInFlow({ portal, initialStep = 'credentials' }: Sign
   }
 
   const startOver = () => {
-    const [ek, pk] = cfg.storage
     sessionStorage.removeItem(ek)
     sessionStorage.removeItem(pk)
     setCode('')
@@ -168,6 +201,8 @@ export default function SignInFlow({ portal, initialStep = 'credentials' }: Sign
             onSubmit={submitCredentials}
             error={error}
             busy={busy}
+            hint={cfg.hint}
+            identifier={cfg.identifier}
           />
         ) : (
           <CodeStep

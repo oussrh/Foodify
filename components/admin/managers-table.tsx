@@ -1,6 +1,7 @@
 import Link from 'next/link'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
 import { ManagerRowMenu } from '@/components/shell/user-row-menu'
+import { LastSignInCell, PeopleTableHead, VerifiedCell } from '@/components/admin/people-cells'
 
 /** A manager row with the restaurants it is assigned to, as the list shows it. */
 interface ManagerRow {
@@ -15,17 +16,7 @@ interface ManagerRow {
 export function ManagersTable({ users }: { users: ManagerRow[] }) {
   return (
     <Table>
-      <TableHeader>
-        <TableRow>
-          <TableHead>Manager</TableHead>
-          <TableHead>Restaurants</TableHead>
-          <TableHead className="hidden sm:table-cell">Verified</TableHead>
-          <TableHead className="hidden md:table-cell">Last sign-in</TableHead>
-          <TableHead className="w-[1%]">
-            <span className="sr-only">Actions</span>
-          </TableHead>
-        </TableRow>
-      </TableHeader>
+      <PeopleTableHead name="Manager" extra="Restaurants" />
       <TableBody>
         {users.map((u) => (
           <TableRow key={u.id}>
@@ -43,16 +34,8 @@ export function ManagersTable({ users }: { users: ManagerRow[] }) {
                 u.restaurants.map((r) => r.name).join(', ')
               )}
             </TableCell>
-            <TableCell className="hidden sm:table-cell">
-              {u.emailVerified ? (
-                <span className="text-xs font-medium text-success">Verified</span>
-              ) : (
-                <span className="text-xs text-muted-foreground">Pending</span>
-              )}
-            </TableCell>
-            <TableCell className="tnum hidden text-muted-foreground md:table-cell">
-              {u.lastLogin ? u.lastLogin.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Never'}
-            </TableCell>
+            <VerifiedCell emailVerified={u.emailVerified} />
+            <LastSignInCell lastLogin={u.lastLogin} />
             <TableCell className="text-right">
               <ManagerRowMenu userId={u.id} email={u.email} />
             </TableCell>

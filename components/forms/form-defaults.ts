@@ -29,6 +29,8 @@ export function restaurantFormValues(restaurant: Restaurant): EditRestaurantValu
     defaultLocale: restaurant.defaultLocale,
     ...textColumns(restaurant),
     dietaryOptions: restaurant.dietaryOptions,
+    orderingEnabled: restaurant.orderingEnabled,
+    tableCount: restaurant.tableCount,
     coverImageStyle: restaurant.coverImageStyle as 'cover' | 'repeat' | undefined,
     menuTheme: (['light', 'dark'].includes(restaurant.menuTheme) ? restaurant.menuTheme : 'system') as 'system' | 'light' | 'dark',
     socialDisplay: (restaurant.socialDisplay === 'text' ? 'text' : 'icons') as 'icons' | 'text',

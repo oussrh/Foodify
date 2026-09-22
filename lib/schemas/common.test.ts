@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
-import { bilingualName, email, firstIssue, money, password, uuid } from './common'
+import { bilingualName, email, firstIssue, money, password, username, uuid } from './common'
 
 describe('the shared pieces', () => {
   it('accepts a v4 UUID and refuses a cuid', () => {
@@ -37,5 +37,25 @@ describe('the shared pieces', () => {
     expect(money.safeParse('12.345').success).toBe(false)
     expect(money.safeParse('1e3').success).toBe(false)
     expect(money.safeParse('-1').success).toBe(false)
+  })
+})
+
+describe('username', () => {
+  it('folds to lower case and trims, so a capital typed on a tablet is not a different account', () => {
+    expect(username.parse('  Kitchen1  ')).toBe('kitchen1')
+  })
+
+  it('takes letters, digits, dot, dash and underscore', () => {
+    for (const name of ['waiter1', 'pass.tablet', 'salle-2', 'bar_01']) {
+      expect(username.safeParse(name).success, name).toBe(true)
+    }
+  })
+
+  it('refuses one too short, too long, or with a space or a symbol in it', () => {
+    expect(username.safeParse('ab').error?.issues[0]?.message).toBe('A username is at least 3 characters')
+    expect(username.safeParse('x'.repeat(33)).error?.issues[0]?.message).toBe('A username is at most 32 characters')
+    for (const name of ['two words', 'kitchen@1', 'tablet/1']) {
+      expect(username.safeParse(name).success, name).toBe(false)
+    }
   })
 })

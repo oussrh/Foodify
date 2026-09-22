@@ -1,6 +1,7 @@
 'use client'
 
 import Link from 'next/link'
+import type { Route } from 'next'
 import { signOut } from 'next-auth/react'
 import { LogOut } from 'lucide-react'
 import {
@@ -18,7 +19,7 @@ interface UserMenuProps {
   user: { email: string }
 }
 
-/** The avatar button: who is signed in, their account page (managers), sign out. */
+/** The avatar button: who is signed in, their account page, sign out. */
 export default function UserMenu({ portal, user }: UserMenuProps) {
   const initials = user.email.slice(0, 2).toUpperCase()
   const loginPath = portal === 'admin' ? '/admin/login' : '/manager/login'
@@ -40,11 +41,9 @@ export default function UserMenu({ portal, user }: UserMenuProps) {
           <span className="block text-xs text-muted-foreground">{portal === 'admin' ? 'Super admin' : 'Restaurant manager'}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {portal === 'manager' && (
-          <DropdownMenuItem asChild>
-            <Link href="/manager/profile">Account settings</Link>
-          </DropdownMenuItem>
-        )}
+        <DropdownMenuItem asChild>
+          <Link href={`/${portal}/profile` as Route}>Account settings</Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => signOut({ redirect: true, callbackUrl: loginPath })}>
           <LogOut className="mr-2 h-4 w-4" />
           Sign out

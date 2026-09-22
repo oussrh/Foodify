@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import type { Route } from 'next'
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
@@ -23,6 +25,10 @@ export default async function ManagerDashboard() {
       _count: { select: { categories: true } },
     },
   })
+
+  // One restaurant is not a portfolio: this page would be a table of one row above a strip of
+  // numbers the restaurant's own Info tab already says. Their home is the restaurant.
+  if (restaurants.length === 1) redirect(`/manager/restaurants/${restaurants[0]!.id}/info` as Route)
 
   const restaurantIds = restaurants.map((r) => r.id)
   const [views, arViews] = await Promise.all([

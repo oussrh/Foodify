@@ -8,11 +8,6 @@ overrides:
   deepmerge-ts: ^8.0.2
   mysql2: ^3.24.4
 
-patchedDependencies:
-  abatty@0.2.0:
-    hash: d14e588a664bb57945036d27c7731fd200a94eb2cf6062fc82602ef1898e0e10
-    path: patches/abatty@0.2.0.patch
-
 importers:
 
   .:
@@ -130,8 +125,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(vitest@5.0.1)
       abatty:
-        specifier: github:Synovitec/abatty#6fc516c70d20907facb95b59daca352e50ba3126
-        version: https://codeload.github.com/Synovitec/abatty/tar.gz/6fc516c70d20907facb95b59daca352e50ba3126(patch_hash=d14e588a664bb57945036d27c7731fd200a94eb2cf6062fc82602ef1898e0e10)
+        specifier: 0.3.1
+        version: 0.3.1
       dependency-cruiser:
         specifier: ^18.4.0
         version: 18.4.0
@@ -2165,9 +2160,8 @@ packages:
   '@vitest/spy@5.0.1':
     resolution: {integrity: sha512-rbto/mF/SGERxEgYOek7Xm6B9b+y+mVoo+f4b2LymYO8zM1b7uB5nHuhVMTP2hxdzgxvGiZYGxGIaMvL5y180Q==}
 
-  abatty@https://codeload.github.com/Synovitec/abatty/tar.gz/6fc516c70d20907facb95b59daca352e50ba3126:
-    resolution: {tarball: https://codeload.github.com/Synovitec/abatty/tar.gz/6fc516c70d20907facb95b59daca352e50ba3126}
-    version: 0.2.0
+  abatty@0.3.1:
+    resolution: {integrity: sha512-06FCKD2M5XrpSQA90tHR1zTbS74A+Ik021OGnyPoZef5bZ+RtkCpqPnJTnWpPohqmjCviTJ9FeRPrlLG/dVRZw==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -6416,7 +6410,7 @@ snapshots:
 
   '@vitest/spy@5.0.1': {}
 
-  abatty@https://codeload.github.com/Synovitec/abatty/tar.gz/6fc516c70d20907facb95b59daca352e50ba3126(patch_hash=d14e588a664bb57945036d27c7731fd200a94eb2cf6062fc82602ef1898e0e10): {}
+  abatty@0.3.1: {}
 
   acorn-jsx-walk@2.0.0: {}
 

@@ -16,20 +16,28 @@ export async function restaurant(tx: Tx, name = `Test ${tag()}`, extra: { dietar
   return tx.restaurant.create({ data: { name, slug: `test-${tag()}`, defaultLocale: 'en', ...extra }, select: { id: true, slug: true, name: true } })
 }
 
-async function user(tx: Tx, role: 'SUPER_ADMIN' | 'RESTAURANT_ADMIN', restaurantIds: string[]) {
+async function user(tx: Tx, role: 'SUPER_ADMIN' | 'RESTAURANT_ADMIN' | 'KITCHEN' | 'WAITER', restaurantIds: string[]) {
+  const handle = `${role.toLowerCase()}-${tag()}`
+  // A device signs in by username on the unroutable domain, the way createStaffUser makes it.
+  const device = role === 'KITCHEN' || role === 'WAITER'
   return tx.user.create({
     data: {
-      email: `${role.toLowerCase()}-${tag()}@test.local`,
+      email: device ? `${handle}@staff.invalid` : `${handle}@test.local`,
+      username: device ? handle : null,
       passwordHash: await bcrypt.hash(PASSWORD, HASH_COST),
       role,
       restaurants: { connect: restaurantIds.map((id) => ({ id })) },
     },
-    select: { id: true, email: true, role: true },
+    select: { id: true, email: true, username: true, role: true },
   })
 }
 
 export const manager = (tx: Tx, restaurantIds: string[]) => user(tx, 'RESTAURANT_ADMIN', restaurantIds)
 export const superAdmin = (tx: Tx) => user(tx, 'SUPER_ADMIN', [])
+/** The tablet on the pass: it works the board and nothing else. */
+export const kitchenTablet = (tx: Tx, restaurantIds: string[]) => user(tx, 'KITCHEN', restaurantIds)
+/** Someone on the floor: they place orders and read the board, but never move one along. */
+export const waiter = (tx: Tx, restaurantIds: string[]) => user(tx, 'WAITER', restaurantIds)
 
 export async function dish(tx: Tx, restaurantId: string, extra: { subcategoryId?: string; nameEn?: string } = {}) {
   const nameEn = extra.nameEn ?? `Dish ${tag()}`

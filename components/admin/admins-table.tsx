@@ -7,9 +7,17 @@ import ResetAdminPasswordButton from '@/components/reset-admin-password-button'
 interface AdminRow {
   id: string
   email: string
-  usesAuthenticator: boolean
+  secondFactor: SecondFactor
   lastLogin: Date | null
   createdAt: Date
+}
+
+type SecondFactor = 'off' | 'email' | 'authenticator'
+
+const SECOND_FACTOR_LABEL: Record<SecondFactor, string> = {
+  off: 'Off',
+  email: 'Email code',
+  authenticator: 'Authenticator app',
 }
 
 /** The administrators table; `meEmail` marks the signed-in admin's own row. */
@@ -37,7 +45,7 @@ export function AdminsTable({ admins, meEmail }: { admins: AdminRow[]; meEmail: 
               {meEmail === a.email && <span className="ml-2 text-xs text-muted-foreground">(you)</span>}
             </TableCell>
             <TableCell className="hidden sm:table-cell">
-              <span className="text-xs text-muted-foreground">{a.usesAuthenticator ? 'Authenticator app' : 'Email code'}</span>
+              <span className="text-xs text-muted-foreground">{SECOND_FACTOR_LABEL[a.secondFactor]}</span>
             </TableCell>
             <TableCell className="tnum hidden text-muted-foreground md:table-cell">
               {a.lastLogin ? a.lastLogin.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Never'}

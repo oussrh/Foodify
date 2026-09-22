@@ -167,6 +167,7 @@ async function seedRestaurant() {
       defaultLocale: "en",
       currency: "EUR",
       currencySymbol: "€",
+      orderingEnabled: true,
     },
   });
   console.log("✅ Restaurant:", restaurant.name);

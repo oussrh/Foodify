@@ -23,6 +23,8 @@ interface NavItem {
   label: string
   icon: LucideIcon
   exact?: boolean
+  /** What lights the item, when that is wider than what it links to. */
+  activePrefix?: string
 }
 
 const NAV: Record<ShellPortal, NavItem[]> = {
@@ -31,6 +33,7 @@ const NAV: Record<ShellPortal, NavItem[]> = {
     { href: '/admin/restaurants', label: 'Restaurants', icon: Building2 },
     { href: '/admin/users', label: 'Managers', icon: Users },
     { href: '/admin/admins', label: 'Admins', icon: Shield },
+    { href: '/admin/profile', label: 'Account', icon: UserIcon },
   ],
   manager: [
     { href: '/manager', label: 'Overview', icon: Home, exact: true },
@@ -39,9 +42,24 @@ const NAV: Record<ShellPortal, NavItem[]> = {
   ],
 }
 
+/**
+ * The rail and the phone tabs. A manager with one restaurant has no portfolio to browse: the
+ * Restaurants item would open a list of one, so it is dropped and Overview goes straight into
+ * that restaurant — which is where `/manager` itself lands them.
+ */
+function navFor(portal: ShellPortal, restaurants: ShellRestaurant[]): NavItem[] {
+  const only = portal === 'manager' && restaurants.length === 1 ? restaurants[0]! : null
+  if (!only) return NAV[portal]
+  const home = `/manager/restaurants/${only.id}`
+  return [
+    { href: `${home}/info` as Route, label: 'Overview', icon: Home, activePrefix: home },
+    { href: '/manager/profile', label: 'Account', icon: UserIcon },
+  ]
+}
+
 export default function AppShell({ portal, user, restaurants, children }: AppShellProps) {
   const pathname = usePathname()
-  const nav = NAV[portal]
+  const nav = navFor(portal, restaurants)
 
   // Are we inside /{portal}/restaurants/{id}/... ?
   const match = pathname.match(new RegExp(`^/${portal}/restaurants/([^/]+)(?:/([^/]+))?`))
@@ -49,7 +67,10 @@ export default function AppShell({ portal, user, restaurants, children }: AppShe
   const currentRestaurant = restaurantId ? restaurants.find((r) => r.id === restaurantId) : null
   const section = match?.[2] ?? 'info'
 
-  const isActive = (item: NavItem) => (item.exact ? pathname === item.href : pathname.startsWith(item.href))
+  const isActive = (item: NavItem) => {
+    const lit = item.activePrefix ?? item.href
+    return item.exact ? pathname === lit : pathname.startsWith(lit)
+  }
 
   return (
     <div className="flex min-h-screen bg-background">

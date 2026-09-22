@@ -148,7 +148,7 @@
     --destructive: 8 59% 44.5%;        /* #B4412F */
     --destructive-foreground: 0 0% 100%;
     --success: 153 55% 27%;
-    --warning: 42 100% 28%;            /* #8F6400: 4.6:1 on muted, was 4.11 at 30% */
+    --warning: 42 100% 24%;            /* #7A5600: 4.94:1 as ink on its own 12% tint over muted, the worst surface it is painted on. Was 28% (#8F6400), which cleared 4.6:1 on muted but only 3.95:1 on that tint — the warning badge. */
     --border: 47 15% 88.4%;            /* Line    #E6E4DD */
     --border-strong: 49 11% 80.6%;     /* #D3D1C8 */
     --input: 49 11% 80.6%;
@@ -259,7 +259,25 @@
     @apply bg-muted-foreground/40;
   }
 
-  @media (prefers-reduced-motion: reduce) {
+  /* Printing: a page that marks a sheet (the per-table QR codes) puts that alone on paper; the
+   rail, the bars and the tabs are screen furniture. */
+@media print {
+  body:has([data-print-sheet]) * {
+    visibility: hidden;
+  }
+  body:has([data-print-sheet]) [data-print-sheet],
+  body:has([data-print-sheet]) [data-print-sheet] * {
+    visibility: visible;
+  }
+  body:has([data-print-sheet]) [data-print-sheet] {
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block-start: 0;
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;

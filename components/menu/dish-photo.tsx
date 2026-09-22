@@ -1,6 +1,11 @@
 // components/menu/dish-photo.tsx
-// A dish's photo, or a neutral placeholder when it has none (an image is optional). The row uses
-// a small square, the sheet a 4:3; both pass their own sizing on the wrapper.
+// A dish's photo, or a neutral placeholder when it has none (an image is optional). The caller
+// gives the box its size; this fills it.
+//
+// The photo carries its own positioning context. `fill` positions against the nearest positioned
+// ancestor, so a caller whose wrapper was `static` did not get a 48px thumbnail — the photo
+// escaped and stretched over the whole order sheet, painting out every line of it. The contract
+// was a comment, and a comment is not a contract: it is a `relative` span now.
 import Image from 'next/image'
 import { Utensils } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -25,5 +30,9 @@ export default function DishPhoto({
       </span>
     )
   }
-  return <Image src={src} alt={alt} fill sizes={sizes} priority={priority ?? false} className="object-cover" />
+  return (
+    <span className="relative block h-full w-full overflow-hidden">
+      <Image src={src} alt={alt} fill sizes={sizes} priority={priority ?? false} className="object-cover" />
+    </span>
+  )
 }

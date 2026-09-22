@@ -35,6 +35,42 @@ describe('labels', () => {
     expect(MENU_TEXT.fr.menuOf('Chez Test')).toBe('Menu de Chez Test')
   })
 
+  // The two tables are written by hand and read by language: a key added to one and forgotten in
+  // the other is a blank in the menu, and a formatter that drops its argument is a sentence
+  // about nothing. Both are checked over every entry rather than one by one.
+  it('has the same keys in both languages', () => {
+    expect(Object.keys(MENU_TEXT.fr).sort()).toEqual(Object.keys(MENU_TEXT.en).sort())
+  })
+
+  it('says something in every language, and keeps what it is given', () => {
+    const samples: Record<string, unknown[]> = {
+      results: [2],
+      menuOf: ['Chez Test'],
+      items: [2],
+      add: ['Harira'],
+      oneLess: ['Harira'],
+      oneMore: ['Harira'],
+      quantityOf: ['Harira'],
+      remove: ['Harira'],
+      inOrder: [3],
+      orderSent: [12],
+      orderSentHint: ['7'],
+      noteFor: ['Harira'],
+    }
+    for (const locale of ['en', 'fr'] as const) {
+      for (const [key, value] of Object.entries(MENU_TEXT[locale])) {
+        if (typeof value !== 'function') {
+          expect(value, `${locale}.${key}`).not.toBe('')
+          continue
+        }
+        const args = samples[key]
+        expect(args, `${locale}.${key} has no sample argument`).toBeDefined()
+        const sentence = (value as (...a: unknown[]) => string)(...args!)
+        expect(sentence, `${locale}.${key}`).toContain(String(args![0]))
+      }
+    }
+  })
+
   it('translates a known dietary or allergen key', () => {
     expect(dietaryLabel('gluten_free', 'fr')).toBe('Sans gluten')
     expect(allergenLabel('nuts', 'en')).toBe('Nuts')

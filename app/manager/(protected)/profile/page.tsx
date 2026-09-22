@@ -1,10 +1,12 @@
 // PathFile: app/manager/(protected)/profile/page.tsx
+import { notFound } from 'next/navigation'
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
-import { daysSince } from '@/lib/time'
-import { AccountOverviewCard } from '@/components/manager/profile/account-overview-card'
-import { AccountStatsCard, MyRestaurantsCard, RecentActivityCard, SecurityCard } from '@/components/manager/profile/account-cards'
-import { ProfileHeader, ProfileNotFound } from '@/components/manager/profile/profile-header'
+import { PageHeader } from '@/components/shell/page-header'
+import { ProfileCard } from '@/components/account/profile-card'
+import { SecurityCards } from '@/components/account/security-cards'
+import { ActivityCard } from '@/components/manager/profile/activity-card'
+import { RestaurantsCard } from '@/components/manager/profile/restaurants-card'
 
 export default async function ProfilePage() {
   const session = await auth()
@@ -16,60 +18,43 @@ export default async function ProfilePage() {
     where: { email: session.user.email },
     select: {
       email: true,
+      emailVerified: true,
+      role: true,
       createdAt: true,
       lastLogin: true,
-      role: true,
-      emailVerified: true,
-      restaurants: {
-        select: {
-          id: true,
-          name: true,
-          createdAt: true,
-          slug: true
-        }
-      }
+      mfaEnabled: true,
+      restaurants: { select: { id: true, name: true, slug: true }, orderBy: { name: 'asc' } },
     },
   })
+  if (!user) notFound()
 
-  if (!user) {
-    return <ProfileNotFound />
-  }
-
-  const recentActivity = await prisma.activityLog.findMany({
+  const activity = await prisma.activityLog.findMany({
     where: { userId: session.user.id },
     take: 5,
     orderBy: { createdAt: 'desc' },
-    select: {
-      action: true,
-      createdAt: true,
-      ipAddress: true,
-      status: true
-    }
-  }).catch(() => []) // Fallback if activityLog table doesn't exist
-
-  const accountAge = daysSince(user.createdAt)
-  const isNewAccount = accountAge < 30
+    select: { id: true, action: true, createdAt: true, status: true },
+  })
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Header Section */}
-      <ProfileHeader emailVerified={user.emailVerified} />
+    <div className="flex flex-col gap-6">
+      <PageHeader title="Account" description="Your profile, sign-in and password." />
 
       <div className="grid gap-6 lg:grid-cols-3">
-        {/* Account Overview - Spans 2 columns */}
-        <AccountOverviewCard user={user} isNewAccount={isNewAccount} />
-
-        {/* Account Stats */}
-        <AccountStatsCard accountAge={accountAge} restaurantCount={user.restaurants.length} activityCount={recentActivity.length} />
-
-        {/* Security Settings - Full width */}
-        <SecurityCard />
-
-        {/* Recent Activity */}
-        <RecentActivityCard activity={recentActivity} />
-
-        {/* My Restaurants */}
-        {user.restaurants.length > 0 && <MyRestaurantsCard restaurants={user.restaurants} />}
+        <div className="flex flex-col gap-6 lg:col-span-2">
+          <ProfileCard
+            email={user.email}
+            emailVerified={user.emailVerified}
+            role={user.role}
+            createdAt={user.createdAt}
+            lastLogin={user.lastLogin}
+            changeEmailHref="/manager/change-email"
+          />
+          <SecurityCards mfaEnabled={user.mfaEnabled} />
+        </div>
+        <div className="flex flex-col gap-6">
+          <RestaurantsCard restaurants={user.restaurants} />
+          <ActivityCard activity={activity} />
+        </div>
       </div>
     </div>
   )

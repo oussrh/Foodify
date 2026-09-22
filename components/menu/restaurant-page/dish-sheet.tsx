@@ -5,6 +5,8 @@ import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/
 import { cn } from '@/lib/utils'
 import { localName, type Locale, type MenuCategory, type MenuDish, type MenuRestaurant, type Money } from '@/lib/menu'
 import DishBody from '../dish-body'
+import { useDishView } from '../use-dish-view'
+import type { DishOrder } from '../cart/dish-order-control'
 import { dishHref } from './menu-urls'
 
 interface DishSheetProps {
@@ -19,6 +21,8 @@ interface DishSheetProps {
   /** '' when the menu follows the device; the forced theme's class otherwise */
   themeClass: string
   brandStyle: Record<string, string>
+  /** The open dish's order handle, or undefined when the restaurant takes no orders. */
+  order?: DishOrder | undefined
 }
 
 /** "Mains · Grills": where the dish sits in the menu, or null when it is uncategorized. */
@@ -36,7 +40,8 @@ function breadcrumbFor(categories: MenuCategory[], dish: MenuDish, locale: Local
 }
 
 /** The bottom sheet a row opens: the dish in full, in the restaurant's brand and theme. */
-export default function DishSheet({ dish, onClose, restaurant, categories, locale, money, origin, themeClass, brandStyle }: DishSheetProps) {
+export default function DishSheet({ dish, onClose, restaurant, categories, locale, money, origin, themeClass, brandStyle, order }: DishSheetProps) {
+  useDishView(dish?.id ?? null)
   const breadcrumb = dish && breadcrumbFor(categories, dish, locale)
   return (
     <Sheet open={dish !== null} onOpenChange={(open) => !open && onClose()}>
@@ -58,6 +63,7 @@ export default function DishSheet({ dish, onClose, restaurant, categories, local
                 photoTransition
                 breadcrumb={breadcrumb}
                 shareUrl={`${origin}${dishHref(restaurant.slug, dish)}?lang=${locale}`}
+                order={order}
               />
             </>
           )}

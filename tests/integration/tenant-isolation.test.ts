@@ -2,10 +2,20 @@ import { describe, expect, it } from 'vitest'
 import { deleteRestaurant, updateRestaurant } from '@/app/actions/restaurant-actions'
 import { getMenu, reorderCategories, updateCategory, updateSubcategory } from '@/app/actions/menu-actions'
 import { createDish, toggleDishStatus, updateDish, updateIngredient } from '@/app/actions/dish-actions'
-import { requireCategoryAccess, requireDishAccess, requireIngredientAccess, requireRestaurantAccess, requireSubcategoryAccess, requireSuperAdmin } from '@/lib/auth-guard'
+import {
+  requireBoardAccess,
+  requireCategoryAccess,
+  requireDishAccess,
+  requireIngredientAccess,
+  requireOrderingStaff,
+  requireRestaurantAccess,
+  requireSubcategoryAccess,
+  requireSuperAdmin,
+} from '@/lib/auth-guard'
 import { loadMenu } from '@/lib/menu-loader'
+import { setMfaEnabled } from '@/app/actions/profile-actions'
 import { withRollback, type Tx } from './db'
-import { category, dish, ingredient, manager, restaurant, subcategory, superAdmin } from './fixtures'
+import { category, dish, ingredient, kitchenTablet, manager, restaurant, subcategory, superAdmin, waiter } from './fixtures'
 import { signInAs } from './session'
 
 // The negative proof (DATA.3, AUTH.1): a restaurant admin reaches nothing of another
@@ -122,5 +132,60 @@ describe('tenant isolation: the actions', () => {
       signInAs(await superAdmin(tx))
       await expect(deleteRestaurant(mine.id)).resolves.toEqual({ id: mine.id })
       expect(await tx.restaurant.findUnique({ where: { id: mine.id } })).toBeNull()
+    }))
+})
+
+// The device accounts are assigned to a restaurant like a manager is, which is exactly why they
+// are worth proving here: membership is not permission, and the guard is the only thing between
+// a tablet on a counter and the menu it is standing next to.
+describe('tenant isolation: the device accounts', () => {
+  it('lets a tablet and a waiter read the board of their own restaurant and no other', () =>
+    withRollback(async (tx) => {
+      const [mine, theirs] = await Promise.all([restaurant(tx), restaurant(tx)])
+
+      signInAs(await kitchenTablet(tx, [mine.id]))
+      await expect(requireBoardAccess(mine.id)).resolves.toMatchObject({ role: 'KITCHEN' })
+      await expect(requireBoardAccess(theirs.id)).rejects.toMatchObject(forbidden)
+
+      signInAs(await waiter(tx, [mine.id]))
+      await expect(requireBoardAccess(mine.id)).resolves.toMatchObject({ role: 'WAITER' })
+      await expect(requireBoardAccess(theirs.id)).rejects.toMatchObject(forbidden)
+    }))
+
+  it('refuses both of them every management guard, on the restaurant they are assigned to', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      const theirDish = await dish(tx, mine.id)
+      const theirCategory = await category(tx, mine.id)
+
+      for (const account of [await kitchenTablet(tx, [mine.id]), await waiter(tx, [mine.id])]) {
+        signInAs(account)
+        await expect(requireRestaurantAccess({ id: mine.id }), account.role).rejects.toMatchObject(forbidden)
+        await expect(requireDishAccess(theirDish.id), account.role).rejects.toMatchObject(forbidden)
+        await expect(requireCategoryAccess(theirCategory.id), account.role).rejects.toMatchObject(forbidden)
+        await expect(updateRestaurant(mine.id, { name: 'Renamed' }), account.role).rejects.toThrow()
+      }
+      expect((await tx.restaurant.findUniqueOrThrow({ where: { id: mine.id }, select: { name: true } })).name).toBe(mine.name)
+    }))
+
+  it('lets a waiter place an order and refuses a tablet, on the same restaurant', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      signInAs(await waiter(tx, [mine.id]))
+      await expect(requireOrderingStaff(mine.id)).resolves.toMatchObject({ role: 'WAITER' })
+      signInAs(await kitchenTablet(tx, [mine.id]))
+      await expect(requireOrderingStaff(mine.id)).rejects.toMatchObject(forbidden)
+    }))
+
+  // A device is mailed at `staff.invalid`, which can never be routed: a second factor would be a
+  // lock-out with no way back, so the account is refused one rather than trusted not to ask.
+  it('refuses a device account a second factor, and leaves the row alone', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      for (const account of [await kitchenTablet(tx, [mine.id]), await waiter(tx, [mine.id])]) {
+        signInAs(account)
+        await expect(setMfaEnabled({ mfaEnabled: true }), account.role).rejects.toThrow(/device account/i)
+        expect((await tx.user.findUniqueOrThrow({ where: { id: account.id }, select: { mfaEnabled: true } })).mfaEnabled).toBe(false)
+      }
     }))
 })

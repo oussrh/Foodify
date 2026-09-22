@@ -63,6 +63,7 @@ export function makeRestaurant(overrides: Partial<MenuRestaurant> = {}): MenuRes
     openingHours: null,
     socialMedia: null,
     dietaryOptions: ['vegetarian', 'vegan', 'halal', 'gluten_free', 'spicy'],
+    orderingEnabled: false,
     socialDisplay: 'icons',
     ...overrides,
   }

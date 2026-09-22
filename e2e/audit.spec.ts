@@ -41,7 +41,9 @@ test.describe('accessibility sweep', () => {
     const account = await auditAccount('manager', info.testId)
     await signInAs(page, 'manager', account.email)
     const r = `/manager/restaurants/${restaurantId}`
-    for (const path of ['/manager', '/manager/restaurants', '/manager/profile', '/manager/change-email', `${r}/dishes`, `${r}/dishes/create`, `${r}/dishes/${dishId}/edit`, `${r}/menu`, `${r}/info`]) {
+    // No `/manager`: the audit account manages one restaurant, so the portal home redirects into
+    // it, and `${r}/info` below is the page it lands on.
+    for (const path of ['/manager/restaurants', '/manager/profile', '/manager/change-email', `${r}/dishes`, `${r}/dishes/create`, `${r}/dishes/${dishId}/edit`, `${r}/menu`, `${r}/info`, `${r}/insights`]) {
       await scan(page, path)
     }
     await scanSettings(page, `${r}/edit`)
@@ -54,8 +56,8 @@ test.describe('accessibility sweep', () => {
     await signInAs(page, 'admin', account.email)
     const r = `/admin/restaurants/${restaurantId}`
     const pages = [
-      '/admin', '/admin/admins', '/admin/admins/create', `/admin/admins/${adminId}/edit`,
-      '/admin/restaurants', '/admin/restaurants/create', `${r}/dishes`, `${r}/dishes/create`, `${r}/dishes/${dishId}/edit`, `${r}/menu`, `${r}/info`, `${r}/users`,
+      '/admin', '/admin/profile', '/admin/admins', '/admin/admins/create', `/admin/admins/${adminId}/edit`,
+      '/admin/restaurants', '/admin/restaurants/create', `${r}/dishes`, `${r}/dishes/create`, `${r}/dishes/${dishId}/edit`, `${r}/menu`, `${r}/info`, `${r}/insights`, `${r}/users`,
       '/admin/users', '/admin/users/create', `/admin/users/${managerId}/edit`, `/admin/users/${managerId}/restaurants`,
     ]
     for (const path of pages) await scan(page, path)
