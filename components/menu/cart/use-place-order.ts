@@ -44,7 +44,10 @@ function messageFor(error: unknown, locale: Locale): string {
     if (names.length > 1) return t.soldOutSincePlural(names.join(', '))
     return t.menuChanged
   }
-  if (error.code === 'invalid_payload' || error.code === 'not_found') return t.menuChanged
+  // `invalid_payload` is something in what was sent, not the menu moving under it: saying "the
+  // menu has changed" sends somebody to look at their order for a problem that is not there.
+  if (error.code === 'invalid_payload') return t.orderRejected
+  if (error.code === 'not_found') return t.menuChanged
   return t.orderFailed
 }
 
@@ -68,7 +71,16 @@ export function usePlaceOrder(locale: Locale, onSent: () => void): PlaceOrder {
       const { data } = await call<PlacedOrder>('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ restaurantId, table: table.trim(), phone: phone.trim(), locale, note: note.trim() || undefined, lines }),
+        // An empty phone is left out rather than sent as '': a waiter has nobody to text, and the
+        // shape reads a missing key as "no phone" (the schema also folds '' to the same thing).
+        body: JSON.stringify({
+          restaurantId,
+          table: table.trim(),
+          phone: phone.trim() || undefined,
+          locale,
+          note: note.trim() || undefined,
+          lines,
+        }),
       })
       setState({ status: 'sent', order: data })
       onSent()

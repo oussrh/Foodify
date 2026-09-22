@@ -13,8 +13,10 @@ describe('orderInput', () => {
     expect(orderInput.parse({ ...valid, phone: '(06) 00 11 22 33' }).phone).toBe('0600112233')
   })
 
-  it('refuses a phone that is too short, too long or not a number', () => {
-    for (const phone of ['', '  ', '12345', '1'.repeat(16), '06 00 AB 22 33', '+']) {
+  it('refuses a phone that is typed but unusable', () => {
+    // '' and '   ' are not in this list: nothing typed is nothing given, which is the next test
+    // and the handler's business rather than the shape's.
+    for (const phone of ['12345', '1'.repeat(16), '06 00 AB 22 33', '+']) {
       expect(orderInput.safeParse({ ...valid, phone }).success, String(phone)).toBe(false)
     }
   })
@@ -69,5 +71,33 @@ describe('orderInput', () => {
     expect(orderInput.safeParse({ ...valid, restaurantId: 'r1' }).success).toBe(false)
     expect(orderInput.safeParse({ ...valid, lines: [{ dishId: 'd1', quantity: 1 }] }).success).toBe(false)
     expect(orderInput.safeParse({ ...valid, note: 'x'.repeat(301) }).error?.issues[0]?.message).toBe('The note is too long')
+  })
+})
+
+describe('an empty phone', () => {
+  const base = {
+    restaurantId: '8f0f3d6a-1d3f-4a1b-9c2e-000000000001',
+    table: '4',
+    lines: [{ dishId: '8f0f3d6a-1d3f-4a1b-9c2e-000000000002', quantity: 1 }],
+  }
+
+  it('is read as no phone, the same as leaving the key out', () => {
+    // A waiter has nobody to text, and their form sends '' rather than omitting the field.
+    // `.optional()` covers a missing key and not an empty string, which refused every order a
+    // waiter placed — and the message blamed the menu.
+    const omitted = orderInput.safeParse(base)
+    const empty = orderInput.safeParse({ ...base, phone: '' })
+    expect(omitted.success).toBe(true)
+    expect(empty.success).toBe(true)
+    expect(empty.success && empty.data.phone).toBeUndefined()
+  })
+
+  it('reads whitespace as nothing too', () => {
+    expect(orderInput.safeParse({ ...base, phone: '   ' }).success).toBe(true)
+  })
+
+  it('still refuses a phone that is typed but unusable', () => {
+    expect(orderInput.safeParse({ ...base, phone: '12' }).success).toBe(false)
+    expect(orderInput.safeParse({ ...base, phone: 'not a phone' }).success).toBe(false)
   })
 })

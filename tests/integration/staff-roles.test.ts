@@ -74,7 +74,10 @@ describe('a waiter', () => {
       const staff = await waiter(tx, [mine.id])
       signInAs(staff)
 
-      const res = await post({ restaurantId: mine.id, table: '7', lines: [{ dishId: only.id, quantity: 2 }] })
+      // The app sends `phone: ''`, not a missing key: a form with nothing typed in it has a value.
+      // Omitting it here is what let a shape that refused '' pass this test while refusing every
+      // order a waiter actually placed.
+      const res = await post({ restaurantId: mine.id, table: '7', phone: '', lines: [{ dishId: only.id, quantity: 2 }] })
       expect(res.status).toBe(201)
       const { data } = (await res.json()) as { data: { id: string } }
       const row = await tx.order.findUniqueOrThrow({ where: { id: data.id }, select: { phone: true, placedById: true, table: true, subtotal: true } })
