@@ -49,10 +49,23 @@ function deny(reason) {
 }
 
 // ---- always denied ----------------------------------------------------------------------
-if (hasFlag(/\bgit push\b.*(\s--force\b|\s-f\b|\s--force-with-lease\b|\s\+[\w/])/)) {
+// The same span and the same cluster as the bypass below, for the same reasons: `git push -fu
+// origin dev` is a force push, and `\s-f\b` could not see it because the boundary after `f`
+// does not hold inside a cluster. `git clean` and `rm -r` in this file already read clusters;
+// the two flags that are refused everywhere, day and night, were the two that did not. Found
+// against a repository running 0.2.0, by replaying the spellings rather than reading the regex.
+if (hasFlag(/\bgit push\b[^;&|]*(\s--force\b|\s--force-with-lease\b|\s-[a-zA-Z]*f[a-zA-Z]*\b|\s\+[\w/])/)) {
   deny("Force push is never allowed. Rebase onto the remote or make a new commit.");
 }
-if (hasFlag(/--no-verify\b|\bgit commit\b.*\s-n\b/)) {
+// The short form, read the way the shim beside this hook reads it. Two defects lived in the
+// span and in the flag. `.*` ran to the end of the line, so a `-n` belonging to a LATER command
+// was read as this commit's: `git commit -m x && sed -n 1p f` was refused, and so was any
+// sentence naming `git commit` with an unrelated `-n` behind it (this entry was written by a
+// command the guard refused for exactly that). The span now stops at a command separator, as
+// the push target's does. And `\s-n\b` could not see a cluster: `-n` bundled as `-nm` bypasses
+// the hook exactly as `-n` does, and the boundary after `n` never held, so the one spelling
+// somebody reaching for the bypass would type was the one spelling that got through.
+if (hasFlag(/--no-verify\b|\bgit commit\b[^;&|]*\s-[a-zA-Z]*n[a-zA-Z]*\b/)) {
   deny("Hook bypass (--no-verify) is not a workflow. Make the gate pass instead.");
 }
 // Provenance is the default: nothing here refuses a commit for naming the agent. A repository
@@ -82,19 +95,39 @@ if (NIGHT && trailer && /\bgit commit\b.*\s-m\b/.test(cmd) && !cmd.includes(trai
 // The branch a push TARGETS, not a word that appears in the command: `git push -u origin
 // feature/main-nav` pushes nothing to main, and a guard reading the substring refuses a branch
 // for its name. `-` and `/` are word boundaries, so \bmain\b matched half the branch names a
-// team uses. The target is the last non-flag argument, its destination side when it is a
-// refspec (`HEAD:main`, `:main` for a delete); with no refspec the push goes to the current
-// branch's upstream, which is the current branch.
+// team uses. The target is the last positional argument before any redirection, its destination
+// side when it is a refspec (`HEAD:main`, `:main` for a delete); with no refspec the push goes
+// to the current branch's upstream, which is the current branch. A redirection is not an
+// argument: `git push origin main 2>&1` targets main, and reading `2>&1` as the target was the
+// hole that let a push to main through (an outside trial found it in a day).
 function pushTarget() {
   const m = argv.match(/\bgit push\b([^;&|]*)/);
   if (!m) return null;
-  const args = m[1].trim().split(/\s+/).filter((w) => w && !w.startsWith("-"));
+  const words = m[1].trim().split(/\s+/).filter(Boolean);
+  const args = [];
+  for (const w of words) {
+    if (/^\d*>{1,2}|^<|^&>/.test(w)) break; // `>`, `>>`, `2>`, `2>&1`, `&>`, `<`: the shell's, not git's
+    if (!w.startsWith("-")) args.push(w);
+  }
   if (args.length < 2) return branch;
   const spec = args[args.length - 1];
-  return (spec.includes(":") ? spec.slice(spec.lastIndexOf(":") + 1) : spec).replace(/^refs\/heads\//, "");
+  const dest = (spec.includes(":") ? spec.slice(spec.lastIndexOf(":") + 1) : spec).replace(/^refs\/heads\//, "");
+  // `HEAD` and its alias `@` are not the name of a branch: git resolves them to the branch you
+  // are standing on, so ON the base branch `git push origin HEAD` IS a push to the base. Read
+  // as a literal it matched no branch name and the push went through - this hook's own
+  // repository, 2026-09-22, by the agent that had just finished closing the two flag holes.
+  // `HEAD:main` is unaffected: the destination side is read before this, and it says main.
+  return dest === "HEAD" || dest === "@" ? branch : dest;
 }
 const target = hasFlag(/\bgit push\b/) ? pushTarget() : null;
-const pushesBase = target === base || target === "master";
+// A push is not the only write to a branch: the forge's API moves a ref or merges into it
+// without git. `gh api` with a write method (or a body flag, which implies POST) to the base's
+// ref or to the merges endpoint is the same act by another door. `gh pr merge` is the pull
+// request landing, which is what PR-only means, and stays a human's call by day.
+const apiWrite = /\bgh api\b/.test(argv) && /\s(-X|--method)\s+(PATCH|POST|PUT|DELETE)\b|\s(-f|-F|--field|--raw-field|--input)\b/i.test(argv);
+const B = "\\b"; // a word boundary as a string: in a template literal the same two characters are a backspace
+const apiRefWrite = apiWrite && new RegExp(B + "gh api" + B + "[^;&|]*/(git/refs/heads/(" + base + "|master)" + B + "|merges" + B + ")").test(argv);
+const pushesBase = target === base || target === "master" || apiRefWrite;
 if (pushesBase && (NIGHT || config.directPushToBase !== true)) {
   deny(
     NIGHT
@@ -128,6 +161,7 @@ if (NIGHT) {
     deny(`Unattended run: stay on ${adoption || "the adoption branch"}. Switching branches is not allowed.`);
   }
   const rules = [
+    [/\bgh pr merge\b|\bgh api\b[^;&|]*\/pulls\/\d+\/merge\b/, "Merging a pull request is a human act; the morning reads the branch."],
     [/\bgit reset\s+--hard\b/, "git reset --hard discards work; revert with a new commit instead."],
     [/\bgit clean\b.*-[a-zA-Z]*f/, "git clean -f deletes untracked work; leave it and record it."],
     [/\bgit branch\s+(-D|--delete --force)\b/, "Force-deleting a branch is not allowed unattended."],
