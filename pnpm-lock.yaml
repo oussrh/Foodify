@@ -125,8 +125,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(vitest@5.0.1)
       abatty:
-        specifier: 0.3.1
-        version: 0.3.1
+        specifier: 0.3.2
+        version: 0.3.2
       dependency-cruiser:
         specifier: ^18.4.0
         version: 18.4.0
@@ -2160,8 +2160,8 @@ packages:
   '@vitest/spy@5.0.1':
     resolution: {integrity: sha512-rbto/mF/SGERxEgYOek7Xm6B9b+y+mVoo+f4b2LymYO8zM1b7uB5nHuhVMTP2hxdzgxvGiZYGxGIaMvL5y180Q==}
 
-  abatty@0.3.1:
-    resolution: {integrity: sha512-06FCKD2M5XrpSQA90tHR1zTbS74A+Ik021OGnyPoZef5bZ+RtkCpqPnJTnWpPohqmjCviTJ9FeRPrlLG/dVRZw==}
+  abatty@0.3.2:
+    resolution: {integrity: sha512-WH5s6AjDZWFtx6zU/7Ak2WJBTokpg0HN98yTaDt9NMugpTcpiQASv4bOYLMChYtURywiiE6iPvMUJHF1DjKCpQ==}
     engines: {node: '>=20'}
     hasBin: true
 
@@ -6410,7 +6410,7 @@ snapshots:
 
   '@vitest/spy@5.0.1': {}
 
-  abatty@0.3.1: {}
+  abatty@0.3.2: {}
 
   acorn-jsx-walk@2.0.0: {}
 
