@@ -35,6 +35,32 @@ notification — reuse the *event* and choose the medium where it lands. Ask wha
 doing, who else is in earshot, and what it costs them to turn it off. An alert that gets muted is
 worse than one that was never loud, because it fails silently and for ever.
 
+## 2026-09-22 · A primary key and a public name are two jobs, and one value cannot hold both
+
+Every link this app hands to a device carried a uuid, because the uuid was already there and was
+already unique. But those links are read off one screen and typed into another by somebody
+standing up mid-service, and thirty-six characters of hex is the wrong shape for that. The slug
+was the obvious alternative and the wrong one: it follows the restaurant's name, so renaming a
+restaurant would break the tab left open on the pass halfway through a service.
+
+The three jobs pull apart cleanly once named. A **primary key** must be unique and stable and is
+never read by a person, so a uuid is right and its ugliness costs nothing. A **slug** is for
+people and for search, so it must be meaningful, which means it must be allowed to change. A
+**public identifier** must be short enough to type, stable enough to print, and unambiguous when
+read aloud or off a screen — which is a third set of constraints that neither of the other two
+satisfies. `Restaurant.code` is six Crockford characters: no I, L, O or U, because the first
+three are read as 1 and 0 and the last makes words.
+
+Two things made it cheap to add late. The row kept its uuid and nothing joins on the code, so it
+is additive rather than a migration of every foreign key. And the route resolver accepts both
+forms, so every address already saved to a tablet's home screen or printed on a card keeps
+working — an identifier you hand out is one you cannot recall, which is the same reason it has to
+be stable in the first place.
+
+Ask of any id that appears in a URL, a support call or a label: who types this, and what happens
+when the thing is renamed? If the answers are "a person" and "the link breaks", it wants a third
+identifier rather than a reused one.
+
 ## 2026-09-22 · State a human has to clear is state that stays set
 
 "This dish has run out" wants to be a boolean. It is the obvious model, it is one column, and it

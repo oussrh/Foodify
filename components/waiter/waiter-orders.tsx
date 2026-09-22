@@ -68,7 +68,7 @@ function OrderCard({ order, now, ready, onDeliver, busy }: { order: BoardOrder; 
   )
 }
 
-export function WaiterOrders({ restaurant }: { restaurant: { id: string; name: string } }) {
+export function WaiterOrders({ restaurant }: { restaurant: { id: string; code: string; name: string } }) {
   const now = useMinuteClock()
   const open = useOrderBoard(restaurant.id, 'open', silent)
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -130,7 +130,7 @@ export function WaiterOrders({ restaurant }: { restaurant: { id: string; name: s
         )}
       </main>
 
-      <WaiterNav restaurantId={restaurant.id} active="orders" />
+      <WaiterNav restaurantId={restaurant.code} active="orders" />
     </div>
   )
 }

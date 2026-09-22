@@ -8,6 +8,7 @@ import { AuthError, requireBoardAccess, requireOrderingStaff, requireRestaurantA
 import { loadMenu } from '@/lib/menu-loader'
 import { boardOrderSelect, serializeOrder } from '@/lib/order-data'
 import { daysAgo } from '@/lib/time'
+import { parseRestaurantCode } from '@/lib/restaurant-code'
 
 /** Whether the guard passes, as a boolean: a page redirects rather than throwing at a signed-out reader. */
 async function passes(guard: () => Promise<unknown>): Promise<boolean> {
@@ -18,6 +19,19 @@ async function passes(guard: () => Promise<unknown>): Promise<boolean> {
     if (error instanceof AuthError) return false
     throw error
   }
+}
+
+/**
+ * The restaurant a device route was given, as a uuid. The path may carry either form: the short
+ * code the links now hand out, or the uuid the links used to — a tablet with the old address
+ * saved to its home screen must keep working, and a printed one cannot be recalled. Null when the
+ * code matches nothing, which the caller turns into the same redirect every other miss gets.
+ */
+export async function restaurantIdFromParam(param: string): Promise<string | null> {
+  const code = parseRestaurantCode(param)
+  if (!code) return param
+  const found = await prisma.restaurant.findUnique({ where: { code }, select: { id: true } })
+  return found?.id ?? null
 }
 
 /** Whether the signed-in user may manage this restaurant; false for a stranger, a kitchen tablet, and nobody signed in. */
@@ -32,8 +46,9 @@ export async function loadRestaurantInfo(id: string) {
   if (!(await mayOpen(id))) return null
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
-    // `tableCount` so the QR section can say whether the per-table sheet has anything on it yet.
-    select: { id: true, name: true, slug: true, tableCount: true },
+    // `tableCount` so the QR section can say whether the per-table sheet has anything on it yet;
+    // `code` because the device links are built from it rather than from the uuid.
+    select: { id: true, name: true, slug: true, code: true, tableCount: true },
   })
   if (!restaurant) return null
   const dish = { restaurantId: id }
@@ -149,6 +164,6 @@ export async function loadBoardRestaurant(id: string) {
   if (!(await passes(() => requireBoardAccess(id)))) return null
   return prisma.restaurant.findUnique({
     where: { id },
-    select: { id: true, name: true, orderingEnabled: true, currency: true, currencySymbol: true, defaultLocale: true },
+    select: { id: true, code: true, name: true, orderingEnabled: true, currency: true, currencySymbol: true, defaultLocale: true },
   })
 }

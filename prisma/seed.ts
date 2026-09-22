@@ -160,6 +160,7 @@ async function seedRestaurant() {
     create: {
       name: "Foodify Test Kitchen",
       slug: RESTAURANT_SLUG,
+      code: 'SEED01',
       email: "contact@foodify.test",
       tagline: "AR dining reinvented",
       logoUrl: "/images/logo.png",

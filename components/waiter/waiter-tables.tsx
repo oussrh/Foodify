@@ -24,7 +24,7 @@ const silent = () => undefined
 const CONTROL = 'h-12 min-w-12 px-3'
 
 interface WaiterTablesProps {
-  restaurant: { id: string; name: string; tableCount: number }
+  restaurant: { id: string; code: string; name: string; tableCount: number }
   onOpenTable: (table: string) => void
 }
 
@@ -137,7 +137,7 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
         )}
       </main>
 
-      <WaiterNav restaurantId={restaurant.id} active="tables" />
+      <WaiterNav restaurantId={restaurant.code} active="tables" />
     </div>
   )
 }

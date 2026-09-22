@@ -36,6 +36,7 @@ export function restaurantRow(overrides: Partial<Restaurant> = {}): Restaurant {
     id: 'r1',
     name: 'Chez Test',
     slug: 'chez-test',
+    code: 'K7M2QX',
     email: null,
     phone: null,
     tagline: null,

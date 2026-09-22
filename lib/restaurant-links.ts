@@ -14,13 +14,18 @@ export interface RestaurantLinks {
 }
 
 /**
- * The three addresses, absolute. The device ones are by id, not slug: a tablet signed in stays on
- * its board across a rename, where a slug would break the tab someone left open on the pass.
+ * The three addresses, absolute. The device ones are by the restaurant's short code, not its slug
+ * and not its uuid: a slug follows the restaurant's name and would break the tab left open on the
+ * pass when somebody renames it, and a uuid is thirty-six characters to read off a screen and
+ * type into a tablet. A code is six, and is assigned once (`lib/restaurant-code.ts`).
+ *
+ * The routes still accept a uuid, so an address saved to a tablet's home screen before codes
+ * existed keeps working.
  */
-export function restaurantLinks(origin: string, restaurant: { id: string; slug: string }): RestaurantLinks {
+export function restaurantLinks(origin: string, restaurant: { code: string; slug: string }): RestaurantLinks {
   return {
     menu: `${origin}/restaurant/${restaurant.slug}`,
-    tablet: `${origin}/kitchen/orders/${restaurant.id}`,
-    waiter: `${origin}/waiter/${restaurant.id}`,
+    tablet: `${origin}/kitchen/orders/${restaurant.code}`,
+    waiter: `${origin}/waiter/${restaurant.code}`,
   }
 }

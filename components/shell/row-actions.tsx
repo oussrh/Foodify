@@ -99,6 +99,21 @@ export function DishSoldOutButton({ dishId, soldOut }: { dishId: string; soldOut
 const menuButton =
   'inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring'
 
+/**
+ * The button every row menu opens from. Same size, same label shape, and dimmed while a move is
+ * in flight, so two lists of different things still behave like one control.
+ */
+function RowMenuTrigger({ label, pending }: { label: string; pending: boolean }) {
+  return (
+    <DropdownMenuTrigger asChild>
+      <button type="button" className={cn(menuButton, pending && 'opacity-50')} aria-label={`Actions for ${label}`}>
+        <MoreHorizontal className="h-4 w-4" />
+      </button>
+    </DropdownMenuTrigger>
+  )
+}
+
+
 interface DishRowMenuProps {
   dishId: string
   dishName: string
@@ -125,11 +140,7 @@ export function DishRowMenu({ dishId, dishName, editHref, isMostPurchased }: Dis
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={cn(menuButton, pending && 'opacity-50')} aria-label={`Actions for ${dishName}`}>
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
+        <RowMenuTrigger label={dishName} pending={pending} />
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
             <Link href={editHref}>Edit</Link>
@@ -185,11 +196,7 @@ export function RestaurantRowMenu({ restaurantId, restaurantName, portal, slug }
   return (
     <>
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <button type="button" className={cn(menuButton, pending && 'opacity-50')} aria-label={`Actions for ${restaurantName}`}>
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-        </DropdownMenuTrigger>
+        <RowMenuTrigger label={restaurantName} pending={pending} />
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
             <Link href={`${base}/menu` as Route}>Menu</Link>

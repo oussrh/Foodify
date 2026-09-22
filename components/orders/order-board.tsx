@@ -22,6 +22,8 @@ import { useWakeLock } from './use-wake-lock'
 
 interface OrderBoardProps {
   restaurantId: string
+  /** The restaurant's short code: what its own links are built from, never the uuid. */
+  restaurantCode: string
   restaurantName: string
   /** The restaurant's currency, for the total in the details sheet. */
   money: Money
@@ -29,7 +31,7 @@ interface OrderBoardProps {
   backHref?: Route | undefined
 }
 
-export default function OrderBoard({ restaurantId, restaurantName, money, backHref }: OrderBoardProps) {
+export default function OrderBoard({ restaurantId, restaurantCode, restaurantName, money, backHref }: OrderBoardProps) {
   const { play: chime } = useChime()
   const [view, setView] = useState<BoardView>('open')
   const { orders, online, loading, arrived, refresh } = useOrderBoard(restaurantId, view, chime)
@@ -70,7 +72,7 @@ export default function OrderBoard({ restaurantId, restaurantName, money, backHr
         wakeLock={wakeLock}
         pwa={pwa}
         backHref={backHref}
-        soldOutHref={`/kitchen/menu/${restaurantId}` as Route}
+        soldOutHref={`/kitchen/menu/${restaurantCode}` as Route}
       />
 
       <main className="flex-1 px-3 py-4 pb-[max(16px,env(safe-area-inset-bottom))] sm:px-4">

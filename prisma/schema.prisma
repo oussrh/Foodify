@@ -38,6 +38,10 @@ model Restaurant {
   id              String         @id @default(uuid())
   name            String
   slug            String         @unique
+  // The short name this restaurant goes by in a link handed to a device (`lib/restaurant-code.ts`):
+  // six Crockford characters, assigned once and never changed. The slug follows the restaurant's
+  // name and would break a tab left open on the pass when somebody renames it; this does not.
+  code            String         @unique
   email           String?
   phone           String?
   tagline         String?

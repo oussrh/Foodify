@@ -11,7 +11,7 @@ import WaiterOrder from './waiter-order'
 import { WaiterTables } from './waiter-tables'
 
 interface WaiterAppProps {
-  restaurant: { id: string; name: string; tableCount: number }
+  restaurant: { id: string; code: string; name: string; tableCount: number }
   categories: MenuCategory[]
   loose: MenuDish[]
   money: Money
