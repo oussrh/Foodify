@@ -221,6 +221,9 @@ model ActivityLog {
 enum OrderStatus {
   NEW
   ACCEPTED
+  // The food is up and waiting on the pass. The kitchen's work is finished; the floor's has not
+  // started. DONE means a waiter carried it out, which is a different fact and a different person.
+  READY
   DONE
   CANCELLED
 }
@@ -250,6 +253,8 @@ model Order {
   // so the history can say how long a table waited before it was started and before it was served.
   // `updatedAt` cannot answer that — it moves again on any later change.
   acceptedAt   DateTime?
+  // Stamped when the kitchen called it up, which is the moment the waiter is told about.
+  readyAt      DateTime?
   servedAt     DateTime?
   lines        OrderLine[]
 

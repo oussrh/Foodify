@@ -80,10 +80,10 @@ export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }
         disabled={busy}
         className={cn(
           'h-16 w-full text-lg font-semibold transition-opacity focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-60',
-          order.status === 'NEW' ? 'bg-brand text-brand-on' : 'bg-success text-white',
+          order.status === 'NEW' ? 'bg-brand text-brand-on' : order.status === 'ACCEPTED' ? 'bg-warning text-white' : 'bg-success text-white',
         )}
       >
-        {busy ? 'Saving…' : order.status === 'NEW' ? 'Start' : 'Served'}
+        {busy ? 'Saving…' : order.status === 'NEW' ? 'Start' : order.status === 'ACCEPTED' ? 'Ready' : 'Served'}
       </button>
     </article>
   )

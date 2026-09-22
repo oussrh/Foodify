@@ -1,5 +1,5 @@
 // components/orders/order-columns.tsx
-// The board's two lanes: what is waiting to be started, and what is being made. An order moves
+// The board's three lanes: waiting to be started, being made, and up on the pass. An order moves
 // lane when staff press its button, so where a card sits is the state — nothing to read. Each
 // lane is its own tray, sunk into the page with its own heading bar and colour, so at a glance
 // across a kitchen the two are never one list: side by side on a tablet held landscape, stacked
@@ -20,7 +20,7 @@ interface OrderColumnsProps {
 }
 
 interface Lane {
-  status: Extract<OrderStatus, 'NEW' | 'ACCEPTED'>
+  status: Extract<OrderStatus, 'NEW' | 'ACCEPTED' | 'READY'>
   title: string
   empty: string
   /** The bar down the lane's heading: the same colour as the card's own move button. */
@@ -29,7 +29,9 @@ interface Lane {
 
 const LANES: Lane[] = [
   { status: 'NEW', title: 'Waiting', empty: 'Nothing waiting.', accent: 'bg-brand' },
-  { status: 'ACCEPTED', title: 'Being made', empty: 'Nothing on yet.', accent: 'bg-success' },
+  { status: 'ACCEPTED', title: 'Being made', empty: 'Nothing on yet.', accent: 'bg-warning' },
+  // The lane the floor reads: the kitchen is finished and nobody has carried it yet.
+  { status: 'READY', title: 'Ready to serve', empty: 'Nothing up.', accent: 'bg-success' },
 ]
 
 export default function OrderColumns({ orders, now, busyId, arrived, onOpen, onAdvance }: OrderColumnsProps) {

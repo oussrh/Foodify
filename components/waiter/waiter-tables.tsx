@@ -39,17 +39,16 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
   const announced = useRef<Set<string>>(new Set())
   const [flashing, setFlashing] = useState<string[]>([])
 
+  // One poll: `READY` is an open status, so what the kitchen holds and what is up on the pass
+  // arrive together and the ready ones are simply the ones it has called up.
   const open = useOrderBoard(restaurant.id, 'open', silent)
-  const finished = useOrderBoard(restaurant.id, 'served', silent)
 
-  const ready = readyOrders(finished.orders, now)
-  const tiles = floorTiles(tableNumbers(restaurant.tableCount), open.orders, ready, now)
+  const ready = readyOrders(open.orders)
+  const cooking = open.orders.filter((order) => order.status !== 'READY')
+  const tiles = floorTiles(tableNumbers(restaurant.tableCount), cooking, ready, now)
   const readyTables = tiles.filter((tile) => tile.state === 'ready')
 
-  const refresh = useCallback(() => {
-    open.refresh()
-    finished.refresh()
-  }, [open, finished])
+  const refresh = useCallback(() => open.refresh(), [open])
 
   // `ready` is a new array every render, so it cannot be a dependency: what actually changes is
   // the set of ids in it. The rest is read through a ref written after each render, rather than
@@ -80,7 +79,7 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
           title="Tables"
           restaurantName={restaurant.name}
           online={open.online}
-          loading={open.loading || finished.loading}
+          loading={open.loading}
           onRefresh={refresh}
         >
           {pwa.canInstall && (
@@ -124,7 +123,7 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
         )}
 
         <p className="tnum pt-4 text-center text-xs text-muted-foreground">
-          {open.orders.length} with the kitchen · {ready.length} ready ·{' '}
+          {cooking.length} with the kitchen · {ready.length} ready ·{' '}
           <button type="button" onClick={alert.test} className="underline underline-offset-2">
             test the alert
           </button>

@@ -4,11 +4,14 @@
 // waiter asks when they walk back in and want to know where to go first.
 //
 // Ready first and then oldest first, because both are the same instruction — deal with this one
-// next. A finished order drops off by itself (`READY_WINDOW_MINUTES`), so the list is the shift's
-// present tense and never its history; the portal's Orders tab is where the history lives.
+// next. Carrying one out takes it off the list, which is the only move the floor owns; the
+// portal's Orders tab is where the history lives.
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useState, useTransition } from 'react'
+import { toast } from 'sonner'
+import { setOrderStatus } from '@/app/actions/order-actions'
+import { Button } from '@/components/ui/button'
 import { useMinuteClock } from '@/components/orders/use-minute-clock'
 import { useOrderBoard } from '@/components/orders/use-order-board'
 import { itemCount, minutesWaiting, STATUS_LABEL, type BoardOrder } from '@/lib/orders'
@@ -20,7 +23,7 @@ import { WaiterNav } from './waiter-nav'
 /** A waiter placed these; nothing here should announce them a second time. */
 const silent = () => undefined
 
-function OrderCard({ order, now, ready }: { order: BoardOrder; now: number; ready: boolean }) {
+function OrderCard({ order, now, ready, onDeliver, busy }: { order: BoardOrder; now: number; ready: boolean; onDeliver: () => void; busy: boolean }) {
   const waiting = minutesWaiting(order.createdAt, now)
   const items = itemCount(order)
 
@@ -53,6 +56,14 @@ function OrderCard({ order, now, ready }: { order: BoardOrder; now: number; read
       </ul>
 
       {order.note && <p className="pt-2 text-[13px] italic text-muted-foreground">“{order.note}”</p>}
+
+      {/* The floor's one move: it was carried to the table. Only on a ready order, because
+          nothing else is a waiter's to close. */}
+      {ready && (
+        <Button className="mt-3 h-14 w-full text-[15px]" disabled={busy} onClick={onDeliver}>
+          {busy ? 'Saving…' : `Carried to table ${order.table}`}
+        </Button>
+      )}
     </li>
   )
 }
@@ -60,20 +71,31 @@ function OrderCard({ order, now, ready }: { order: BoardOrder; now: number; read
 export function WaiterOrders({ restaurant }: { restaurant: { id: string; name: string } }) {
   const now = useMinuteClock()
   const open = useOrderBoard(restaurant.id, 'open', silent)
-  const finished = useOrderBoard(restaurant.id, 'served', silent)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [, startTransition] = useTransition()
 
-  const ready = readyOrders(finished.orders, new Date(now))
-  const readyIds = new Set(ready.map((order) => order.id))
-  // Ready first, then whatever has waited longest: both mean "this one next".
-  const all = [...ready, ...open.orders].sort((a, b) => {
+  const readyIds = new Set(readyOrders(open.orders).map((order) => order.id))
+  // One list, sorted: ready first, then whatever has waited longest. Both mean "this one next".
+  const all = [...open.orders].sort((a, b) => {
     if (readyIds.has(a.id) !== readyIds.has(b.id)) return readyIds.has(a.id) ? -1 : 1
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   })
 
-  const refresh = useCallback(() => {
-    open.refresh()
-    finished.refresh()
-  }, [open, finished])
+  const refresh = useCallback(() => open.refresh(), [open])
+
+  const deliver = (orderId: string) => {
+    setBusyId(orderId)
+    startTransition(async () => {
+      try {
+        await setOrderStatus({ orderId, action: 'done' })
+        open.refresh()
+      } catch {
+        toast.error('Could not mark that one carried out.')
+      } finally {
+        setBusyId(null)
+      }
+    })
+  }
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -82,7 +104,7 @@ export function WaiterOrders({ restaurant }: { restaurant: { id: string; name: s
           title="Orders"
           restaurantName={restaurant.name}
           online={open.online}
-          loading={open.loading || finished.loading}
+          loading={open.loading}
           onRefresh={refresh}
         />
       </header>
@@ -95,7 +117,14 @@ export function WaiterOrders({ restaurant }: { restaurant: { id: string; name: s
         ) : (
           <ul className="flex flex-col gap-3">
             {all.map((order) => (
-              <OrderCard key={order.id} order={order} now={now} ready={readyIds.has(order.id)} />
+              <OrderCard
+                key={order.id}
+                order={order}
+                now={now}
+                ready={readyIds.has(order.id)}
+                busy={busyId === order.id}
+                onDeliver={() => deliver(order.id)}
+              />
             ))}
           </ul>
         )}

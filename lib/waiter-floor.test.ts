@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { BoardOrder } from '@/lib/orders'
-import { floorTiles, newlyReady, readyOrders, READY_WINDOW_MINUTES } from './waiter-floor'
+import { floorTiles, newlyReady, readyOrders } from './waiter-floor'
 
 const NOW = new Date('2026-09-22T20:00:00Z')
 
@@ -16,6 +16,7 @@ const order = (over: Partial<BoardOrder> = {}): BoardOrder =>
     createdAt: '2026-09-22T19:50:00Z',
     updatedAt: '2026-09-22T19:50:00Z',
     acceptedAt: null,
+    readyAt: null,
     servedAt: null,
     placedBy: null,
     lines: [{ id: 'l1', nameEn: 'Chicken', nameFr: 'Poulet', quantity: 2, note: null }],
@@ -23,28 +24,23 @@ const order = (over: Partial<BoardOrder> = {}): BoardOrder =>
   }) as BoardOrder
 
 describe('readyOrders', () => {
-  it('takes an order the kitchen has just finished', () => {
-    const served = order({ status: 'DONE', servedAt: '2026-09-22T19:55:00Z' })
-    expect(readyOrders([served], NOW)).toHaveLength(1)
+  it('takes an order the kitchen has called up', () => {
+    expect(readyOrders([order({ status: 'READY', readyAt: '2026-09-22T19:55:00Z' })])).toHaveLength(1)
   })
 
-  it('lets one age off rather than piling up all service', () => {
-    const old = order({ status: 'DONE', servedAt: '2026-09-22T19:00:00Z' })
-    expect(readyOrders([old], NOW)).toEqual([])
+  it('leaves one that is still being made', () => {
+    expect(readyOrders([order({ status: 'ACCEPTED' })])).toEqual([])
+    expect(readyOrders([order({ status: 'NEW' })])).toEqual([])
   })
 
-  it('keeps one right on the edge of the window', () => {
-    const edge = new Date(NOW.getTime() - READY_WINDOW_MINUTES * 60_000).toISOString()
-    expect(readyOrders([order({ status: 'DONE', servedAt: edge })], NOW)).toHaveLength(1)
+  it('drops one the moment a waiter carries it, rather than after a window', () => {
+    // The old reading kept a served order on the floor for half an hour and guessed. `READY`
+    // ends when somebody ends it.
+    expect(readyOrders([order({ status: 'DONE', servedAt: '2026-09-22T19:58:00Z' })])).toEqual([])
   })
 
   it('never counts a cancelled order as ready to carry', () => {
-    expect(readyOrders([order({ status: 'CANCELLED', servedAt: '2026-09-22T19:55:00Z' })], NOW)).toEqual([])
-  })
-
-  it('ignores a finished order with no stamp, rather than guessing when it was', () => {
-    expect(readyOrders([order({ status: 'DONE', servedAt: null })], NOW)).toEqual([])
-    expect(readyOrders([order({ status: 'DONE', servedAt: 'not a date' })], NOW)).toEqual([])
+    expect(readyOrders([order({ status: 'CANCELLED' })])).toEqual([])
   })
 })
 
@@ -63,7 +59,7 @@ describe('floorTiles', () => {
     const tile = floorTiles(
       [3],
       [order({ id: 'a', table: '3' })],
-      [order({ id: 'b', table: '3', status: 'DONE', servedAt: '2026-09-22T19:58:00Z' })],
+      [order({ id: 'b', table: '3', status: 'READY', readyAt: '2026-09-22T19:58:00Z' })],
       NOW,
     )[0]
     expect(tile!.state).toBe('ready')

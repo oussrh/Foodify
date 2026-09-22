@@ -135,6 +135,16 @@ export async function requireBoardAction(restaurantId: string) {
 }
 
 /**
+ * Carrying an order out to the table: the one move that belongs to the floor rather than the
+ * pass, so a waiter passes this where `requireBoardAction` refuses them. A tablet and a manager
+ * may do it too — a kitchen that plates and hands over in one motion should not have to find a
+ * waiter to record it.
+ */
+export async function requireDeliverAction(restaurantId: string) {
+  return requireBoardAccess(restaurantId)
+}
+
+/**
  * Who may place an order for a table from inside the restaurant: a super admin, a manager, or a
  * waiter of that restaurant. A kitchen tablet is refused — it cooks what comes in, it does not
  * write orders. Answers the user, whose id the order is stamped with.

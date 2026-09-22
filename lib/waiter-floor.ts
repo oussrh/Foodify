@@ -2,26 +2,16 @@
 // What a waiter's phone shows for each table of the room. Two questions, not one: what is still
 // coming from the kitchen, and what is ready to be carried out right now.
 //
-// "Ready" is the kitchen's Served stamp (`servedAt`), read for a window rather than for ever. The
-// board has no separate delivered step — the kitchen says the food is up, and a waiter carries
-// it — so an order stays on the floor list for a while and then ages off. That is a heuristic and
-// it is worth naming as one: it needs no new status, no migration and no second action during
-// service, and the cost of being wrong is a tile that stops glowing while a plate is still on the
-// pass. If that starts to matter, the fix is a real READY → DELIVERED step, not a longer window.
+// "Ready" is a status the kitchen sets (`READY`), not a guess. It was briefly inferred from the
+// Served stamp inside a time window, because there was no separate step to end it; there is one
+// now, so an order stays ready until somebody carries it and not a minute longer or shorter. The
+// window was the kind of heuristic that works until the evening it does not.
 
 import type { BoardOrder } from '@/lib/orders'
 
-/** How long a finished order keeps announcing itself on the floor. Long enough to cross a room, short enough not to pile up. */
-export const READY_WINDOW_MINUTES = 30
-
-/** The orders the kitchen has just finished: served, and served recently enough to still be waiting on the pass. */
-export function readyOrders(orders: BoardOrder[], now: Date = new Date()): BoardOrder[] {
-  const cutoff = now.getTime() - READY_WINDOW_MINUTES * 60_000
-  return orders.filter((order) => {
-    if (order.status !== 'DONE' || !order.servedAt) return false
-    const servedAt = new Date(order.servedAt).getTime()
-    return Number.isFinite(servedAt) && servedAt >= cutoff
-  })
+/** The orders the kitchen has called up: the food is on the pass and nobody has carried it yet. */
+export function readyOrders(orders: BoardOrder[]): BoardOrder[] {
+  return orders.filter((order) => order.status === 'READY')
 }
 
 /** What one table's tile says. `ready` outranks `cooking`: a plate waiting on the pass is the thing to act on. */

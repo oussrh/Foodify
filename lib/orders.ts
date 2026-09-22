@@ -4,12 +4,16 @@
 // the endpoint that feeds it share these, so a status never means two things.
 
 /** Where an order stands. `NEW` is what POST /api/orders writes; the rest are the board's own doing. */
-export const ORDER_STATUSES = ['NEW', 'ACCEPTED', 'DONE', 'CANCELLED'] as const
+export const ORDER_STATUSES = ['NEW', 'ACCEPTED', 'READY', 'DONE', 'CANCELLED'] as const
 /** One of ORDER_STATUSES; the same set as Prisma's OrderStatus enum. */
 export type OrderStatus = (typeof ORDER_STATUSES)[number]
 
-/** The two the board works through, in the order the kitchen does: what is waiting, then what is being made. */
-export const OPEN_STATUSES = ['NEW', 'ACCEPTED'] as const satisfies readonly OrderStatus[]
+/**
+ * The three the board works through, in the order service does: waiting, being made, and up on
+ * the pass. `READY` is open, not closed — the kitchen has finished but the order has not left, and
+ * an order nobody carries is exactly the one a board must keep showing.
+ */
+export const OPEN_STATUSES = ['NEW', 'ACCEPTED', 'READY'] as const satisfies readonly OrderStatus[]
 /** The two an order ends on: off the working board, but not gone — the Served view lists them. */
 export const CLOSED_STATUSES = ['DONE', 'CANCELLED'] as const satisfies readonly OrderStatus[]
 
@@ -30,6 +34,7 @@ export function isClosed(status: OrderStatus): boolean {
 export const STATUS_LABEL: Record<OrderStatus, string> = {
   NEW: 'New',
   ACCEPTED: 'Preparing',
+  READY: 'Ready',
   DONE: 'Served',
   CANCELLED: 'Cancelled',
 }
@@ -82,17 +87,30 @@ export interface BoardOrder {
   updatedAt: string
   /** When the kitchen took it on, and when it went out; null until each happens. */
   acceptedAt: string | null
+  /** When the kitchen called it up; null until it does. */
+  readyAt: string | null
   servedAt: string | null
   /** The member of staff who took the order at the table; null when the guest ordered for themselves. */
   placedBy: { email: string } | null
   lines: BoardLine[]
 }
 
-/** The status a board action moves an order to, or null when the action does not apply to it. */
-export function nextStatus(status: OrderStatus, action: 'accept' | 'done' | 'cancel'): OrderStatus | null {
+/** What a member of staff can do to an order from the board or the floor. */
+export type OrderMove = 'accept' | 'ready' | 'done' | 'cancel'
+
+/**
+ * The status a move takes an order to, or null when it does not apply — which is what makes two
+ * tablets pressing at once safe: the second press moves nothing and the caller is told where the
+ * order actually stands.
+ *
+ * `done` still accepts an order that was never marked ready, because a kitchen that plates and
+ * hands over in one motion should not be made to press twice to record it.
+ */
+export function nextStatus(status: OrderStatus, action: OrderMove): OrderStatus | null {
   if (action === 'cancel') return status === 'DONE' ? null : 'CANCELLED'
   if (action === 'accept') return status === 'NEW' ? 'ACCEPTED' : null
-  return status === 'NEW' || status === 'ACCEPTED' ? 'DONE' : null
+  if (action === 'ready') return status === 'NEW' || status === 'ACCEPTED' ? 'READY' : null
+  return status === 'NEW' || status === 'ACCEPTED' || status === 'READY' ? 'DONE' : null
 }
 
 /** How long an order has been waiting, as the board colours it: new, getting on, late. */
@@ -110,11 +128,12 @@ export function waitingTier(minutes: number): WaitingTier {
   return 'fresh'
 }
 
-/** The board's two columns: what is waiting to be started, and what is being made. An order of any other status is not on the board. */
+/** The board's three columns: waiting to be started, being made, and up on the pass. An order of any other status is not on the board. */
 export function byStatus<T extends { status: OrderStatus }>(orders: T[]): Record<(typeof OPEN_STATUSES)[number], T[]> {
   return {
     NEW: orders.filter((order) => order.status === 'NEW'),
     ACCEPTED: orders.filter((order) => order.status === 'ACCEPTED'),
+    READY: orders.filter((order) => order.status === 'READY'),
   }
 }
 

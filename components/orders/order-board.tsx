@@ -8,7 +8,7 @@
 import { useState } from 'react'
 import type { Route } from 'next'
 import type { Money } from '@/lib/menu'
-import type { BoardOrder, BoardView } from '@/lib/orders'
+import type { BoardOrder, BoardView, OrderMove } from '@/lib/orders'
 import { setOrderStatus } from '@/app/actions/order-actions'
 import BoardHeader from './board-header'
 import OrderColumns from './order-columns'
@@ -45,7 +45,7 @@ export default function OrderBoard({ restaurantId, restaurantName, money, backHr
   // back — and an order that left the board (served on another tablet) simply closes it.
   const openOrder = orders.find((order) => order.id === openId) ?? null
 
-  const act = async (orderId: string, action: 'accept' | 'done' | 'cancel') => {
+  const act = async (orderId: string, action: OrderMove) => {
     setBusyId(orderId)
     if (action !== 'accept') setOpenId(null)
     try {
@@ -97,7 +97,9 @@ export default function OrderBoard({ restaurantId, restaurantName, money, backHr
             busyId={busyId}
             arrived={arrived}
             onOpen={(order: BoardOrder) => setOpenId(order.id)}
-            onAdvance={(order: BoardOrder) => act(order.id, order.status === 'NEW' ? 'accept' : 'done')}
+            // One button per card, and which move it makes is the lane it is in: start it, call
+            // it up, or mark it carried out.
+            onAdvance={(order: BoardOrder) => act(order.id, order.status === 'NEW' ? 'accept' : order.status === 'ACCEPTED' ? 'ready' : 'done')}
           />
         ) : (
           <ServedList orders={orders} money={money} onOpen={(order: BoardOrder) => setOpenId(order.id)} />
