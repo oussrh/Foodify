@@ -19,6 +19,25 @@ function newestFirst(statuses: readonly OrderStatus[]): boolean {
 }
 
 /**
+ * How the board reads a list, and why each key is the one it is.
+ *
+ * Finished: by `servedAt`, not `updatedAt`. `updatedAt` moves on any later change at all, so a
+ * served order whose note was edited would climb back to the top of a list that claims to say
+ * what went out last. A cancelled order was never served and has none, so it sits below the ones
+ * that were, newest of those first.
+ *
+ * The tie-break is `number`, which is unique per restaurant and counts up, so two rows sharing a
+ * timestamp still read in the order they happened. It used to be `id` — a random uuid, which is
+ * a tie-break in form only: it settles the comparison without meaning anything, so two orders
+ * served in the same millisecond could sit either way round and swap between five-second polls,
+ * reshuffling the Served list under a waiter's hand with nothing having changed.
+ */
+const BOARD_ORDER = {
+  finished: [{ servedAt: { sort: 'desc', nulls: 'last' } }, { number: 'desc' }],
+  working: [{ createdAt: 'asc' }, { number: 'asc' }],
+} as const
+
+/**
  * GET, the restaurant's own staff and its kitchen tablets (401 or 403 in the envelope): the orders the board polls. Query `restaurantId`
  * and optional repeated `status` (the open ones, NEW and ACCEPTED, when absent); anything else is 400 invalid_query.
  * Answers `{ data: BoardOrder[] }`, at most a hundred: the ones being worked oldest first, so the longest wait is at the
@@ -43,7 +62,7 @@ export async function GET(request: Request) {
   const recent = newestFirst(statuses)
   const rows = await prisma.order.findMany({
     where: { restaurantId: query.data.restaurantId, status: { in: statuses } },
-    orderBy: recent ? [{ updatedAt: 'desc' }, { id: 'desc' }] : [{ createdAt: 'asc' }, { id: 'asc' }],
+    orderBy: recent ? [...BOARD_ORDER.finished] : [...BOARD_ORDER.working],
     take: MAX_ORDERS,
     select: boardOrderSelect,
   })

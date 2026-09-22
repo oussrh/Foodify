@@ -50,19 +50,56 @@ describe('GET /api/orders/board', () => {
       expect(typeof rows[0]?.createdAt).toBe('string')
     }))
 
-  it('shows the finished ones when asked for them by name, newest first', () =>
+  it('shows the finished ones when asked for them by name, newest served first', () =>
     withRollback(async (tx) => {
       const mine = await restaurant(tx)
       signInAs(await manager(tx, [mine.id]))
       await order(tx, mine.id, 1)
       const first = await order(tx, mine.id, 2, { status: 'DONE' })
       const second = await order(tx, mine.id, 3, { status: 'DONE' })
-      // The served list answers "what did we just send out", so the last one served is on top.
-      await tx.order.update({ where: { id: first.id }, data: { servedAt: new Date() } })
-      await tx.order.update({ where: { id: second.id }, data: { servedAt: new Date() } })
+      // Stated, not timed: two updates in one transaction can land in the same millisecond, and a
+      // test that leans on the clock to separate them proves whatever the clock happened to do.
+      await tx.order.update({ where: { id: first.id }, data: { servedAt: new Date('2026-09-22T12:00:00Z') } })
+      await tx.order.update({ where: { id: second.id }, data: { servedAt: new Date('2026-09-22T12:30:00Z') } })
+
       const served = await ordersOf(await board(mine.id, ['DONE']))
+
       expect(served.map((o) => o.number)).toEqual([3, 2])
       expect(served.every((o) => o.status === 'DONE')).toBe(true)
+    }))
+
+  it('reads the finished ones by when they were served, not by when they were last touched', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      signInAs(await manager(tx, [mine.id]))
+      const early = await order(tx, mine.id, 1, { status: 'DONE' })
+      const late = await order(tx, mine.id, 2, { status: 'DONE' })
+      await tx.order.update({ where: { id: early.id }, data: { servedAt: new Date('2026-09-22T12:00:00Z') } })
+      await tx.order.update({ where: { id: late.id }, data: { servedAt: new Date('2026-09-22T12:30:00Z') } })
+      // Touching the older one after the fact moves `updatedAt` and nothing else: it did not go
+      // out of the kitchen again, so it must not climb over the one served after it.
+      await tx.order.update({ where: { id: early.id }, data: { note: 'allergy noted late' } })
+
+      const served = await ordersOf(await board(mine.id, ['DONE']))
+
+      expect(served.map((o) => o.number)).toEqual([2, 1])
+    }))
+
+  it('keeps two orders served in the same millisecond in the order they were taken', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      signInAs(await manager(tx, [mine.id]))
+      const together = new Date('2026-09-22T12:00:00Z')
+      const first = await order(tx, mine.id, 7, { status: 'DONE' })
+      const second = await order(tx, mine.id, 8, { status: 'DONE' })
+      await tx.order.update({ where: { id: first.id }, data: { servedAt: together } })
+      await tx.order.update({ where: { id: second.id }, data: { servedAt: together } })
+
+      const served = await ordersOf(await board(mine.id, ['DONE']))
+
+      // A tie is settled by the order number, which counts up. Settling it by a random uuid read
+      // either way round and could swap between two polls five seconds apart.
+      expect(served.map((o) => o.number)).toEqual([8, 7])
     }))
 
   it('never shows another restaurant\'s orders, and refuses a manager who is not this one\'s', () =>

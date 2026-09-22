@@ -69,7 +69,10 @@ export async function loadOrderHistory(id: string) {
   if (!restaurant) return null
   const rows = await prisma.order.findMany({
     where: { restaurantId: id },
-    orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+    // `number` as the tie-break, not `id`: it is unique per restaurant and counts up, so two
+    // orders taken in the same millisecond still read in the order they were taken. A uuid would
+    // settle the comparison without meaning anything.
+    orderBy: [{ createdAt: 'desc' }, { number: 'desc' }],
     take: HISTORY_LIMIT,
     select: boardOrderSelect,
   })
