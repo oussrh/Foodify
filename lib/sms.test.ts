@@ -44,6 +44,22 @@ describe('sendSms', () => {
     })
   })
 
+  it('reports a refusal the provider sent no readable body with', async () => {
+    // The body is read only to log what Brevo said; a body that cannot be read is still a
+    // refusal, and must not become an exception on the path that takes an order.
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({
+        ok: false,
+        status: 502,
+        text: async () => {
+          throw new Error('connection closed mid-body')
+        },
+      })),
+    )
+    expect(await sendSms({ to: '+212600000000', text: 'Order #1' })).toEqual({ sent: false })
+  })
+
   it('reports a refusal and a failed request as "nothing sent" rather than throwing', async () => {
     vi.stubGlobal('fetch', vi.fn(async () => new Response('{"code":"invalid_parameter"}', { status: 400 })))
     expect(await sendSms({ to: '+212600000000', text: 'Order #1' })).toEqual({ sent: false })

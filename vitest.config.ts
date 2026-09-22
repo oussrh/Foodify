@@ -31,9 +31,11 @@ export default defineConfig({
       ],
       thresholds: {
         // The shared layer. Set from `vitest run --coverage` on 2026-09-20, raised to the measured
-        // figure on 2026-09-21 (phase 10) and again on 2026-09-22 with the insights report's
-        // arithmetic; branches are what bind. Raise when the number does, never lower.
-        'lib/**': { branches: 93.5, functions: 97.5, lines: 97.7, statements: 97.5 },
+        // figure on 2026-09-21 (phase 10) and twice on 2026-09-22 — the insights report's
+        // arithmetic, then the roles, order serializer and staff schema that shipped untested and
+        // were caught by the changed-lines gate. Branches are what bind. Raise when the number
+        // does, never lower.
+        'lib/**': { branches: 94.5, functions: 99.1, lines: 99.3, statements: 98.9 },
         // The process's modules (phase 13): the logger's redaction and the drain are the two things
         // that must never regress unseen; measured at 100 on 2026-09-21 and pinned there.
         'server/**': { branches: 100, functions: 100, lines: 100, statements: 100 },
