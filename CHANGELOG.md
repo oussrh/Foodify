@@ -4,6 +4,11 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ## [Unreleased]
 
+### Changed
+
+- CI runs on a pinned runner and on the current majors of its three actions: `ubuntu-26.04` rather than `ubuntu-latest`, `actions/checkout@v7`, `actions/setup-node@v7`, `pnpm/action-setup@v6`. GitHub had been warning that the old majors run on Node 20, which it is forcing onto Node 24, and that `ubuntu-latest` becomes Ubuntu 26 on 19 October — two changes that would have arrived on their own schedule, in a red build, on a commit that did not cause either. Pinning the runner is the part worth keeping: `ubuntu-latest` is a moving target by design, and a pin turns "the image changed under us" into a one-line PR whose CI run is the proof. This is that run, taken deliberately and early rather than on the morning of the 19th. The action bump is not cosmetic either — checkout v6 moved the token out of the git config and into a file beside it, which the `range` step's `git fetch` depends on, so it wanted a run of its own rather than a ride along with a feature.
+
+
 ### Added
 
 - The kitchen board's **Ready to serve** is now a drawer rather than a lane, and the sound control is a switch rather than a demonstration. A card in "Being made" carries one button reading *Ready to serve*; tapping it calls the order up, and the waiter's phone buzzes within the poll — that path already existed, and what changed is that the board no longer spends a third of its width showing the result. Ready orders live behind a handle on the right that carries the count, because what is up on the pass is the floor's work and not the pass's: the kitchen needs the number on screen and the list only when it asks. The old "Test sound" button is now a bell that turns the alert on and off, remembered on the device (`components/staff/use-sound-setting.ts`, shared with the waiter's phone, which had its own copy) — turning it on wakes the audio without ringing, so the switch staff flick before service to check it is on no longer shouts at them for checking.
