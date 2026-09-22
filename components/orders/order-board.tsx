@@ -5,7 +5,7 @@
 // has lost the server rather than showing an empty room.
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import type { Route } from 'next'
 import type { Money } from '@/lib/menu'
 import type { BoardOrder, BoardView, OrderMove } from '@/lib/orders'
@@ -15,6 +15,8 @@ import OrderColumns from './order-columns'
 import OrderDetailsSheet from './order-details-sheet'
 import ServedList from './served-list'
 import { useChime } from './use-chime'
+import { useSoundSetting } from '@/components/staff/use-sound-setting'
+import ReadyDrawer from './ready-drawer'
 import { useMinuteClock } from './use-minute-clock'
 import { useOrderBoard } from './use-order-board'
 import { useStaffPwa } from '@/components/staff/use-staff-pwa'
@@ -32,9 +34,15 @@ interface OrderBoardProps {
 }
 
 export default function OrderBoard({ restaurantId, restaurantCode, restaurantName, money, backHref }: OrderBoardProps) {
-  const { play: chime } = useChime()
+  const { play: chime, prime } = useChime()
+  // A pass wants sound: it is the whole reason the board is there, so it starts on. Turning it
+  // off is a choice the room makes, remembered on the tablet.
+  const sound = useSoundSetting('foodify-board-sound', true, prime)
+  const announce = useCallback(() => {
+    if (sound.on) chime()
+  }, [sound.on, chime])
   const [view, setView] = useState<BoardView>('open')
-  const { orders, online, loading, arrived, refresh } = useOrderBoard(restaurantId, view, chime)
+  const { orders, online, loading, arrived, refresh } = useOrderBoard(restaurantId, view, announce)
   const wakeLock = useWakeLock()
   const pwa = useStaffPwa()
   const [busyId, setBusyId] = useState<string | null>(null)
@@ -46,6 +54,11 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
   // The open order is looked up rather than copied, so the sheet follows what the poll brings
   // back — and an order that left the board (served on another tablet) simply closes it.
   const openOrder = orders.find((order) => order.id === openId) ?? null
+
+  // What the kitchen is working, and what is up waiting for the floor. The lanes show the first;
+  // the second is behind the drawer, because it is the floor's job and not the pass's.
+  const working = orders.filter((order) => order.status !== 'READY')
+  const ready = orders.filter((order) => order.status === 'READY')
 
   const act = async (orderId: string, action: OrderMove) => {
     setBusyId(orderId)
@@ -68,7 +81,9 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
         online={online}
         loading={loading}
         onRefresh={refresh}
-        onTestSound={chime}
+        soundOn={sound.on}
+        onToggleSound={sound.toggle}
+        readyDrawer={<ReadyDrawer orders={ready} now={now} busyId={busyId} onDeliver={(order) => act(order.id, 'done')} />}
         wakeLock={wakeLock}
         pwa={pwa}
         backHref={backHref}
@@ -94,7 +109,7 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
           </div>
         ) : view === 'open' ? (
           <OrderColumns
-            orders={orders}
+            orders={working}
             now={now}
             busyId={busyId}
             arrived={arrived}

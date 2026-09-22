@@ -12,6 +12,7 @@ import { useCallback, useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { setOrderStatus } from '@/app/actions/order-actions'
 import { Button } from '@/components/ui/button'
+import OrderLineList from '@/components/orders/order-line-list'
 import { useMinuteClock } from '@/components/orders/use-minute-clock'
 import { useOrderBoard } from '@/components/orders/use-order-board'
 import { itemCount, minutesWaiting, STATUS_LABEL, type BoardOrder } from '@/lib/orders'
@@ -43,17 +44,7 @@ function OrderCard({ order, now, ready, onDeliver, busy }: { order: BoardOrder; 
         {order.placedBy ? ' · taken at the table' : ''}
       </p>
 
-      <ul className="pt-2 text-[13px]">
-        {order.lines.map((line) => (
-          <li key={line.id} className="flex gap-2">
-            <span className="tnum shrink-0 font-semibold">{line.quantity}×</span>
-            <span className="min-w-0">
-              <span className="block truncate">{line.nameEn}</span>
-              {line.note && <span className="block truncate italic text-muted-foreground">{line.note}</span>}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <OrderLineList lines={order.lines} />
 
       {order.note && <p className="pt-2 text-[13px] italic text-muted-foreground">“{order.note}”</p>}
 

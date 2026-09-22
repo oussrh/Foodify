@@ -1,17 +1,16 @@
 // components/orders/board-header.tsx
 // The board's one strip of chrome: where it is, how many orders are open, whether the server is
-// answering, and the four switches a tablet needs — install, keep the screen awake, test the
-// alert, check now. Every control is at least 48px, because it is pressed with a thumb, often
-// with one hand, sometimes with a glove.
+// answering, what is up on the pass, and this device's own switches (board-controls.tsx).
 'use client'
 
 import Link from 'next/link'
 import type { Route } from 'next'
-import { ArrowLeft, BellRing, Download, Ban, RefreshCw, Sun, WifiOff } from 'lucide-react'
+import { ArrowLeft, Ban, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { BoardView } from '@/lib/orders'
 import { cn } from '@/lib/utils'
 import type { StaffPwa } from '@/components/staff/use-staff-pwa'
+import BoardControls from './board-controls'
 import type { WakeLock } from './use-wake-lock'
 
 interface BoardHeaderProps {
@@ -22,7 +21,11 @@ interface BoardHeaderProps {
   online: boolean
   loading: boolean
   onRefresh: () => void
-  onTestSound: () => void
+  /** Whether this tablet makes a noise when an order arrives; remembered on the device. */
+  soundOn: boolean
+  onToggleSound: () => void
+  /** The handle for what is up on the pass: a count on the board, the list only when asked for. */
+  readyDrawer: React.ReactNode
   wakeLock: WakeLock
   pwa: StaffPwa
   /** Absent on a kitchen tablet: there is no portal behind it to go back to. */
@@ -33,7 +36,7 @@ interface BoardHeaderProps {
 
 const CONTROL = 'h-12 min-w-12 px-3'
 
-export default function BoardHeader({ restaurantName, view, onView, openCount, online, loading, onRefresh, onTestSound, wakeLock, pwa, backHref, soldOutHref }: BoardHeaderProps) {
+export default function BoardHeader({ restaurantName, view, onView, openCount, online, loading, onRefresh, soundOn, onToggleSound, readyDrawer, wakeLock, pwa, backHref, soldOutHref }: BoardHeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 sm:px-4">
@@ -78,40 +81,21 @@ export default function BoardHeader({ restaurantName, view, onView, openCount, o
           </span>
         )}
 
-        {pwa.canInstall && (
-          <Button onClick={pwa.install} className={CONTROL}>
-            <Download className="h-5 w-5" />
-            <span className="hidden md:inline">Install</span>
-          </Button>
-        )}
-
-        {wakeLock.supported && (
-          <Button
-            variant={wakeLock.on ? 'default' : 'outline'}
-            onClick={wakeLock.toggle}
-            aria-pressed={wakeLock.on}
-            className={CONTROL}
-            title="Keep the screen awake"
-          >
-            <Sun className="h-5 w-5" />
-            <span className="hidden md:inline">{wakeLock.on ? 'Screen on' : 'Keep awake'}</span>
-          </Button>
-        )}
-
         <Button asChild variant="outline" className={CONTROL}>
           <Link href={soldOutHref} title="Mark a dish sold out">
             <Ban className="h-5 w-5" />
             <span className="hidden md:inline">Sold out</span>
           </Link>
         </Button>
-        <Button variant="outline" onClick={onTestSound} className={CONTROL} title="Play the new-order alert">
-          <BellRing className="h-5 w-5" />
-          <span className="hidden md:inline">Test sound</span>
-        </Button>
-
-        <Button variant="outline" onClick={onRefresh} aria-label="Check for new orders now" className={CONTROL}>
-          <RefreshCw className={cn('h-5 w-5', loading && 'animate-spin')} />
-        </Button>
+        {readyDrawer}
+        <BoardControls
+          loading={loading}
+          onRefresh={onRefresh}
+          soundOn={soundOn}
+          onToggleSound={onToggleSound}
+          wakeLock={wakeLock}
+          pwa={pwa}
+        />
       </div>
     </header>
   )
