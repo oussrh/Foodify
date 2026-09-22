@@ -7,7 +7,8 @@
 import { useState } from 'react'
 import { ApiError, call } from '@/lib/api-client'
 import type { CartLine } from '@/lib/cart'
-import { MENU_TEXT, type Locale } from '@/lib/menu'
+import { type Locale } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import type { PlacedOrder } from '@/lib/schemas/order'
 
 type State = { status: 'idle' | 'sending'; error: string } | { status: 'sent'; order: PlacedOrder }

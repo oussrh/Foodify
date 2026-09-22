@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
-import { MENU_TEXT, type Locale, type MenuDish, type MenuRestaurant, type Money } from '@/lib/menu'
+import { type Locale, type MenuDish, type MenuRestaurant, type Money } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import { useMenuLocale } from './use-menu-locale'
 import { useCart } from './cart/use-cart'
 import DishBody from './dish-body'
@@ -84,7 +85,8 @@ export default function DishPage({ dish, restaurant, breadcrumb, brandStyle, sha
           breadcrumb={breadcrumb ? (locale === 'fr' ? breadcrumb.fr : breadcrumb.en) : null}
           shareUrl={shareUrl}
           order={
-            restaurant.orderingEnabled
+            // Sold out for the rest of the service: nothing to add, here or at the endpoint.
+            restaurant.orderingEnabled && !dish.soldOut
               ? {
                   quantity: cart.quantityOf(dish.id),
                   onChange: (quantity) => cart.setQuantity(dish.id, quantity),

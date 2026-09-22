@@ -13,7 +13,11 @@ export default defineConfig({
     environment: 'node',
     // e2e/ is Playwright's (its specs call test.describe from @playwright/test).
     // tests/integration is the database suite's (vitest.integration.config.ts, a real Postgres).
-    exclude: [...configDefaults.exclude, 'e2e/**', 'tests/**'],
+    // `.claude/**` is the agent harness, not source. It can hold a git worktree of this same
+    // repository, and a worktree carries a full copy of the test suite — which the runner would
+    // otherwise collect and run a second time, against another branch's code, out of its own
+    // checkout. Git ignores those paths; a filesystem glob does not.
+    exclude: [...configDefaults.exclude, 'e2e/**', 'tests/**', '.claude/**'],
     coverage: {
       provider: 'v8',
       reportOnFailure: true,

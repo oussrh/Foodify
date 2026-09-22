@@ -5,7 +5,9 @@
 'use client'
 
 import { useState } from 'react'
-import { RefreshCw } from 'lucide-react'
+import Link from 'next/link'
+import type { Route } from 'next'
+import { Ban, RefreshCw } from 'lucide-react'
 import { useMinuteClock } from '@/components/orders/use-minute-clock'
 import { useOrderBoard } from '@/components/orders/use-order-board'
 import { Button } from '@/components/ui/button'
@@ -56,6 +58,11 @@ export default function WaiterApp({ restaurant, categories, loose, money, locale
           <h1 className="truncate text-xl font-semibold leading-tight tracking-display">Tables</h1>
           <p className="truncate text-xs text-muted-foreground">{restaurant.name}</p>
         </div>
+        <Button asChild variant="outline" className="h-12 min-w-12 px-3">
+          <Link href={`/waiter/${restaurant.id}/availability` as Route} aria-label="Mark a dish sold out">
+            <Ban className="h-5 w-5" />
+          </Link>
+        </Button>
         <Button variant="outline" onClick={refresh} aria-label="Check the open orders again" className="h-12 min-w-12 px-3">
           <RefreshCw className={cn('h-5 w-5', loading && 'animate-spin')} />
         </Button>

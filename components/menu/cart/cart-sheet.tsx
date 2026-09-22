@@ -6,7 +6,8 @@
 
 import { useState, type CSSProperties } from 'react'
 import { Sheet, SheetContent, SheetDescription, SheetTitle } from '@/components/ui/sheet'
-import { MENU_TEXT, type Locale, type Money } from '@/lib/menu'
+import { type Locale, type Money } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import { cn } from '@/lib/utils'
 import type { CartApi } from './use-cart'
 import type { CartLineView } from './cart-lines'

@@ -113,6 +113,17 @@ export async function requireBoardAccess(restaurantId: string) {
 }
 
 /**
+ * Anyone who works this restaurant's service: its managers, its order tablets, its waiters, and a
+ * super admin. The same population as `requireBoardAccess`, but this one grants a write, so it is
+ * named for what it is rather than borrowed from a read: marking a dish sold out is a service
+ * decision, taken by whoever notices the pan is empty, and it expires by itself. It is the only
+ * write a device has over the menu, and it changes no price, name or dish.
+ */
+export async function requireServiceStaff(restaurantId: string) {
+  return requireBoardAccess(restaurantId)
+}
+
+/**
  * Who may MOVE one of its orders along — take it on, serve it, cancel it. The same people as
  * `requireBoardAccess` minus the waiters: a waiter reads the board to answer "is my food coming?",
  * and the kitchen alone says what has been made.

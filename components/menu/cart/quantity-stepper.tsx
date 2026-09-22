@@ -6,7 +6,8 @@
 
 import { Minus, Plus, Trash2 } from 'lucide-react'
 import { MAX_QUANTITY } from '@/lib/cart'
-import { MENU_TEXT, type Locale } from '@/lib/menu'
+import { type Locale } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import { cn } from '@/lib/utils'
 
 interface QuantityStepperProps {

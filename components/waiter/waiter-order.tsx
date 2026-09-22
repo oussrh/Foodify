@@ -12,6 +12,7 @@ import { useCart } from '@/components/menu/cart/use-cart'
 import { usePlaceOrder } from '@/components/menu/cart/use-place-order'
 import { Button } from '@/components/ui/button'
 import { formatPrice, type Locale, type MenuCategory, type MenuDish, type Money } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import { cn } from '@/lib/utils'
 
 interface WaiterOrderProps {
@@ -89,17 +90,27 @@ export default function WaiterOrder({ restaurantId, restaurantName, table, categ
                       <span className="block truncate text-[15px] font-medium leading-snug">{name(dish)}</span>
                       <span className="tnum block text-[13px] text-muted-foreground">{formatPrice(dish.price, money)}</span>
                     </span>
-                    {quantity > 0 && (
+                    {/* A waiter is told the same thing the guest's menu says, rather than finding
+                        out when the order is refused at the table. */}
+                    {dish.soldOut ? (
+                      <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[13px] font-semibold">
+                        {MENU_TEXT[locale].soldOut}
+                      </span>
+                    ) : (
                       <>
-                        <Button variant="outline" size="icon" className="h-12 w-12" onClick={() => cart.setQuantity(dish.id, quantity - 1)} aria-label={`One less ${name(dish)}`}>
-                          <Minus className="h-4 w-4" />
+                        {quantity > 0 && (
+                          <>
+                            <Button variant="outline" size="icon" className="h-12 w-12" onClick={() => cart.setQuantity(dish.id, quantity - 1)} aria-label={`One less ${name(dish)}`}>
+                              <Minus className="h-4 w-4" />
+                            </Button>
+                            <output className="tnum w-6 text-center text-lg font-semibold">{quantity}</output>
+                          </>
+                        )}
+                        <Button size="icon" className="h-12 w-12" onClick={() => cart.addOne(dish.id)} aria-label={`Add ${name(dish)}`}>
+                          <Plus className="h-4 w-4" />
                         </Button>
-                        <output className="tnum w-6 text-center text-lg font-semibold">{quantity}</output>
                       </>
                     )}
-                    <Button size="icon" className="h-12 w-12" onClick={() => cart.addOne(dish.id)} aria-label={`Add ${name(dish)}`}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
                   </li>
                 )
               })}

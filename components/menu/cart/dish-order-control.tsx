@@ -3,7 +3,8 @@
 // once it is, the stepper with the line's total and the note the guest can leave on it.
 'use client'
 
-import { formatPrice, MENU_TEXT, type Locale, type MenuDish, type Money } from '@/lib/menu'
+import { formatPrice, type Locale, type MenuDish, type Money } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import { multiplyPrice } from '@/lib/money'
 import LineNote from './line-note'
 import QuantityStepper from './quantity-stepper'

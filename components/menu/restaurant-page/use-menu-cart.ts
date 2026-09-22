@@ -60,10 +60,13 @@ export function useMenuCart(
     setOpen,
     // The two ways a guest adds, and the only two places the add is counted: the waiter app
     // shares the cart store but not this hook, and a staff order is counted as an order.
+    // A dish the kitchen has run out of has no handle at all, so neither the row's + nor the
+    // sheet's stepper exists to be tapped. The endpoint refuses it as well: a cart is built in
+    // the guest's browser and can be minutes old by the time it is sent.
     rowOrder: (dish) =>
-      enabled ? { quantity: cart.quantityOf(dish.id), onAdd: () => add(dish.id) } : undefined,
+      enabled && !dish.soldOut ? { quantity: cart.quantityOf(dish.id), onAdd: () => add(dish.id) } : undefined,
     dishOrder: (dish) =>
-      enabled && dish
+      enabled && dish && !dish.soldOut
         ? {
             quantity: cart.quantityOf(dish.id),
             onChange: (quantity: number) => {

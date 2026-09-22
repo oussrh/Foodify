@@ -1,6 +1,7 @@
 "use client"
 
-import { MENU_TEXT, type Locale, type MenuDish, type Money } from '@/lib/menu'
+import { type Locale, type MenuDish, type Money } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import DishRow from '../dish-row'
 import { dishHref } from './menu-urls'
 import type { MenuFilters } from './use-menu-filters'

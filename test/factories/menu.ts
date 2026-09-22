@@ -17,6 +17,7 @@ export function makeDish(overrides: Partial<MenuDish> = {}): MenuDish {
     glbUrl: null,
     calories: null,
     isMostPurchased: false,
+    soldOut: false,
     dietary: [],
     allergens: [],
     ingredients: [],

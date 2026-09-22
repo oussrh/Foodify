@@ -6,8 +6,10 @@
 import { useState } from 'react'
 import { Box, Camera, ImageIcon } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { MENU_TEXT, type Locale, type MenuDish } from '@/lib/menu'
+import { type Locale, type MenuDish } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import DishPhoto from './dish-photo'
+import { SoldOutMark } from './sold-out-mark'
 import Dish3D from './dish-3d'
 
 export default function DishMedia({ dish, name, ar, locale, photoTransition }: { dish: MenuDish; name: string; ar: boolean; locale: Locale; photoTransition?: boolean | undefined }) {
@@ -24,7 +26,9 @@ export default function DishMedia({ dish, name, ar, locale, photoTransition }: {
         <DishPhoto src={dish.imageUrl} alt={name} sizes="(max-width: 640px) 100vw, 640px" priority iconClassName="h-12 w-12" />
       )}
 
-      {ar && mode === 'photo' && (
+      {dish.soldOut && <SoldOutMark locale={locale} className="text-sm" />}
+
+      {ar && mode === 'photo' && !dish.soldOut && (
         <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-full bg-white/92 px-2.5 py-1 text-[11px] font-bold text-[#1B1A17]">
           <Camera className="h-3 w-3" aria-hidden="true" />
           {t.ar}

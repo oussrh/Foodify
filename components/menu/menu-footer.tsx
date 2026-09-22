@@ -1,6 +1,7 @@
 "use client"
 
-import { MENU_TEXT, type Locale, type MenuRestaurant } from '@/lib/menu'
+import { type Locale, type MenuRestaurant } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import type { SocialHandles } from '@/lib/social'
 import { hasStructuredHours, parseOpeningHours } from '@/lib/opening-hours'
 import { formatAddress } from './contact-format'

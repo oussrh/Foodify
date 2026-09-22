@@ -70,6 +70,7 @@ export default function OrderBoard({ restaurantId, restaurantName, money, backHr
         wakeLock={wakeLock}
         pwa={pwa}
         backHref={backHref}
+        soldOutHref={`/kitchen/menu/${restaurantId}` as Route}
       />
 
       <main className="flex-1 px-3 py-4 pb-[max(16px,env(safe-area-inset-bottom))] sm:px-4">

@@ -20,6 +20,7 @@ export function dishRow(overrides: Partial<Dish> & { ingredients?: Ingredient[] 
     subcategoryId: null,
     sortOrder: 0,
     isActive: true,
+    soldOutUntil: null,
     isMostPurchased: false,
     calories: null,
     dietary: ['halal'],

@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, MENU_TEXT, offeredDietary, resolveInitialLocale, localName } from './menu'
+import { allergenLabel, dietaryLabel, formatPrice, hasAR, LOCALE_STORAGE_KEY, offeredDietary, resolveInitialLocale, localName } from './menu'
+import { MENU_TEXT } from './menu-text'
 
 describe('formatPrice', () => {
   it('formats with the ISO code through Intl, French style in French', () => {

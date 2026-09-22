@@ -16,6 +16,28 @@ What we learned the hard way, one entry per lesson, newest first. A line added t
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
 
+## 2026-09-22 · State a human has to clear is state that stays set
+
+"This dish has run out" wants to be a boolean. It is the obvious model, it is one column, and it
+is wrong: somebody has to turn it back on, and the morning after a busy Saturday nobody does. The
+failure is silent and expensive — a dish that sells nothing for a week, with no error anywhere,
+because the system is faithfully doing what it was told.
+
+`Dish.soldOutUntil` stores the moment it returns instead of the fact that it is off. Nothing runs
+to reset it: a read after that moment sees an available dish, so there is no job to schedule, no
+cron to forget and no morning routine to build a habit around. The expiry is the data, not a
+process acting on the data.
+
+Generalise it as: prefer the moment over the flag wherever the "off" state is temporary by
+nature. A flag needs a second actor to undo it and quietly persists when that actor does not
+show up; a timestamp undoes itself and needs nobody. Ask of any boolean that turns something off
+— suppressed, muted, paused, sold out, snoozed — who clears it, and what happens on the day they
+forget. If the honest answer is "nothing good, and silently", it wants a deadline instead.
+
+The cost is a boundary to choose, and that choice should be written down where it is made rather
+than assumed: this one ends the service day at 04:00 UTC, not midnight, because a kitchen closing
+at 23:00 local is still serving after midnight UTC and a dish must never return mid-service.
+
 ## 2026-09-22 · A test that reads the code's own list proves only that the list agrees with itself
 
 `lib/roles.ts` was written after a waiter account could be given a second factor and lock itself

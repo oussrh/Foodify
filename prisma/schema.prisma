@@ -152,6 +152,10 @@ model Dish {
   usdzUrl         String
   glbUrl          String
   isActive        Boolean          @default(true)
+  // Sold out for the rest of the service: the dish stays on the menu, marked, and cannot be
+  // ordered until this moment passes. Null is available. `isActive` is the other axis and means
+  // "off the menu entirely"; this one is the kitchen running out, and it expires by itself.
+  soldOutUntil    DateTime?
   calories        Int?
   isMostPurchased Boolean          @default(false)
   sortOrder       Int

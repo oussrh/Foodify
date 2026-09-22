@@ -52,6 +52,25 @@ async function confirmByText(order: PlacedOrder, phone: string, restaurant: Rest
 }
 
 /**
+ * The dishes of this order that may actually be ordered: this restaurant's, on the menu, and not
+ * sold out. A dish the kitchen has run out of is refused here and not only hidden from the menu's
+ * add button, because a cart is built in the guest's browser and can be minutes old by the time
+ * it is sent — a waiter's tab older still.
+ */
+function orderableDishes(restaurantId: string, dishIds: string[]) {
+  return prisma.dish.findMany({
+    where: {
+      id: { in: dishIds },
+      restaurantId,
+      isActive: true,
+      OR: [{ soldOutUntil: null }, { soldOutUntil: { lte: new Date() } }],
+    },
+    select: { id: true, nameEn: true, nameFr: true, price: true },
+    take: MAX_LINES,
+  })
+}
+
+/**
  * POST, public: the guest menu sends an order with no session. Body as `orderInput` says (the restaurant, the table, a
  * phone for the confirmation, a note for the order, one to fifty lines of dish id, quantity and the note asked for on
  * that dish); every line is re-priced from the database, never from the body. A guest must give a phone and is texted
@@ -86,13 +105,9 @@ export async function POST(request: NextRequest) {
     const staffId = await placedBy(restaurantId)
     if (!staffId && !phone) return fail('invalid_payload', 'A phone number is required', 400)
 
-    const dishes = await prisma.dish.findMany({
-      where: { id: { in: lines.map((l) => l.dishId) }, restaurantId, isActive: true },
-      select: { id: true, nameEn: true, nameFr: true, price: true },
-      take: MAX_LINES,
-    })
+    const dishes = await orderableDishes(restaurantId, lines.map((l) => l.dishId))
     const priced = priceLines(lines, dishes)
-    if (priced.length !== lines.length) return fail('invalid_payload', 'A dish is not on this menu', 400)
+    if (priced.length !== lines.length) return fail('invalid_payload', 'A dish is not on this menu, or is sold out', 400)
     const subtotal = sumPrices(priced.map((p) => ({ price: p.unitPrice, quantity: p.quantity })))
 
     const { nextOrderNumber } = await prisma.restaurant.update({

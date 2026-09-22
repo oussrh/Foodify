@@ -7,7 +7,7 @@
 
 import Link from 'next/link'
 import type { Route } from 'next'
-import { ArrowLeft, BellRing, Download, RefreshCw, Sun, WifiOff } from 'lucide-react'
+import { ArrowLeft, BellRing, Download, Ban, RefreshCw, Sun, WifiOff } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import type { BoardView } from '@/lib/orders'
 import { cn } from '@/lib/utils'
@@ -27,11 +27,13 @@ interface BoardHeaderProps {
   pwa: OrdersPwa
   /** Absent on a kitchen tablet: there is no portal behind it to go back to. */
   backHref?: Route | undefined
+  /** The sold-out screen for this restaurant: the pass is where a dish runs out. */
+  soldOutHref: Route
 }
 
 const CONTROL = 'h-12 min-w-12 px-3'
 
-export default function BoardHeader({ restaurantName, view, onView, openCount, online, loading, onRefresh, onTestSound, wakeLock, pwa, backHref }: BoardHeaderProps) {
+export default function BoardHeader({ restaurantName, view, onView, openCount, online, loading, onRefresh, onTestSound, wakeLock, pwa, backHref, soldOutHref }: BoardHeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 sm:px-4">
@@ -96,6 +98,12 @@ export default function BoardHeader({ restaurantName, view, onView, openCount, o
           </Button>
         )}
 
+        <Button asChild variant="outline" className={CONTROL}>
+          <Link href={soldOutHref} title="Mark a dish sold out">
+            <Ban className="h-5 w-5" />
+            <span className="hidden md:inline">Sold out</span>
+          </Link>
+        </Button>
         <Button variant="outline" onClick={onTestSound} className={CONTROL} title="Play the new-order alert">
           <BellRing className="h-5 w-5" />
           <span className="hidden md:inline">Test sound</span>

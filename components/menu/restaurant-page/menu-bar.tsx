@@ -5,7 +5,8 @@ import Image from 'next/image'
 import { Camera, Search, SlidersHorizontal, X } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
-import { MENU_TEXT, type Locale, type MenuRestaurant } from '@/lib/menu'
+import { type Locale, type MenuRestaurant } from '@/lib/menu'
+import { MENU_TEXT } from '@/lib/menu-text'
 import type { MenuFilters } from './use-menu-filters'
 
 interface MenuBarProps {
