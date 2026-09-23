@@ -86,15 +86,25 @@ password, no second factor) and a dish of the test's own. The phone and desktop 
 parallel on one database, so a test never assumes the state of a shared row: it makes its own
 (a dish, a table, an account), sets in the form what it reads (`hours.spec.ts` closes the days it
 checks), and removes what it made. Two projects, a phone and a desktop; retries 0 locally and
-2 in CI; a trace on the first retry. Test data is the seeded restaurant (`prisma/seed.ts`); CI seeds
-a Postgres service before the run. Vitest excludes `e2e/`.
+2 in CI; a trace on the first retry. Test data is the seeded restaurant (`prisma/seed.ts`). Vitest
+excludes `e2e/`.
+
+The database is the suite's own. `pnpm e2e` is `scripts/ci/e2e.mjs`: in CI it runs Playwright on
+the Postgres service the job has migrated and seeded; locally it takes `E2E_DATABASE_URL` when set,
+else the `e2e` database of the same throwaway container the integration suite uses
+(`scripts/ci/test-db.mjs`, port 5499), migrates and seeds it (the seed only adds what is missing),
+and serves the build against it. Only without Docker does it fall back to the database `.env`
+names, and says so: the suite writes accounts and orders, and a spec reading a row someone last
+saved there fails for a reason that is not in the code. Arguments pass through to Playwright
+(`pnpm e2e e2e/menu.spec.ts --project=phone`).
 
 ## Integration suite
 
 `pnpm test:integration` runs `tests/integration/**` (`vitest.integration.config.ts`) against a real
 Postgres on the real migrations (TEST.2, DATA.3): `scripts/ci/integration.mjs` takes
-`TEST_DATABASE_URL` when set (CI's service) or starts a throwaway `postgres:16-alpine` container
-on port 5499 (left running for the next run), applies `prisma migrate deploy`, then runs the
+`TEST_DATABASE_URL` when set (CI's service) or the `test` database of a throwaway
+`postgres:16-alpine` container on port 5499 (`scripts/ci/test-db.mjs`, left running for the next
+run), applies `prisma migrate deploy`, then runs the
 suite. `DATABASE_URL` is never read, so the suite cannot touch the database a developer's `.env`
 names. Every test runs inside a transaction that is rolled back (`tests/integration/db.ts`); the
 code under test reaches that transaction through the `@/lib/prisma` mock in `setup.ts` and the

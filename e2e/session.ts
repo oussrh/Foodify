@@ -31,7 +31,9 @@ export async function seededIds() {
   const restaurant = await db().restaurant.findUniqueOrThrow({ where: { slug: SEEDED_SLUG }, select: { id: true } })
   const dish = await db().dish.findFirstOrThrow({ where: { restaurantId: restaurant.id }, orderBy: { sortOrder: 'asc' }, select: { id: true } })
   const admin = await db().user.findFirstOrThrow({ where: { role: 'SUPER_ADMIN', email: { not: { startsWith: 'audit-' } } }, select: { id: true } })
-  const manager = await db().user.findFirstOrThrow({ where: { restaurants: { some: { id: restaurant.id } }, email: { not: { startsWith: 'audit-' } } }, select: { id: true } })
+  // The role, not just "attached to the restaurant": a device account made by a staff spec is
+  // attached too, and one picked here is deleted under the page that is reading it.
+  const manager = await db().user.findFirstOrThrow({ where: { role: 'RESTAURANT_ADMIN', restaurants: { some: { id: restaurant.id } }, email: { not: { startsWith: 'audit-' } } }, select: { id: true } })
   return { restaurantId: restaurant.id, dishId: dish.id, adminId: admin.id, managerId: manager.id }
 }
 
