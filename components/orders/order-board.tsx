@@ -33,6 +33,10 @@ interface OrderBoardProps {
   backHref?: Route | undefined
 }
 
+/**
+ * The kitchen board a tablet sits on all day: open orders in two lanes, the alert when one arrives,
+ * the ready drawer, and each order's details a tap away.
+ */
 export default function OrderBoard({ restaurantId, restaurantCode, restaurantName, money, backHref }: OrderBoardProps) {
   const { play: chime, prime } = useChime()
   // A pass wants sound: it is the whole reason the board is there, so it starts on. Turning it

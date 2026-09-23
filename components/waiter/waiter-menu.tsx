@@ -29,6 +29,10 @@ interface Section {
   dishes: MenuDish[]
 }
 
+/**
+ * The menu as a waiter uses it standing up: search as you type in both languages, and category
+ * chips that jump to a section.
+ */
 export function WaiterMenu({ categories, loose, money, locale, quantityOf, onAdd, onQuantity }: WaiterMenuProps) {
   const [query, setQuery] = useState('')
   const name = (dish: MenuDish) => localName(locale, dish.nameEn, dish.nameFr)

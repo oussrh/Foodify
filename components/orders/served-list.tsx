@@ -18,6 +18,10 @@ interface ServedListProps {
 
 const TIME: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' }
 
+/**
+ * The orders this restaurant last finished, newest first, as records without a move; a row opens
+ * the details sheet.
+ */
 export default function ServedList({ orders, onOpen, money }: ServedListProps) {
   return (
     <ul className="overflow-hidden rounded-lg border border-border-strong bg-card">

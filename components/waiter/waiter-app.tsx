@@ -18,6 +18,10 @@ interface WaiterAppProps {
   locale: Locale
 }
 
+/**
+ * The waiter's phone: the room's tables, and the order screen for whichever table is tapped, as one
+ * screen so the tables' poll keeps running.
+ */
 export default function WaiterApp({ restaurant, categories, loose, money, locale }: WaiterAppProps) {
   const [table, setTable] = useState<string | null>(null)
 

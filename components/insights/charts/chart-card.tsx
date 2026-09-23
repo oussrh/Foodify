@@ -12,6 +12,10 @@ interface LegendItem {
   line?: boolean
 }
 
+/**
+ * The key to a chart's series: a swatch (or a short stroke, for a line) beside each name, so
+ * identity never rests on colour alone.
+ */
 export function Legend({ items }: { items: LegendItem[] }) {
   return (
     <ul className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -36,6 +40,10 @@ interface ChartCardProps {
   children: React.ReactNode
 }
 
+/**
+ * The hairline card every Insights chart sits in: a title saying what is plotted, one line on how
+ * to read it, and a legend when there are two series or more.
+ */
 export function ChartCard({ title, description, legend, className, children }: ChartCardProps) {
   return (
     <section className={cn('flex min-w-0 flex-col gap-4 rounded-lg border border-border bg-card p-4 sm:p-5', className)}>

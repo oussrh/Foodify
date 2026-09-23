@@ -30,6 +30,10 @@ const WAIT_STYLE = {
 /** How many lines the card lists before it says "and n more"; past this it stops being glanceable. */
 const PREVIEW_LINES = 3
 
+/**
+ * One order on the board, read at arm's length: the table, the wait, the dishes, and one large
+ * button that moves it on; the card opens its details.
+ */
 export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }: OrderCardProps) {
   const waiting = minutesWaiting(order.createdAt, now)
   const tier = waitingTier(waiting)

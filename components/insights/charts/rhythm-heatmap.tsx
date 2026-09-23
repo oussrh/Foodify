@@ -18,6 +18,10 @@ interface RhythmHeatmapProps {
   noun: string
 }
 
+/**
+ * The week as a weekday × hour grid, darker where more happened, with the busiest hour said in
+ * words under it.
+ */
 export function RhythmHeatmap({ grid, noun }: RhythmHeatmapProps) {
   const { from, to } = activeHours(grid)
   const hours = Array.from({ length: to - from + 1 }, (_, i) => from + i)

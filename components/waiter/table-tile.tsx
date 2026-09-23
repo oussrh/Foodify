@@ -30,6 +30,7 @@ function tileLabel(tile: Tile): string {
   return `Table ${tile.table}, free`
 }
 
+/** One table in the room (free, cooking or ready), legible from arm's length and never by colour alone. */
 export function TableTile({ tile, onOpen, flashing }: TableTileProps) {
   const { table, state, ready, items, waitingMinutes } = tile
 

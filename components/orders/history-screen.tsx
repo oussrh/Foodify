@@ -16,6 +16,10 @@ interface HistoryScreenProps {
   boardUrl: string
 }
 
+/**
+ * The Orders tab both portals render: the link onto the kitchen tablet, then the restaurant's
+ * recent orders and how long each stage took.
+ */
 export default function HistoryScreen({ restaurant, orders, boardUrl }: HistoryScreenProps) {
   const money: Money = {
     locale: restaurant.defaultLocale === 'fr' ? 'fr' : 'en',

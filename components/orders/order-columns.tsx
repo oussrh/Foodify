@@ -35,6 +35,7 @@ const LANES: Lane[] = [
   // lives in a drawer the pass can pull out when it wants to see what is waiting to go.
 ]
 
+/** The board's two lanes, waiting to be started and being made, so where a card sits is its state. */
 export default function OrderColumns({ orders, now, busyId, arrived, onOpen, onAdvance }: OrderColumnsProps) {
   const lanes = byStatus(orders)
 

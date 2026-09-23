@@ -45,6 +45,10 @@ interface InsightsTableProps {
   money: Money
 }
 
+/**
+ * Every figure bucket by bucket, newest first, as a table; the order columns are left out for a
+ * restaurant that takes no orders.
+ */
 export function InsightsTable({ buckets, grain, ordering, money }: InsightsTableProps) {
   const columns = columnsOf(money).filter((column) => ordering || !column.ordering)
   const shown = (column: Column) => (column.from ? SHOWN_FROM[column.from] : undefined)

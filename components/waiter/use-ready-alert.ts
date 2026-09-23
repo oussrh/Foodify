@@ -36,6 +36,10 @@ export interface ReadyAlert {
 /** Whether the browser exposes vibration. iOS Safari does not, on any iPhone, by design. */
 const vibrationAvailable = () => typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function'
 
+/**
+ * How the waiter's phone says food is up: a buzz by default, a falling chime only if the waiter
+ * turns sound on, remembered per device.
+ */
 export function useReadyAlert(): ReadyAlert {
   // The waiter's own voice: lower, falling and quieter than the kitchen's bell, so the two are
   // told apart in a room where both can be heard.

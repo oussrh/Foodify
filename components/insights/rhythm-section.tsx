@@ -16,6 +16,10 @@ interface RhythmSectionProps {
   ordering: boolean
 }
 
+/**
+ * When and on what: the week's busy hours as a heatmap, and the phones the menu is read on with
+ * their AR rate.
+ */
 export function RhythmSection({ rhythm, devices, ordering }: RhythmSectionProps) {
   const noun = ordering ? 'orders' : 'dishes opened'
   const total = devices.reduce((n, d) => n + d.views, 0)

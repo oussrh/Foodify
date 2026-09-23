@@ -15,6 +15,10 @@ interface TrendSectionProps {
   money: Money
 }
 
+/**
+ * The report over time: dishes opened split by AR and, where the restaurant takes orders, orders by
+ * who placed them and the revenue.
+ */
 export function TrendSection({ buckets, grain, ordering, money }: TrendSectionProps) {
   const per = GRAIN_LABEL[grain].toLowerCase()
   const traffic = trafficChart(buckets, grain)

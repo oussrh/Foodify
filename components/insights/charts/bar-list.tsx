@@ -22,6 +22,10 @@ interface BarListProps {
   max?: number
 }
 
+/**
+ * A ranking as horizontal bars, each with its value written at the tip; says `empty` when there is
+ * nothing to rank.
+ */
 export function BarList({ rows, slot = 1, empty, max }: BarListProps) {
   if (rows.length === 0) return <p className="py-6 text-center text-sm text-muted-foreground">{empty}</p>
   const longest = max ?? Math.max(1, ...rows.map((row) => row.value))

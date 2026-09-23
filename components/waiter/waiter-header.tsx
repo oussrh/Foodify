@@ -19,6 +19,10 @@ interface WaiterHeaderProps {
   children?: React.ReactNode
 }
 
+/**
+ * The strip both top-level waiter screens wear: the title, the restaurant, whether the server
+ * answers, and a refresh.
+ */
 export function WaiterHeader({ title, restaurantName, online, loading, onRefresh, children }: WaiterHeaderProps) {
   return (
     <div className="flex items-center gap-2 px-3 py-2.5">

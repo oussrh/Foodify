@@ -6,7 +6,7 @@
 // removed by the test that made it.
 import bcrypt from 'bcryptjs'
 import { expect, type Page, type TestInfo } from '@playwright/test'
-import { db, seededIds } from './session'
+import { db, seededIds, submitUntil } from './session'
 
 const PASSWORD = 'device-only'
 
@@ -43,7 +43,7 @@ export async function signInDevice(page: Page, portal: 'kitchen' | 'waiter', use
   await page.goto(`/${portal}/login`)
   await page.getByLabel('Username').fill(username)
   await page.getByLabel('Password').fill(PASSWORD)
-  await page.getByRole('button', { name: 'Continue' }).click()
+  await submitUntil(page.getByRole('button', { name: 'Continue' }), async () => !page.url().includes('/login'))
   // Off the login page and onto a rendered screen, not merely "under /kitchen": `/kitchen/login`
   // is under it too, and navigating away before the sign-in lands aborts it with no cookie set.
   await expect(page).toHaveURL(new RegExp(`/${portal}/(?!login)[^/]+`))
