@@ -6,6 +6,10 @@
 import { Button } from '@/components/ui/button'
 import { AlertCircle, Save } from 'lucide-react'
 
+/**
+ * The create-dish form's submit row: the Create Dish button, disabled until a field is touched and
+ * while it saves, and an unsaved-changes note.
+ */
 export default function CreateDishSubmit({ isSubmitting, isDirty }: { isSubmitting: boolean; isDirty: boolean }) {
   return (
     <div className="flex items-center gap-4 pt-4 border-t border-border">

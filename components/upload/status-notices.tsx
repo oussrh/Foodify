@@ -12,6 +12,7 @@ interface SuccessNoticeProps {
   icon?: LucideIcon
 }
 
+/** The success line an upload shows above its zone, with its second-line hint. */
 export function SuccessNotice({ message, hint, icon: Icon = CheckCircle }: SuccessNoticeProps) {
   return (
     <div className="p-4 border border-border rounded-md flex items-start gap-3">
@@ -26,6 +27,10 @@ export function SuccessNotice({ message, hint, icon: Icon = CheckCircle }: Succe
   )
 }
 
+/**
+ * The error line an upload shows above its zone, followed by a fixed prompt to check the file and
+ * try again.
+ */
 export function ErrorNotice({ message }: { message: string }) {
   return (
     <div className="p-4 border border-border rounded-md flex items-start gap-3">

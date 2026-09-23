@@ -10,6 +10,10 @@ import { Input } from "@/components/ui/input";
 import { FolderPlus, Plus } from "lucide-react";
 import type { Names } from "./types";
 
+/**
+ * The card that creates a category from its English and French names. Both are required; the draft
+ * is cleared only after the parent's onAdd resolves.
+ */
 export default function AddCategoryCard({
   onAdd,
   iconClassName,

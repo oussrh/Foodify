@@ -10,6 +10,11 @@ import { ArrowUp, ArrowDown, Eye, EyeOff, Trash2 } from "lucide-react";
 import DeleteDialog from "./delete-dialog";
 import type { Names, Subcategory } from "./types";
 
+/**
+ * One subcategory's editable row: each name is saved when its field loses focus, not on every
+ * keystroke. It also has move up/down, the active switch, and delete only when onDeleteSub is
+ * passed.
+ */
 export default function SubcategoryRow({
   categoryId,
   sub,

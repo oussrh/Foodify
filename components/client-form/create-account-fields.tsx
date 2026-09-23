@@ -9,6 +9,10 @@ import { Label } from '@/components/ui/label'
 import { Mail, Lock } from 'lucide-react'
 import FieldError from '@/components/forms/field-error'
 
+/**
+ * The Account Information section of the create-client form: the sign-in email and the starting
+ * password, each with its error line.
+ */
 export default function CreateAccountFields({
   email,
   password,

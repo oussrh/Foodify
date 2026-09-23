@@ -13,6 +13,11 @@ import SubcategoryRow from "./subcategory-row";
 import AddSubcategory from "./add-subcategory";
 import type { Category, Names, SubDrafts, Subcategory } from "./types";
 
+/**
+ * One category as a draggable card, with its subcategory rows and the add block when it is
+ * expanded. Delete appears only where the portal passes the delete handlers: the admin portal does,
+ * the manager portal does not.
+ */
 export default function SortableCategory({
   category,
   onRename,

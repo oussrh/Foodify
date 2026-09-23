@@ -99,7 +99,7 @@ const config = [
     // /** */ block, not the file's // header). Functions only: a component's props interface is
     // read field by field, and its name already says whose props they are. Add a directory here
     // in the commit that documents it; the list only grows.
-    files: ['components/insights/**/*.{ts,tsx}', 'components/orders/**/*.{ts,tsx}', 'components/waiter/**/*.{ts,tsx}', 'components/menu/**/*.{ts,tsx}', 'components/shell/**/*.{ts,tsx}', 'components/admin/**/*.{ts,tsx}'],
+    files: ['components/insights/**/*.{ts,tsx}', 'components/orders/**/*.{ts,tsx}', 'components/waiter/**/*.{ts,tsx}', 'components/menu/**/*.{ts,tsx}', 'components/shell/**/*.{ts,tsx}', 'components/admin/**/*.{ts,tsx}', 'components/dish-form/**/*.{ts,tsx}', 'components/restaurant-form/**/*.{ts,tsx}', 'components/category-manager/**/*.{ts,tsx}', 'components/client-form/**/*.{ts,tsx}', 'components/upload/**/*.{ts,tsx}', 'components/ar-viewer/**/*.{ts,tsx}'],
     ignores: ['**/*.test.ts'],
     plugins: { jsdoc },
     rules: {

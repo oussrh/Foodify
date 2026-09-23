@@ -18,6 +18,11 @@ import {
 
 type Restaurant = { id: string; name: string }
 
+/**
+ * The Assign Restaurants dialog of the create-client form: a name search over every restaurant,
+ * with Assign or Remove on each row. It only reports the choice through its callbacks; the form
+ * keeps the selection.
+ */
 export default function CreateAssignDialog({
   restaurants,
   selected,

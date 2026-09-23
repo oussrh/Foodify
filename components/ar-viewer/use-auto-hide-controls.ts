@@ -3,6 +3,10 @@
 // The viewer's controls show on any mouse move or touch and hide again after a pause.
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+/**
+ * Shows the viewer's controls on any mouse move or touch anywhere on the document and hides them
+ * after a pause. They start visible, and hideControls hides them at once.
+ */
 export function useAutoHideControls(hideAfterMs: number) {
   const [showControls, setShowControls] = useState(true)
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null)

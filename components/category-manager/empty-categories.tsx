@@ -5,6 +5,10 @@ import type { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { FolderPlus } from "lucide-react";
 
+/**
+ * The placeholder card shown while a restaurant has no category; the portal supplies the sentence
+ * under it and the icon colour.
+ */
 export default function EmptyCategories({
   iconClassName,
   children,

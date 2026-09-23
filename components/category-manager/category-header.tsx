@@ -15,6 +15,10 @@ import { GripVertical, ChevronDown, ChevronRight, Edit2, Trash2 } from "lucide-r
 import DeleteDialog from "./delete-dialog";
 import type { Category, Names } from "./types";
 
+/**
+ * A category card's header: fold, drag handle, the names or their inline rename form, the
+ * subcategory count, the active switch, and delete only when the portal passes onDelete.
+ */
 export default function CategoryHeader({
   category,
   collapsed,

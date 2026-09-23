@@ -9,6 +9,11 @@ import { Building2, X } from 'lucide-react'
 
 type Restaurant = { id: string; name: string }
 
+/**
+ * The create-client form's list of restaurants picked so far, each with a remove button; a dashed
+ * placeholder stands in while none is picked. An id with no matching restaurant is skipped, not
+ * shown.
+ */
 export default function AssignedRestaurants({
   restaurants,
   selected,

@@ -21,6 +21,11 @@ export interface UploadResult {
 /** True when both public variables are set, so the browser can upload without the server. */
 export const isBrowserUploadConfigured = () => Boolean(publicEnv.cloudinaryCloudName && publicEnv.cloudinaryUploadPreset)
 
+/**
+ * Uploads a file straight from the browser to Cloudinary, unsigned, into the folder and public id
+ * the target names. Throws when the cloud name or preset is unset, or when Cloudinary refuses the
+ * file.
+ */
 export async function uploadToCloudinary(file: File, target: CloudinaryTarget): Promise<UploadResult> {
   const { cloudinaryCloudName: cloudName, cloudinaryUploadPreset: uploadPreset } = publicEnv
 

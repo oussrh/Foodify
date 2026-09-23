@@ -7,6 +7,10 @@
 import ChipGroup from '@/components/forms/chip-group'
 import { DIETARY_OPTIONS } from '@/lib/menu'
 
+/**
+ * Chooses which dietary attributes a restaurant offers: the dish forms offer only these and the
+ * public menu shows and filters by only these; a dish's other stored tags stay unseen.
+ */
 export default function DietaryOptionsField({ value, onChange }: { value: string[]; onChange: (next: string[]) => void }) {
   return (
     <ChipGroup

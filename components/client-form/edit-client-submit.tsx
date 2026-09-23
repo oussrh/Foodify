@@ -7,6 +7,11 @@ import { Button } from '@/components/ui/button'
 import { AlertCircle, ArrowRight, Loader2, Save } from 'lucide-react'
 import type { AssignmentChanges } from './edit-assign-dialog'
 
+/**
+ * The foot of the edit-client form: an unsaved-changes note, the Save button (disabled until the
+ * form is dirty or while it saves) and a summary of the email and assignment changes the save will
+ * make.
+ */
 export default function EditClientSubmit({
   isDirty,
   isSubmitting,

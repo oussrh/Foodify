@@ -33,6 +33,7 @@ const COPY = {
   },
 } as const
 
+/** The logo or cover upload's section header: title and accepted formats for that kind. */
 export function BrandImageHeader({ kind }: { kind: BrandImageKind }) {
   const c = COPY[kind]
   return (
@@ -54,6 +55,7 @@ interface BrandImageCardProps {
   restaurantName: string
 }
 
+/** The uploaded logo or cover as a thumbnail sized for its kind, with its URL beside it. */
 export function BrandImageCard({ kind, url, restaurantName }: BrandImageCardProps) {
   const c = COPY[kind]
   return (
@@ -79,6 +81,10 @@ export function BrandImageCard({ kind, url, restaurantName }: BrandImageCardProp
   )
 }
 
+/**
+ * The logo or cover upload's requirements panel: formats, size limit (5MB logo, 10MB cover),
+ * recommended proportions and the restaurant's branding folder.
+ */
 export function BrandImageRequirements({ kind, restaurantSlug }: { kind: BrandImageKind; restaurantSlug: string }) {
   const c = COPY[kind]
   return (

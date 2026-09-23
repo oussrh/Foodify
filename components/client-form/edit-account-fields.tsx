@@ -9,6 +9,10 @@ import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Mail, AlertCircle, Shield } from 'lucide-react'
 
+/**
+ * The Account Information section of the edit-client form: the email, with a Changed badge and a
+ * warning once it differs, because the client will then sign in with the new address.
+ */
 export default function EditAccountFields({
   email,
   error,

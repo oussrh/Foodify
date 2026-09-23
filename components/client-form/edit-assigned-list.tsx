@@ -11,6 +11,10 @@ import { Building2, Check, Plus, Sparkles, X } from 'lucide-react'
 
 type Restaurant = { id: string; name: string }
 
+/**
+ * The edit-client form's current assignments, each with a remove button and a New badge on one not
+ * yet saved; with none assigned it shows a placeholder whose button opens the assignment dialog.
+ */
 export default function EditAssignedList({
   restaurants,
   selected,

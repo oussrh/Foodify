@@ -60,6 +60,10 @@ interface ArModelSectionProps {
   onRemove: () => void
 }
 
+/**
+ * One format's column of the AR model upload, USDZ or GLB: the uploaded model with Preview,
+ * Download and Remove, or else the drop zone with its progress while a file uploads.
+ */
 export function ArModelSection({ type, url, uploading, progress, disabled, onFileChange, onPreview, onDownload, onRemove }: ArModelSectionProps) {
   const f = FORMATS[type]
   return (

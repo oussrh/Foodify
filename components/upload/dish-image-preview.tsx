@@ -23,6 +23,10 @@ interface DishImagePreviewProps {
   onRemove: () => void
 }
 
+/**
+ * The uploaded dish photo with Preview, Download, Replace and Remove, and whatever Cloudinary
+ * reported about it (format, dimensions, size), each shown only when known.
+ */
 export function DishImagePreview({ url, info, onPreview, onDownload, onReplace, onRemove }: DishImagePreviewProps) {
   return (
     <div className="space-y-4">

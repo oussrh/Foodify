@@ -5,6 +5,11 @@
 // attribute set twice keeps its last value.
 import type { ArMode } from '@/components/model-viewer/element'
 
+/**
+ * Sets the attributes every mode shares: the model source, its alt text, camera controls, loading
+ * and the default shadows and tone mapping. Call it first: the 3D or AR set applied after it
+ * overrides what they both set.
+ */
 export function applyBaseAttributes(modelViewer: HTMLElement, modelUrl: string, dishName: string) {
   modelViewer.setAttribute('src', modelUrl)
   modelViewer.setAttribute('alt', `3D model of ${dishName}`)

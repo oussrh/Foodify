@@ -9,6 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RestaurantInput } from "@/lib/schemas/restaurant";
 import { Phone, Mail, Globe } from "lucide-react";
 
+/**
+ * The create-restaurant form's contact card: email, phone and website, with the schema's errors
+ * shown under email and website.
+ */
 export default function CreateContactCard({
   register,
   errors,

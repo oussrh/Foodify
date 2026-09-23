@@ -15,12 +15,20 @@ export interface CloudinaryTarget {
 /** The restaurant's folder name: spaces to underscores, lower case. */
 export const restaurantFolderName = (restaurantName: string) => restaurantName.replace(/\s+/g, '_').toLowerCase()
 
+/**
+ * Where an AR model goes: the restaurant's `ar` folder as a raw resource, under a public id stamped
+ * with the upload time, so each upload is a new file.
+ */
 export const arModelTarget = (restaurantName: string, type: ArModelType): CloudinaryTarget => ({
   folder: `restaurants/${restaurantFolderName(restaurantName)}/ar`,
   publicId: `${type}_${Date.now()}`,
   resourceType: 'raw',
 })
 
+/**
+ * Where a dish photo goes: the restaurant's `dishes` folder as an image, under a public id stamped
+ * with the upload time, so each upload is a new file.
+ */
 export const dishImageTarget = (restaurantName: string): CloudinaryTarget => ({
   folder: `restaurants/${restaurantFolderName(restaurantName)}/dishes`,
   publicId: `dish_${Date.now()}`,

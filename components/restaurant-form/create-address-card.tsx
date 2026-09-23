@@ -10,6 +10,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RestaurantInput } from "@/lib/schemas/restaurant";
 import { MapPin } from "lucide-react";
 
+/**
+ * The create-restaurant form's address card: street, city, state, postal code and country, all
+ * optional and registered straight on the form.
+ */
 export default function CreateAddressCard({ register }: { register: UseFormRegister<RestaurantInput> }) {
   return (
     <Card className="border-border">

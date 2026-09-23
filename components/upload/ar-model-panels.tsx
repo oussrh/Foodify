@@ -5,6 +5,10 @@
 import { Apple, CloudUpload, Globe, Info, Zap } from 'lucide-react'
 import { restaurantFolderName } from '@/components/upload/targets'
 
+/**
+ * The AR upload's requirements panel: USDZ for iOS, GLB for Android and the web, 50MB per file, and
+ * the folder the models are stored in.
+ */
 export function ArRequirements({ restaurantName }: { restaurantName: string }) {
   return (
     <div className="p-6 border border-border rounded-md">
@@ -42,6 +46,10 @@ export function ArRequirements({ restaurantName }: { restaurantName: string }) {
   )
 }
 
+/**
+ * What the AR upload shows in place of its columns when the browser upload to Cloudinary is not
+ * configured.
+ */
 export function ArUploadUnavailable() {
   return (
     <div className="text-center py-12">
@@ -54,6 +62,10 @@ export function ArUploadUnavailable() {
   )
 }
 
+/**
+ * The summary shown once a model is on file: which AR experiences a guest now gets, iOS Quick Look
+ * for a USDZ and web AR for a GLB.
+ */
 export function ArReadyStatus({ hasUsdz, hasGlb }: { hasUsdz: boolean; hasGlb: boolean }) {
   return (
     <div className="p-6 border border-border rounded-md">

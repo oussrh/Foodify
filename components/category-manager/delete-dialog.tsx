@@ -16,6 +16,10 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 
+/**
+ * The confirmation put in front of a permanent delete: the caller supplies the trigger and the
+ * wording, and onConfirm runs only on Delete Permanently.
+ */
 export default function DeleteDialog({
   trigger,
   title,
