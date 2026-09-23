@@ -28,7 +28,8 @@ describe('restaurantFormValues', () => {
       socialMedia: '',
       socialDisplay: 'icons',
       coverImageUrl: '',
-      coverImageStyle: null,
+      // Not null: a null here failed the settings form's schema and blocked every save.
+      coverImageStyle: 'cover',
       secondaryColor: '',
       fontFamily: '',
       googleFontUrl: '',

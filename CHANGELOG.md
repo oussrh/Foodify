@@ -4,7 +4,14 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ## [Unreleased]
 
+### Fixed
+
+- A restaurant whose cover style was never set could not save **any** of its settings. The settings form took the column as it was (`NULL` became `null`, through a type cast in `components/forms/form-defaults.ts`), its schema refused `null`, and the save failed with the Branding tab marked in error and no message on it — the field is hidden. The seeded restaurant is one such, and so is any restaurant made before the field existed. The value is now narrowed like its neighbours: anything but `repeat` is `cover`, which is what the public menu already showed.
+- A dish saved without calories could not be edited again. The edit form read the empty calories box with `valueAsNumber`, which gives `NaN`, and the schema refused it; the save failed with the focus on a field that showed nothing wrong. An empty box is now no figure (`components/edit-dish-form.tsx`).
+
 ### Changed
+
+- The browser suite drives what a manager changes, which it had only ever opened: `manager-menu.spec.ts` creates a dish, reprices it and deletes it, reading each step back on the public menu; `manager-settings.spec.ts` saves the General settings and reloads them, and adds a waiter on the People tab who then signs in and is removed; `account.spec.ts` turns the second factor off and signs in on the password alone, and changes a password (the new one works, the old one is refused). They run on a restaurant of their own (`e2e/manager.ts`), so the seeded menu the other specs read is never changed. Writing them found the two bugs above.
 
 - The browser suite runs on a database of its own. Locally it used the one `.env` names — the shared development database — writing test accounts and orders into it and reading whatever somebody had last saved there, which is how an opened Tuesday failed `hours.spec.ts`. `pnpm e2e` is now `scripts/ci/e2e.mjs`: in CI it runs as before on the job's seeded Postgres; locally it uses `E2E_DATABASE_URL`, else an `e2e` database in the Docker container the integration suite already starts (the container logic moves to `scripts/ci/test-db.mjs`, shared by both runners), migrated and seeded before each run; without Docker it falls back to `.env`'s database and says so. Found on the way: `seededIds()` in `e2e/session.ts` took any user attached to the seeded restaurant as its manager, which since the staff specs includes a test's own kitchen tablet — picked, then deleted under the admin sweep in a parallel run. It now asks for the manager role. 100/100 at six workers, every test run twice.
 

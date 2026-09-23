@@ -15,7 +15,8 @@ import { PrismaClient } from '../generated/prisma/client'
 
 export type Portal = 'admin' | 'manager'
 
-const PASSWORD = 'audit-only'
+/** The password every audit account is made with; a test that changes it signs in with its own. */
+export const PASSWORD = 'audit-only'
 const CODE = '246810'
 const SEEDED_SLUG = 'foodify-test-kitchen'
 
@@ -37,10 +38,14 @@ export async function seededIds() {
   return { restaurantId: restaurant.id, dishId: dish.id, adminId: admin.id, managerId: manager.id }
 }
 
-/** An account for this test alone (its name carries the portal and a tag, the worker's project), with the second factor on unless `mfa` is false; `remove` deletes it. */
-export async function auditAccount(portal: Portal, tag: string, { mfa = true } = {}) {
+/**
+ * An account for this test alone (its name carries the portal and a tag, the worker's project),
+ * with the second factor on unless `mfa` is false; a manager manages the seeded restaurant, or
+ * `restaurantId` when the test brings its own. `remove` deletes it.
+ */
+export async function auditAccount(portal: Portal, tag: string, { mfa = true, restaurantId }: { mfa?: boolean; restaurantId?: string } = {}) {
   const email = `audit-${portal}-${tag.replace(/[^a-z0-9]/gi, '')}@foodify.test`
-  const restaurant = await db().restaurant.findUniqueOrThrow({ where: { slug: SEEDED_SLUG }, select: { id: true } })
+  const restaurant = restaurantId ? { id: restaurantId } : await db().restaurant.findUniqueOrThrow({ where: { slug: SEEDED_SLUG }, select: { id: true } })
   await db().user.deleteMany({ where: { email } })
   await db().user.create({
     data: {

@@ -37,6 +37,13 @@ export interface EditDishValues {
   allergens?: string[] | undefined
 }
 
+/**
+ * The calories box as the schema reads it: empty is no figure, not NaN. `valueAsNumber` turned an
+ * empty box into NaN, which the schema refused, so a dish saved without calories could never be
+ * edited again — the save failed with focus on a field that showed nothing wrong.
+ */
+const caloriesValue = (raw: unknown) => (raw === '' || raw === null || raw === undefined ? undefined : Number(raw))
+
 const schema = dishInput.omit({ subcategoryId: true, calories: true }).extend({
   subcategoryId: z.string().optional(),
   calories: z.number().int('Calories must be a whole number').optional(),
@@ -170,7 +177,7 @@ export default function EditDishForm({
 
             <DishDetailsGrid
               price={{ field: register('price'), error: errors.price }}
-              calories={{ field: register('calories', { valueAsNumber: true }) }}
+              calories={{ field: register('calories', { setValueAs: caloriesValue }) }}
               subcategoryId={register('subcategoryId')}
               imageUrl={{ field: register('imageUrl'), value: imageUrl }}
               isMostPurchased={register('isMostPurchased')}
