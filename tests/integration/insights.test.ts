@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { loadInsights } from '@/lib/insights-loader'
 import { totalsOf } from '@/lib/insights'
-import { withRollback, type Tx } from './db'
+import { withRollback } from './db'
 import { dish, kitchenTablet, manager, restaurant, waiter } from './fixtures'
 import { signInAs } from './session'
+import { at, order } from './insights-orders'
 
 // The report is three grouped queries merged onto a bucket list. What is worth pinning against a
 // real database is what a mock cannot see: that `date_trunc` and the bucket arithmetic agree on
@@ -11,33 +12,6 @@ import { signInAs } from './session'
 // as a zero in it.
 
 const NOW = new Date('2026-09-22T18:00:00Z')
-const at = (iso: string) => new Date(iso)
-
-interface OrderSpec {
-  number: number
-  created: string
-  accepted?: string
-  served?: string
-  /** A waiter's id: the order was taken at the table, so there is no phone to text. */
-  placedById?: string
-}
-
-async function order(tx: Tx, restaurantId: string, spec: OrderSpec) {
-  return tx.order.create({
-    data: {
-      restaurantId,
-      number: spec.number,
-      table: String(spec.number),
-      phone: spec.placedById ? '' : '+212600112233',
-      subtotal: '9.50',
-      placedById: spec.placedById ?? null,
-      createdAt: at(spec.created),
-      acceptedAt: spec.accepted ? at(spec.accepted) : null,
-      servedAt: spec.served ? at(spec.served) : null,
-    },
-    select: { id: true },
-  })
-}
 
 describe('the insights report', () => {
   it('puts each row in the bucket its own timestamp falls in', () =>

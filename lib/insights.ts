@@ -49,18 +49,16 @@ export interface InsightsBucket {
   acceptSeconds: number | null
   /** Seconds from the order arriving to it going out, averaged; null when none went out. */
   serveSeconds: number | null
+  /** Seconds from the kitchen taking it on to calling it up, averaged; null when none was called. */
+  prepSeconds: number | null
+  /** Of the orders, the ones cancelled. They are still counted in the two order figures above. */
+  cancelledOrders: number
+  /** What the orders that were not cancelled came to, in minor units (cents): money is never a float. */
+  revenueMinor: number
 }
 
-/** The whole window at once, for the strip above the table. */
-export interface InsightsTotals {
-  views: number
-  arViews: number
-  cartAdds: number
-  guestOrders: number
-  staffOrders: number
-  acceptSeconds: number | null
-  serveSeconds: number | null
-}
+/** The whole window at once, for the figures above the charts. */
+export type InsightsTotals = Omit<InsightsBucket, 'start'>
 
 /**
  * The start of the bucket a date falls in, the way Postgres `date_trunc` would put it: midnight
@@ -89,16 +87,20 @@ function step(start: Date, grain: Grain, by: number) {
  * in. It is a bucket boundary, not `now` shifted back: a window starting mid-month would put
  * half of October in a bucket labelled October and make a thirteenth one out of the remainder.
  */
-export function windowStart(grain: Grain, now: Date): Date {
+export function windowStart(grain: Grain, now: Date, count = GRAIN_BUCKETS[grain]): Date {
   const start = startOfGrain(now, grain)
-  step(start, grain, -(GRAIN_BUCKETS[grain] - 1))
+  step(start, grain, -(count - 1))
   return start
 }
 
-/** Every bucket start in the window, oldest first, so a quiet day is a row of zeros and not a gap. */
-export function bucketStarts(grain: Grain, now: Date): Date[] {
-  const cursor = windowStart(grain, now)
-  return Array.from({ length: GRAIN_BUCKETS[grain] }, () => {
+/**
+ * Every bucket start in the window, oldest first, so a quiet day is a row of zeros and not a gap.
+ * `count` defaults to the grain's window; the report asks for two, the one before being what a
+ * change is measured against.
+ */
+export function bucketStarts(grain: Grain, now: Date, count = GRAIN_BUCKETS[grain]): Date[] {
+  const cursor = windowStart(grain, now, count)
+  return Array.from({ length: count }, () => {
     const start = new Date(cursor)
     step(cursor, grain, 1)
     return start
@@ -127,6 +129,9 @@ export function totalsOf(buckets: InsightsBucket[]): InsightsTotals {
     staffOrders: sum((b) => b.staffOrders),
     acceptSeconds: weighted((b) => b.acceptSeconds, orders),
     serveSeconds: weighted((b) => b.serveSeconds, orders),
+    prepSeconds: weighted((b) => b.prepSeconds, orders),
+    cancelledOrders: sum((b) => b.cancelledOrders),
+    revenueMinor: sum((b) => b.revenueMinor),
   }
 }
 
