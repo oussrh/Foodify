@@ -20,6 +20,10 @@ interface TableFieldProps {
   locale: Locale
 }
 
+/**
+ * Where the order goes: the table from the table's own QR code, shown read-only, or a field for a
+ * guest who came another way.
+ */
 export default function TableField({ table, onTable, locked, invalid, locale }: TableFieldProps) {
   const t = MENU_TEXT[locale]
 

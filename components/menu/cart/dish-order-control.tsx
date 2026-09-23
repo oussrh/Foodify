@@ -24,6 +24,10 @@ interface DishOrderControlProps {
   money: Money
 }
 
+/**
+ * "Add to order" on the dish sheet and page; once the dish is in the order, its stepper, the line
+ * total and the note.
+ */
 export default function DishOrderControl({ dish, order, locale, money }: DishOrderControlProps) {
   const t = MENU_TEXT[locale]
   const name = locale === 'fr' ? dish.nameFr : dish.nameEn

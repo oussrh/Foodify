@@ -10,6 +10,7 @@ import Image from 'next/image'
 import { Utensils } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
+/** A dish's photo filling the box the caller sizes, or a neutral placeholder when it has none. */
 export default function DishPhoto({
   src,
   alt,

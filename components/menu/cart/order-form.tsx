@@ -31,6 +31,10 @@ interface OrderFormProps {
   money: Money
 }
 
+/**
+ * The foot of the cart: the subtotal, the table (shown, not asked for, when the QR code carried
+ * it), the phone, the note and the send button.
+ */
 export default function OrderForm({ subtotal, table, onTable, tableLocked, phone, onPhone, note, onNote, onSubmit, sending, error, locale, money }: OrderFormProps) {
   const t = MENU_TEXT[locale]
   // The fields are asked for only once the guest has tried to send: an empty one is not yet a mistake.

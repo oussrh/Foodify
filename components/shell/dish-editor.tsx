@@ -15,6 +15,10 @@ import type { ShellPortal } from '@/components/shell/shell-types'
 export type EditableDish = Dish & { ingredients: Ingredient[]; _count: { views: number } }
 export type DishRestaurant = { id: string; name: string; dietaryOptions: string[]; categories: (MenuCategory & { subcategories: MenuSubcategory[] })[] }
 
+/**
+ * The dish edit page's body for both portals: the header and view count, the status toggles, the
+ * edit form and the ingredients.
+ */
 export default function DishEditor({ portal, restaurant, dish }: { portal: ShellPortal; restaurant: DishRestaurant; dish: EditableDish }) {
   const subcategories = restaurant.categories.flatMap((category) =>
     category.subcategories.map((sub) => ({ id: sub.id, nameEn: `${category.nameEn} → ${sub.nameEn}` })),

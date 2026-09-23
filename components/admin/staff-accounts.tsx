@@ -33,6 +33,10 @@ interface StaffAccountsProps {
   loginUrl: string
 }
 
+/**
+ * One card of a restaurant's device accounts (order tablets or waiters): each signs in with a
+ * username, and its password is set on its own row.
+ */
 export default function StaffAccounts({ restaurantId, staffRole: role, accounts, loginUrl }: StaffAccountsProps) {
   const router = useRouter()
   const [username, setUsername] = useState('')

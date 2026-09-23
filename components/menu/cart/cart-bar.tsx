@@ -15,6 +15,10 @@ interface CartBarProps {
   money: Money
 }
 
+/**
+ * The bar that rises from the bottom of the menu once the order has something in it: the count, the
+ * subtotal, and the way into the cart.
+ */
 export default function CartBar({ count, subtotal, onOpen, locale, money }: CartBarProps) {
   const t = MENU_TEXT[locale]
   if (count === 0) return null

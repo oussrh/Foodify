@@ -13,6 +13,10 @@ interface MenuFooterProps {
   locale: Locale
 }
 
+/**
+ * The foot of the public menu: the restaurant's name, its address and contacts, its opening hours
+ * and its social links, each column only when there is something in it.
+ */
 export default function MenuFooter({ restaurant, social, locale }: MenuFooterProps) {
   const t = MENU_TEXT[locale]
   const address = formatAddress(restaurant)

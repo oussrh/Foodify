@@ -33,6 +33,10 @@ interface CartSheetProps {
   brandStyle: Record<string, string>
 }
 
+/**
+ * The order the guest has built, in the restaurant's brand: its lines, then the table, the phone,
+ * the note and the send; once sent, the order number.
+ */
 export default function CartSheet({ open, onOpenChange, restaurantId, restaurantName, lines, cart, tableLocked, locale, money, themeClass, brandStyle }: CartSheetProps) {
   const t = MENU_TEXT[locale]
   const [note, setNote] = useState('')

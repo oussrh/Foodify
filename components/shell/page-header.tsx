@@ -12,6 +12,10 @@ interface PageHeaderProps {
   className?: string
 }
 
+/**
+ * A portal page's title, its one-line description, an optional link back above it, and the page's
+ * actions on the right.
+ */
 export function PageHeader({ title, description, back, actions, className }: PageHeaderProps) {
   return (
     <div className={cn('flex flex-col gap-3 pb-5 sm:flex-row sm:items-end sm:justify-between', className)}>
@@ -59,6 +63,7 @@ interface EmptyStateProps {
   action?: React.ReactNode
 }
 
+/** What a list says when it has nothing in it, with the one action that would fill it. */
 export function EmptyState({ title, description, action }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed border-border-strong px-6 py-14 text-center">

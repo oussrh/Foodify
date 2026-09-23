@@ -101,8 +101,9 @@ function orderableDishes(restaurantId: string, dishIds: string[]) {
  * phone for the confirmation, a note for the order, one to fifty lines of dish id, quantity and the note asked for on
  * that dish); every line is re-priced from the database, never from the body. A guest must give a phone and is texted
  * once the row exists (a send can only fail to arrive, never to be stored); a waiter or manager signed in to this
- * restaurant may leave it out, and the order records who took it instead (`placedById`). Answers 201 `{ data: { id, number, table, subtotal } }`; 400 invalid_json or invalid_payload (the issues, or a dish
- * that is not this restaurant's active menu), 403 forbidden when the restaurant has ordering off, 404 not_found for an
+ * restaurant may leave it out, and the order records who took it instead (`placedById`). Answers 201 `{ data: { id, number, table, subtotal } }`; 400 invalid_json or invalid_payload (the issues);
+ * 409 unavailable, naming each dish that is not this restaurant's active menu or has sold out (`reason`: `off_menu` or `sold_out`), because the
+ * request was well formed and the kitchen's answer changed under it; 403 forbidden when the restaurant has ordering off, 404 not_found for an
  * unknown restaurant, 500 internal. The number is per restaurant, from `Restaurant.nextOrderNumber` (an order that
  * fails after the increment leaves a gap, never a duplicate). Nothing rate-limits: every accepted call is an order.
  */

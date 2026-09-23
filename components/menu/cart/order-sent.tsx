@@ -8,6 +8,10 @@ import { type Locale } from '@/lib/menu'
 import { MENU_TEXT } from '@/lib/menu-text'
 import type { PlacedOrder } from '@/lib/schemas/order'
 
+/**
+ * What the cart shows once the server has taken the order: its number, its table, and the way back
+ * to the menu.
+ */
 export default function OrderSent({ order, onDone, locale }: { order: PlacedOrder; onDone: () => void; locale: Locale }) {
   const t = MENU_TEXT[locale]
   return (

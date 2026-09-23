@@ -20,6 +20,10 @@ interface LineNoteProps {
   fieldId: string
 }
 
+/**
+ * What the guest asks for on one dish ("no onions"): a quiet button that opens a field, stored as
+ * typed. One note per dish, not per portion.
+ */
 export default function LineNote({ name, note, onNote, locale, fieldId }: LineNoteProps) {
   const t = MENU_TEXT[locale]
   const [open, setOpen] = useState(false)

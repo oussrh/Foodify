@@ -9,6 +9,10 @@ import { SOCIAL_NETWORKS, socialUrl, type SocialHandles } from '@/lib/social'
 const iconLink = 'inline-flex h-9 w-9 items-center justify-center rounded-md border border-border text-muted-foreground hover:border-border-strong hover:text-foreground'
 const textLink = 'inline-flex h-8 items-center gap-1.5 rounded-md border border-border px-2.5 text-xs font-medium text-muted-foreground hover:border-border-strong hover:text-foreground'
 
+/**
+ * The restaurant's social links, one per network it filled in, as icons or as text labels (its own
+ * choice in Settings).
+ */
 export default function SocialList({ handles, display, className }: { handles: SocialHandles; display: 'icons' | 'text'; className?: string }) {
   const shown = SOCIAL_NETWORKS.filter((n) => handles[n.key])
   if (shown.length === 0) return null

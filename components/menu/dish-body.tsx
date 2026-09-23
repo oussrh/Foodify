@@ -24,6 +24,10 @@ interface DishBodyProps {
   order?: DishOrder | undefined
 }
 
+/**
+ * Everything a dish says, on its sheet and on its own page: the media, the name and share button,
+ * the price and details, and — where the restaurant takes orders — its order control.
+ */
 export default function DishBody({ dish, locale, money, breadcrumb, shareUrl, photoTransition, headingLevel = 'h2', order }: DishBodyProps) {
   const Heading = headingLevel
   const t = MENU_TEXT[locale]
