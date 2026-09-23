@@ -1,7 +1,7 @@
 ---
 title: "Testing"
 description: "What the unit suite covers, the coverage floor per area and why each exclusion exists (TEST.4: an unwritten exclusion is indistinguishable from a hole); the suites still to come."
-category: governance
+category: operations
 status: living
 audience: ["developer", "agent"]
 tags: ["testing", "coverage", "vitest"]

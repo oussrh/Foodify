@@ -16,7 +16,7 @@ last_verified: "2026-09-23"
 
 | Metric | Day 0 | Now | Target | Held by | Rule |
 |---|---|---|---|---|---|
-| Gap-analysis score | 49/100 | 81/100 (2026-09-22, 75 checks under abatty 0.3; 82/100 over 74 under 0.2.0 on 2026-09-21) | 100 | `abatty measure` | - |
+| Gap-analysis score | 49/100 | 79/100 (2026-09-23, 76 checks under abatty 0.5.1; 81/100 over 75 under 0.3 on 2026-09-22, 82/100 over 74 under 0.2.0 on 2026-09-21) | 100 | `abatty measure` | - |
 | Enforced share (rules held by a machine) | 74% (35/47) | 73% (46/63) | 100% | `abatty measure` | - |
 | `size.overBudget` (files over their kind's budget) | 31 | 0 | 0 | hard | CODE.1 |
 | `size.excessCode` (code lines over budget, summed) | 5302 | 0 | 0 | hard | CODE.1 |
