@@ -24,6 +24,10 @@ function loadModelViewer(): Promise<void> {
   return customElements.whenDefined('model-viewer').then(() => undefined)
 }
 
+/**
+ * A dish's GLB model, turned left and right only, pinned at eye level; the model-viewer script
+ * loads the first time a guest opens the 3D view.
+ */
 export default function Dish3D({ glbUrl, name }: { glbUrl: string; name: string }) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const [ready, setReady] = useState(false)

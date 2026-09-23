@@ -19,6 +19,10 @@ interface CartLineRowProps {
   money: Money
 }
 
+/**
+ * One line of the guest's order: the dish, its stepper, what the line comes to, and the note asked
+ * for on it.
+ */
 export default function CartLineRow({ dish, quantity, onQuantity, note, onNote, locale, money }: CartLineRowProps) {
   const name = locale === 'fr' ? dish.nameFr : dish.nameEn
   return (

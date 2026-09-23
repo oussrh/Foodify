@@ -40,6 +40,10 @@ interface RestaurantPageProps {
   urlTable?: string | null
 }
 
+/**
+ * A restaurant's public menu: the hero, the category bar and filters, the sections of dishes, the
+ * dish sheet, and — where it takes orders — the cart.
+ */
 export default function RestaurantPage({
   restaurant,
   categories,

@@ -57,6 +57,10 @@ function navFor(portal: ShellPortal, restaurants: ShellRestaurant[]): NavItem[] 
   ]
 }
 
+/**
+ * The one shell of both portals: the side rail on a desktop, the top bar with the restaurant
+ * switcher, and the bottom tabs on a phone.
+ */
 export default function AppShell({ portal, user, restaurants, children }: AppShellProps) {
   const pathname = usePathname()
   const nav = navFor(portal, restaurants)

@@ -20,6 +20,10 @@ interface QuantityStepperProps {
 
 const CONTROL = 'inline-flex h-11 w-11 items-center justify-center rounded-full text-foreground hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-40 disabled:hover:bg-transparent'
 
+/**
+ * − n + for one dish in the order: at 1 the minus takes the dish out, at the cart's ceiling the
+ * plus is disabled.
+ */
 export default function QuantityStepper({ name, quantity, onChange, locale, className }: QuantityStepperProps) {
   const t = MENU_TEXT[locale]
   const removing = quantity <= 1

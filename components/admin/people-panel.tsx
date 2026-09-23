@@ -34,6 +34,10 @@ interface PeoplePanelProps {
   isSuperAdmin: boolean
 }
 
+/**
+ * One restaurant's People tab, for both portals: the managers who can edit it, then its order
+ * tablets and waiters. The reader's own row carries no controls.
+ */
 export default function PeoplePanel({ restaurant, origin, currentUserId, isSuperAdmin }: PeoplePanelProps) {
   const managers = restaurant.users.filter((u) => u.role === 'RESTAURANT_ADMIN')
   const devicesOf = (role: 'KITCHEN' | 'WAITER') =>

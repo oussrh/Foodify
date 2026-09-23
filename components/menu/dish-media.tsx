@@ -12,6 +12,10 @@ import DishPhoto from './dish-photo'
 import { SoldOutMark } from './sold-out-mark'
 import Dish3D from './dish-3d'
 
+/**
+ * A dish's photo, or its 3D model behind a Photo / 3D toggle when it has one; marked when the dish
+ * is sold out.
+ */
 export default function DishMedia({ dish, name, ar, locale, photoTransition }: { dish: MenuDish; name: string; ar: boolean; locale: Locale; photoTransition?: boolean | undefined }) {
   const t = MENU_TEXT[locale]
   const has3d = Boolean(dish.glbUrl)

@@ -62,6 +62,10 @@ export interface PlaceOrder {
   reset: () => void
 }
 
+/**
+ * Sends the order to POST /api/orders and says what went wrong in the guest's language; the cart is
+ * emptied only once an order number comes back.
+ */
 export function usePlaceOrder(locale: Locale, onSent: () => void): PlaceOrder {
   const [state, setState] = useState<State>({ status: 'idle', error: '' })
 

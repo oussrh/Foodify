@@ -28,6 +28,10 @@ export interface MenuCart {
   dishOrder: (dish: MenuDish | null) => DishOrder | undefined
 }
 
+/**
+ * What the menu page needs of the cart: the store, the lines joined to the page's dishes, the
+ * subtotal, the sheet's state and each row's order handle; inert when ordering is off.
+ */
 export function useMenuCart(
   restaurant: MenuRestaurant,
   categories: MenuCategory[],

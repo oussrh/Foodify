@@ -33,6 +33,10 @@ interface DishesListProps {
   emptyAction?: React.ReactNode
 }
 
+/**
+ * A restaurant's dishes as a searchable table (category, price, AR, live, stock, added, and each
+ * row's actions), with an empty state carrying the caller's action.
+ */
 export default function DishesList({ portal, restaurantId, currency, rows, search, emptyAction }: DishesListProps) {
   const base = `/${portal}/restaurants/${restaurantId}`
   return (

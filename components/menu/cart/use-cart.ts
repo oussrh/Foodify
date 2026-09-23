@@ -56,6 +56,10 @@ export interface CartApi {
   clear: () => void
 }
 
+/**
+ * The restaurant's cart as state: one store per restaurant, kept in localStorage and followed
+ * across tabs; empty on the server, filled once hydrated.
+ */
 export function useCart(restaurantId: string, urlTable?: string | null): CartApi {
   const subscribe = useCallback(
     (listener: () => void) => {

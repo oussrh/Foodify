@@ -121,6 +121,7 @@ interface DishRowMenuProps {
   isMostPurchased: boolean
 }
 
+/** A dish row's menu: edit, mark or unmark it as popular, and delete behind a confirmation. */
 export function DishRowMenu({ dishId, dishName, editHref, isMostPurchased }: DishRowMenuProps) {
   const [confirm, setConfirm] = useState(false)
   const [pending, startTransition] = useTransition()
@@ -187,6 +188,10 @@ interface RestaurantRowMenuProps {
   slug: string
 }
 
+/**
+ * A restaurant row's menu: straight to its menu, dishes, settings and people, open its public page,
+ * and delete behind a confirmation.
+ */
 export function RestaurantRowMenu({ restaurantId, restaurantName, portal, slug }: RestaurantRowMenuProps) {
   const [confirm, setConfirm] = useState(false)
   const [pending, startTransition] = useTransition()

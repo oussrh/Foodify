@@ -31,6 +31,10 @@ interface RestaurantInfoScreenProps {
   tableCount: number
 }
 
+/**
+ * The Info tab for both portals: how much the menu is opened, the QR code to print, and every
+ * address the restaurant hands out.
+ */
 export function RestaurantInfoScreen({ restaurantId, restaurantName, links, stats, tablesHref, tableCount }: RestaurantInfoScreenProps) {
   const { dishes, views, recent, arViews } = stats
 

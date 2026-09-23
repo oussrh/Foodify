@@ -15,6 +15,10 @@ interface AddButtonProps {
   locale: Locale
 }
 
+/**
+ * The round + at the end of a menu row: one tap adds the dish, and once it is in the order the
+ * button shows the count.
+ */
 export default function AddButton({ name, quantity, onAdd, locale }: AddButtonProps) {
   const t = MENU_TEXT[locale]
   const inOrder = quantity > 0
