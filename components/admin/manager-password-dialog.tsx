@@ -12,6 +12,7 @@ import { resetClientPassword } from '@/app/actions/client-actions'
 import { resetManagerPassword } from '@/app/actions/restaurant-manager-actions'
 import { FormDialog } from '@/components/forms/form-dialog'
 import { PlainField } from '@/components/forms/plain-field'
+import { PasswordTools } from '@/components/forms/password-tools'
 
 interface ManagerPasswordDialogProps {
   open: boolean
@@ -63,6 +64,7 @@ export default function ManagerPasswordDialog({
         onChange={setNext}
         placeholder="At least 6 characters"
         required
+        action={<PasswordTools value={next} onChange={setNext} />}
       />
     </FormDialog>
   )

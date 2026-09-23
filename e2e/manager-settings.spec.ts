@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { ownRestaurant } from './manager'
-import { auditAccount, db, signInAs } from './session'
+import { auditAccount, db, signInAs, submitUntil } from './session'
 import { signInDevice } from './staff'
 
 // What a manager saves about a restaurant and who works it, on a restaurant of the test's own:
@@ -44,6 +44,38 @@ test.describe('a manager\'s restaurant', () => {
       await expect(page.getByText('Could not save. Check the fields and try again.')).toBeVisible()
       expect((await db().restaurant.findUniqueOrThrow({ where: { id: restaurant.id } })).slug).toBe(restaurant.slug)
     } finally {
+      await manager.remove()
+      await restaurant.remove()
+    }
+  })
+
+  test('adds a manager with a generated password, who then signs in with it', async ({ page, browser }, info) => {
+    test.setTimeout(120_000)
+    const restaurant = await ownRestaurant(info)
+    const manager = await auditAccount('manager', info.testId, { mfa: false, restaurantId: restaurant.id })
+    const email = `new-${restaurant.slug}@foodify.test`
+    try {
+      await signInAs(page, 'manager', manager.email, { mfa: false })
+      await page.goto(`/manager/restaurants/${restaurant.id}/users`)
+      await page.getByRole('button', { name: 'Add manager' }).click()
+      const dialog = page.getByRole('dialog')
+      await dialog.getByLabel('Email address').fill(email)
+      await dialog.getByRole('button', { name: 'Generate' }).click()
+      const password = await dialog.getByLabel('Password', { exact: true }).inputValue()
+      // Strong, and visible so it can be handed over: 14 characters of every class.
+      expect(password).toMatch(/^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])(?=.*[^A-Za-z0-9]).{14}$/)
+      await dialog.getByRole('button', { name: 'Add manager' }).click()
+      await expect(page.getByRole('button', { name: `Remove ${email}` })).toBeVisible()
+
+      const colleague = await browser.newPage()
+      await colleague.goto('/manager/login')
+      await colleague.getByLabel(/email/i).fill(email)
+      await colleague.getByLabel(/password/i).fill(password)
+      await submitUntil(colleague.getByRole('button', { name: /continue|sign in/i }), async () => !colleague.url().includes('/login'))
+      await expect(colleague).toHaveURL(new RegExp(`/manager/restaurants/${restaurant.id}`))
+      await colleague.close()
+    } finally {
+      await db().user.deleteMany({ where: { email } })
       await manager.remove()
       await restaurant.remove()
     }

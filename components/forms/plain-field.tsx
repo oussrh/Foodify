@@ -20,6 +20,8 @@ interface PlainFieldProps {
   max?: number
   /** One line under the field, for what a placeholder cannot say. */
   hint?: string
+  /** Controls beside the input, on the same line (a password's Generate and Copy). */
+  action?: React.ReactNode
 }
 
 /** Label, input and optional hint, tied together by id. */
@@ -35,22 +37,26 @@ export function PlainField({
   min,
   max,
   hint,
+  action,
 }: PlainFieldProps) {
   return (
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type={type}
-        autoComplete={autoComplete}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        required={required}
-        min={min}
-        max={max}
-        inputMode={type === 'number' ? 'numeric' : undefined}
-      />
+      <div className="flex gap-2">
+        <Input
+          id={id}
+          type={type}
+          autoComplete={autoComplete}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          required={required}
+          min={min}
+          max={max}
+          inputMode={type === 'number' ? 'numeric' : undefined}
+        />
+        {action}
+      </div>
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   )

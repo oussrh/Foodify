@@ -4,6 +4,10 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ## [Unreleased]
 
+### Added
+
+- **Generate** and **Copy** beside the password when an admin sets one for somebody else: adding a manager on the People tab, and setting a manager's new password. Generate fills a 14-character password with a capital, a small letter, a digit and a symbol, random from the platform's cryptographic source (`lib/password.ts`, `crypto.getRandomValues`, never `Math.random`), without the characters a reader confuses (0/O, 1/l/I), and leaves it visible to be handed over; Copy puts it on the clipboard. It passes the strict rule a person's own new password is held to, not only the six characters an admin-set one needs. Not offered for a tablet's or a waiter's password, which is typed into the device by hand. `manager-settings.spec.ts` adds a manager with a generated password and signs in as them with it.
+
 ### Fixed
 
 - A restaurant whose cover style was never set could not save **any** of its settings. The settings form took the column as it was (`NULL` became `null`, through a type cast in `components/forms/form-defaults.ts`), its schema refused `null`, and the save failed with the Branding tab marked in error and no message on it — the field is hidden. The seeded restaurant is one such, and so is any restaurant made before the field existed. The value is now narrowed like its neighbours: anything but `repeat` is `cover`, which is what the public menu already showed.
