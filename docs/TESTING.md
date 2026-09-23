@@ -56,6 +56,7 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 | `lib/auth-guard.ts` | Needs a NextAuth session and Postgres; belongs to the integration suite |
 | `lib/restaurant-loader.ts` | The same guard over the same database; held by `tests/integration/order-board.test.ts` |
 | `lib/insights-loader.ts` | Grouped SQL over the same database; held by `tests/integration/insights.test.ts` |
+| `lib/insights-queries.ts` | The insights loader's SQL, split out of it; held by the same suite and `tests/integration/insights-breakdowns.test.ts` |
 | `lib/emails/**` | HTML templates; presentational |
 
 ## Contrast of the tokens
