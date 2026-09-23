@@ -45,7 +45,21 @@ function check(name, ok, detail = "") {
 
 const tmp = mkdtempSync(join(tmpdir(), "harness-"));
 const nightDir = join(tmp, "night");
-const baseEnv = { ADOPTION_RUN: "", ADOPTION_BRANCH: "", ADOPTION_PHASE: "", ADOPTION_BASE: "", ADOPTION_NIGHT_DIR: nightDir };
+// The cases assume the base branch is PR-only. A repository that allows a direct push to it
+// (directPushToBase: true) is right to, and its own config made ten of these cases fail: they
+// run against its config with that one key set as they assume, and one case proves its setting.
+const ownConfig = (() => {
+  try {
+    return readJson(ADOPTION);
+  } catch {
+    return {};
+  }
+})();
+const policyCfg = join(tmp, "policy.json");
+writeFileSync(policyCfg, JSON.stringify({ ...ownConfig, directPushToBase: false }));
+const directCfg = join(tmp, "direct.json");
+writeFileSync(directCfg, JSON.stringify({ ...ownConfig, directPushToBase: true }));
+const baseEnv = { ADOPTION_RUN: "", ADOPTION_BRANCH: "", ADOPTION_PHASE: "", ADOPTION_BASE: "", ADOPTION_NIGHT_DIR: nightDir, ADOPTION_CONFIG: policyCfg };
 
 /** Run a hook with an event on stdin and an environment; returns { code, stdout, stderr }. */
 function hook(file, event, env = {}, cwd = process.cwd()) {
@@ -89,7 +103,7 @@ process.stdout.write("\nHarness self-test\n\n");
 
 try {
   // ---- 1. files and wiring ------------------------------------------------------------------
-  for (const f of ["lib.mjs", "vocabulary.mjs", "guard.mjs", "protect.mjs", "stop-gate.mjs", "check-direction.mjs", "session-brief.mjs", "lint-on-edit.mjs"]) {
+  for (const f of ["lib.mjs", "shell.mjs", "vocabulary.mjs", "guard.mjs", "protect.mjs", "stop-gate.mjs", "check-direction.mjs", "session-brief.mjs", "lint-on-edit.mjs"]) {
     check(`hook present: ${f}`, existsSync(join(HOOKS, f)));
   }
   check(`skill present: ${SKILL}`, existsSync(SKILL));
@@ -111,7 +125,10 @@ try {
     check("settings wires PreToolUse mcp__* → protect.mjs", Boolean(mcpMatcher), `matcher: ${matchers("PreToolUse", "protect.mjs").map((m) => m.matcher).join(", ") || "none"}`);
     check("settings wires Stop → stop-gate.mjs", wired("Stop", "stop-gate.mjs"));
     check("settings wires SessionStart → session-brief.mjs", wired("SessionStart", "session-brief.mjs"));
-    const stopTimeout = (settings.hooks?.Stop || []).flatMap((m) => m.hooks || []).find((h) => (h.args || []).join(" ").includes("stop-gate"))?.timeout;
+    // The hook as the settings spell it, either way: `args` beside `command`, or the whole line in
+    // `command` (`cd` into the project folder `&& node .claude/hooks/stop-gate.mjs`). Reading only the
+    // first failed a harness written the second way.
+    const stopTimeout = (settings.hooks?.Stop || []).flatMap((m) => m.hooks || []).find((h) => [h.command, ...(h.args || [])].join(" ").includes("stop-gate"))?.timeout;
     check("Stop hook timeout is long enough for a gate (>= 600s)", (stopTimeout ?? 0) >= 600, `timeout=${stopTimeout}`);
     // The hooks read the config through lib.mjs; this file resolves it its own way. When the two
     // disagree the hooks quietly run on defaults: no scrub, no coupled pairs, the repository's
@@ -255,6 +272,8 @@ try {
   // The push target, not a word in the command: both directions, because a guard that refuses a
   // branch for carrying the base's name in it is a guard a team switches off.
   cases.push(["a push to the base branch is refused", bash("git push origin main"), {}, "deny"]);
+  cases.push(["directPushToBase: true lets the same push through by day", bash("git push origin main"), { ADOPTION_CONFIG: directCfg }, "none"]);
+  cases.push(["directPushToBase: true still refuses it at night", bash("git push origin main"), { ...night, ADOPTION_CONFIG: directCfg }, "deny"]);
   cases.push(["a push to the base by refspec is refused", bash("git push origin HEAD:main"), {}, "deny"]);
   cases.push(["deleting the base branch is refused", bash("git push origin :main"), {}, "deny"]);
   // Quotes are the shell's: git never sees them, so a target compared with them still attached
@@ -299,6 +318,18 @@ try {
   cases.push(["reading the base's ref through the API is not a write", bash("gh api repos/o/r/git/refs/heads/main"), {}, "none"]);
   cases.push(["moving another ref through the API is not the base", bash("gh api -X PATCH repos/o/r/git/refs/heads/feat/x -f sha=abc123"), {}, "none"]);
   cases.push([`a heredoc that documents the bypass flag is a file being written`, bash(`cat > docs/RULES.md <<'EOF'\n${bypass} is not a workflow.\ngit push --force is never allowed.\nEOF`), {}, "none"]);
+  // A command is read as a command now, not as a line of text. A reader's arguments are the
+  // reader's: refusing an honest search teaches its user to route around the hook, which is the
+  // habit the hook exists to prevent.
+  cases.push(["a search whose pattern names a command is a search", bash(`rg "git push --force" docs/`), {}, "none"]);
+  cases.push(["reading the guard's own source is reading", bash(`grep -nE "git push|${bypass}" .claude/hooks/guard.mjs`), {}, "none"]);
+  cases.push(["saying the name of a thing is not doing it", bash(`echo "the bypass flag is ${bypass}"`), {}, "none"]);
+  // And the other direction, which is what makes the above safe to allow: a program the guard
+  // cannot resolve is read conservatively, token by token, so a substitution cannot hide the
+  // two words from each other.
+  cases.push(["a substitution in command position is still a force push", bash("$(echo git) push --force origin dev"), {}, "deny"]);
+  cases.push(["so is a variable holding the program", bash("$GIT push --force origin dev"), {}, "deny"]);
+  cases.push(["and a wrapper nobody put on a list", bash("timeout 5 git push --force origin dev"), {}, "deny"]);
   // Provenance is the default: with the scrub off (the template's default) a commit that carries
   // the agent's trailer passes. The vocabulary, under a config that opted in: a commit, a pull
   // request or an issue that names the tools is refused day and night; the samples are built at
@@ -454,6 +485,22 @@ try {
   check("stop-gate · a phase entry updated during the run, clean tree, green gate: stop allowed", fresh.code === 0, `exit ${fresh.code} ${oneLine(fresh.stderr)}`);
   const freshReceipt = join(nightDir, `stop-gate-${freshSid}.json`);
   check("stop-gate · an allowed stop leaves a receipt with every check ok", existsSync(freshReceipt) && readJson(freshReceipt).decision === "allow" && readJson(freshReceipt).checks.every((c) => c.ok), existsSync(freshReceipt) ? oneLine(readFileSync(freshReceipt, "utf8")) : "no receipt");
+
+  // Several sessions share one worktree: a file another session left uncommitted before this one
+  // started, untouched since, is not this session's to commit or restore. One it wrote still is.
+  write(repo, "notes-of-another-session.md", "theirs\n");
+  const shareSid = "selftest-share-" + Date.now();
+  const shareCfg = cfgIn("share", { startedAt: "2026-01-01T00:00:00Z", phases: [{ id: 0, status: "done", updatedAt: "2026-01-01T01:00:00Z" }] });
+  const shareEnv = { ...night, ADOPTION_BRANCH: "", ADOPTION_PHASE: "0", ADOPTION_CONFIG: shareCfg };
+  hook("session-brief.mjs", { session_id: shareSid }, shareEnv, repo);
+  const shared = hook("stop-gate.mjs", { session_id: shareSid }, shareEnv, repo);
+  check("stop-gate · a file uncommitted before the session started is left alone", shared.code === 0, `exit ${shared.code} ${oneLine(shared.stderr)}`);
+  write(repo, "mine.md", "mine\n");
+  const mine = hook("stop-gate.mjs", { session_id: shareSid }, shareEnv, repo);
+  const named = mine.stderr.split("\n\n")[0] || "";
+  check("stop-gate · a file the session wrote blocks, and only it is named", mine.code === 2 && /mine\.md/.test(named) && !/notes-of-another-session/.test(named), `exit ${mine.code} ${oneLine(mine.stderr)}`);
+  rmSync(join(repo, "notes-of-another-session.md"));
+  rmSync(join(repo, "mine.md"));
 
   // ---- 3b. the stop-gate trusts the base branch's adoption.json, not the tree's ---------------
   // The worker points commands.gate at a command that fails in the TREE copy; the base copy says
