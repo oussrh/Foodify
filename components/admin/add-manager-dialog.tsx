@@ -11,6 +11,7 @@ import { addRestaurantManager } from '@/app/actions/restaurant-manager-actions'
 import { Button } from '@/components/ui/button'
 import { FormDialog } from '@/components/forms/form-dialog'
 import { PlainField } from '@/components/forms/plain-field'
+import { PasswordTools } from '@/components/forms/password-tools'
 
 /** The People tab's "Add manager": an address, and a password used only if that address is new here. */
 export default function AddManagerDialog({ restaurantId }: { restaurantId: string }) {
@@ -55,7 +56,8 @@ export default function AddManagerDialog({ restaurantId }: { restaurantId: strin
         value={password}
         onChange={setPassword}
         placeholder="At least 6 characters"
-        hint="Only needed if this address is new to Foodify. Someone who already has an account keeps their own password."
+        hint="Only needed if this address is new to Foodify. Someone who already has an account keeps their own password. Generate makes a strong one to copy and hand over."
+        action={<PasswordTools value={password} onChange={setPassword} />}
       />
     </FormDialog>
   )
