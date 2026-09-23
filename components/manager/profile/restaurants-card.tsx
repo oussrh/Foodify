@@ -11,6 +11,10 @@ interface ProfileRestaurant {
   slug: string
 }
 
+/**
+ * The restaurants a manager account is assigned to, each linking to its info page and its menu; a
+ * line in their place when there is none.
+ */
 export function RestaurantsCard({ restaurants }: { restaurants: ProfileRestaurant[] }) {
   return (
     <Card>

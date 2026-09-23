@@ -3,6 +3,7 @@
 // the field is fine.
 import type { FieldError as FieldErrorShape } from "react-hook-form";
 
+/** The dot-and-message under a field that failed validation; renders nothing when there is no error. */
 export default function FieldError({ error }: { error?: FieldErrorShape | undefined }) {
   if (!error) return null;
   return (

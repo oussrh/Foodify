@@ -29,6 +29,10 @@ const schema = dishInput.omit({ calories: true, subcategoryId: true }).extend({
 
 type FormValues = z.infer<typeof schema>;
 
+/**
+ * Creates a dish in one restaurant with its names, details, dietary tags and uploaded image and AR
+ * files; after a success it clears the fields and the uploads for the next dish.
+ */
 export default function CreateDishForm({
   restaurantId,
   subcategories,

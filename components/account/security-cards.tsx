@@ -5,6 +5,10 @@ import MfaCheckbox from '@/components/mfa-checkbox'
 import UpdatePasswordForm from '@/components/update-password-form'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 
+/**
+ * The Account page's two sign-in cards, shared by both portals: the two-factor checkbox, then the
+ * password form.
+ */
 export function SecurityCards({ mfaEnabled }: { mfaEnabled: boolean }) {
   return (
     <>

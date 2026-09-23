@@ -22,6 +22,10 @@ interface TableQrSheetProps {
   tableCount: number
 }
 
+/**
+ * The printable grid of per-table QR codes, with print-all, print-one, CSV export and the table-
+ * count dialog; with no tables set it shows an empty state instead.
+ */
 export default function TableQrSheet({ restaurantId, restaurantName, slug, origin, tableCount }: TableQrSheetProps) {
   const tables = tableNumbers(tableCount)
   /**

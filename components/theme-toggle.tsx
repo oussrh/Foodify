@@ -5,6 +5,10 @@ import { Moon, Sun } from 'lucide-react'
 import { Button, type ButtonProps } from './ui/button'
 import { useClientValue } from './use-client-value'
 
+/**
+ * A button that switches between light and dark mode; it shows the dark-mode icon until mounted, so
+ * the server render and first client render match.
+ */
 export function ThemeToggle({ className, variant = 'ghost', size = 'icon' }: Pick<ButtonProps, 'className' | 'variant' | 'size'>) {
   const { resolvedTheme, setTheme } = useTheme()
   const mounted = useClientValue(() => true, false)

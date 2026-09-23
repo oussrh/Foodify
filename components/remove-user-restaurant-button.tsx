@@ -5,6 +5,10 @@ import { useRouter } from 'next/navigation'
 import { call } from '@/lib/api-client'
 import { toast } from 'sonner'
 
+/**
+ * Unassigns one restaurant from a user by posting the user's full remaining list to
+ * `/api/users/<id>/restaurants`, so `restaurantIds` must be every restaurant they have now.
+ */
 export default function RemoveUserRestaurantButton({
   userId,
   restaurantIds,

@@ -3,6 +3,10 @@
 // of the password it will generate.
 import { AlertTriangle, Shield, Lock, RefreshCw, UserCheck, Clock } from "lucide-react"
 
+/**
+ * What the reset dialog says before the reset: the security notice and the properties of the
+ * password it will generate. All static.
+ */
 export default function ResetIntro() {
   return (
     <>

@@ -9,11 +9,16 @@ import type { Category } from "@/components/category-manager/types";
 import { useCategoryList } from "@/components/category-manager/use-category-list";
 import { useSubcategoryList } from "@/components/category-manager/use-subcategory-list";
 import { useCollapsed } from "@/components/category-manager/use-collapsed";
+import { useCategoryToggles } from "@/components/category-manager/use-category-toggles";
 import AddCategoryCard from "@/components/category-manager/add-category-card";
 import EmptyCategories from "@/components/category-manager/empty-categories";
 import CategoryDndList from "@/components/category-manager/category-dnd-list";
 import SortableCategory from "@/components/category-manager/sortable-category";
 
+/**
+ * The super admin's editor for a restaurant's categories and subcategories: add, rename, reorder by
+ * drag, switch on or off, delete; each change is saved as it is made.
+ */
 export default function AdminCategoryManager({
   initialData,
   restaurantId,
@@ -26,34 +31,11 @@ export default function AdminCategoryManager({
   const subs = useSubcategoryList(categories, setCategories);
   const { collapsedStates, toggleCollapse, collapseAll, expandAll } = useCollapsed(categories);
 
-  const handleToggleCategoryStatus = async (id: string) => {
-    // Note: This would need a backend implementation for category status
-    setCategories(prev =>
-      prev.map(cat =>
-        cat.id === id ? { ...cat, isActive: !cat.isActive } : cat
-      )
-    );
-  };
+  const { toggleCategory: handleToggleCategoryStatus, toggleSub: handleToggleSubStatus } = useCategoryToggles(setCategories);
 
   const handleDeleteCategory = async (id: string) => {
     await deleteCategory(id);
     setCategories(categories.filter((c: Category) => c.id !== id));
-  };
-
-  const handleToggleSubStatus = async (catId: string, subId: string) => {
-    // Note: This would need a backend implementation for subcategory status
-    setCategories(prev =>
-      prev.map(cat =>
-        cat.id === catId
-          ? {
-              ...cat,
-              subcategories: cat.subcategories.map(sub =>
-                sub.id === subId ? { ...sub, isActive: !sub.isActive } : sub
-              ),
-            }
-          : cat
-      )
-    );
   };
 
   const handleDeleteSub = async (catId: string, id: string) => {

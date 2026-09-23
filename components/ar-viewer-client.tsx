@@ -17,6 +17,10 @@ import { ViewerHeader, ViewModeToggle } from '@/components/ar-viewer/viewer-head
 import { CompactControls, DesktopControls } from '@/components/ar-viewer/viewer-controls'
 import { ControlsHint, ModeInfo, ModelLoadedBadge } from '@/components/ar-viewer/viewer-status'
 
+/**
+ * The /ar-viewer page: reads `model`, `name` and `mode` from the URL and builds a model-viewer by
+ * hand in 3D or AR mode. The element is rebuilt whenever the mode switches.
+ */
 export default function ARViewerClient() {
   const searchParams = useSearchParams()
   const modelUrl = searchParams.get('model')

@@ -18,6 +18,10 @@ const DEFAULT_PERIOD: Period = { open: '12:00', close: '23:00' }
 const timeInput =
   'h-9 rounded-md border border-input bg-card px-2 text-sm tnum focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50'
 
+/**
+ * Edits the weekly opening hours and their note: each day open with one or two periods, closed, or
+ * left unset (hidden from guests); a closing time earlier than the opening runs past midnight.
+ */
 export default function HoursEditor({ value, onChange, disabled }: HoursEditorProps) {
   const setDay = (day: DayKey, periods: Period[] | undefined) => {
     const days = { ...value.days }

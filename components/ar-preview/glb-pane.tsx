@@ -17,6 +17,10 @@ interface GlbPaneProps {
   onFullScreen: () => void
 }
 
+/**
+ * The GLB side of the preview dialog: the container the parent fills with model-viewer, its loading
+ * and error overlays, controls, and download / full-screen actions.
+ */
 export function GlbPane({ isLoading, error, containerRef, isAutoRotating, onReset, onToggleAutoRotate, onDownload, onFullScreen }: GlbPaneProps) {
   return (
     <div className="h-full relative bg-background">

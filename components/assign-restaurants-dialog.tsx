@@ -29,6 +29,10 @@ interface Restaurant {
   name: string;
 }
 
+/**
+ * The super admin's dialog for choosing which restaurants a user manages. It fetches the list on
+ * open, and Save replaces the whole assignment with what is checked.
+ */
 export default function AssignRestaurantsDialog({
   userId,
   defaultRestaurantIds,

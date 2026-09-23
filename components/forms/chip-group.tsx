@@ -16,6 +16,10 @@ export interface ChipGroupProps {
   disabled?: boolean | undefined
 }
 
+/**
+ * A multi-select of vocabulary keys as toggle chips, labelled in both languages; the dish form's
+ * dietary and allergen pickers and the settings' dietary options share it.
+ */
 export default function ChipGroup({ id, label, hint, options, value, onChange, disabled }: ChipGroupProps) {
   const toggle = (key: string) => onChange(value.includes(key) ? value.filter((k) => k !== key) : [...value, key])
   return (

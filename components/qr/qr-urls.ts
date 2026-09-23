@@ -5,5 +5,9 @@
 
 export const QR_SIZES = { card: 300, large: 600, download: 1200 } as const
 
+/**
+ * The qrserver.com image URL for a QR code of `url` at a square size in pixels: the design's ink on
+ * white, quiet zone 2, PNG. Nothing is generated locally.
+ */
 export const qrCodeUrl = (url: string, size: number) =>
   `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(url)}&color=1b1a17&bgcolor=ffffff&qzone=2&format=png`

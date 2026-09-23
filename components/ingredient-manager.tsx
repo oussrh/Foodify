@@ -15,6 +15,10 @@ interface IngredientManagerProps {
   ingredients: Ingredient[]
 }
 
+/**
+ * Lists a dish's ingredients and adds, renames and deletes them through dialogs, refreshing the
+ * route after each; a blank French name is saved as the English one.
+ */
 export default function IngredientManager({ dishId, ingredients }: IngredientManagerProps) {
   const [loading, setLoading] = useState(false)
   const [addDialogOpen, setAddDialogOpen] = useState(false)

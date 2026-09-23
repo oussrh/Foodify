@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -19,6 +20,10 @@ const schema = restaurantInput;
 
 type FormValues = RestaurantInput;
 
+/**
+ * The super admin's new-restaurant form; a success clears it and stays on the page, and a failed
+ * create is said in a toast.
+ */
 export default function CreateRestaurantForm() {
   const {
     register,
@@ -49,9 +54,10 @@ export default function CreateRestaurantForm() {
     try {
       await createRestaurant(data);
       reset();
-    } catch (error) {
-      console.error("Failed to create restaurant:", error);
-      // You might want to show an error message to the user here
+    } catch {
+      // Said where the admin is looking, not only logged: a create that failed silently looked
+      // like a form that did nothing.
+      toast.error("Could not create the restaurant. The slug may already be taken; check the fields and try again.");
     }
   };
 

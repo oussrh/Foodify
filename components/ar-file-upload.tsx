@@ -21,6 +21,10 @@ interface ARFileUploadProps {
   onPreview?: (modelUrl: string, modelType: 'usdz' | 'glb') => void
 }
 
+/**
+ * Uploads, previews, downloads and removes a dish's USDZ and GLB models on Cloudinary, in that
+ * restaurant's folder. It reports each URL to the form; it saves nothing itself.
+ */
 export default function ARFileUpload({
   restaurantName,
   currentUsdzUrl,

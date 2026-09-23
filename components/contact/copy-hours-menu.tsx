@@ -8,6 +8,10 @@ import { Copy } from 'lucide-react'
 import { DropdownMenu, DropdownMenuCheckboxItem, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { DAY_KEYS, dayName, type DayKey } from '@/lib/opening-hours'
 
+/**
+ * Copies one day's opening hours to the days picked from a checklist. Nothing is copied until the
+ * "Copy to N days" item is chosen.
+ */
 export default function CopyHoursMenu({ day, disabled, onCopy }: { day: DayKey; disabled?: boolean | undefined; onCopy: (targets: DayKey[]) => void }) {
   const others = DAY_KEYS.filter((d) => d !== day)
   const [open, setOpen] = useState(false)

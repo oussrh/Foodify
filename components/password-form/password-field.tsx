@@ -10,6 +10,10 @@ import FieldError from '@/components/forms/field-error'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
+/**
+ * One password input of the update-password form: its label, a show/hide toggle, the error line,
+ * and whatever the form places beneath it (the requirements list).
+ */
 export default function PasswordField({
   id,
   label,

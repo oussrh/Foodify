@@ -1,31 +1,9 @@
 // components/reset-password/random-password.ts
-// The temporary password an admin reset hands out: one character of each class, the rest at
-// random, shuffled; and the five-point score the dialog reports for it.
+// The five-point score the reset dialog reports for the temporary password it hands out. The
+// password itself comes from lib/password.ts (`crypto.getRandomValues`). It used to be made here
+// with Math.random, under a dialog that told the admin it was cryptographically random.
 
-// Enhanced password generator with better character distribution
-export function generateRandomPassword(length: number = 12): string {
-  const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-  const lowercase = "abcdefghijklmnopqrstuvwxyz"
-  const numbers = "0123456789"
-  const symbols = "!@#$%^&*"
-
-  // Ensure at least one character from each category
-  let password = ""
-  password += uppercase.charAt(Math.floor(Math.random() * uppercase.length))
-  password += lowercase.charAt(Math.floor(Math.random() * lowercase.length))
-  password += numbers.charAt(Math.floor(Math.random() * numbers.length))
-  password += symbols.charAt(Math.floor(Math.random() * symbols.length))
-
-  // Fill the rest randomly
-  const allChars = uppercase + lowercase + numbers + symbols
-  for (let i = 4; i < length; i++) {
-    password += allChars.charAt(Math.floor(Math.random() * allChars.length))
-  }
-
-  // Shuffle the password
-  return password.split('').sort(() => Math.random() - 0.5).join('')
-}
-
+/** A 0-5 score for the reset dialog: one point each for 12+ characters, a capital, a small letter, a digit and a symbol. */
 export function getPasswordStrength(password: string) {
   let score = 0
   if (password.length >= 12) score++

@@ -12,7 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { generateRandomPassword, getPasswordStrength } from "@/components/reset-password/random-password"
+import { getPasswordStrength } from "@/components/reset-password/random-password";
+import { generatePassword } from "@/lib/password";
 import ResetIntro from "@/components/reset-password/reset-intro"
 import NewPasswordPanel from "@/components/reset-password/new-password-panel"
 import ResetFooter from "@/components/reset-password/reset-footer"
@@ -39,7 +40,7 @@ export default function ResetAdminPasswordButton({
     setError(null)
 
     try {
-      const randomPassword = generateRandomPassword(12)
+      const randomPassword = generatePassword(12)
       await resetAdminPassword(id, randomPassword)
       setNewPassword(randomPassword)
       setSuccess(true)

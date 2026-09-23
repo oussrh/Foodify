@@ -36,6 +36,10 @@ interface AvailabilityScreenProps {
   padded?: boolean | undefined
 }
 
+/**
+ * The device apps' sold-out screen: one tap marks a dish sold out or back, shown at once and undone
+ * if the write fails. There is no save button, and rows never reorder.
+ */
 export function AvailabilityScreen({ restaurantName, categories, loose, locale, backHref, padded }: AvailabilityScreenProps) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()

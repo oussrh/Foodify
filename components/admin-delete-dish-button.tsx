@@ -23,6 +23,10 @@ interface AdminDeleteDishButtonProps {
   restaurantId: string
 }
 
+/**
+ * Deletes a dish after a confirm dialog, then goes to the admin portal's dish list for that
+ * restaurant. It is admin-only because of that redirect.
+ */
 export function AdminDeleteDishButton({ dishId, dishName, restaurantId }: AdminDeleteDishButtonProps) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)

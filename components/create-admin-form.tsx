@@ -14,6 +14,7 @@ import { useState } from 'react'
 const schema = adminInput
 type FormValues = AdminInput
 
+/** Creates another super admin account from an email and a password; it clears itself after a success. */
 export default function CreateAdminForm() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [success, setSuccess] = useState(false)

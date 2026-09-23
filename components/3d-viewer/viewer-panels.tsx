@@ -14,6 +14,10 @@ interface ViewerHeaderProps {
   onToggleFullscreen: () => void
 }
 
+/**
+ * The 3D page's top bar: Back closes the window, plus the controls and fullscreen toggles. It
+ * slides out of view when the controls are hidden.
+ */
 export function ViewerHeader({ dishName, showControls, isFullscreen, onToggleControls, onToggleFullscreen }: ViewerHeaderProps) {
   return (
     <div className={`absolute top-0 left-0 right-0 z-20 transition-all duration-300 ${showControls ? 'translate-y-0' : '-translate-y-full'}`}>
@@ -71,6 +75,10 @@ interface ControlsPanelProps {
   onToggleInfo: () => void
 }
 
+/**
+ * The panel in the bottom-right corner with reset, auto-rotate and info toggles and the navigation
+ * help; it slides off-screen when the controls are hidden.
+ */
 export function ControlsPanel({ showControls, isAutoRotating, showInfo, onReset, onToggleAutoRotate, onToggleInfo }: ControlsPanelProps) {
   return (
     <div className={`absolute bottom-8 right-8 transition-all duration-300 ${showControls ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}`}>
@@ -156,6 +164,10 @@ export function ControlsPanel({ showControls, isAutoRotating, showInfo, onReset,
   )
 }
 
+/**
+ * The card in the bottom-left corner naming the dish and describing the preview; it slides away
+ * when not visible rather than unmounting.
+ */
 export function ModelInfoPanel({ dishName, visible }: { dishName: string; visible: boolean }) {
   return (
     <div className={`absolute bottom-8 left-8 transition-all duration-300 ${visible ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'}`}>

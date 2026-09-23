@@ -7,6 +7,10 @@ import { Check, Shield, Copy, Eye, EyeOff, CheckCircle2, Lock, Mail } from "luci
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
+/**
+ * What the admin password-reset dialog shows after the reset: the confirmation, the temporary
+ * password with show and copy, its strength, and next steps.
+ */
 export default function NewPasswordPanel({
   newPassword,
   passwordStrength,

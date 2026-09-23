@@ -12,6 +12,10 @@ interface RestaurantPickerProps {
   basePath: string
 }
 
+/**
+ * Where a staff account covering several restaurants chooses one, each linking to `basePath/<id>`;
+ * an account with none is told to ask for a People-tab assignment.
+ */
 export default function RestaurantPicker({ title, restaurants, basePath }: RestaurantPickerProps) {
   return (
     <main className="mx-auto flex min-h-screen max-w-lg flex-col justify-center gap-4 px-4 py-10">

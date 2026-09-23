@@ -14,6 +14,10 @@ import { useState } from 'react'
 const schema = adminPatch
 export type EditAdminValues = AdminPatch
 
+/**
+ * Changes a super admin's email address, the only field the admin patch allows; the role and the
+ * password are not editable here.
+ */
 export default function EditAdminForm({
   id,
   defaultValues,

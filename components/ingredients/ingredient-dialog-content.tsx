@@ -10,6 +10,10 @@ import { Label } from '@/components/ui/label'
 import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Loader2 } from 'lucide-react'
 
+/**
+ * The shared body of the add and edit ingredient dialogs; the owner holds the draft, and the submit
+ * stays disabled until an English name is typed.
+ */
 export default function IngredientDialogContent({
   title,
   ids,

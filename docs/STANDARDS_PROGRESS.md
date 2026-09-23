@@ -39,13 +39,13 @@ last_verified: "2026-09-23"
 | `api.bareResponse` / `api.unboundedList` / `api.rowReturn` / `api.floatMoney` (the envelope, bounded lists, shaped payloads, money as a string; the repository's probes) | 5 / 2 / 36 / 7 (measured 2026-09-20) | 0 | 0 | hard | API.1 |
 | Import-graph violations (`pnpm run graph`: no-circular, no-orphans, five boundary arrows) | 0 (two of the template's arrows matched nothing) | 0 (every arrow of the map held) | 0 | hard (gate) | CODE.5 |
 | Dead code (`pnpm run dead`, knip: files, dependencies, exports, types) | 0 | 0 | 0 | hard (gate) | CODE.6 |
-| `dup.clones` / `dup.clonedLines` (jscpd at its defaults over app, components, lib, auth.ts, proxy.ts; the repository's probes) | not measured (82 / 1064 on 2026-09-21) | 65 / 832 | falls with every split that removes a copy | ratchet | CODE.12 |
+| `dup.clones` / `dup.clonedLines` (jscpd at its defaults over app, components, lib, auth.ts, proxy.ts; the repository's probes) | not measured (82 / 1064 on 2026-09-21) | 64 / 824 | falls with every split that removes a copy | ratchet | CODE.12 |
 | Console calls on the server paths (`no-console` at error on lib, app, server, auth.ts, proxy.ts, instrumentation.ts) | 13 (measured 2026-09-21; 3 printing an address, 2 a signature) | 0 | 0 | hard (lint script) | OBS.1 |
 | Unit coverage floor, `server/**` (the logger's redaction, the drain) | - | 100 / 100 / 100 / 100 | 100 | hard (`pnpm test`) | TEST.4 |
 | `docs.frontMatter` (documents without front matter) | 2 | 0 | 0 | hard | DOC.1 |
 | `docs.indexDrift` (documents missing from the index) | 1 | 0 | 0 | hard | DOC.3 |
 | Exports without a JSDoc block on `lib/**`, `app/actions/**`, `app/api/**`, `auth.ts`, `proxy.ts` (`jsdoc/require-jsdoc` publicOnly, every exported declaration) | 147 (measured 2026-09-21; 121 under the arrow-only context) | 0 | 0 | hard (lint script) | CODE.7 |
-| Exported components and hooks without a JSDoc block, `components/**` (functions only, not props types; held a directory at a time) | 351 (measured 2026-09-23) | 209 (insights, orders, waiter, menu, shell, admin, dish-form, restaurant-form, category-manager, client-form, upload and ar-viewer held at 0) | 0 | hard on the held directories (lint script) | CODE.7 |
+| Exported components and hooks without a JSDoc block, `components/**` (functions only, not props types) | 236 (measured 2026-09-23; first reported as 351, which counted every `export default function` twice) | 0 | 0 | hard (lint script, the whole folder) | CODE.7 |
 | Living docs with `source_truth` + `last_verified` (DOC-FRESHNESS) | 3/7 dated, 1 with source_truth | 9/9 dated, 6 with source_truth | every doc that describes a file | ratchet (`docs.behindCode`) | DOC.5 |
 | Coverage `lib/**` statements / branches / functions / lines | - | 98.9 / 94.5 / 99.1 / 99.3 (per file: `menu.ts` 88.8 / 85 / 63.6 / 86.2, `totp.ts` 100) | raised, never lowered | `vitest` thresholds, total and changed lines | TEST.4 |
 
@@ -70,6 +70,7 @@ last_verified: "2026-09-23"
 
 ## Log
 
+- 2026-09-23 · **JSDoc: every component held** · The last 94 exported components and hooks documented and the rule's directory list replaced by `components/**`; 0 remain. The starting count is corrected to 236 distinct exports: the audit that reported 351 counted each `export default function` twice (once as a function, once as a default export), and the earlier log lines carry that inflated figure. Drafting the blocks found four real bugs, fixed in the same change (see the changelog).
 - 2026-09-23 · **JSDoc: the forms, the uploads and the AR viewer held** · 71 blocks on `dish-form`, `restaurant-form`, `category-manager`, `client-form`, `upload` and `ar-viewer`; the six directories join the rule. 280 → 209.
 - 2026-09-23 · **JSDoc: menu, shell and admin held** · 31 blocks on the public menu and its cart, the portals' shell and the People tab; the three directories join the rule's list in `eslint.config.mjs`. 311 → 280.
 - 2026-09-23 · **components join the JSDoc rule, a directory at a time** · 351 exported components and hooks in `components/` had no block (measured with the project's rule over the whole tree; 53 props types and 102 `app/` page exports besides, which stay out). `components/insights`, `components/orders` and `components/waiter` documented (40 blocks, each what the component is for) and added to a second `jsdoc/require-jsdoc` block in `eslint.config.mjs`, functions only; 351 → 311. Decision in `ADOPTION_DECISIONS.md` (2026-09-23).

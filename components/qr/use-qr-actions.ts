@@ -30,6 +30,10 @@ function clickDownloadLink(href: string, download: string, target?: string) {
   document.body.removeChild(link)
 }
 
+/**
+ * The menu QR dialog's actions: copy the URL, download the 1200px code as a file, share the menu
+ * (falling back to a copy) and open it in a phone-sized window.
+ */
 export function useQrActions(url: string, restaurantName: string) {
   const [copied, setCopied] = useState(false)
   const [isDownloading, setIsDownloading] = useState(false)

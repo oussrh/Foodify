@@ -26,6 +26,10 @@ const IN_PROGRESS: Record<string, { label: string; variant: BadgeProps['variant'
 
 const MOMENT: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }
 
+/**
+ * The account's recent activity log (email change, password change, two-factor on or off), with a
+ * badge on an email change still awaiting a confirmation.
+ */
 export function ActivityCard({ activity }: { activity: ActivityEntry[] }) {
   return (
     <Card>

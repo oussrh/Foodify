@@ -23,6 +23,10 @@ interface ContactPanelProps {
   disabled?: boolean
 }
 
+/**
+ * The settings form's contact section: phone, address, opening hours and social links, beside a
+ * preview of how guests see them. Hours and social links go back to the form as serialized JSON.
+ */
 export default function ContactPanel({ register, errors, values, onChange, disabled }: ContactPanelProps) {
   const hours = useMemo(() => parseOpeningHours(values.openingHours), [values.openingHours])
   const socialHandles = useMemo(() => parseSocialMedia(values.socialMedia), [values.socialMedia])

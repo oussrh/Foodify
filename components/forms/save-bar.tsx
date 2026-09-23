@@ -9,6 +9,10 @@ import { cn } from '@/lib/utils'
 
 export type SaveStatus = 'idle' | 'saving' | 'saved' | 'error'
 
+/**
+ * The sticky Discard/Save bar of an edit form; it renders itself only while the form is dirty,
+ * saving, or its last save failed, so a caller mounts it unconditionally.
+ */
 export default function SaveBar({
   saveStatus,
   hasUnsavedChanges,

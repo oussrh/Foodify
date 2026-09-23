@@ -27,6 +27,10 @@ interface TableQrCardProps {
   onPrint: () => void
 }
 
+/**
+ * One table's QR card, encoding the menu link with its table number, with Print and Copy;
+ * `excluded` hides it from paper while another table is printed alone.
+ */
 export default function TableQrCard({ restaurantName, slug, origin, table, excluded, onPrint }: TableQrCardProps) {
   const url = tableMenuUrl(origin, slug, table)
   const [copied, setCopied] = useState(false)

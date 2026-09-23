@@ -13,6 +13,10 @@ import { emailChange, type EmailChange } from '@/lib/schemas/user'
 const schema = emailChange
 type FormValues = EmailChange
 
+/**
+ * Starts an email change: the new address takes effect only after the link emailed to the current
+ * address is confirmed. It says so when that email could not be sent.
+ */
 export default function ChangeEmailForm({ disabled = false }: { disabled?: boolean }) {
   const {
     register,

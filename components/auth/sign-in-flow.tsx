@@ -68,6 +68,11 @@ const CONFIG = {
 
 const CODE_TTL = 600
 
+/**
+ * The one sign-in for every portal: password first, then the emailed code if the account has the
+ * second factor on. Between the steps the credentials sit in sessionStorage so the /mfa route can
+ * finish.
+ */
 export default function SignInFlow({ portal, initialStep = 'credentials' }: SignInFlowProps) {
   const cfg = CONFIG[portal]
   const router = useRouter()
