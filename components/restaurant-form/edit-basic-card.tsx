@@ -181,7 +181,7 @@ export default function EditBasicCard(props: Props) {
       <CardContent className="p-6 space-y-6">
         <IdentityFields register={props.register} errors={props.errors} setValue={props.setValue} dietaryOptions={props.dietaryOptions} />
         <LocaleFields register={props.register} setValue={props.setValue} defaultValues={props.defaultValues} currencySymbol={props.currencySymbol} />
-        <TimeZoneField register={props.register} />
+        <TimeZoneField register={props.register} current={props.defaultValues.timeZone ?? 'UTC'} />
         <div className="border-t border-border pt-6">
           <OrderingField
             value={props.orderingEnabled}
