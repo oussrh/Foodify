@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["standards", "adoption", "decisions"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 source_truth: ["abatty.config.json", "docs/ADOPTION_STATE.json", "eslint.config.mjs"]
-last_verified: "2026-09-21"
+last_verified: "2026-09-23"
 ---
 
 # Adoption decisions
