@@ -31,6 +31,7 @@ export default defineConfig({
         'lib/auth-guard.ts', // needs a session and Postgres: the phase-10 integration suite
         'lib/restaurant-loader.ts', // the same guard over the same database: tests/integration/order-board.test.ts
         'lib/insights-loader.ts', // grouped SQL over the same database: tests/integration/insights.test.ts
+        'lib/insights-queries.ts', // the loader's SQL, split out of it: the same integration suite
         'lib/emails/**', // HTML templates: presentational
       ],
       thresholds: {

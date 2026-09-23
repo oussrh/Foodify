@@ -15,12 +15,13 @@ export default async function RestaurantInsightsPage({
   const grain = parseGrain((await searchParams).grain)
   const data = await loadInsights(id, grain)
   if (!data) redirect('/manager/restaurants')
+  const { restaurant, ...report } = data
   return (
     <InsightsScreen
-      restaurantName={data.restaurant.name}
-      ordering={data.restaurant.orderingEnabled}
+      restaurantName={restaurant.name}
+      ordering={restaurant.orderingEnabled}
       grain={grain}
-      buckets={data.buckets}
+      {...report}
       basePath={`/manager/restaurants/${id}/insights`}
     />
   )

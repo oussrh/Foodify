@@ -19,6 +19,9 @@ const bucket = (over: Partial<InsightsBucket> = {}): InsightsBucket => ({
   staffOrders: 0,
   acceptSeconds: null,
   serveSeconds: null,
+  prepSeconds: null,
+  cancelledOrders: 0,
+  revenueMinor: 0,
   ...over,
 })
 
@@ -79,6 +82,15 @@ describe('totalsOf', () => {
     expect(totalsOf([]).acceptSeconds).toBeNull()
   })
 
+  it('adds up revenue and cancellations, and weights the preparing time like the others', () => {
+    const totals = totalsOf([
+      bucket({ guestOrders: 3, cancelledOrders: 1, revenueMinor: 2450, prepSeconds: 600 }),
+      bucket({ staffOrders: 1, revenueMinor: 1000, prepSeconds: 1200 }),
+    ])
+    expect(totals).toMatchObject({ cancelledOrders: 1, revenueMinor: 3450 })
+    expect(totals.prepSeconds).toBeCloseTo((3 * 600 + 1200) / 4, 5)
+  })
+
   it('ignores a bucket that timed nothing, rather than reading it as zero', () => {
     const timed = bucket({ guestOrders: 2, acceptSeconds: 300 })
     const untimed = bucket({ guestOrders: 5, acceptSeconds: null })
@@ -136,6 +148,14 @@ describe('bucketStarts', () => {
     expect(days).toHaveLength(30)
     expect(days[0]!.toISOString()).toBe('2026-08-24T00:00:00.000Z')
     expect(days.at(-1)!.toISOString()).toBe('2026-09-22T00:00:00.000Z')
+  })
+
+  it('reaches further back when asked for more, ending on the same bucket', () => {
+    // The report reads two windows at once: the one shown and the one it is compared with.
+    const both = bucketStarts('week', now, 24)
+    expect(both).toHaveLength(24)
+    expect(both.at(-1)!.toISOString()).toBe(bucketStarts('week', now).at(-1)!.toISOString())
+    expect(both[12]!.toISOString()).toBe(windowStart('week', now).toISOString())
   })
 
   it('steps a month at a time without a month-end rolling over', () => {
