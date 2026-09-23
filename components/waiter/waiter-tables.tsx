@@ -28,6 +28,10 @@ interface WaiterTablesProps {
   onOpenTable: (table: string) => void
 }
 
+/**
+ * The room: a tile per table from two polls, what is cooking and what is ready, with ready tables
+ * listed at the top and a buzz when one comes up.
+ */
 export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
   const alert = useReadyAlert()
   const pwa = useStaffPwa()

@@ -24,6 +24,10 @@ interface ColumnChartProps extends ChartData {
   label: string
 }
 
+/**
+ * Counts over time as columns, the series stacked in slot order from the baseline, with a tooltip
+ * naming the hovered column and its total.
+ */
 export function ColumnChart({ axis, titles, series, totals, label }: ColumnChartProps) {
   const [measure, frame] = useChartFrame(axis.length)
   const stackOf = (index: number) => series.reduce((sum, s) => sum + (s.values[index] ?? 0), 0)

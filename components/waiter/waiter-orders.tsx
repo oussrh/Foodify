@@ -59,6 +59,10 @@ function OrderCard({ order, now, ready, onDeliver, busy }: { order: BoardOrder; 
   )
 }
 
+/**
+ * Every open order on the floor as one list, ready first and then oldest first, with the carry-out
+ * button on the ready ones.
+ */
 export function WaiterOrders({ restaurant }: { restaurant: { id: string; code: string; name: string } }) {
   const now = useMinuteClock()
   const open = useOrderBoard(restaurant.id, 'open', silent)

@@ -93,6 +93,28 @@ const config = [
       'jsdoc/no-types': 'error',
     },
   },
+  {
+    // The same rule over the components, one directory at a time as each is documented: every
+    // exported component and hook says what it is for where it is used (an IDE hover shows a
+    // /** */ block, not the file's // header). Functions only: a component's props interface is
+    // read field by field, and its name already says whose props they are. Add a directory here
+    // in the commit that documents it; the list only grows.
+    files: ['components/insights/**/*.{ts,tsx}', 'components/orders/**/*.{ts,tsx}', 'components/waiter/**/*.{ts,tsx}'],
+    ignores: ['**/*.test.ts'],
+    plugins: { jsdoc },
+    rules: {
+      'jsdoc/require-jsdoc': [
+        'error',
+        {
+          publicOnly: true,
+          enableFixer: false,
+          require: { FunctionDeclaration: true, FunctionExpression: false, ArrowFunctionExpression: false, ClassDeclaration: true, MethodDefinition: false },
+          contexts: ['ExportNamedDeclaration > VariableDeclaration > VariableDeclarator > ArrowFunctionExpression', 'ExportNamedDeclaration > VariableDeclaration > VariableDeclarator > FunctionExpression', 'ExportDefaultDeclaration'],
+        },
+      ],
+      'jsdoc/no-types': 'error',
+    },
+  },
   { files: ['**/*.{js,jsx,mjs,ts,tsx,mts,cts}'], rules: SHAPE_RULE_CONFIG },
   { files: ['**/*.tsx'], rules: { 'max-lines-per-function': COMPONENT_LINES } },
   // Tests and fixtures describe a behaviour per block, not a function per concern; a spec's

@@ -7,6 +7,7 @@ import { ChartCard } from '@/components/insights/charts/chart-card'
 import { LineChart } from '@/components/insights/charts/line-chart'
 import { kitchenChart } from '@/components/insights/insights-series'
 
+/** The three waits a table sits through (to accept, to prepare, to serve) as lines over time. */
 export function KitchenSection({ buckets, grain }: { buckets: InsightsBucket[]; grain: Grain }) {
   const chart = kitchenChart(buckets, grain)
   return (

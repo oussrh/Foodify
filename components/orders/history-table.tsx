@@ -28,6 +28,10 @@ function minutes(value: number | null) {
   return value === null ? <span className="text-muted-foreground">—</span> : <>{value} min</>
 }
 
+/**
+ * Recent orders as a record: what each was, where it got to, and how long it waited to be taken on
+ * and to go out; a row opens the details sheet.
+ */
 export default function HistoryTable({ orders, money }: { orders: BoardOrder[]; money: Money }) {
   const [openId, setOpenId] = useState<string | null>(null)
   // A history does not tick: the clock is read once, at mount, rather than on every render.

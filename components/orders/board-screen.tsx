@@ -12,6 +12,10 @@ interface BoardScreenProps {
   portal: 'admin' | 'manager' | 'kitchen'
 }
 
+/**
+ * The kitchen board as a portal page shows it: the board with the restaurant's money and the way
+ * back into that portal.
+ */
 export default function BoardScreen({ restaurant, portal }: BoardScreenProps) {
   const money: Money = {
     locale: restaurant.defaultLocale === 'fr' ? 'fr' : 'en',

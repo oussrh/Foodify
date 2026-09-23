@@ -19,6 +19,10 @@ export interface ChartGeometry {
   centre: (index: number) => number
 }
 
+/**
+ * The chart's measured width, the column under the pointer and the column geometry; the ref setter
+ * is returned apart from the geometry the chart draws with.
+ */
 export function useChartFrame(columns: number) {
   // A callback ref held in state rather than `useRef`: the geometry below is read while rendering,
   // and a ref may not be.

@@ -41,6 +41,10 @@ function Group({ title, children }: { title: string; children: React.ReactNode }
   )
 }
 
+/**
+ * The Insights tab both portals render: scores against the window before, then the charts, with the
+ * bucket table folded underneath as their text alternative.
+ */
 export function InsightsScreen(props: InsightsScreenProps) {
   const { restaurantName, ordering, grain, buckets, previous, money } = props
   const now = totalsOf(buckets)

@@ -34,6 +34,10 @@ interface WaiterReviewProps {
   error: string | null
 }
 
+/**
+ * The read-back before an order goes to the kitchen: the table, every line editable, a note per
+ * dish and one for the whole order.
+ */
 export function WaiterReview(props: WaiterReviewProps) {
   const { open, onOpenChange, table, lines, subtotal, money, locale, note, onNote, onQuantity, onLineNote, onSend, sending, error } = props
   const name = (line: CartLineView) => (locale === 'fr' ? line.dish.nameFr : line.dish.nameEn)

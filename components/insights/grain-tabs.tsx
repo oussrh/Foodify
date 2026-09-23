@@ -13,6 +13,10 @@ interface GrainTabsProps {
   current: Grain
 }
 
+/**
+ * Daily / Weekly / Monthly / Yearly as links: the grain lives in the URL, so a report on screen is
+ * a report that can be sent.
+ */
 export function GrainTabs({ basePath, current }: GrainTabsProps) {
   return (
     <div className="flex gap-1 rounded-md border border-border bg-card p-1" role="group" aria-label="Report period">

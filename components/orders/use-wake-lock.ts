@@ -19,6 +19,10 @@ export interface WakeLock {
   toggle: () => void
 }
 
+/**
+ * Keeps the tablet's screen on while the board is open, taking the lock again whenever the page
+ * comes back into view.
+ */
 export function useWakeLock(): WakeLock {
   // A browser fact, not state: read on the first client render rather than set from an effect.
   const supported = useClientValue(() => 'wakeLock' in navigator, false)

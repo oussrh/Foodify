@@ -19,6 +19,10 @@ interface ChartShellProps extends ChartData {
   children: React.ReactNode
 }
 
+/**
+ * What a time chart draws around its marks: the measured box, grid, hover bands, labels and
+ * tooltip. Nothing is drawn until the box's real width is known.
+ */
 export function ChartShell({ measure, frame, ticks, y, label, unit, totals, axis, titles, series, children }: ChartShellProps) {
   return (
     <div ref={measure} className="relative" style={{ minHeight: PLOT.height }}>

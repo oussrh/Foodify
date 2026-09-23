@@ -28,6 +28,10 @@ interface WaiterOrderProps {
   onBack: () => void
 }
 
+/**
+ * Taking an order at one table: the menu to build it, the review sheet to read it back, and the
+ * send; the cart is kept per table.
+ */
 export default function WaiterOrder({ restaurantId, restaurantName, table, categories, loose, money, locale, onBack }: WaiterOrderProps) {
   const router = useRouter()
   // One cart per table: the key carries the table, so two tables never share an order.

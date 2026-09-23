@@ -26,6 +26,10 @@ interface BoardControlsProps {
 
 const CONTROL = 'h-12 min-w-12 px-3'
 
+/**
+ * This tablet's own switches (install, keep the screen awake, sound, refresh), kept apart from the
+ * view switch because they change this device only.
+ */
 export default function BoardControls({ loading, onRefresh, soundOn, onToggleSound, wakeLock, pwa }: BoardControlsProps) {
   return (
     <>

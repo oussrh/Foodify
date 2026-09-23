@@ -19,6 +19,7 @@ function Moment({ label, at, after }: { label: string; at: string | null; after?
   )
 }
 
+/** When an order was placed, taken on and served, with the waits between them already worked out. */
 export default function OrderTimeline({ order }: { order: BoardOrder }) {
   const timings = orderTimings(order)
   return (

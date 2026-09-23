@@ -12,6 +12,10 @@ interface BoardLinkCardProps {
   restaurantName: string
 }
 
+/**
+ * The kitchen board's address, repeated on the Orders tab where someone reading the history is most
+ * likely to want it.
+ */
 export default function BoardLinkCard({ url, restaurantName }: BoardLinkCardProps) {
   return (
     <Card>

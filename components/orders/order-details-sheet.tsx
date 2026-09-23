@@ -25,6 +25,10 @@ interface OrderDetailsSheetProps {
   readOnly?: boolean
 }
 
+/**
+ * One order in full: every line and note, the table, the wait, the total, the number to call, and
+ * the moves staff can make, with cancel behind a second tap.
+ */
 export default function OrderDetailsSheet({ order, onClose, onAction, busy, money, now, readOnly = false }: OrderDetailsSheetProps) {
   // Cancel asks twice: the second tap is the answer, and closing the sheet forgets the question.
   const [confirmingCancel, setConfirmingCancel] = useState(false)

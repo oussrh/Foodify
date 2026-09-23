@@ -30,6 +30,10 @@ interface ScoreStripProps {
   against: string
 }
 
+/**
+ * One group of headline figures, each with its move against the window before said as a figure, an
+ * arrow and a colour.
+ */
 export function ScoreStrip({ scores, against }: ScoreStripProps) {
   const cols = scores.length >= 4 ? 'lg:grid-cols-4' : scores.length === 3 ? 'lg:grid-cols-3' : ''
   return (

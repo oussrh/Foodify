@@ -22,6 +22,10 @@ interface ReadyDrawerProps {
   busyId: string | null
 }
 
+/**
+ * What is up on the pass, behind a handle carrying the count; an order leaves it when a waiter says
+ * they carried it out.
+ */
 export default function ReadyDrawer({ orders, now, onDeliver, busyId }: ReadyDrawerProps) {
   const count = orders.length
 

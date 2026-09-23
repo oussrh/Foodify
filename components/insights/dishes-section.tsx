@@ -37,6 +37,10 @@ interface DishesSectionProps {
   money: Money
 }
 
+/**
+ * The menu dish by dish: the funnel from opening to ordering, the most opened and most ordered, and
+ * the dishes opened but rarely ordered.
+ */
 export function DishesSection({ totals, dishes, ordering, money }: DishesSectionProps) {
   const opened = topBy(dishes, (d) => d.views).map((d) => ({
     key: d.id,

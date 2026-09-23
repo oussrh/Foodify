@@ -13,6 +13,10 @@ interface OrderLineListProps {
   lines: BoardOrder['lines']
 }
 
+/**
+ * An order's lines in compact form (how many of each dish, and the note asked for on it) for the
+ * ready drawer and the waiter's list.
+ */
 export default function OrderLineList({ lines }: OrderLineListProps) {
   return (
     <ul className="pt-2 text-[13px]">

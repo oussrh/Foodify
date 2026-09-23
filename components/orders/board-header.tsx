@@ -36,6 +36,10 @@ interface BoardHeaderProps {
 
 const CONTROL = 'h-12 min-w-12 px-3'
 
+/**
+ * The board's one strip of chrome: where it is, how many orders are open, whether the server
+ * answers, the ready drawer and this device's switches.
+ */
 export default function BoardHeader({ restaurantName, view, onView, openCount, online, loading, onRefresh, soundOn, onToggleSound, readyDrawer, wakeLock, pwa, backHref, soldOutHref }: BoardHeaderProps) {
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">

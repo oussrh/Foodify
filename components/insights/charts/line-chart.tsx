@@ -35,6 +35,10 @@ interface LineChartProps extends ChartData {
   unit?: string
 }
 
+/**
+ * Averages over time as lines on one axis; a column with no figure breaks the line rather than
+ * dropping it to zero.
+ */
 export function LineChart({ axis, titles, series, label, unit }: LineChartProps) {
   const [measure, frame] = useChartFrame(axis.length)
   const all = series.flatMap((s) => s.values).filter((v): v is number => v !== null)
