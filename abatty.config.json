@@ -81,36 +81,14 @@
     "envModule": "(^|/)env\\.[cm]?[jt]s$|^instrumentation\\.ts$",
     "exclude": [],
     "hard": [],
-    "ratchet": [
-      "size.overRaw"
-    ]
+    "ratchet": ["size.overRaw"],
+    "enable": []
   },
   "lintOnEdit": true,
-  "lintExtensions": [
-    ".ts",
-    ".tsx",
-    ".js",
-    ".jsx",
-    ".mjs"
-  ],
+  "lintExtensions": [".ts", ".tsx", ".js", ".jsx", ".mjs"],
   "maxStopBlocks": 6,
   "maxSessionsPerPhase": 2,
-  "phases": [
-    0,
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13
-  ],
+  "phases": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
   "stack": "next",
-  "abatty": "0.3.3"
+  "abatty": "0.5.1"
 }

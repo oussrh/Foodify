@@ -96,9 +96,13 @@ The database is the suite's own. `pnpm e2e` is `scripts/ci/e2e.mjs`: in CI it ru
 the Postgres service the job has migrated and seeded; locally it takes `E2E_DATABASE_URL` when set,
 else the `e2e` database of the same throwaway container the integration suite uses
 (`scripts/ci/test-db.mjs`, port 5499), migrates and seeds it (the seed only adds what is missing),
-and serves the build against it. Only without Docker does it fall back to the database `.env`
-names, and says so: the suite writes accounts and orders, and a spec reading a row someone last
-saved there fails for a reason that is not in the code. Arguments pass through to Playwright
+and serves the build against it. Without Docker or `E2E_DATABASE_URL` it refuses to run rather
+than fall back to the database `.env` names: the suite writes accounts and orders, and a spec
+reading a row someone last saved there fails for a reason that is not in the code. The gate
+(abatty 0.5.1) holds the same line for both local suites: with a `.env` naming `DATABASE_URL`
+and no `TEST_DATABASE_URL` in the shell, it defers the database and browser suites to CI and
+says so. Set `TEST_DATABASE_URL=postgresql://test:test@localhost:5499/test` in the environment
+to run them before a push. Arguments pass through to Playwright
 (`pnpm e2e e2e/menu.spec.ts --project=phone`).
 
 ## Integration suite

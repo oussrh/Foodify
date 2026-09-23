@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-22"
+last_verified: "2026-09-23"
 ---
 
 # Lessons
@@ -15,6 +15,22 @@ last_verified: "2026-09-22"
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
+
+## 2026-09-23 · A validation error on a field nobody can see is a save that silently does nothing
+
+Two saves were broken and nobody knew. A restaurant whose cover style had never been set could
+not save any of its settings: the form default passed the column through a type cast, so `NULL`
+reached the form as `null`, the schema refused it, and the error sat on a hidden input. A dish
+saved without calories could never be edited again: an empty number box read with
+`valueAsNumber` is `NaN`, not `undefined`, and the schema refused that too. In both, the save
+bar went on saying "You have unsaved changes", as if the button had not been pressed. They were
+found only when a browser test pressed Save and read the row back.
+
+Generalise it as: every value a form can hold must be one its schema accepts, and a refused
+save must say so where the person is looking. A cast (`as 'a' | 'b' | undefined`) over a
+nullable column is a promise the type system takes on trust; narrow the value instead. A hidden
+input and an empty number box are the two places a form holds a value nobody typed. And a test
+that clicks Save has not tested saving until it reads what was stored.
 
 ## 2026-09-22 · The same event wants a different medium in each room it lands in
 
@@ -80,8 +96,11 @@ show up; a timestamp undoes itself and needs nobody. Ask of any boolean that tur
 forget. If the honest answer is "nothing good, and silently", it wants a deadline instead.
 
 The cost is a boundary to choose, and that choice should be written down where it is made rather
-than assumed: this one ends the service day at 04:00 UTC, not midnight, because a kitchen closing
-at 23:00 local is still serving after midnight UTC and a dish must never return mid-service.
+than assumed: this one ends the service day at 04:00, not midnight, because a kitchen closing
+at 23:00 is still serving after midnight and a dish must never return mid-service. It was 04:00
+UTC until 2026-09-23, which in New York is midnight — the boundary was written down, and the
+clock it was written in was the next thing to be wrong. It is now the restaurant's own 04:00
+(`Restaurant.timeZone`).
 
 ## 2026-09-22 · A test that reads the code's own list proves only that the list agrees with itself
 
