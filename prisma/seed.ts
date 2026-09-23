@@ -169,6 +169,8 @@ async function seedRestaurant() {
       currency: "EUR",
       currencySymbol: "€",
       orderingEnabled: true,
+      // Tables for the waiter's room and the per-table QR sheet; the browser suite takes orders at 1 and 2.
+      tableCount: 6,
     },
   });
   console.log("✅ Restaurant:", restaurant.name);
