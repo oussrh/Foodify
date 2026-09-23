@@ -40,6 +40,10 @@ const COVER_FITS: { key: CoverStyle; label: string }[] = [
   { key: 'repeat', label: 'Tile' },
 ]
 
+/**
+ * Settings → Branding: logo and cover, colour, typeface and menu theme, beside a live phone
+ * preview. Image uploads are saved at once; everything else waits for the form's save.
+ */
 export default function BrandingPanel({ restaurantId, restaurantSlug, values, onChange, disabled }: BrandingPanelProps) {
   const persist = (field: 'logoUrl' | 'coverImageUrl') => async (url: string) => {
     await updateRestaurant(restaurantId, { [field]: url })

@@ -24,6 +24,10 @@ const schema = passwordChange
 type FormValues = z.infer<typeof schema>
 type Status = 'idle' | 'saving' | 'saved' | 'failed'
 
+/**
+ * The signed-in user's password change for both portals' Account pages: checks the current password
+ * server-side, says the result in place and clears the fields on success.
+ */
 export default function UpdatePasswordForm() {
   const {
     register,

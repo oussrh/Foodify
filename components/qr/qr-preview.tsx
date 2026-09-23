@@ -16,6 +16,10 @@ interface QrSizePreviewProps {
   onChange: (mode: PreviewMode) => void
 }
 
+/**
+ * The QR dialog's code preview with a Small/Large switch; the caller holds the mode, and the large
+ * one is fetched at the 600px size.
+ */
 export function QrSizePreview({ url, restaurantName, previewMode, onChange }: QrSizePreviewProps) {
   return (
     <div className="text-center space-y-4">
@@ -64,6 +68,10 @@ interface MenuUrlPanelProps {
   onPreview: () => void
 }
 
+/**
+ * The menu URL as text, with a copy button and a Preview link; shows a confirmation while `copied`
+ * is true, which the caller clears.
+ */
 export function MenuUrlPanel({ url, copied, onCopy, onPreview }: MenuUrlPanelProps) {
   return (
     <div className="p-4 border border-border rounded-md">

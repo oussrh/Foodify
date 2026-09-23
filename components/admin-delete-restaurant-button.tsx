@@ -22,6 +22,10 @@ interface AdminDeleteRestaurantButtonProps {
   restaurantName: string
 }
 
+/**
+ * Deletes a whole restaurant after a confirm dialog, then goes to the admin restaurant list. It
+ * cannot be undone.
+ */
 export function AdminDeleteRestaurantButton({ restaurantId, restaurantName }: AdminDeleteRestaurantButtonProps) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)

@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
@@ -20,6 +21,11 @@ type Restaurant = { id: string; name: string };
 const schema = clientInput;
 type FormValues = ClientInput;
 
+/**
+ * The super admin's form for a new restaurant manager: an address, a password, and existing
+ * restaurants to assign or the name of a new one created with it. A failed create is said in a
+ * toast.
+ */
 export default function CreateClientForm({
   restaurants,
 }: {
@@ -47,8 +53,10 @@ export default function CreateClientForm({
       setSuccess(true);
       reset();
       setTimeout(() => setSuccess(false), 3000);
-    } catch (error) {
-      console.error('Error creating client:', error);
+    } catch {
+      // Said where the admin is looking, not only logged: a create that failed silently looked
+      // like a form that did nothing.
+      toast.error('Could not create that manager. The address may already have an account; check the fields and try again.');
     } finally {
       setIsSubmitting(false);
     }

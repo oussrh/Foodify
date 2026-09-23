@@ -2,6 +2,10 @@
 // The two slots the 3D page fills in its <model-viewer>: the loading poster and the error
 // panel, both on the same dark ground.
 
+/**
+ * Builds the `slot="poster"` element model-viewer shows until the model is revealed. It is plain
+ * DOM, not React, because the viewer element is built by hand.
+ */
 export function createPoster(): HTMLDivElement {
   const poster = document.createElement('div')
   poster.setAttribute('slot', 'poster')
@@ -23,6 +27,10 @@ export function createPoster(): HTMLDivElement {
   return poster
 }
 
+/**
+ * Builds the `slot="error"` element that model-viewer shows when the model itself fails to load. It
+ * is plain DOM, not React, because the viewer element is built by hand.
+ */
 export function createErrorSlot(): HTMLDivElement {
   const errorSlot = document.createElement('div')
   errorSlot.setAttribute('slot', 'error')

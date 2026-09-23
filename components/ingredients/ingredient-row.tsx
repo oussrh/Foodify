@@ -13,6 +13,10 @@ export interface Ingredient {
   nameFr: string
 }
 
+/**
+ * One ingredient in the list: its rank, its English name and the French one only when it differs,
+ * and edit and delete buttons shown on hover or focus.
+ */
 export default function IngredientRow({
   ingredient,
   index,

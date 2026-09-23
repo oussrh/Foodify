@@ -52,6 +52,10 @@ const schema = dishInput.omit({ subcategoryId: true, calories: true }).extend({
   calories: data.calories ? Number(data.calories) : undefined,
 }))
 
+/**
+ * Edits an existing dish behind the sticky save bar and the save shortcuts; a save refreshes the
+ * route, and new defaults from the server reset both the fields and the uploaded assets.
+ */
 export default function EditDishForm({
   id,
   defaultValues,

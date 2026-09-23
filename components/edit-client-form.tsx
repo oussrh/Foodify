@@ -25,6 +25,10 @@ export type EditClientValues = ClientPatch
 // One empty list, so an unset field keeps the same identity across renders (the memos below depend on it).
 const NO_RESTAURANTS: string[] = []
 
+/**
+ * The super admin's edit of a restaurant manager: the email and the set of assigned restaurants,
+ * which a save replaces as a whole; the password is not changed here.
+ */
 export default function EditClientForm({
   id,
   defaultValues,

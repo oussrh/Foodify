@@ -5,6 +5,7 @@
 import { Button } from '@/components/ui/button'
 import { ChefHat, Plus } from 'lucide-react'
 
+/** The dashed placeholder shown while a dish has no ingredient; its button opens the add dialog. */
 export default function EmptyIngredients({ onAdd }: { onAdd: () => void }) {
   return (
     <div className="text-center py-12 border-2 border-dashed border-border rounded-md bg-muted">

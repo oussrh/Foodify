@@ -23,6 +23,10 @@ interface QRCodeDisplayProps {
   restaurantName: string
 }
 
+/**
+ * The restaurant's menu QR code shown small, with a button that opens the full QR dialog: sizes,
+ * the URL, download, share and the setup guides.
+ */
 export default function QRCodeDisplay({ url, restaurantName }: QRCodeDisplayProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [previewMode, setPreviewMode] = useState<PreviewMode>('small')

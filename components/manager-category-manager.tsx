@@ -1,20 +1,21 @@
 "use client";
 
-import {
-  toggleCategoryStatus,
-  toggleSubcategoryStatus,
-} from "@/app/actions/menu-actions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import type { Category } from "@/components/category-manager/types";
 import { useCategoryList } from "@/components/category-manager/use-category-list";
 import { useSubcategoryList } from "@/components/category-manager/use-subcategory-list";
 import { useCollapsed } from "@/components/category-manager/use-collapsed";
+import { useCategoryToggles } from "@/components/category-manager/use-category-toggles";
 import AddCategoryCard from "@/components/category-manager/add-category-card";
 import EmptyCategories from "@/components/category-manager/empty-categories";
 import CategoryDndList from "@/components/category-manager/category-dnd-list";
 import SortableCategory from "@/components/category-manager/sortable-category";
 
+/**
+ * The manager portal's menu structure for one restaurant: add, rename, reorder and switch
+ * categories and subcategories on or off; there is no delete here.
+ */
 export default function ManagerCategoryManager({
   initialData,
   restaurantId,
@@ -27,38 +28,7 @@ export default function ManagerCategoryManager({
   const subs = useSubcategoryList(categories, setCategories);
   const { collapsedStates, toggleCollapse, collapseAll, expandAll } = useCollapsed(categories);
 
-  const handleToggleCategoryStatus = async (id: string) => {
-    try {
-      await toggleCategoryStatus(id);
-      setCategories(prev =>
-        prev.map(cat =>
-          cat.id === id ? { ...cat, isActive: !cat.isActive } : cat
-        )
-      );
-    } catch (error) {
-      console.error('Failed to toggle category status:', error);
-    }
-  };
-
-  const handleToggleSubStatus = async (catId: string, subId: string) => {
-    try {
-      await toggleSubcategoryStatus(subId);
-      setCategories(prev =>
-        prev.map(cat =>
-          cat.id === catId
-            ? {
-                ...cat,
-                subcategories: cat.subcategories.map(sub =>
-                  sub.id === subId ? { ...sub, isActive: !sub.isActive } : sub
-                ),
-              }
-            : cat
-        )
-      );
-    } catch (error) {
-      console.error('Failed to toggle subcategory status:', error);
-    }
-  };
+  const { toggleCategory: handleToggleCategoryStatus, toggleSub: handleToggleSubStatus } = useCategoryToggles(setCategories);
 
   return (
     <div className="space-y-8">

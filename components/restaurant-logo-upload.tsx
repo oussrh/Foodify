@@ -19,6 +19,10 @@ interface RestaurantLogoUploadProps {
   disabled?: boolean
 }
 
+/**
+ * Uploads, previews, downloads and removes a restaurant's logo; an upload is saved at once when
+ * `restaurantId` is given, but a removal only clears the form value.
+ */
 export default function RestaurantLogoUpload({
   restaurantId,
   restaurantSlug,

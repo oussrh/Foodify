@@ -21,6 +21,10 @@ const FILTERS: { key: FontCategory | 'all'; label: string }[] = [
   { key: 'display', label: 'Display' },
 ]
 
+/**
+ * Picks the menu's typeface from `BRAND_FONTS`, each option drawn in its own face with the
+ * restaurant's name. Choosing the default reports an empty family and URL.
+ */
 export default function FontPicker({ value, onChange, sample, disabled }: FontPickerProps) {
   const [filter, setFilter] = useState<FontCategory | 'all'>('all')
 

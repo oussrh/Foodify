@@ -21,6 +21,10 @@ interface ImageUploadProps {
   onPreview?: (imageUrl: string) => void
 }
 
+/**
+ * Uploads a dish photo from the browser to Cloudinary under the restaurant's folder and hands back
+ * its URL, or an empty string on remove; shows a notice instead when uploads are not configured.
+ */
 export default function ImageUpload({
   restaurantName,
   currentImageUrl,

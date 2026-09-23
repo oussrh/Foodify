@@ -6,6 +6,10 @@
 import { useState, type RefObject } from 'react'
 import type { ModelViewer } from '@/components/model-viewer/element'
 
+/**
+ * The <model-viewer> turntable: starts on, toggles by flipping the live element's auto-rotate
+ * attribute, and resets the rotation; the 3D page and the preview dialog share it.
+ */
 export function useAutoRotate(modelViewerRef: RefObject<ModelViewer | null>) {
   const [isAutoRotating, setIsAutoRotating] = useState(true)
 

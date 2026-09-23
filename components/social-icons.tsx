@@ -26,6 +26,10 @@ function Glyph({ children, ...props }: IconProps) {
   )
 }
 
+/**
+ * The Instagram glyph, stroked like a Lucide icon (the Lucide 0.525 shape) so `className` sizes and
+ * colours it the same way.
+ */
 export function Instagram(props: IconProps) {
   return (
     <Glyph {...props}>
@@ -36,6 +40,10 @@ export function Instagram(props: IconProps) {
   )
 }
 
+/**
+ * The Facebook glyph, stroked like a Lucide icon (the Lucide 0.525 shape) so `className` sizes and
+ * colours it the same way.
+ */
 export function Facebook(props: IconProps) {
   return (
     <Glyph {...props}>
@@ -44,6 +52,10 @@ export function Facebook(props: IconProps) {
   )
 }
 
+/**
+ * The Twitter bird glyph, stroked like a Lucide icon (the Lucide 0.525 shape) so `className` sizes
+ * and colours it the same way.
+ */
 export function Twitter(props: IconProps) {
   return (
     <Glyph {...props}>
@@ -64,6 +76,7 @@ function Solid({ children, ...props }: IconProps) {
   )
 }
 
+/** The TikTok mark, solid in currentColor on the 24-unit grid. */
 export function TikTok(props: IconProps) {
   return (
     <Solid {...props}>
@@ -72,6 +85,7 @@ export function TikTok(props: IconProps) {
   )
 }
 
+/** The YouTube mark, solid in currentColor on the 24-unit grid. */
 export function YouTube(props: IconProps) {
   return (
     <Solid {...props}>
@@ -80,6 +94,7 @@ export function YouTube(props: IconProps) {
   )
 }
 
+/** The Pinterest mark, solid in currentColor on the 24-unit grid. */
 export function Pinterest(props: IconProps) {
   return (
     <Solid {...props}>
@@ -88,6 +103,7 @@ export function Pinterest(props: IconProps) {
   )
 }
 
+/** The Snapchat mark, solid in currentColor on the 24-unit grid. */
 export function Snapchat(props: IconProps) {
   return (
     <Solid {...props}>
@@ -96,6 +112,7 @@ export function Snapchat(props: IconProps) {
   )
 }
 
+/** The WhatsApp mark, solid in currentColor on the 24-unit grid. */
 export function WhatsApp(props: IconProps) {
   return (
     <Solid {...props}>
@@ -104,6 +121,7 @@ export function WhatsApp(props: IconProps) {
   )
 }
 
+/** The Tripadvisor mark, solid in currentColor on the 24-unit grid. */
 export function Tripadvisor(props: IconProps) {
   return (
     <Solid {...props}>

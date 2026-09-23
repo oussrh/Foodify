@@ -6,6 +6,7 @@ import { Key, Loader2, CheckCircle2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { DialogFooter } from "@/components/ui/dialog"
 
+/** The reset dialog's footer: Cancel and Reset Password until the reset succeeds, then a single Done. */
 export default function ResetFooter({
   success,
   loading,

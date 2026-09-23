@@ -4,6 +4,7 @@
 // code up and promote it, and the file's technical details. All static.
 import { Camera, CheckCircle, Eye, Globe, Info, Mail, MessageSquare, Printer, Smartphone, Sparkles, Star, Users, Zap } from 'lucide-react'
 
+/** The QR dialog's static panel of what the menu gives the guest and what it gives the restaurant. */
 export function FeaturesGrid() {
   return (
     <div className="grid md:grid-cols-2 gap-4">
@@ -109,6 +110,10 @@ export function InstructionsGrid() {
   )
 }
 
+/**
+ * Static copy describing the downloaded QR file (PNG, 1200×1200); written by hand, so keep it in
+ * step with QR_SIZES.download in qr-urls.ts.
+ */
 export function TechnicalInfo() {
   return (
     <div className="p-4 bg-muted border border-border rounded-md">

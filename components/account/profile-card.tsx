@@ -31,6 +31,10 @@ function Row({ term, children }: { term: string; children: React.ReactNode }) {
   )
 }
 
+/**
+ * The Account page's read-only facts: address and whether it is verified, role, creation date, last
+ * sign-in. The Change email link shows only when the portal passes where to go.
+ */
 export function ProfileCard({ email, emailVerified, role, createdAt, lastLogin, changeEmailHref }: ProfileCardProps) {
   return (
     <Card>

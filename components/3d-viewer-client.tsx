@@ -10,6 +10,10 @@ import { createErrorSlot, createPoster } from '@/components/3d-viewer/slots'
 import { ErrorScreen, LoadingScreen, NoModelScreen } from '@/components/3d-viewer/screens'
 import { ControlsPanel, ModelInfoPanel, ShowControlsButton, ViewerHeader } from '@/components/3d-viewer/viewer-panels'
 
+/**
+ * The standalone 3D page: reads `model` and `name` from the URL, loads the model-viewer script and
+ * builds the element by hand in its container.
+ */
 export default function ThreeDViewerClient() {
   const searchParams = useSearchParams()
   const modelUrl = searchParams.get('model')

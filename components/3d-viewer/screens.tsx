@@ -5,6 +5,7 @@
 import { Button } from '@/components/ui/button'
 import { AlertCircle, ArrowLeft, Loader2, RotateCcw } from 'lucide-react'
 
+/** What the 3D page shows when the URL carries no `model`: a message and a Go Back that closes the window. */
 export function NoModelScreen() {
   return (
     <div className="min-h-screen bg-linear-to-br from-background to-muted flex items-center justify-center">
@@ -25,6 +26,7 @@ export function NoModelScreen() {
   )
 }
 
+/** The full-page state while the model-viewer script loads; it names the dish being prepared. */
 export function LoadingScreen({ dishName }: { dishName: string }) {
   return (
     <div className="min-h-screen bg-linear-to-br from-background to-muted flex items-center justify-center">
@@ -46,6 +48,10 @@ export function LoadingScreen({ dishName }: { dishName: string }) {
   )
 }
 
+/**
+ * The full-page state when the viewer script fails to load: the message, a Retry that reloads the
+ * page, and a Go Back that closes the window.
+ */
 export function ErrorScreen({ error }: { error: string }) {
   return (
     <div className="min-h-screen bg-linear-to-br from-background to-muted flex items-center justify-center">

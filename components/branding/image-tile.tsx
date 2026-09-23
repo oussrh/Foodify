@@ -21,6 +21,10 @@ interface ImageTileProps {
   disabled?: boolean | undefined
 }
 
+/**
+ * Uploads, replaces or removes the logo or the cover by picking a file or dropping one. With
+ * `onPersist` the change is saved as soon as the upload finishes, not with the form.
+ */
 export default function ImageTile({ kind, label, value, restaurantSlug, onChange, onPersist, disabled }: ImageTileProps) {
   const inputId = useId()
   const inputRef = useRef<HTMLInputElement>(null)

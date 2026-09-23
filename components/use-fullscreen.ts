@@ -3,6 +3,10 @@
 // Whether the document is fullscreen, and the toggle; shared by the AR and 3D viewer pages.
 import { useEffect, useState } from 'react'
 
+/**
+ * Whether the document is fullscreen, and a toggle for the whole page; used by the AR and 3D viewer
+ * pages. Failures are logged, not thrown.
+ */
 export function useFullscreen() {
   const [isFullscreen, setIsFullscreen] = useState(false)
 

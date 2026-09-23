@@ -19,6 +19,10 @@ import type { UseFormRegister } from 'react-hook-form'
 
 export type { EditRestaurantValues } from '@/components/restaurant-form/edit-restaurant-schema'
 
+/**
+ * The Settings form across its General, Contact and Branding tabs, saved as one; uploads persist on
+ * their own without dirtying it, and a refused save switches to the tab holding the error.
+ */
 export default function EditRestaurantForm({
   id,
   defaultValues,

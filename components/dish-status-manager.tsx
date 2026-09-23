@@ -14,6 +14,10 @@ interface DishStatusManagerProps {
   isMostPurchased: boolean
 }
 
+/**
+ * The dish editor's two switches, live on the menu and the Popular tag; each flips its flag on the
+ * server at once and refreshes the route.
+ */
 export default function DishStatusManager({ 
   dishId, 
   isActive, 

@@ -5,6 +5,10 @@
 import { ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
+/**
+ * Goes back in the browser history, or to the home page when there is no history (a page opened
+ * directly); the not-found page uses it.
+ */
 export default function GoBackButton() {
   const router = useRouter()
   const handleGoBack = () => {

@@ -5,6 +5,10 @@
 import { Button } from '@/components/ui/button'
 import { Camera, Download, Info } from 'lucide-react'
 
+/**
+ * The USDZ side of the preview dialog. There is no in-browser viewer for the format, so it explains
+ * where the file opens and offers a download.
+ */
 export function UsdzPane({ onDownload }: { onDownload: () => void }) {
   return (
     <div className="h-full flex items-center justify-center">

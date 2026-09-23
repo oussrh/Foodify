@@ -11,6 +11,10 @@ interface TablesPanelProps {
   origin: string
 }
 
+/**
+ * The Tables tab both portals render: the page header, then the per-table QR sheet; the pages only
+ * differ in how they load the restaurant.
+ */
 export function TablesPanel({ restaurant, origin }: TablesPanelProps) {
   return (
     <div className="flex flex-col gap-2">

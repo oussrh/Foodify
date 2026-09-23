@@ -20,6 +20,10 @@ interface GoogleFontsSelectorProps {
   disabled?: boolean
 }
 
+/**
+ * Picks the menu font from a curated Google Fonts list or a pasted fonts.googleapis.com URL,
+ * loading each picked font into the page for its preview; a URL from any other host is ignored.
+ */
 export default function GoogleFontsSelector({ 
   currentFontUrl = '', 
   onFontChange, 

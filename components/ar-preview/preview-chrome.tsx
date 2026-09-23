@@ -14,6 +14,7 @@ interface PreviewHeaderProps {
   onClose: () => void
 }
 
+/** The preview dialog's header: the dish name, the format badge and the close button. */
 export function PreviewHeader({ dishName, modelType, onClose }: PreviewHeaderProps) {
   return (
     <DialogHeader className="p-6 pb-4 border-b border-border">
@@ -52,6 +53,10 @@ export function PreviewHeader({ dishName, modelType, onClose }: PreviewHeaderPro
   )
 }
 
+/**
+ * The preview dialog's footer, which says what the format is for: AR Quick Look for USDZ, an
+ * interactive 3D preview for GLB.
+ */
 export function PreviewFooter({ modelType }: { modelType: ArModelType }) {
   return (
     <div className="p-4 border-t border-border bg-muted/30">

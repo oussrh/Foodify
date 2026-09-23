@@ -23,6 +23,10 @@ const subscribeModelViewer = (onChange: () => void) => {
   return () => {}
 }
 
+/**
+ * The dialog that previews an uploaded AR model: GLB in an interactive model-viewer, USDZ as a
+ * download, since browsers cannot render it. Full screen opens the /3d-viewer page.
+ */
 export default function ARModelPreview({
   isOpen,
   onClose,

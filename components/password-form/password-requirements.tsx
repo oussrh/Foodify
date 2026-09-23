@@ -6,6 +6,10 @@ import { cn } from '@/lib/utils'
 
 export type PasswordCheck = { label: string; test: boolean }
 
+/**
+ * The five new-password rules and whether a value meets each; a separate copy of passwordChange in
+ * lib/schemas/user, so change the two together.
+ */
 export function passwordChecks(password: string): PasswordCheck[] {
   return [
     { label: 'At least 8 characters', test: password.length >= 8 },
@@ -16,6 +20,10 @@ export function passwordChecks(password: string): PasswordCheck[] {
   ]
 }
 
+/**
+ * Lists the new-password rules under the field as it is typed, a check for each one met; a guide
+ * only, the schema is what refuses a password.
+ */
 export function PasswordRequirements({ password }: { password: string }) {
   const checks = passwordChecks(password)
   return (

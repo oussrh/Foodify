@@ -3,6 +3,10 @@
 // under it. The AR-model and dish-image uploads open with it.
 import type { LucideIcon } from 'lucide-react'
 
+/**
+ * The centred icon, title and one-line lead that open an upload section (the dish image and AR
+ * model uploads).
+ */
 export default function SectionIntro({ icon: Icon, title, description }: { icon: LucideIcon; title: string; description: string }) {
   return (
     <div className="space-y-3 text-center">

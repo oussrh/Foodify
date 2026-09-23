@@ -32,6 +32,10 @@ export function staffScope(pathname: string): string | null {
   return null
 }
 
+/**
+ * A staff app's install state and install prompt; in production it also registers `staff-sw.js` for
+ * the current path's own scope, and nothing outside the staff paths.
+ */
 export function useStaffPwa(): StaffPwa {
   const [prompt, setPrompt] = useState<InstallEvent | null>(null)
   // How the board was opened is a browser fact; installing it during the session is the event's.

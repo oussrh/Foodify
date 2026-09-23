@@ -19,6 +19,10 @@ interface RestaurantCoverUploadProps {
   disabled?: boolean
 }
 
+/**
+ * Uploads, previews, downloads and removes a restaurant's cover image; with a `restaurantId` the
+ * upload and the removal are saved at once, without one only the form hears of them.
+ */
 export default function RestaurantCoverUpload({
   restaurantId,
   restaurantSlug,
