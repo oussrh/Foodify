@@ -5,6 +5,7 @@
 import { Button } from '@/components/ui/button'
 import { AlertCircle, ArrowLeft, Loader2, RefreshCw } from 'lucide-react'
 
+/** The full page shown when the viewer was opened without a model URL; its only action closes the window. */
 export function NoModelScreen() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-background to-muted">
@@ -28,6 +29,10 @@ export function NoModelScreen() {
   )
 }
 
+/**
+ * The full page shown while the viewer script loads, with the dish name and a progress bar. The
+ * progress is the script loader's simulated figure, not a real download measure.
+ */
 export function LoadingScreen({ dishName, loadingProgress }: { dishName: string; loadingProgress: number }) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-purple-900/20 via-background to-indigo-900/20 dark:from-purple-900 dark:via-black dark:to-indigo-900">
@@ -54,6 +59,10 @@ export function LoadingScreen({ dishName, loadingProgress }: { dishName: string;
   )
 }
 
+/**
+ * The full page shown when the viewer fails to load: the message, Retry (which reloads the page)
+ * and Go Back (which closes the window).
+ */
 export function ErrorScreen({ error }: { error: string }) {
   return (
     <div className="flex items-center justify-center min-h-screen bg-linear-to-br from-destructive/20 via-background to-muted">

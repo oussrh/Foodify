@@ -19,6 +19,11 @@ export type CreateDishValues = {
   allergens?: string[] | undefined
 }
 
+/**
+ * Builds what the create form sends to createDish: an uploaded image URL wins over the hidden
+ * field; a missing category becomes null, missing model URLs become '', and missing flags and lists
+ * become false and [].
+ */
 export function createDishPayload(data: CreateDishValues, calories: number | undefined, assets: DishAssetUrls) {
   return {
     nameEn: data.nameEn,

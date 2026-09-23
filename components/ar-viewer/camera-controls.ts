@@ -26,6 +26,10 @@ function steppedDistance(distance: string, direction: 'in' | 'out') {
   return direction === 'in' ? `${Math.max(50, parseInt(distance) - 10)}%` : `${Math.min(200, parseInt(distance) + 10)}%`
 }
 
+/**
+ * Moves the camera one step in or out by changing only the orbit radius, ten points at a time
+ * between 50% and 200%. An 'auto' radius counts as 100%, and a toast confirms each step.
+ */
 export function zoomCamera(modelViewer: ModelViewer, direction: 'in' | 'out') {
   const currentOrbit = modelViewer.getAttribute('camera-orbit') || DEFAULT_ORBIT
   // A part the attribute lacks is the default orbit's.

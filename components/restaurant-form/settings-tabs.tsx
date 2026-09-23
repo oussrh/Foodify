@@ -30,6 +30,10 @@ export const TABS: { key: SettingsTab; label: string; fields: (keyof EditRestaur
   },
 ]
 
+/**
+ * The settings form's tab strip: a dot marks a tab holding a failing field, and the trailing link
+ * opens the public menu at the saved slug, not the one being edited.
+ */
 export default function SettingsTabs({
   activeTab,
   errors,

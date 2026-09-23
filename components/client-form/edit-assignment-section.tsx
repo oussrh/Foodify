@@ -11,6 +11,10 @@ import EditAssignedList from './edit-assigned-list'
 
 type Restaurant = { id: string; name: string }
 
+/**
+ * The Restaurant Assignment section of the edit-client form: the assignment dialog and the list of
+ * current assignments. It owns the dialog's open state because the list's empty state opens it too.
+ */
 export default function EditAssignmentSection({
   restaurants,
   selected,

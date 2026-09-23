@@ -7,6 +7,10 @@ import ARFileUpload from '@/components/ar-file-upload'
 import ImageUpload from '@/components/image-upload'
 import type { DishAssets } from './use-dish-assets'
 
+/**
+ * The dish's photo and AR model upload cards, bound to the form's asset state; an uploaded photo's
+ * URL also goes to the caller so the form's hidden imageUrl field follows it.
+ */
 export default function DishMediaUploads({
   restaurantName,
   assets,

@@ -20,6 +20,10 @@ type RegisteredField = {
   placeholder?: string
 }
 
+/**
+ * The dish price input, in steps of 0.01, bound to whatever registration its form passes, with its
+ * error line.
+ */
 export function DishPriceField({ field, error, disabled, placeholder }: RegisteredField) {
   return (
     <div className="space-y-2">
@@ -41,6 +45,10 @@ export function DishPriceField({ field, error, disabled, placeholder }: Register
   )
 }
 
+/**
+ * The optional calories input with its error line. It takes the form's own registration, because
+ * the create form registers calories as text and the edit form as a number.
+ */
 export function DishCaloriesField({ field, error, disabled, placeholder }: RegisteredField) {
   return (
     <div className="space-y-2">
@@ -60,6 +68,10 @@ export function DishCaloriesField({ field, error, disabled, placeholder }: Regis
   )
 }
 
+/**
+ * The dish's category select, listing the restaurant's subcategories by English name; its empty
+ * option, No category, leaves the dish without one.
+ */
 export function DishCategorySelect({
   field,
   subcategories,
@@ -92,6 +104,7 @@ export function DishCategorySelect({
   )
 }
 
+/** The checkbox that marks a dish as popular (isMostPurchased), under a Special Options heading. */
 export function DishPopularCheckbox({ field, disabled }: { field: UseFormRegisterReturn; disabled: boolean }) {
   return (
     <div className="space-y-3">

@@ -36,6 +36,11 @@ async function logCameraPermission() {
   }
 }
 
+/**
+ * Decides which AR this device can open: WebXR when the browser supports an immersive-ar session,
+ * else Quick Look on iPhone/iPad or Scene Viewer on Android, else none. It also logs the camera
+ * permission first.
+ */
 export async function detectArSupport(): Promise<ArSupport> {
   await logCameraPermission()
 

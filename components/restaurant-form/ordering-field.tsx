@@ -15,6 +15,10 @@ interface OrderingFieldProps {
   onTableCount: (next: number) => void
 }
 
+/**
+ * The online-ordering switch and the room's table count, which the Tables tab prints one QR code
+ * per table for. The count is clamped to 0-300 and kept while ordering is off.
+ */
 export default function OrderingField({ value, onChange, tableCount, onTableCount }: OrderingFieldProps) {
   return (
     <div className="space-y-5">

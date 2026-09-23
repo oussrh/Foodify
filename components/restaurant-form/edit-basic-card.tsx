@@ -163,6 +163,11 @@ function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omi
   )
 }
 
+/**
+ * The settings form's General card: identity, dietary options, currency (its symbol read-only,
+ * submitted through hidden inputs), default language and the ordering switch. Every change marks
+ * the form dirty.
+ */
 export default function EditBasicCard(props: Props) {
   return (
     <Card className="border-border">

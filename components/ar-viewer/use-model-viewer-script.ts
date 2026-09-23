@@ -6,6 +6,10 @@
 import { useEffect, useState } from 'react'
 import { MODEL_VIEWER_SCRIPT_SRC } from '@/components/model-viewer/element'
 
+/**
+ * Adds the <model-viewer> script to the page and reports its load. The progress is simulated and
+ * stops at 90% until the script loads; the script is removed on unmount.
+ */
 export function useModelViewerScript() {
   const [isLoading, setIsLoading] = useState(true)
   const [scriptError, setScriptError] = useState<string | null>(null)

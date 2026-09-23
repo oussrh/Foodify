@@ -24,6 +24,10 @@ interface DropZoneProps {
   children: ReactNode
 }
 
+/**
+ * The dashed drop zone of the AR model, logo and cover uploads: a hidden file input behind a full-
+ * size label, with the progress or the prompt as its children.
+ */
 export function DropZone({ id, accept, disabled, dimmed, onChange, children }: DropZoneProps) {
   return (
     <div className="border-2 border-dashed border-border rounded-md p-8 text-center hover:border-border-strong hover:bg-muted transition-colors group">
@@ -53,6 +57,10 @@ interface UploadProgressProps {
   narrow?: boolean
 }
 
+/**
+ * The pane a drop zone shows while a file uploads: a spinner, the label, a progress bar and the
+ * rounded percentage.
+ */
 export function UploadProgress({ label, progress, tone = 'muted', narrow }: UploadProgressProps) {
   const t = TONES[tone]
   return (
@@ -83,6 +91,10 @@ interface UploadPromptProps {
   tone?: ZoneTone
 }
 
+/**
+ * The pane a drop zone shows while idle: the upload icon, the title, the browse-or-drop line and a
+ * hint of what the file is for.
+ */
 export function UploadPrompt({ title, hint, tone = 'muted' }: UploadPromptProps) {
   const t = TONES[tone]
   return (

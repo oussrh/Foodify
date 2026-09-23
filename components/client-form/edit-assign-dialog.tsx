@@ -22,6 +22,11 @@ type Restaurant = { id: string; name: string }
 
 export type AssignmentChanges = { added: string[]; removed: string[] }
 
+/**
+ * The Manage Assignments dialog of the edit-client form: search, an assigned-only filter, a count
+ * of pending additions and removals, and one row per restaurant. The caller holds the open state,
+ * so the empty list can open it too.
+ */
 export default function EditAssignDialog({
   open,
   onOpenChange,

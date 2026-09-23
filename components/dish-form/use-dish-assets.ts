@@ -7,6 +7,10 @@ import { useCallback, useState } from 'react'
 export type DishAssetUrls = { imageUrl?: string | undefined; usdzUrl?: string | undefined; glbUrl?: string | undefined }
 export type PreviewModel = { url: string; type: 'usdz' | 'glb' }
 
+/**
+ * Holds a dish form's image, USDZ and GLB URLs beside its fields, plus the model open for preview.
+ * The upload components set them; resetAssets restores given URLs but leaves the preview alone.
+ */
 export function useDishAssets(initial: DishAssetUrls) {
   const [usdzUrl, setUsdzUrl] = useState(initial.usdzUrl || '')
   const [glbUrl, setGlbUrl] = useState(initial.glbUrl || '')

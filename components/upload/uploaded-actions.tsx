@@ -14,6 +14,10 @@ interface UploadedActionsProps {
   removeDisabled?: boolean
 }
 
+/**
+ * The Preview, Download and Remove row under an uploaded AR model, logo or cover; Remove has its
+ * own disabled flag so it can be held while an upload is in flight.
+ */
 export function UploadedActions({ onPreview, onDownload, onRemove, disabled, removeDisabled }: UploadedActionsProps) {
   return (
     <div className="flex flex-wrap items-center gap-2">

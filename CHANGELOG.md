@@ -12,6 +12,8 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Changed
 
+- JSDoc on the forms (`dish-form`, `restaurant-form`, `category-manager`, `client-form`), the uploads (`upload`) and the AR viewer (`ar-viewer`): 71 blocks, several saying what a caller would otherwise get wrong — the viewer's load progress is simulated, `useArSupport` cannot tell "not yet known" from "unsupported", a subcategory name saves on blur, the dietary options limit what the public menu shows. Lint holds the six directories; 209 exported components remain, counted in `docs/STANDARDS_PROGRESS.md`.
+
 - JSDoc on `components/menu` (the public menu and the guest's cart), `components/shell` (the portals' shell, headers, lists and row menus) and `components/admin` (the People tab): 31 blocks, and lint now holds the three directories; 280 exported components remain undocumented, counted in `docs/STANDARDS_PROGRESS.md`. The order endpoint's doc comment now says what the code does for a dish that is off the menu or sold out: 409 `unavailable` with the dishes and their reason, not the 400 it claimed.
 
 - The browser suite drives what a manager changes, which it had only ever opened: `manager-menu.spec.ts` creates a dish, reprices it and deletes it, reading each step back on the public menu; `manager-settings.spec.ts` saves the General settings and reloads them, and adds a waiter on the People tab who then signs in and is removed; `account.spec.ts` turns the second factor off and signs in on the password alone, and changes a password (the new one works, the old one is refused). They run on a restaurant of their own (`e2e/manager.ts`), so the seeded menu the other specs read is never changed. Writing them found the two bugs above.

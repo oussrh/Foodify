@@ -19,6 +19,10 @@ interface DishImageZoneProps {
   onChoose: () => void
 }
 
+/**
+ * The dish photo's drag-and-drop area and its Choose Image button, switching to a progress bar
+ * while the file uploads; the drag state and handlers belong to the caller.
+ */
 export function DishImageZone({ isDragOver, isUploading, progress, inputRef, onChange, onDragOver, onDragLeave, onDrop, onChoose }: DishImageZoneProps) {
   return (
     <div

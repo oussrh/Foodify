@@ -45,7 +45,7 @@ last_verified: "2026-09-23"
 | `docs.frontMatter` (documents without front matter) | 2 | 0 | 0 | hard | DOC.1 |
 | `docs.indexDrift` (documents missing from the index) | 1 | 0 | 0 | hard | DOC.3 |
 | Exports without a JSDoc block on `lib/**`, `app/actions/**`, `app/api/**`, `auth.ts`, `proxy.ts` (`jsdoc/require-jsdoc` publicOnly, every exported declaration) | 147 (measured 2026-09-21; 121 under the arrow-only context) | 0 | 0 | hard (lint script) | CODE.7 |
-| Exported components and hooks without a JSDoc block, `components/**` (functions only, not props types; held a directory at a time) | 351 (measured 2026-09-23) | 280 (insights, orders, waiter, menu, shell and admin held at 0) | 0 | hard on the held directories (lint script) | CODE.7 |
+| Exported components and hooks without a JSDoc block, `components/**` (functions only, not props types; held a directory at a time) | 351 (measured 2026-09-23) | 209 (insights, orders, waiter, menu, shell, admin, dish-form, restaurant-form, category-manager, client-form, upload and ar-viewer held at 0) | 0 | hard on the held directories (lint script) | CODE.7 |
 | Living docs with `source_truth` + `last_verified` (DOC-FRESHNESS) | 3/7 dated, 1 with source_truth | 9/9 dated, 6 with source_truth | every doc that describes a file | ratchet (`docs.behindCode`) | DOC.5 |
 | Coverage `lib/**` statements / branches / functions / lines | - | 98.9 / 94.5 / 99.1 / 99.3 (per file: `menu.ts` 88.8 / 85 / 63.6 / 86.2, `totp.ts` 100) | raised, never lowered | `vitest` thresholds, total and changed lines | TEST.4 |
 
@@ -70,6 +70,7 @@ last_verified: "2026-09-23"
 
 ## Log
 
+- 2026-09-23 · **JSDoc: the forms, the uploads and the AR viewer held** · 71 blocks on `dish-form`, `restaurant-form`, `category-manager`, `client-form`, `upload` and `ar-viewer`; the six directories join the rule. 280 → 209.
 - 2026-09-23 · **JSDoc: menu, shell and admin held** · 31 blocks on the public menu and its cart, the portals' shell and the People tab; the three directories join the rule's list in `eslint.config.mjs`. 311 → 280.
 - 2026-09-23 · **components join the JSDoc rule, a directory at a time** · 351 exported components and hooks in `components/` had no block (measured with the project's rule over the whole tree; 53 props types and 102 `app/` page exports besides, which stay out). `components/insights`, `components/orders` and `components/waiter` documented (40 blocks, each what the component is for) and added to a second `jsdoc/require-jsdoc` block in `eslint.config.mjs`, functions only; 351 → 311. Decision in `ADOPTION_DECISIONS.md` (2026-09-23).
 - 2026-09-23 · **scoreboard re-read against the 2026-09-22 baseline** · `docs.behindCode` found this document, `README.md`, `ADOPTION_DECISIONS.md` and `TESTING.md` older than their cited files. No floor moved today; the rows caught up with moves already made: gap-analysis 81/100 over 75 checks (abatty 0.3.3), enforced share 73% (46/63), `lib/**` coverage 98.9 / 94.5 / 99.1 / 99.3, `dup.clones` / `dup.clonedLines` 65 / 832, integration tests 65, and `valid.utcDay` (VALID.5, new in abatty 0.3) at 0. The other three documents were re-read: the index and the decisions log state nothing the version pin changed; the testing document gained the two loader exclusions and the `.claude/**` discovery exclusion.

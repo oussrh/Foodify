@@ -4,6 +4,10 @@
 // with the message the component shows, or null when the file passes.
 import type { ArModelType } from '@/components/upload/targets'
 
+/**
+ * A byte count as the size the upload messages quote, in binary units (1024), to two decimals: "1.5
+ * MB", "0 Bytes".
+ */
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return '0 Bytes'
   const k = 1024

@@ -7,6 +7,10 @@ import { AlertCircle, FileImage, ImageIcon, Sparkles, Zap } from 'lucide-react'
 import { restaurantFolderName } from '@/components/upload/targets'
 import { ConfigurationNotice } from '@/components/upload/status-notices'
 
+/**
+ * The requirements and tips under the dish image zone: formats, size and dimension limits, photo
+ * advice, and the restaurant's dishes folder.
+ */
 export function DishImageRequirements({ restaurantName }: { restaurantName: string }) {
   return (
     <div className="p-6 border border-border rounded-md">
@@ -55,6 +59,10 @@ export function DishImageRequirements({ restaurantName }: { restaurantName: stri
   )
 }
 
+/**
+ * The whole dish image upload as shown when the browser upload is not configured: a heading and the
+ * notice naming the two variables to set.
+ */
 export function DishImageUnavailable() {
   return (
     <div className="space-y-6">

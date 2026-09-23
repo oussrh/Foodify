@@ -17,6 +17,10 @@ import type { DragEndEvent } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import type { Category } from "./types";
 
+/**
+ * The drag-and-drop context the category cards are reordered in; a drag starts after 5px. It passes
+ * React's id to dnd-kit so the server and client renders agree.
+ */
 export default function CategoryDndList({
   categories,
   onDragEnd,

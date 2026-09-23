@@ -160,6 +160,11 @@ function LocaleFields({ register, setValue }: Omit<Props, "errors" | "dietaryOpt
   );
 }
 
+/**
+ * The create-restaurant form's Basic Information card: identity fields, the dietary options
+ * offered, currency and default language. Picking a currency also fills its symbol, which stays
+ * editable here.
+ */
 export default function CreateBasicCard(props: Props) {
   return (
     <Card className="border-border">

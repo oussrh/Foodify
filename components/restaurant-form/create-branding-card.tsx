@@ -16,6 +16,11 @@ import RestaurantCoverUpload from "@/components/restaurant-cover-upload";
 import GoogleFontsSelector from "@/components/google-fonts-selector";
 import { Palette, ImageIcon, Monitor } from "lucide-react";
 
+/**
+ * The create-restaurant form's branding card: logo and cover uploads, the two brand colours, the
+ * Google font and the cover style. Uploads and the font write their URLs into the form through
+ * setValue.
+ */
 export default function CreateBrandingCard({
   register,
   setValue,

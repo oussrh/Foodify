@@ -9,6 +9,10 @@ import { Building2, Check, Plus, X } from 'lucide-react'
 
 type Restaurant = { id: string; name: string }
 
+/**
+ * One restaurant in the edit-client assignment dialog: its name, whether it is assigned, whether
+ * that differs from when the form opened, and the Assign or Remove button.
+ */
 export default function EditAssignRow({
   restaurant,
   isAssigned,

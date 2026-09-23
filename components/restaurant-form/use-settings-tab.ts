@@ -5,6 +5,10 @@ import { useCallback, useState } from 'react'
 import { useClientValue } from '@/components/use-client-value'
 import { TABS, type SettingsTab } from './settings-tabs'
 
+/**
+ * The settings form's active section, mirrored in `?tab=` with replaceState so a reload or a shared
+ * link lands on it; an unknown or missing value falls back to General.
+ */
 export function useSettingsTab() {
   // The active tab lives in the URL so a reload (or a shared link) lands on the same section.
   const urlTab = useClientValue(() => new URLSearchParams(window.location.search).get('tab'), null)

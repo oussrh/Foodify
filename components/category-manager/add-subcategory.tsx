@@ -9,6 +9,10 @@ import { Input } from "@/components/ui/input";
 import { Plus } from "lucide-react";
 import type { Names, SubDrafts } from "./types";
 
+/**
+ * The add-subcategory block at the foot of an open category card. Its draft names are held by the
+ * parent, keyed by category, so each card keeps its own draft; both names are required.
+ */
 export default function AddSubcategory({
   categoryId,
   subDrafts,

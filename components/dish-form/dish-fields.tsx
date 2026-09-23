@@ -13,6 +13,10 @@ import FieldError from '@/components/forms/field-error'
 
 type Bilingual = { en: string; fr: string }
 
+/**
+ * The dish's English and French names side by side, each with its error line; both dish forms use
+ * it, and the create form adds placeholders.
+ */
 export function DishNameFields({
   nameEn,
   nameFr,
@@ -61,6 +65,10 @@ export function DishNameFields({
   )
 }
 
+/**
+ * The dish's optional English and French descriptions side by side; both dish forms use it, and the
+ * create form adds placeholders.
+ */
 export function DishDescriptionFields({
   descriptionEn,
   descriptionFr,

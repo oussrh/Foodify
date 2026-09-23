@@ -18,6 +18,10 @@ interface ViewerHeaderProps {
   onToggleFullscreen: () => void
 }
 
+/**
+ * The viewer's top bar: Back closes the window, the dish name carries its mode badge and, in AR,
+ * which platform viewer is ready, then share and fullscreen. It slides away when the controls hide.
+ */
 export function ViewerHeader({ dishName, viewMode, arMode, showControls, isFullscreen, onShare, onToggleFullscreen }: ViewerHeaderProps) {
   return (
     <div className={`absolute top-0 left-0 right-0 z-20 p-4 transition-all duration-300 ${
@@ -107,6 +111,10 @@ interface ViewModeToggleProps {
   onSwitch: (mode: ViewMode) => void
 }
 
+/**
+ * The 3D View / AR View switch under the header. It only reports the chosen mode; the caller
+ * switches the viewer. It hides along with the controls.
+ */
 export function ViewModeToggle({ viewMode, showControls, onSwitch }: ViewModeToggleProps) {
   return (
     <div className={`absolute top-20 left-1/2 transform -translate-x-1/2 w-max z-20 transition-all duration-300 ${

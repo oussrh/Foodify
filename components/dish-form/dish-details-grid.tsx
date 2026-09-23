@@ -24,6 +24,11 @@ export type DishDetailsGridProps = {
   disabled: boolean
 }
 
+/**
+ * The Price and Details block of both dish forms: price, calories, category, the popular flag, the
+ * dietary and allergen pickers limited to the restaurant's options, and the hidden image URL. Each
+ * form registers its own fields.
+ */
 export default function DishDetailsGrid({ price, calories, subcategoryId, imageUrl, isMostPurchased, subcategories, tags, disabled }: DishDetailsGridProps) {
   return (
     <>

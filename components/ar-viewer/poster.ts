@@ -3,6 +3,10 @@
 // one for 3D mode, with the line that says which model is coming.
 import type { ViewMode } from '@/components/model-viewer/element'
 
+/**
+ * Builds the element for the <model-viewer>'s poster slot, shown while the model loads: a spinner
+ * on a dark ground for AR, on a light one for 3D, with a line naming the mode.
+ */
 export function createPoster(viewMode: ViewMode): HTMLDivElement {
   const poster = document.createElement('div')
   poster.setAttribute('slot', 'poster')
