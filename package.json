@@ -17,7 +17,7 @@
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "test:changed": "vitest run --coverage --changed origin/main --passWithNoTests",
-    "e2e": "playwright test",
+    "e2e": "node scripts/ci/e2e.mjs",
     "test:integration": "node scripts/ci/integration.mjs",
     "contrast": "vitest run test/contrast.test.ts",
     "format:check": "prettier --check --end-of-line auto .",

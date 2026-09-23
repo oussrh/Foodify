@@ -160,7 +160,7 @@ CLOUDINARY_API_SECRET="..."
 ## Testing & Quality
 
 - `pnpm test`: Vitest, colocated `*.test.ts`, the `lib/**` and `server/**` coverage floors pinned in `vitest.config.ts` (raised with the measurement, never lowered; `docs/TESTING.md`).
-- `pnpm test:integration`: `tests/integration/**` on a real Postgres in rolled-back transactions (the ORM is not mocked); `pnpm e2e`: Playwright + axe on the production build.
+- `pnpm test:integration`: `tests/integration/**` on a real Postgres in rolled-back transactions (the ORM is not mocked); `pnpm e2e`: Playwright + axe on the production build, on its own database (`scripts/ci/e2e.mjs`: the `e2e` database of the same Docker container locally, never the one `.env` names unless Docker is missing).
 - `pnpm run gate:fast` before a push (the pre-push hook runs it); `pnpm run standards` is the ratchet.
 
 ## Vercel Build Compatibility
