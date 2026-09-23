@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["testing", "coverage", "vitest"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 source_truth: ["vitest.config.ts", "vitest.integration.config.ts", "package.json"]
-last_verified: "2026-09-21"
+last_verified: "2026-09-23"
 ---
 
 # Testing
@@ -20,7 +20,7 @@ the floor, is red even while the total holds (TEST.4, the changed-lines gate).
 
 ## Unit suite
 
-Colocated `*.test.ts` beside the module (TEST.1); Vitest's default discovery collects any `*.test.ts(x)` in the tree, so a test dropped beside a component is run, not silently skipped. Fixtures are builders in `test/factories/`,
+Colocated `*.test.ts` beside the module (TEST.1); Vitest's default discovery collects any `*.test.ts(x)` in the tree, so a test dropped beside a component is run, not silently skipped. `.claude/**` is excluded from discovery: it can hold a git worktree of this repository, whose copy of the suite would otherwise run a second time against another branch's code. Fixtures are builders in `test/factories/`,
 never inline blobs. Time is `vi.useFakeTimers()` + `vi.setSystemTime()` restored in `afterEach`;
 no test touches the network (`fetch` is stubbed where a module calls it).
 
@@ -29,7 +29,7 @@ no test touches the network (`fetch` is stubbed where a module calls it).
 Two areas: `lib/`, the shared layer (the customer-menu data formats, brand colour, pricing, locale,
 TOTP, JSON-LD, the schemas, the list keyset), and `server/`, the process's modules (the logger's
 redaction and level rule, the SIGTERM drain). The floor is pinned in
-`vitest.config.ts` at the figure measured on 2026-09-21 (first set on 2026-09-20) and only ever raised; branches and
+`vitest.config.ts` at the figure measured on 2026-09-22 (first set on 2026-09-20, raised on 2026-09-21 and twice on 2026-09-22) and only ever raised; branches and
 functions are what bind (TEST.4). `thresholds.autoUpdate` is never set: a raise is a reviewed
 change with the new number in the log of `STANDARDS_PROGRESS.md`.
 
@@ -54,6 +54,8 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 | `lib/prisma.ts` | The Prisma client singleton; no logic of its own |
 | `lib/cloudinary.ts` | A wrapper over the Cloudinary SDK and the network; an integration concern |
 | `lib/auth-guard.ts` | Needs a NextAuth session and Postgres; belongs to the integration suite |
+| `lib/restaurant-loader.ts` | The same guard over the same database; held by `tests/integration/order-board.test.ts` |
+| `lib/insights-loader.ts` | Grouped SQL over the same database; held by `tests/integration/insights.test.ts` |
 | `lib/emails/**` | HTML templates; presentational |
 
 ## Contrast of the tokens
