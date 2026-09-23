@@ -1,6 +1,7 @@
 // lib/schemas/restaurant.ts
 // A restaurant's profile, address, business settings and branding, plus its image uploads.
 import { z } from 'zod'
+import { isTimeZone } from '@/lib/time-zone'
 import { dietaryKey, email } from './common'
 
 const optionalUrl = z.url('Invalid URL format').optional().or(z.literal(''))
@@ -38,6 +39,8 @@ export const restaurantInput = z.object({
   dietaryOptions: z.array(dietaryKey).optional(),
   orderingEnabled: z.boolean().optional(),
   tableCount: z.number().int().min(0, 'Tables cannot be negative').max(300, 'That is more tables than the sheet can print').optional(),
+  /** The restaurant's own clock (lib/time-zone): its sold-out return and its Insights days and hours. */
+  timeZone: z.string().refine(isTimeZone, 'Choose a time zone from the list').optional(),
   openingHours: z.string().optional(),
   socialMedia: z.string().optional(),
   socialDisplay: z.enum(['icons', 'text']).optional(),

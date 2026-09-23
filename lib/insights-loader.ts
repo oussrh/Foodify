@@ -11,6 +11,7 @@ import type { DishStat } from '@/lib/insights-dishes'
 import { rhythmGrid } from '@/lib/insights-rhythm'
 import type { Money } from '@/lib/menu'
 import { toMinorUnits } from '@/lib/money'
+import { fromWallClock, wallClock } from '@/lib/time-zone'
 import {
   countBuckets,
   countDevices,
@@ -41,14 +42,19 @@ const NO_ORDERS: OrderCounts = {
 /** Keyed by the bucket's instant, which is what the merge looks a row up by. */
 const byBucket = <T extends { bucket: Date }>(rows: T[]) => new Map(rows.map((row) => [row.bucket.getTime(), row]))
 
-/** Two windows of buckets, oldest first, with the empty ones present as zeros. */
-async function loadBuckets(id: string, grain: Grain, now: Date): Promise<InsightsBucket[]> {
+/**
+ * Two windows of buckets, oldest first, with the empty ones present as zeros. `local` is now on
+ * the restaurant's clock, which is how the buckets are laid out and how the SQL groups; the
+ * window's start goes back to an instant for the filter.
+ */
+async function loadBuckets(id: string, grain: Grain, local: Date, tz: string): Promise<InsightsBucket[]> {
   const count = GRAIN_BUCKETS[grain] * 2
-  const [views, carts, orders] = await countBuckets(id, TRUNC[grain], windowStart(grain, now, count))
+  const since = fromWallClock(windowStart(grain, local, count), tz)
+  const [views, carts, orders] = await countBuckets(id, TRUNC[grain], since, tz)
   const viewsAt = byBucket(views)
   const cartsAt = byBucket(carts)
   const ordersAt = byBucket(orders)
-  return bucketStarts(grain, now, count).map((start) => {
+  return bucketStarts(grain, local, count).map((start) => {
     const at = start.getTime()
     const view: ViewCounts = viewsAt.get(at) ?? NO_VIEWS
     const cart: CartCounts = cartsAt.get(at) ?? NO_CARTS
@@ -70,10 +76,10 @@ async function loadBuckets(id: string, grain: Grain, now: Date): Promise<Insight
 }
 
 /** The window's per-dish figures, the weekly rhythm and the phones the menu was read on. */
-async function loadBreakdowns(id: string, since: Date, ordering: boolean) {
+async function loadBreakdowns(id: string, since: Date, ordering: boolean, tz: string) {
   const [dishRows, rhythmRows, devices] = await Promise.all([
     countDishes(id, since),
-    countRhythm(id, since, ordering ? 'orders' : 'views'),
+    countRhythm(id, since, ordering ? 'orders' : 'views', tz),
     countDevices(id, since),
   ])
   const dishes: DishStat[] = dishRows.map((row) => ({
@@ -107,16 +113,19 @@ export async function loadInsights(id: string, grain: Grain, now = new Date()) {
 
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
-    select: { id: true, name: true, orderingEnabled: true, currency: true, currencySymbol: true },
+    select: { id: true, name: true, orderingEnabled: true, currency: true, currencySymbol: true, timeZone: true },
   })
   if (!restaurant) return null
 
+  // The restaurant's clock: its days, its weeks, its hours (lib/time-zone.ts).
+  const tz = restaurant.timeZone
+  const local = wallClock(now, tz)
   const [all, breakdowns] = await Promise.all([
-    loadBuckets(id, grain, now),
-    loadBreakdowns(id, windowStart(grain, now), restaurant.orderingEnabled),
+    loadBuckets(id, grain, local, tz),
+    loadBreakdowns(id, fromWallClock(windowStart(grain, local), tz), restaurant.orderingEnabled, tz),
   ])
   const shown = GRAIN_BUCKETS[grain]
   // The portals are in English, so the amounts are too; the currency is the restaurant's.
   const money: Money = { locale: 'en', symbol: restaurant.currencySymbol || '$', code: restaurant.currency }
-  return { restaurant, money, buckets: all.slice(shown), previous: all.slice(0, shown), ...breakdowns }
+  return { restaurant, money, timeZone: tz, buckets: all.slice(shown), previous: all.slice(0, shown), ...breakdowns }
 }

@@ -19,20 +19,21 @@ export type Availability = z.infer<typeof availability>
 /**
  * The restaurant's own service staff — a manager, an order tablet, a waiter — or a super admin.
  * Parses the dish id as a UUID and `availability`, and stamps `soldOutUntil` at the end of this
- * service day, or clears it. The restaurant is read from the dish, never taken from the caller,
+ * service day in the restaurant's own zone, or clears it. The restaurant is read from the dish, never taken from the caller,
  * so the guard is asked about the restaurant that actually owns the row. Answers `{ id, soldOut }`.
  */
 export async function setDishAvailability(rawDishId: string, raw: Availability) {
   const dishId = uuid.parse(rawDishId)
   const { soldOut } = availability.parse(raw)
 
-  const dish = await prisma.dish.findUnique({ where: { id: dishId }, select: { restaurantId: true } })
+  const dish = await prisma.dish.findUnique({ where: { id: dishId }, select: { restaurantId: true, restaurant: { select: { timeZone: true } } } })
   if (!dish) throw new Error('No such dish')
   await requireServiceStaff(dish.restaurantId)
 
   const row = await prisma.dish.update({
     where: { id: dishId },
-    data: { soldOutUntil: soldOut ? soldOutUntilNextService(new Date()) : null },
+    // The restaurant's own 04:00: a dish run out of at 22:00 in New York must not return at midnight there.
+    data: { soldOutUntil: soldOut ? soldOutUntilNextService(new Date(), dish.restaurant.timeZone) : null },
     select: { id: true, soldOutUntil: true },
   })
   return { id: row.id, soldOut: row.soldOutUntil !== null }

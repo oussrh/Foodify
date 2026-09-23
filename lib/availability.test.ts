@@ -1,14 +1,31 @@
 import { describe, expect, it } from 'vitest'
-import { isSoldOut, SERVICE_DAY_END_HOUR_UTC, soldOutUntilNextService } from './availability'
+import { isSoldOut, SERVICE_DAY_END_HOUR, soldOutUntilNextService } from './availability'
 
 // What makes this worth testing is the promise: a dish marked sold out during service comes back
 // for the next one, and never in the middle of the one it was marked in.
 
 describe('soldOutUntilNextService', () => {
+  it("comes back at the restaurant's own 04:00, not UTC's", () => {
+    // 22:00 in New York (02:00 UTC next day): the old 04:00 UTC was 00:00 there, mid-service.
+    expect(soldOutUntilNextService(new Date('2026-09-23T02:00:00Z'), 'America/New_York').toISOString()).toBe('2026-09-23T08:00:00.000Z')
+    // Paris in summer is UTC+2: its 04:00 is 02:00 UTC.
+    expect(soldOutUntilNextService(new Date('2026-09-22T13:00:00Z'), 'Europe/Paris').toISOString()).toBe('2026-09-23T02:00:00.000Z')
+  })
+
+  it('takes the next local 04:00 when marked after midnight but before it', () => {
+    // 01:30 in Casablanca (UTC+1): the same morning's 04:00, not tomorrow's.
+    expect(soldOutUntilNextService(new Date('2026-09-23T00:30:00Z'), 'Africa/Casablanca').toISOString()).toBe('2026-09-23T03:00:00.000Z')
+  })
+
+  it('keeps the hour across a daylight-saving change', () => {
+    // Marked the evening before Paris moves to summer time: back at 04:00 local, now UTC+2.
+    expect(soldOutUntilNextService(new Date('2026-03-28T21:00:00Z'), 'Europe/Paris').toISOString()).toBe('2026-03-29T02:00:00.000Z')
+  })
+
   it('returns the dish at the end of the service day, not at midnight', () => {
     const until = soldOutUntilNextService(new Date('2026-09-22T13:00:00Z'))
     expect(until.toISOString()).toBe('2026-09-23T04:00:00.000Z')
-    expect(until.getUTCHours()).toBe(SERVICE_DAY_END_HOUR_UTC)
+    expect(until.getUTCHours()).toBe(SERVICE_DAY_END_HOUR)
   })
 
   it('does not bring a dish back in the middle of the service it was marked in', () => {

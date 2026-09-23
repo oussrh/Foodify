@@ -12,8 +12,11 @@ last_verified: "2026-09-23"
 
 # Deployment
 
-Production is a Vercel project building `main`; every other branch gets a preview deploy. The
-database is a Neon Postgres. Nothing here is automatic unless it says so.
+Production is a Vercel project building `main`, and only `main`: `vercel.json` turns automatic
+deployments off for every other branch (`git.deploymentEnabled`, `"**": false` with `"main": true`;
+`**` because a bare `*` does not match a `/` in `feat/…`), so a pull request gets no preview and
+spends no build. Test a branch locally, or deploy one by hand with the Vercel CLI. The database is
+a Neon Postgres. Nothing here is automatic unless it says so.
 
 ## What the build runs
 

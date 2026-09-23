@@ -31,6 +31,7 @@ export function restaurantFormValues(restaurant: Restaurant): EditRestaurantValu
     dietaryOptions: restaurant.dietaryOptions,
     orderingEnabled: restaurant.orderingEnabled,
     tableCount: restaurant.tableCount,
+    timeZone: restaurant.timeZone,
     // Narrowed like the two below, not cast: a NULL column (the seeded restaurant, any made before
     // the field existed) reached the form as null, which its schema refuses, and the whole
     // settings save failed on a hidden field with no message. NULL reads as 'cover' on the menu too.

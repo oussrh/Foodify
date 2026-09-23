@@ -66,6 +66,24 @@ describe('the insights report, money and kitchen', () => {
 })
 
 describe('the insights report, breakdowns', () => {
+  it("counts days and hours on the restaurant's own clock", () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      await tx.restaurant.update({ where: { id: mine.id }, data: { timeZone: 'America/New_York', orderingEnabled: true } })
+      // 02:00 UTC on Tuesday 22 September is 22:00 on Monday 21 September in New York.
+      await order(tx, mine.id, { number: 1, created: '2026-09-22T02:00:00Z' })
+      signInAs(await manager(tx, [mine.id]))
+
+      const report = (await loadInsights(mine.id, 'day', NOW))!
+
+      const monday = report.buckets.find((b) => b.start.toISOString() === '2026-09-21T00:00:00.000Z')
+      const tuesday = report.buckets.find((b) => b.start.toISOString() === '2026-09-22T00:00:00.000Z')
+      expect(monday?.guestOrders).toBe(1)
+      expect(tuesday?.guestOrders).toBe(0)
+      expect(report.rhythm[0]![22]).toBe(1)
+      expect(report.timeZone).toBe('America/New_York')
+    }))
+
   it('counts each dish opened, put in a cart and ordered, and only this restaurant\'s', () =>
     withRollback(async (tx) => {
       const mine = await restaurant(tx)

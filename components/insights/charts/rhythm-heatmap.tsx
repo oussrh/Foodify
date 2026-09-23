@@ -16,13 +16,15 @@ interface RhythmHeatmapProps {
   grid: RhythmGrid
   /** `orders` or `dishes opened`: what a cell counts. */
   noun: string
+  /** Named under the grid: the hours are the restaurant's. */
+  timeZone: string
 }
 
 /**
  * The week as a weekday × hour grid, darker where more happened, with the busiest hour said in
  * words under it.
  */
-export function RhythmHeatmap({ grid, noun }: RhythmHeatmapProps) {
+export function RhythmHeatmap({ grid, noun, timeZone }: RhythmHeatmapProps) {
   const { from, to } = activeHours(grid)
   const hours = Array.from({ length: to - from + 1 }, (_, i) => from + i)
   const peak = peakOf(grid)
@@ -64,7 +66,7 @@ export function RhythmHeatmap({ grid, noun }: RhythmHeatmapProps) {
         ))}
       </div>
       <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
-        <p>{summary} Hours are UTC.</p>
+        <p>{summary} Hours are in {timeZone.replaceAll('_', ' ')} time.</p>
         <span className="flex items-center gap-1" aria-hidden="true">
           Fewer
           {STEPS.map((step) => (

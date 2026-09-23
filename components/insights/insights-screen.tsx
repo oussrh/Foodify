@@ -28,6 +28,8 @@ export interface InsightsScreenProps {
   rhythm: RhythmGrid
   devices: { device: string; views: number; arViews: number }[]
   money: Money
+  /** The restaurant's zone, which the days and hours are counted in. */
+  timeZone: string
   /** The tab's own path, for the period links. */
   basePath: string
 }
@@ -79,7 +81,7 @@ export function InsightsScreen(props: InsightsScreenProps) {
         <DishesSection totals={now} dishes={props.dishes} ordering={ordering} money={money} />
       </Group>
       <Group title="When and where">
-        <RhythmSection rhythm={props.rhythm} devices={props.devices} ordering={ordering} />
+        <RhythmSection rhythm={props.rhythm} devices={props.devices} ordering={ordering} timeZone={props.timeZone} />
       </Group>
 
       {!ordering && (

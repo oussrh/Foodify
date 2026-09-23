@@ -5,6 +5,7 @@ import { POST as placeOrder } from '@/app/api/orders/route'
 import { withRollback, type Tx } from './db'
 import { dish, kitchenTablet, manager, restaurant, waiter } from './fixtures'
 import { signInAs } from './session'
+import { wallClock } from '@/lib/time-zone'
 
 // Marking a dish sold out is the one write a device account has over the menu, so the population
 // it is open to is the point: everyone who works the service, and nobody else. The other half is
@@ -27,6 +28,22 @@ const soldOutUntilOf = async (tx: Tx, id: string) =>
   (await tx.dish.findUniqueOrThrow({ where: { id }, select: { soldOutUntil: true } })).soldOutUntil
 
 describe('marking a dish sold out', () => {
+  it("comes back at the restaurant's own 04:00, read from its time zone", () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      await tx.restaurant.update({ where: { id: mine.id }, data: { timeZone: 'America/New_York' } })
+      const d = await dish(tx, mine.id)
+      signInAs(await manager(tx, [mine.id]))
+
+      await setDishAvailability(d.id, { soldOut: true })
+
+      // 04:00 on New York's clock, whatever time this test runs at.
+      const until = (await soldOutUntilOf(tx, d.id))!
+      expect(wallClock(until, 'America/New_York').getUTCHours()).toBe(4)
+      expect(wallClock(until, 'America/New_York').getUTCMinutes()).toBe(0)
+      expect(until.getTime()).toBeGreaterThan(Date.now())
+    }))
+
   it('is open to everyone who works the service', () =>
     withRollback(async (tx) => {
       const mine = await restaurant(tx)

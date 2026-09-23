@@ -14,13 +14,14 @@ interface RhythmSectionProps {
   rhythm: RhythmGrid
   devices: { device: string; views: number; arViews: number }[]
   ordering: boolean
+  timeZone: string
 }
 
 /**
  * When and on what: the week's busy hours as a heatmap, and the phones the menu is read on with
  * their AR rate.
  */
-export function RhythmSection({ rhythm, devices, ordering }: RhythmSectionProps) {
+export function RhythmSection({ rhythm, devices, ordering, timeZone }: RhythmSectionProps) {
   const noun = ordering ? 'orders' : 'dishes opened'
   const total = devices.reduce((n, d) => n + d.views, 0)
   const rows = [...devices]
@@ -36,7 +37,7 @@ export function RhythmSection({ rhythm, devices, ordering }: RhythmSectionProps)
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <ChartCard title="Busiest hours" description={`${ordering ? 'Orders' : 'Dishes opened'} by weekday and hour.`} className="lg:col-span-2">
-        <RhythmHeatmap grid={rhythm} noun={noun} />
+        <RhythmHeatmap grid={rhythm} noun={noun} timeZone={timeZone} />
       </ChartCard>
       <ChartCard title="Devices" description="Share of dishes opened, by the guest's phone.">
         <BarList rows={rows} max={Math.max(1, total)} slot={2} empty="No dish has been opened in this period." />

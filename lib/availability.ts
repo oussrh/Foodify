@@ -5,25 +5,24 @@
 //
 // `Dish.soldOutUntil` is the moment it returns; null is available. Nothing runs on a timer: a
 // menu read after that moment sees an available dish, which is why the return needs no job.
+import { DEFAULT_TIME_ZONE, fromWallClock, wallClock } from '@/lib/time-zone'
 
 /**
- * The hour (UTC) a service day is taken to end at. Not midnight: a kitchen closing at 23:00 local
- * is still serving after midnight UTC in some of the places this runs, and a dish must not come
- * back while the pass is still open. 04:00 UTC is after the last service and before the first
- * across Europe and North Africa, which is where these restaurants are.
- *
- * It is a fixed hour because `Restaurant` carries no timezone. Adding one would let this be the
- * restaurant's own 4am; until then this is the honest approximation, and the failure mode is a
- * dish returning a few hours late rather than mid-service.
+ * The local hour a service day is taken to end at, in the restaurant's own zone
+ * (`Restaurant.timeZone`). Not midnight: a kitchen closing at 23:00 is still serving at midnight
+ * on a busy night, and a dish must not come back while the pass is still open. 04:00 is after the
+ * last service and before the first. Before restaurants had a zone this was 04:00 UTC, which in
+ * New York is 23:00 — a dish came back mid-service; a restaurant still on UTC keeps that hour.
  */
-export const SERVICE_DAY_END_HOUR_UTC = 4
+export const SERVICE_DAY_END_HOUR = 4
 
-/** When a dish marked sold out now should come back: the next end of service day, strictly after `now`. */
-export function soldOutUntilNextService(now: Date): Date {
-  const until = new Date(now)
-  until.setUTCHours(SERVICE_DAY_END_HOUR_UTC, 0, 0, 0)
-  if (until <= now) until.setUTCDate(until.getUTCDate() + 1)
-  return until
+/** When a dish marked sold out now should come back: the restaurant's next local 04:00, strictly after `now`. */
+export function soldOutUntilNextService(now: Date, timeZone: string = DEFAULT_TIME_ZONE): Date {
+  const until = wallClock(now, timeZone)
+  const local = until.getTime()
+  until.setUTCHours(SERVICE_DAY_END_HOUR, 0, 0, 0)
+  if (until.getTime() <= local) until.setUTCDate(until.getUTCDate() + 1)
+  return fromWallClock(until, timeZone)
 }
 
 /** Whether a dish is sold out at `now`. A moment already passed is available again, with nothing having run. */
