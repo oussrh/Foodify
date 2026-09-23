@@ -152,14 +152,17 @@ export default function EditDishForm({
     }
   }, [hasUnsavedChanges, reset, defaultValues, resetAssets])
 
+  // A refused save says so in the save bar rather than leaving "You have unsaved changes" up, as
+  // if nothing had been tried: the calories bug failed exactly that silently.
+  const onInvalid = useCallback(() => setSaveStatus('error'), [])
   const submit = useCallback(() => {
-    handleSubmit(onSubmit)()
-  }, [handleSubmit, onSubmit])
+    handleSubmit(onSubmit, onInvalid)()
+  }, [handleSubmit, onSubmit, onInvalid])
   const submitForm = useSaveShortcuts({ hasUnsavedChanges, isSubmitting, submit, cancel: handleCancel })
 
   return (
     <div className="space-y-8">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+      <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-8">
         {/* Basic Information */}
         <Card className="border-0">
           <CardHeader className="border-b">

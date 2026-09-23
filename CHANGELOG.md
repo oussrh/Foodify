@@ -8,6 +8,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 - A restaurant whose cover style was never set could not save **any** of its settings. The settings form took the column as it was (`NULL` became `null`, through a type cast in `components/forms/form-defaults.ts`), its schema refused `null`, and the save failed with the Branding tab marked in error and no message on it — the field is hidden. The seeded restaurant is one such, and so is any restaurant made before the field existed. The value is now narrowed like its neighbours: anything but `repeat` is `cover`, which is what the public menu already showed.
 - A dish saved without calories could not be edited again. The edit form read the empty calories box with `valueAsNumber`, which gives `NaN`, and the schema refused it; the save failed with the focus on a field that showed nothing wrong. An empty box is now no figure (`components/edit-dish-form.tsx`).
+- Both bugs above were silent: a save the form's validation refused left the save bar saying "You have unsaved changes", as if nothing had been tried. The settings and dish edit forms now put the save bar's own "Could not save. Check the fields and try again." up whenever validation refuses a save (`manager-settings.spec.ts` checks it, and fails when the line is removed).
 
 ### Changed
 

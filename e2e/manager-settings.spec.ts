@@ -32,6 +32,23 @@ test.describe('a manager\'s restaurant', () => {
     }
   })
 
+  test('says a refused save was refused, and stores nothing', async ({ page }, info) => {
+    const restaurant = await ownRestaurant(info)
+    const manager = await auditAccount('manager', info.testId, { mfa: false, restaurantId: restaurant.id })
+    try {
+      await signInAs(page, 'manager', manager.email, { mfa: false })
+      await page.goto(`/manager/restaurants/${restaurant.id}/edit`)
+      await page.locator('#slug').fill('Not A Slug')
+      await page.getByRole('button', { name: 'Save changes' }).click()
+      // Not "You have unsaved changes", as if nothing had been tried: two saves once failed that silently.
+      await expect(page.getByText('Could not save. Check the fields and try again.')).toBeVisible()
+      expect((await db().restaurant.findUniqueOrThrow({ where: { id: restaurant.id } })).slug).toBe(restaurant.slug)
+    } finally {
+      await manager.remove()
+      await restaurant.remove()
+    }
+  })
+
   test('adds a waiter on the People tab, who can then sign in, and removes them', async ({ page, browser }, info) => {
     test.setTimeout(120_000)
     const restaurant = await ownRestaurant(info)

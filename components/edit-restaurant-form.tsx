@@ -112,9 +112,12 @@ export default function EditRestaurantForm({
     }
   }, [hasUnsavedChanges, reset, defaultValues])
 
-  // Validation errors on a hidden tab would be invisible: switch to the first tab that has one.
+  // Validation errors on a hidden tab would be invisible: switch to the first tab that has one,
+  // and say in the save bar that nothing was saved. A field can also be a hidden input with no
+  // message of its own, and a save that silently did nothing is how one of those went unseen.
   const onInvalid = useCallback(
     (errs: Record<string, unknown>) => {
+      setSaveStatus('error')
       const bad = new Set(Object.keys(errs))
       const tab = TABS.find((t) => t.fields.some((f) => bad.has(f)))
       if (tab) showTab(tab.key)
