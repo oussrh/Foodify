@@ -10,7 +10,7 @@
 import 'dotenv/config'
 import bcrypt from 'bcryptjs'
 import { PrismaPg } from '@prisma/adapter-pg'
-import { expect, type Page } from '@playwright/test'
+import { expect, type Locator, type Page } from '@playwright/test'
 import { PrismaClient } from '../generated/prisma/client'
 
 export type Portal = 'admin' | 'manager'
@@ -53,6 +53,19 @@ export async function auditAccount(portal: Portal, tag: string, { mfa = true } =
 }
 
 /**
+ * Clicks `submit` until the form has answered (`arrived`). A click that lands before the page has
+ * hydrated does nothing at all, and the first page a freshly started server renders under a full
+ * gate's load hydrates late; so the click is repeated, never while the form is already answering
+ * (`arrived` is checked first), until the form moves on or twenty seconds pass.
+ */
+export async function submitUntil(submit: Locator, arrived: () => Promise<boolean>) {
+  await expect(async () => {
+    if (!(await arrived())) await submit.click({ timeout: 2_000 })
+    await expect.poll(arrived, { timeout: 3_000 }).toBe(true)
+  }).toPass({ timeout: 20_000 })
+}
+
+/**
  * Signs the page in through the portal's sign-in flow as `email` (an audit account) and lands on
  * the portal; with `mfa` false the password alone is expected to do it. Where exactly it lands is
  * the portal's business — an admin gets the overview, a manager with one restaurant is sent
@@ -64,10 +77,10 @@ export async function signInAs(page: Page, portal: Portal, email: string, { mfa 
   await page.goto(`/${portal}/login`)
   await page.getByLabel(/email/i).fill(email)
   await page.getByLabel(/password/i).fill(PASSWORD)
-  await page.getByRole('button', { name: /sign in|continue|log in/i }).click()
+  const code = page.getByLabel(/code/i)
+  const answered = mfa ? () => code.isVisible() : async () => !/\/(login|mfa)/.test(page.url())
+  await submitUntil(page.getByRole('button', { name: /sign in|continue|log in/i }), answered)
   if (mfa) {
-    const code = page.getByLabel(/code/i)
-    await expect(code).toBeVisible()
     await db().user.update({ where: { email }, data: { emailOtpCode: CODE, emailOtpExpires: new Date(Date.now() + 10 * 60 * 1000) } })
     await code.fill(CODE)
     await page.getByRole('button', { name: /^sign in$/i }).click()
