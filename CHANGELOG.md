@@ -18,6 +18,8 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Changed
 
+- Vercel builds `main` only (`vercel.json`, `git.deploymentEnabled`): every push to a pull-request branch was a preview build, a merge that needed "update branch" first cost two or three, and the free tier's builds went on previews nobody opened. `"**": false` with `"main": true` — `**`, because minimatch's `*` stops at the `/` in `feat/…`. The Vercel check was never a required status (only `checks` is), so merging is unaffected; a branch is tested locally, or deployed by hand with the CLI. `docs/DEPLOYMENT.md` says so.
+
 - JSDoc on the forms (`dish-form`, `restaurant-form`, `category-manager`, `client-form`), the uploads (`upload`) and the AR viewer (`ar-viewer`): 71 blocks, several saying what a caller would otherwise get wrong — the viewer's load progress is simulated, `useArSupport` cannot tell "not yet known" from "unsupported", a subcategory name saves on blur, the dietary options limit what the public menu shows. Lint holds the six directories; 209 exported components remain, counted in `docs/STANDARDS_PROGRESS.md`.
 
 - JSDoc on `components/menu` (the public menu and the guest's cart), `components/shell` (the portals' shell, headers, lists and row menus) and `components/admin` (the People tab): 31 blocks, and lint now holds the three directories; 280 exported components remain undocumented, counted in `docs/STANDARDS_PROGRESS.md`. The order endpoint's doc comment now says what the code does for a dish that is off the menu or sold out: 409 `unavailable` with the dishes and their reason, not the 400 it claimed.
