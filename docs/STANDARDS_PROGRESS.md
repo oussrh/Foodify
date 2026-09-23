@@ -46,7 +46,7 @@ last_verified: "2026-09-23"
 | `docs.indexDrift` (documents missing from the index) | 1 | 0 | 0 | hard | DOC.3 |
 | Exports without a JSDoc block on `lib/**`, `app/actions/**`, `app/api/**`, `auth.ts`, `proxy.ts` (`jsdoc/require-jsdoc` publicOnly, every exported declaration) | 147 (measured 2026-09-21; 121 under the arrow-only context) | 0 | 0 | hard (lint script) | CODE.7 |
 | Exported components and hooks without a JSDoc block, `components/**` (functions only, not props types; held a directory at a time) | 351 (measured 2026-09-23) | 311 (insights, orders and waiter held at 0) | 0 | hard on the held directories (lint script) | CODE.7 |
-| Living docs with `source_truth` + `last_verified` (DOC-FRESHNESS) | 3/7 dated, 1 with source_truth | 8/8 dated, 5 with source_truth | every doc that describes a file | ratchet (`docs.behindCode`) | DOC.5 |
+| Living docs with `source_truth` + `last_verified` (DOC-FRESHNESS) | 3/7 dated, 1 with source_truth | 9/9 dated, 6 with source_truth | every doc that describes a file | ratchet (`docs.behindCode`) | DOC.5 |
 | Coverage `lib/**` statements / branches / functions / lines | - | 98.9 / 94.5 / 99.1 / 99.3 (per file: `menu.ts` 88.8 / 85 / 63.6 / 86.2, `totp.ts` 100) | raised, never lowered | `vitest` thresholds, total and changed lines | TEST.4 |
 
 ## Phase status

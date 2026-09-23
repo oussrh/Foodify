@@ -1,74 +1,46 @@
-README.md
-# Foodify - AR Menu Platform
- 
-Foodify is a prototype web platform that helps restaurants present their menus in Augmented Reality. Guests can scan a QR code to view 3D dishes while restaurant administrators manage content through a dashboard.
+# Foodify
 
-## Project Goals
-- Display dishes in AR using web technologies
-- Provide a dashboard for restaurants to manage menus and analytics
-- Support multi-language content in English and French
+Foodify puts a restaurant's menu on a guest's phone, with dishes they can place on the table in
+augmented reality. A guest scans a QR code, reads the menu in English or French, opens a dish in
+3D or AR, and — where the restaurant takes orders — orders from the table. The kitchen works the
+orders on a tablet, the waiters carry them out from their phones, and the restaurant manages its
+menu, people and settings in a web portal, with a report on how the menu is read and served.
 
-## Tech Stack
-- Next.js 15 with React 19 and TypeScript
-- Tailwind CSS with shadcn/ui components
-- PostgreSQL via Prisma ORM
-- NextAuth v5 with Resend email provider and MFA
-- Framer Motion, React Hook Form, Zod, and Lucide icons
+## Who uses what
 
-## Development
-Install dependencies and run the development server:
+| Who | Where | What |
+|---|---|---|
+| Guests | `/restaurant/<slug>` (from the QR code) | The menu, dishes in 3D and AR, ordering |
+| Kitchen | `/kitchen` (a tablet, username and password) | The order board, sold-out dishes |
+| Waiters | `/waiter` (a phone, username and password) | The tables, taking orders, carrying them out |
+| Managers | `/manager` | Their restaurants: menu, dishes, orders, tables, people, insights, settings |
+| Super admins | `/admin` | Every restaurant and account |
+
+## Stack
+
+Next.js 16 (App Router) with React 19 and TypeScript · Tailwind CSS 4 with shadcn/ui primitives ·
+Postgres (Neon) through Prisma 7 · Auth.js v5 with an optional second factor by email ·
+Cloudinary for photos and AR models · Resend for email, Brevo for SMS · deployed on Vercel.
+
+## Running it
+
 ```bash
 pnpm install
 pnpm dev
 ```
 
-The project uses Tailwind CSS with class-based dark mode. Toggle the theme using the sun/moon button on the home page.
+`.env.example` lists the environment; only `DATABASE_URL` and `NEXTAUTH_SECRET` are required to
+start. `pnpm db:setup` resets a **local** database, applies the schema and seeds a restaurant with
+two accounts (`ousrh7@gmail.com` and `owner@foodify.test`, password `changeme`).
 
-## UI Components
-Foodify uses reusable UI components from [shadcn/ui]. The following pieces are prepared in `components/ui`:
+## Checks
 
-| UI Piece | Shadcn Component(s) |
-| --- | --- |
-| Buttons | `Button` |
-| Cards | `Card` |
-| Modals / Drawers | `Dialog`, `Sheet` |
-| Inputs | `Input`, `Textarea`, `Select` |
-| Alerts | `Alert`, `AlertDialog` |
-| Menus | `DropdownMenu` |
-| Notifications | `Toast` |
-| Loading states | `Skeleton`, `Spinner` |
-| Tooltips | `Tooltip` |
-| Tabs | `Tabs` |
-| Forms | `Input` + `Label` + `Button` |
-| Avatars | `Avatar` |
-| Badges | `Badge` |
+`pnpm run gate:fast` before a push (lint, types, the import graph, dead code, unit tests, the
+standards ratchet; the pre-push hook runs it). `pnpm test:integration` runs the database suite on a
+real Postgres, `pnpm e2e` the browser suite on the production build.
 
-This repository currently contains minimal scaffolding. More features will be added over time.
+## Where to read more
 
-## Menu Management
-
-Restaurant admins can manage menu categories and subcategories from `/admin/restaurants/[id]/menu`. Categories support inline editing, deletion with confirmation and drag-and-drop reordering using the built-in HTML5 API. Subcategories can be reordered using Up/Down buttons.
-
-## AR File Uploads
-
-Dish USDZ and GLB assets are uploaded to Cloudinary. Each restaurant has its own folder which keeps AR files organized. Configure your Cloudinary credentials in `.env` using `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, and `CLOUDINARY_API_SECRET`.
-
-## Email Setup
-
-Foodify sends verification codes using [Resend](https://resend.com). Provide your API key and a verified sender address in `.env`:
-
-```bash
-RESEND_API_KEY="your-resend-api-key"
-RESEND_FROM="Foodify <no-reply@yourdomain.com>"
-```
-
-If the `RESEND_FROM` value is missing Resend will return a `missing_required_field` error.
-
-The order confirmation a diner receives goes out over [Brevo](https://www.brevo.com)'s
-transactional SMS. The account is not linked yet: with these unset nothing is sent, the order is
-still taken, and the server logs `order: placed, confirmation not sent`.
-
-```bash
-BREVO_API_KEY="your-brevo-api-key"
-BREVO_SMS_SENDER="Foodify"   # the sender name or number Brevo has approved
-```
+- [`CLAUDE.md`](./CLAUDE.md) — the architecture: where each part of the app lives and why.
+- [`docs/`](./docs/README.md) — deployment, testing, the standards scoreboard and the decisions behind it.
+- [`CHANGELOG.md`](./CHANGELOG.md) — what changed, and why.
