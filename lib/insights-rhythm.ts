@@ -1,6 +1,6 @@
 // lib/insights-rhythm.ts
 // The week's shape: a count at every weekday and hour, laid out as a grid for the heatmap, with
-// its busiest cell and the hours worth drawing. Hours are UTC, as everything in the report is.
+// its busiest cell and the hours worth drawing. Hours are the restaurant's own (lib/time-zone.ts).
 
 /** Monday first: a restaurant's week is a working week, and ISO numbers it that way. */
 export const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] as const

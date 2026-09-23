@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Building2, Globe, ChefHat, CreditCard } from 'lucide-react'
 import DietaryOptionsField from './dietary-options-field'
 import OrderingField from './ordering-field'
+import TimeZoneField from './time-zone-field'
 import { CURRENCIES, currencySymbolFor } from './currencies'
 import type { EditRestaurantValues } from './edit-restaurant-schema'
 
@@ -165,7 +166,7 @@ function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omi
 
 /**
  * The settings form's General card: identity, dietary options, currency (its symbol read-only,
- * submitted through hidden inputs), default language and the ordering switch. Every change marks
+ * submitted through hidden inputs), default language, time zone and the ordering switch. Every change marks
  * the form dirty.
  */
 export default function EditBasicCard(props: Props) {
@@ -180,6 +181,7 @@ export default function EditBasicCard(props: Props) {
       <CardContent className="p-6 space-y-6">
         <IdentityFields register={props.register} errors={props.errors} setValue={props.setValue} dietaryOptions={props.dietaryOptions} />
         <LocaleFields register={props.register} setValue={props.setValue} defaultValues={props.defaultValues} currencySymbol={props.currencySymbol} />
+        <TimeZoneField register={props.register} />
         <div className="border-t border-border pt-6">
           <OrderingField
             value={props.orderingEnabled}

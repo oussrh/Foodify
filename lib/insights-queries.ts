@@ -1,9 +1,11 @@
 // lib/insights-queries.ts
 // The insights report's SQL, one grouped query per question. Kept apart from the loader, which
 // guards and merges: these read one restaurant since one moment and know nothing about grains or
-// buckets beyond the `date_trunc` field they are handed. Every figure is UTC — Postgres stores
-// the timestamps without a zone, and the bucket arithmetic in `lib/insights.ts` lays them out the
-// same way, so a row always lands on a bucket.
+// buckets beyond the `date_trunc` field they are handed. The timestamps are stored as UTC
+// without a zone; each is read on the restaurant's own clock (`(t AT TIME ZONE 'UTC') AT TIME
+// ZONE tz`) before it is grouped, so a day is the restaurant's day and an hour its hour. The
+// loader lays the buckets out on the same clock (lib/time-zone.ts `wallClock`), so a row always
+// lands on one. `since` is an instant and filters the raw column, which keeps its index.
 import prisma from '@/lib/prisma'
 
 /** A bucket's dishes opened, and of those the ones that launched AR. */
@@ -29,10 +31,10 @@ type Bucketed<T> = T & { bucket: Date }
  * FILTER rather than counted as a zero, and a clock that ran backwards is floored at zero. A
  * cancelled order is an order (it was sent) but brought in nothing, so it is out of the revenue.
  */
-export async function countBuckets(id: string, trunc: string, since: Date) {
+export async function countBuckets(id: string, trunc: string, since: Date, tz: string) {
   return Promise.all([
     prisma.$queryRaw<Bucketed<ViewCounts>[]>`
-      SELECT date_trunc(${trunc}::text, v."viewedAt") AS bucket,
+      SELECT date_trunc(${trunc}::text, (v."viewedAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz}) AS bucket,
              count(*)::int AS views,
              (count(*) FILTER (WHERE v."arViewed"))::int AS ar_views
       FROM "DishView" v
@@ -40,12 +42,12 @@ export async function countBuckets(id: string, trunc: string, since: Date) {
       WHERE d."restaurantId" = ${id} AND v."viewedAt" >= ${since}
       GROUP BY 1`,
     prisma.$queryRaw<Bucketed<CartCounts>[]>`
-      SELECT date_trunc(${trunc}::text, c."createdAt") AS bucket, count(*)::int AS adds
+      SELECT date_trunc(${trunc}::text, (c."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz}) AS bucket, count(*)::int AS adds
       FROM "CartAdd" c
       WHERE c."restaurantId" = ${id} AND c."createdAt" >= ${since}
       GROUP BY 1`,
     prisma.$queryRaw<Bucketed<OrderCounts>[]>`
-      SELECT date_trunc(${trunc}::text, o."createdAt") AS bucket,
+      SELECT date_trunc(${trunc}::text, (o."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz}) AS bucket,
              (count(*) FILTER (WHERE o."placedById" IS NULL))::int AS guest_orders,
              (count(*) FILTER (WHERE o."placedById" IS NOT NULL))::int AS staff_orders,
              (count(*) FILTER (WHERE o."status" = 'CANCELLED'))::int AS cancelled_orders,
@@ -115,17 +117,19 @@ export type RhythmRow = { dow: number; hour: number; count: number }
  * When the restaurant is busy: orders by weekday and hour — or, for a restaurant that takes no
  * orders, dishes opened, which is the only activity it has.
  */
-export function countRhythm(id: string, since: Date, of: 'orders' | 'views') {
+export function countRhythm(id: string, since: Date, of: 'orders' | 'views', tz: string) {
   if (of === 'orders') {
     return prisma.$queryRaw<RhythmRow[]>`
-      SELECT EXTRACT(ISODOW FROM o."createdAt")::int AS dow, EXTRACT(HOUR FROM o."createdAt")::int AS hour,
+      SELECT EXTRACT(ISODOW FROM (o."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::int AS dow,
+             EXTRACT(HOUR FROM (o."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::int AS hour,
              count(*)::int AS count
       FROM "Order" o
       WHERE o."restaurantId" = ${id} AND o."createdAt" >= ${since}
       GROUP BY 1, 2`
   }
   return prisma.$queryRaw<RhythmRow[]>`
-    SELECT EXTRACT(ISODOW FROM v."viewedAt")::int AS dow, EXTRACT(HOUR FROM v."viewedAt")::int AS hour,
+    SELECT EXTRACT(ISODOW FROM (v."viewedAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::int AS dow,
+           EXTRACT(HOUR FROM (v."viewedAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::int AS hour,
            count(*)::int AS count
     FROM "DishView" v JOIN "Dish" d ON d."id" = v."dishId"
     WHERE d."restaurantId" = ${id} AND v."viewedAt" >= ${since}

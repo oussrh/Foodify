@@ -71,6 +71,10 @@ model Restaurant {
   // How many tables the room has: the per-table QR sheet makes one code per table (1..N), each
   // opening the menu with its number, and 0 means no per-table codes.
   tableCount      Int            @default(0)
+  // The restaurant's own clock (an IANA zone, lib/time-zone.ts): when a sold-out dish comes back
+  // (its 04:00) and how Insights cuts its days and hours. UTC until a manager sets it, which is
+  // what every figure used before there was a setting.
+  timeZone        String         @default("UTC")
   // Design/Branding
   coverImageUrl   String?
   coverImageStyle String? // "cover" or "repeat"

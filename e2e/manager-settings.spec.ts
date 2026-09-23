@@ -8,7 +8,7 @@ import { signInDevice } from './staff'
 // and a waiter added on the People tab can sign in at the floor's door and is gone once removed.
 
 test.describe('a manager\'s restaurant', () => {
-  test('saves its name, turns ordering on with a number of tables, and the settings hold', async ({ page }, info) => {
+  test('saves its name, its time zone, turns ordering on with a number of tables, and the settings hold', async ({ page }, info) => {
     const restaurant = await ownRestaurant(info)
     const manager = await auditAccount('manager', info.testId, { mfa: false, restaurantId: restaurant.id })
     const renamed = `${restaurant.name} renamed`
@@ -18,14 +18,16 @@ test.describe('a manager\'s restaurant', () => {
       await page.locator('#name').fill(renamed)
       await page.getByLabel('Online ordering').check()
       await page.getByLabel('Tables in the room').fill('4')
+      await page.getByLabel('Time zone').selectOption('Africa/Casablanca')
       await page.getByRole('button', { name: 'Save changes' }).click()
 
       await expect
-        .poll(() => db().restaurant.findUniqueOrThrow({ where: { id: restaurant.id }, select: { name: true, orderingEnabled: true, tableCount: true } }))
-        .toEqual({ name: renamed, orderingEnabled: true, tableCount: 4 })
+        .poll(() => db().restaurant.findUniqueOrThrow({ where: { id: restaurant.id }, select: { name: true, orderingEnabled: true, tableCount: true, timeZone: true } }))
+        .toEqual({ name: renamed, orderingEnabled: true, tableCount: 4, timeZone: 'Africa/Casablanca' })
       await page.reload()
       await expect(page.locator('#name')).toHaveValue(renamed)
       await expect(page.getByLabel('Online ordering')).toBeChecked()
+      await expect(page.getByLabel('Time zone')).toHaveValue('Africa/Casablanca')
     } finally {
       await manager.remove()
       await restaurant.remove()

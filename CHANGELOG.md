@@ -4,6 +4,10 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ## [Unreleased]
 
+### Added
+
+- Every restaurant has a **time zone**, set in Settings → General (`Restaurant.timeZone`, an IANA zone; migration `20260923210000_restaurant_time_zone`). Two things used UTC because a restaurant had no clock of its own, and both now use the restaurant's. **Sold out** comes back at the restaurant's own 04:00: at 04:00 UTC a dish run out of in New York returned at midnight there, in the middle of service. **Insights** counts its days, weeks and months, and the busiest-hours grid, on the restaurant's clock: an order at 22:00 in New York belongs to that evening, not to the next day, and the grid now says which zone its hours are in. Every restaurant starts on UTC, which is exactly what both used before, so nothing moves until a manager picks a zone. The conversions are `lib/time-zone.ts` — `Intl` only, daylight-saving changes included, no zone table to go stale; the select shows each zone with its offset today. In SQL the timestamps are read as `(t AT TIME ZONE 'UTC') AT TIME ZONE tz` before grouping, and the date filter stays on the raw column so it keeps its index. Tested at every level: the conversions and the 04:00 across a DST change (unit), an evening order in New York landing on New York's day and hour and the sold-out action reading the zone (integration, the first checked to fail without the conversion), and the setting saved and reloaded (browser).
+
 ### Fixed
 
 - A restaurant whose cover style was never set could not save **any** of its settings. The settings form took the column as it was (`NULL` became `null`, through a type cast in `components/forms/form-defaults.ts`), its schema refused `null`, and the save failed with the Branding tab marked in error and no message on it — the field is hidden. The seeded restaurant is one such, and so is any restaurant made before the field existed. The value is now narrowed like its neighbours: anything but `repeat` is `cover`, which is what the public menu already showed.
