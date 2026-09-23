@@ -66,9 +66,25 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 ## Browser suite
 
 `pnpm e2e` runs Playwright (`playwright.config.ts`, specs in `e2e/`) against the production build
-served on port 3100 (`pnpm build` first; the gate and CI do both): the public menu journey (load,
-language toggle, dish sheet) and the sign-in pages, each with an axe scan that fails on any serious
-or critical violation (TEST.3, A11Y.1). Two projects, a phone and a desktop; retries 0 locally and
+served on port 3100 (`pnpm build` first; the gate and CI do both), each journey with an axe scan
+that fails on any serious or critical violation (TEST.3, A11Y.1):
+
+| Spec | Journey |
+|---|---|
+| `menu.spec.ts`, `ar-viewer.spec.ts` | The guest's menu: load, language, dish sheet, 3D view, category bar |
+| `ordering.spec.ts` | A guest's order from a row to "sent", with the table from the QR link |
+| `order-life.spec.ts` | That order across the devices: started and called up on the kitchen board, carried out from the waiter's phone, every stamp on the row; and a tablet kept out of the portals |
+| `waiter-order.spec.ts` | A waiter taking an order at a table: search, notes on the dish and the order, sent and listed |
+| `sold-out.spec.ts` | A dish marked sold out on the tablet: shown but not orderable, refused by the endpoint (409), then back |
+| `sign-in.spec.ts`, `hours.spec.ts` | The sign-in pages and the opening-hours editor |
+| `audit.spec.ts` | Every page of the guest, manager, admin and device screens at rest, under axe |
+
+Signed-in journeys sign in for real: `e2e/session.ts` makes an account for the test and writes
+the emailed code it would have received; `e2e/staff.ts` makes device accounts (username and
+password, no second factor) and a dish of the test's own. The phone and desktop projects run in
+parallel on one database, so a test never assumes the state of a shared row: it makes its own
+(a dish, a table, an account), sets in the form what it reads (`hours.spec.ts` closes the days it
+checks), and removes what it made. Two projects, a phone and a desktop; retries 0 locally and
 2 in CI; a trace on the first retry. Test data is the seeded restaurant (`prisma/seed.ts`); CI seeds
 a Postgres service before the run. Vitest excludes `e2e/`.
 
@@ -91,5 +107,8 @@ order a write leaves behind. The gate's database suite runs it when a push touch
 
 ## Still to come
 
-- Authenticated journeys in the browser suite: the sign-in needs an emailed code, which the suite
-  cannot read; a test-only code source is the seam.
+- The manager's writes in the browser: a dish created and edited (uploads, dietary options),
+  categories, settings saved, branding, tables, the People tab. The sweep opens every one of
+  these pages; none is driven.
+- The account flows: the second factor turned on and off, a password changed, an email changed.
+- The installed apps: the service workers, a new version waiting for Refresh, the menu offline.
