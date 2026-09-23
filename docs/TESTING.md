@@ -77,6 +77,9 @@ that fails on any serious or critical violation (TEST.3, A11Y.1):
 | `order-life.spec.ts` | That order across the devices: started and called up on the kitchen board, carried out from the waiter's phone, every stamp on the row; and a tablet kept out of the portals |
 | `waiter-order.spec.ts` | A waiter taking an order at a table: search, notes on the dish and the order, sent and listed |
 | `sold-out.spec.ts` | A dish marked sold out on the tablet: shown but not orderable, refused by the endpoint (409), then back |
+| `manager-menu.spec.ts` | A dish created, repriced and deleted in the portal, each step read back on the public menu |
+| `manager-settings.spec.ts` | General settings saved and held after a reload; a waiter added on the People tab signs in, then is removed |
+| `account.spec.ts` | The second factor turned off takes effect at the next sign-in; a changed password works and the old one is refused |
 | `sign-in.spec.ts`, `hours.spec.ts` | The sign-in pages and the opening-hours editor |
 | `audit.spec.ts` | Every page of the guest, manager, admin and device screens at rest, under axe |
 
@@ -84,7 +87,7 @@ Signed-in journeys sign in for real: `e2e/session.ts` makes an account for the t
 the emailed code it would have received; `e2e/staff.ts` makes device accounts (username and
 password, no second factor) and a dish of the test's own. The phone and desktop projects run in
 parallel on one database, so a test never assumes the state of a shared row: it makes its own
-(a dish, a table, an account), sets in the form what it reads (`hours.spec.ts` closes the days it
+(a dish, a table, an account, a whole restaurant in `e2e/manager.ts` for a spec that saves settings or deletes a dish), sets in the form what it reads (`hours.spec.ts` closes the days it
 checks), and removes what it made. Two projects, a phone and a desktop; retries 0 locally and
 2 in CI; a trace on the first retry. Test data is the seeded restaurant (`prisma/seed.ts`). Vitest
 excludes `e2e/`.
@@ -118,8 +121,7 @@ order a write leaves behind. The gate's database suite runs it when a push touch
 
 ## Still to come
 
-- The manager's writes in the browser: a dish created and edited (uploads, dietary options),
-  categories, settings saved, branding, tables, the People tab. The sweep opens every one of
-  these pages; none is driven.
-- The account flows: the second factor turned on and off, a password changed, an email changed.
+- Uploads (a dish photo, an AR model, a logo): they go to Cloudinary, which the suite does not
+  reach; a test double for the upload endpoint is the seam.
+- Categories and subcategories edited, branding saved, the change-email flow (it mails two links).
 - The installed apps: the service workers, a new version waiting for Refresh, the menu offline.
