@@ -50,7 +50,7 @@
     "size.excessCode": 0,
     "size.overBudget": 0,
     "size.overRaw": 0,
-    "test.coverageExclusions": 9,
+    "test.coverageExclusions": 11,
     "types.escapes": 0,
     "types.nonNull": 0,
     "valid.rawEnv": 0,
@@ -59,29 +59,29 @@
     "valid.wholeEnv": 0
   },
   "scanned": {
-    "api.bareResponse": 10,
-    "api.floatMoney": 509,
-    "api.rowReturn": 14,
-    "api.unboundedList": 10,
+    "api.bareResponse": 11,
+    "api.floatMoney": 540,
+    "api.rowReturn": 15,
+    "api.unboundedList": 11,
     "auth.unguardedAdminPage": 21,
-    "cache.serverCacheUse": 509,
+    "cache.serverCacheUse": 540,
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 6,
-    "docs.citations": 135,
+    "docs.citations": 136,
     "docs.danglingSource": 17,
     "docs.frontMatter": 10,
     "docs.indexDrift": 9,
-    "dup.clonedLines": 776,
-    "dup.clones": 776,
-    "size.excessCode": 502,
-    "size.overBudget": 502,
-    "size.overRaw": 528,
-    "types.escapes": 502,
-    "valid.rawEnv": 499,
-    "valid.unparsedBoundary": 25,
-    "valid.utcDay": 502,
-    "valid.wholeEnv": 499
+    "dup.clonedLines": 816,
+    "dup.clones": 816,
+    "size.excessCode": 533,
+    "size.overBudget": 533,
+    "size.overRaw": 559,
+    "types.escapes": 533,
+    "valid.rawEnv": 530,
+    "valid.unparsedBoundary": 27,
+    "valid.utcDay": 533,
+    "valid.wholeEnv": 530
   },
   "debt": {
     "dup.clonedLines": {
@@ -161,7 +161,7 @@
       "lib/cloudinary.ts": 2
     },
     "test.coverageExclusions": {
-      "vitest.config.ts": 9
+      "vitest.config.ts": 11
     }
   },
   "versions": {

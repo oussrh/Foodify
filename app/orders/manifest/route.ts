@@ -36,8 +36,13 @@ export async function GET(request: Request) {
     description: app.of(restaurant.name),
     start_url: board,
     scope: board,
+    // Immersive where the platform allows it: an installed staff app on Android opens with no status
+    // bar and no navigation buttons (a swipe from the edge shows them for a moment). On a waiter's
+    // phone the buttons sat as a white strip under the app's own tabs and were pressed by mistake.
+    // `display` is the fallback for a browser that reads no override; iOS reads neither and keeps
+    // its own status bar (lib/order-board-page.ts).
     display: 'standalone',
-    display_override: ['standalone', 'minimal-ui'],
+    display_override: ['fullscreen', 'standalone', 'minimal-ui'],
     // A kitchen tablet stands in a landscape dock as often as it is held, and a waiter's phone
     // is whichever way up they grabbed it; neither is forced.
     orientation: 'any',

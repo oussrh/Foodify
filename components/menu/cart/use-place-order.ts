@@ -17,6 +17,8 @@ type State = { status: 'idle' | 'sending'; error: string; field: OrderField | nu
 const IDLE: State = { status: 'idle', error: '', field: null }
 // What a 409 carries: the dishes it would not take. A body of another shape names none.
 const refusedDishes = z.array(refusedDish).catch([])
+// Or, for a waiter adding to a table's bill, why that bill would not take it (lib/table-tab.ts).
+const refusedBill = z.object({ addTo: z.string() })
 
 /** The dishes the server named, in the guest's language; empty when it named none it could name. */
 function soldOutNames(details: unknown, locale: Locale): string[] {
@@ -37,6 +39,7 @@ function messageFor(error: unknown, locale: Locale): string {
   if (!(error instanceof ApiError)) return t.orderFailed
   if (error.code === 'forbidden') return t.orderingOff
   if (error.code === 'unavailable') {
+    if (refusedBill.safeParse(error.details).success) return t.tabClosed
     const names = soldOutNames(error.details, locale)
     if (names.length > 1) return t.soldOutSincePlural(names.join(', '))
     const [name] = names

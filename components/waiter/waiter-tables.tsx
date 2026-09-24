@@ -9,6 +9,10 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { Bell, BellOff, Download } from 'lucide-react'
 import { useMinuteClock } from '@/components/orders/use-minute-clock'
 import { useOrderBoard } from '@/components/orders/use-order-board'
+import { DeviceSetupSheet } from '@/components/staff/device-setup/device-setup-sheet'
+import { SoundUnlockStrip } from '@/components/staff/sound-unlock-strip'
+import { useAppBadge } from '@/components/staff/use-app-badge'
+import { useAudioUnlock } from '@/components/staff/use-audio-unlock'
 import { useStaffPwa } from '@/components/staff/use-staff-pwa'
 import { Button } from '@/components/ui/button'
 import { floorTiles, newlyReady, readyOrders } from '@/lib/waiter-floor'
@@ -34,6 +38,8 @@ interface WaiterTablesProps {
  */
 export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
   const alert = useReadyAlert()
+  // Sound the waiter turned on yesterday is locked again after a reload until the next tap.
+  const audio = useAudioUnlock(alert.soundOn)
   const pwa = useStaffPwa()
   // One clock for every tile, so the waits tick without each one reading it in render.
   const now = new Date(useMinuteClock())
@@ -51,6 +57,8 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
   const cooking = open.orders.filter((order) => order.status !== 'READY')
   const tiles = floorTiles(tableNumbers(restaurant.tableCount), cooking, ready, now)
   const readyTables = tiles.filter((tile) => tile.state === 'ready')
+  // The app icon counts the tables with food up: what a waiter in another app needs to know.
+  useAppBadge(open.loading ? null : readyTables.length)
 
   const refresh = useCallback(() => open.refresh(), [open])
 
@@ -77,8 +85,8 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
   const tables = tiles.length
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
+    <div className="staff-app flex min-h-screen flex-col bg-background">
+      <header className="staff-safe-top sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
         <WaiterHeader
           title="Tables"
           restaurantName={restaurant.name}
@@ -100,7 +108,15 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
           >
             {alert.soundOn ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
           </Button>
+          <DeviceSetupSheet
+            restaurantId={restaurant.id}
+            app="waiter"
+            pwa={pwa}
+            sound={{ on: alert.soundOn, locked: audio.locked, toggle: alert.toggleSound, test: alert.test }}
+            vibration={{ supported: alert.canVibrate, test: alert.buzz }}
+          />
         </WaiterHeader>
+        <SoundUnlockStrip locked={audio.locked} onUnlock={audio.unlock} />
 
         {readyTables.length > 0 && (
           // The one line worth putting above everything: what is going cold.

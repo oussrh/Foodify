@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge, type BadgeProps } from '@/components/ui/badge'
 import { formatPrice, type Money } from '@/lib/menu'
 import { itemCount, orderTimings, STATUS_LABEL, type BoardOrder, type OrderStatus } from '@/lib/orders'
+import { additionLabel } from '@/lib/table-tab'
 import OrderDetailsSheet from './order-details-sheet'
 
 const STATUS_VARIANT: Record<OrderStatus, BadgeProps['variant']> = {
@@ -67,6 +68,7 @@ export default function HistoryTable({ orders, money }: { orders: BoardOrder[]; 
                   <span className="tnum block text-xs text-muted-foreground">
                     #{order.number} · {itemCount(order)} item{itemCount(order) === 1 ? '' : 's'}
                   </span>
+                  {additionLabel(order) && <span className="block text-xs font-medium">{additionLabel(order)}</span>}
                 </TableCell>
                 <TableCell>
                   <Badge variant={STATUS_VARIANT[order.status]}>{STATUS_LABEL[order.status]}</Badge>

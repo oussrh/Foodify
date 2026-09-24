@@ -31,6 +31,8 @@ export interface ReadyAlert {
   toggleSound: () => void
   /** Play it now, so a waiter can check the phone is not on silent before service. */
   test: () => void
+  /** The buzz alone, for the device sheet's vibration test. */
+  buzz: () => void
 }
 
 /** Whether the browser exposes vibration. iOS Safari does not, on any iPhone, by design. */
@@ -69,5 +71,5 @@ export function useReadyAlert(): ReadyAlert {
     chime()
   }, [buzz, chime])
 
-  return { alert, canVibrate, soundOn: sound.on, toggleSound: sound.toggle, test }
+  return { alert, canVibrate, soundOn: sound.on, toggleSound: sound.toggle, test, buzz }
 }

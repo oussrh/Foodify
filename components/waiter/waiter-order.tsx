@@ -3,18 +3,26 @@
 // button to send. It is the guest's cart underneath (`lib/cart.ts`), kept per table so a waiter
 // can start one table, walk away, and come back to it — and the same `POST /api/orders`, which
 // stamps who took it and asks for no phone from staff.
+//
+// A table that has already ordered has a bill open (lib/table-tab.ts): the header shows it, and a
+// send adds to it while the table is plainly the same party (lib/table-tab.ts `defaultsToAdd`).
+// A second, unrelated order is what made a kitchen cook a table's dessert as a new table.
 'use client'
 
 import { useState } from 'react'
-import { Check, ChevronLeft } from 'lucide-react'
+import { ChevronLeft, ReceiptText } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { cartLinesToSend, cartLineViews, cartSubtotal, dishesById } from '@/components/menu/cart/cart-lines'
 import { useCart } from '@/components/menu/cart/use-cart'
 import { usePlaceOrder } from '@/components/menu/cart/use-place-order'
 import { Button } from '@/components/ui/button'
 import { formatPrice, type Locale, type MenuCategory, type MenuDish, type Money } from '@/lib/menu'
+import { billChoice } from './bill-choice'
+import { TableTabSheet } from './table-tab-sheet'
+import { useTableTab } from './use-table-tab'
 import { WaiterMenu } from './waiter-menu'
 import { WaiterReview } from './waiter-review'
+import { WaiterSent } from './waiter-sent'
 
 interface WaiterOrderProps {
   restaurantId: string
@@ -38,53 +46,70 @@ export default function WaiterOrder({ restaurantId, restaurantName, table, categ
   const cart = useCart(`${restaurantId}:t${table}`, table)
   const [note, setNote] = useState('')
   const [reviewing, setReviewing] = useState(false)
+  const [showingTab, setShowingTab] = useState(false)
+  // The waiter's own choice of bill in the review, over the default; null is the default.
+  const [choice, setChoice] = useState<'add' | 'new' | null>(null)
+  // The bill the last send was added to, for the confirmation; captured when it is sent.
+  const [addedTo, setAddedTo] = useState<number | null>(null)
+  const current = useTableTab(restaurantId, table)
+  const tab = current.tab
+  // Add while the table is plainly the same party (lib/table-tab.ts `defaultsToAdd`), unless told.
+  const { bill, addTo } = billChoice(current, choice)
   const placing = usePlaceOrder(locale, () => {
     cart.clear()
     setNote('')
+    setChoice(null)
   })
+  // Each sheet that shows or decides on the bill reads it again as it opens.
+  const review = (open: boolean) => {
+    if (open) current.refresh()
+    setReviewing(open)
+  }
+  const showTab = (open: boolean) => {
+    if (open) current.refresh()
+    setShowingTab(open)
+  }
 
   const lines = cartLineViews(cart.cart, dishesById(categories, loose))
   const subtotal = cartSubtotal(lines)
   const items = lines.reduce((n, line) => n + line.quantity, 0)
 
   const send = async () => {
+    setAddedTo(addTo && tab ? tab.parent.number : null)
     // No phone: a waiter has nobody to text. A refusal before sending keeps the sheet open on the field.
-    if (await placing.send({ restaurantId, table, phone: '', lines: cartLinesToSend(lines), note }, false)) setReviewing(false)
+    const draft = { restaurantId, table, phone: '', lines: cartLinesToSend(lines), note }
+    if (await placing.send(addTo ? { ...draft, addTo } : draft, false)) setReviewing(false)
+    // A refusal may be the bill having closed under the waiter (cancelled, or the night rolled
+    // over): read it again, so the next tap sends a new order rather than failing the same way.
+    current.refresh()
   }
 
   // `usePlaceOrder` holds the order once the server answers; that is the confirmation screen.
   if (placing.order) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
-        <Check className="h-14 w-14 text-success" aria-hidden="true" />
-        <p className="text-2xl font-semibold tracking-display">Order #{placing.order.number} sent</p>
-        <p className="text-muted-foreground">
-          Table {table} · {restaurantName}
-        </p>
-        <Button
-          className="mt-4 h-14 w-full max-w-xs text-[15px]"
-          onClick={() => {
-            placing.reset()
-            router.refresh()
-            onBack()
-          }}
-        >
-          Back to the tables
-        </Button>
-      </div>
-    )
+    const done = () => {
+      placing.reset()
+      router.refresh()
+      onBack()
+    }
+    return <WaiterSent number={placing.order.number} addedTo={addedTo} table={table} restaurantName={restaurantName} onDone={done} />
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-30 flex h-[57px] items-center gap-2 border-b border-border bg-background/95 px-3 backdrop-blur-sm">
+    <div className="staff-app flex min-h-screen flex-col bg-background">
+      <header className="staff-safe-top sticky top-0 z-30 flex h-[calc(57px+env(safe-area-inset-top,0px))] items-center gap-2 border-b border-border bg-background/95 px-3 backdrop-blur-sm">
         <Button variant="ghost" size="icon" className="h-12 w-12 shrink-0" onClick={onBack} aria-label="Back to the tables">
           <ChevronLeft className="h-5 w-5" />
         </Button>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <h1 className="truncate text-xl font-semibold leading-tight tracking-display">Table {table}</h1>
           <p className="truncate text-xs text-muted-foreground">{restaurantName}</p>
         </div>
+        {tab && (
+          <Button variant="outline" className="h-12 shrink-0 gap-1.5 px-3 text-[15px] font-semibold" onClick={() => showTab(true)}>
+            <ReceiptText className="h-5 w-5" aria-hidden="true" />
+            Current order #{tab.parent.number}
+          </Button>
+        )}
       </header>
 
       <WaiterMenu
@@ -106,7 +131,7 @@ export default function WaiterOrder({ restaurantId, restaurantName, table, categ
           )}
           {/* Review rather than send: a waiter builds this from what someone said across a table,
               and the notes belong to the reading-back, not to the tapping. */}
-          <Button className="h-16 w-full text-lg" onClick={() => setReviewing(true)}>
+          <Button className="h-16 w-full text-lg" onClick={() => review(true)}>
             Review {items} item{items === 1 ? '' : 's'} · {formatPrice(subtotal, money)}
           </Button>
         </div>
@@ -114,7 +139,7 @@ export default function WaiterOrder({ restaurantId, restaurantName, table, categ
 
       <WaiterReview
         open={reviewing}
-        onOpenChange={setReviewing}
+        onOpenChange={review}
         table={table}
         lines={lines}
         subtotal={subtotal}
@@ -128,7 +153,12 @@ export default function WaiterOrder({ restaurantId, restaurantName, table, categ
         sending={placing.status === 'sending'}
         error={placing.error}
         field={placing.field}
+        bill={bill}
+        onAddingChange={(add) => setChoice(add ? 'add' : 'new')}
+        onRetryBill={current.refresh}
       />
+
+      {tab && <TableTabSheet tab={tab} open={showingTab} onOpenChange={showTab} money={money} />}
     </div>
   )
 }

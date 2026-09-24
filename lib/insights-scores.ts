@@ -19,7 +19,7 @@ export interface Score {
 
 const orders = (t: InsightsTotals) => t.guestOrders + t.staffOrders
 
-/** What an order that was not cancelled came to on average, in minor units; null without one. */
+/** What an order that was not cancelled came to on average, the whole bill with its additions, in minor units; null without one. */
 export function averageOrderMinor(t: InsightsTotals): number | null {
   const kept = orders(t) - t.cancelledOrders
   return kept > 0 ? Math.round(t.revenueMinor / kept) : null

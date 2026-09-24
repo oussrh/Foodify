@@ -1,4 +1,4 @@
-/* Foodify staff service worker (v2).
+/* Foodify staff service worker (v3).
    One file, three scopes: a portal's /orders board, the kitchen tablet, and the waiter's phone.
    The cache is named after the registration scope, so two staff apps on one device never share
    or evict each other's shell, and the public menu's worker never meets any of them. It exists
@@ -6,7 +6,10 @@
    - Pages in scope: network-first, the cached shell as a fallback.
    - Next static assets: cache-first (they are content-hashed).
    - The API is NEVER cached. A cached order list would show a kitchen work it has already done,
-     which is worse than showing nothing; the board says it is offline instead. */
+     which is worse than showing nothing; the board says it is offline instead.
+   - Web Push (server/push.ts): a new order wakes a kitchen board, a ready order a waiter's phone,
+     with the app in the background or the screen locked. The payload carries an order number, a
+     table and a dish count, never anything about the guest. */
 // The scope decides the cache: `/waiter/` and `/manager/orders/` are different apps on the same
 // origin, and a shared cache would let one serve the other's shell.
 const SCOPE_KEY = new URL(self.registration.scope).pathname.replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'root'
@@ -75,3 +78,75 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(networkFirst(request))
   }
 })
+
+
+// The alert's shape follows the room it lands in: a new order is long and stays on screen until
+// someone on the pass deals with it; a ready order is a short double buzz in a waiter's apron.
+const VIBRATE = { order: [300, 120, 300, 120, 600], ready: [180, 90, 180, 90, 320] }
+
+/** Whether one of this scope's pages is on screen: it chimes by itself, so the notification stays quiet. */
+async function pageIsVisible() {
+  const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+  return windows.some((client) => client.url.startsWith(self.registration.scope) && (client.visibilityState === 'visible' || client.focused))
+}
+
+self.addEventListener('push', (event) => {
+  let message = null
+  try {
+    message = event.data ? event.data.json() : null
+  } catch {
+    message = null
+  }
+  if (!message || typeof message.title !== 'string') return
+  const kind = message.kind === 'ready' ? 'ready' : 'order'
+  event.waitUntil(
+    (async () => {
+      // Browsers want a notification for every push, so a visible page still gets one, silently.
+      const silent = await pageIsVisible()
+      await self.registration.showNotification(message.title, {
+        body: typeof message.body === 'string' ? message.body : '',
+        tag: typeof message.tag === 'string' ? message.tag : undefined,
+        renotify: typeof message.tag === 'string',
+        icon: '/icons/icon-192.png',
+        badge: '/icons/icon-192.png',
+        data: {
+          url: typeof message.url === 'string' ? message.url : self.registration.scope,
+          restaurantId: typeof message.restaurantId === 'string' ? message.restaurantId : null,
+        },
+        vibrate: VIBRATE[kind],
+        requireInteraction: kind === 'order',
+        silent,
+      })
+    })(),
+  )
+})
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close()
+  // Only a same-origin address is ever opened, whatever the payload said.
+  const data = event.notification.data || {}
+  const target = new URL(data.url || self.registration.scope, self.location.origin)
+  // A portal's board (/manager/orders/, /admin/orders/) is addressed by the restaurant's id, not
+  // the tablet's short link: outside this worker's scope, its own board is built from the scope.
+  const own = !target.href.startsWith(self.registration.scope) && /^[0-9a-f-]{36}$/i.test(data.restaurantId || '')
+    ? new URL(self.registration.scope + data.restaurantId, self.location.origin)
+    : target
+  const url = sameOrigin(own) ? own.href : self.registration.scope
+  event.waitUntil(
+    (async () => {
+      const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
+      const open = windows.find((client) => client.url.startsWith(self.registration.scope))
+      if (!open) return self.clients.openWindow(url)
+      const focused = await open.focus()
+      // A manager's board is scoped to /manager/orders/ and the payload names the kitchen's
+      // address: the open board is already the right page, so it is focused, not moved.
+      const inScope = url.startsWith(self.registration.scope)
+      return !inScope || focused.url === url || !('navigate' in focused) ? focused : focused.navigate(url)
+    })(),
+  )
+})
+
+// A push service can rotate a subscription (pushsubscriptionchange). Re-subscribing here would
+// need the VAPID key and a session, and a half-done attempt could leave a stale row pointing at a
+// dead endpoint; the page re-subscribes on its next open instead, and the server drops the old
+// endpoint the first time the push service answers 404 or 410 for it.

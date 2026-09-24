@@ -6,12 +6,25 @@ import { afterAll, afterEach, vi } from 'vitest'
 import { currentTx, db } from './db'
 import { session, signInAs } from './session'
 
+/**
+ * `prisma.$transaction` inside the test's own transaction: a transaction client has none, and a
+ * nested one is the enclosing one (Postgres has no nested transactions, and the test's rollback
+ * must undo it too). The callback form runs on the open transaction, so a row it locks stays
+ * locked until the test ends; the array form runs its queries in order on it.
+ */
+async function nested(work: unknown) {
+  if (typeof work === 'function') return work(currentTx())
+  const results: unknown[] = []
+  for (const query of work as Promise<unknown>[]) results.push(await query)
+  return results
+}
+
 vi.mock('@/lib/prisma', () => ({
   default: new Proxy(
     {},
     {
       // Every property read (`prisma.dish`, `prisma.$queryRaw`) goes to the open transaction.
-      get: (_target, property) => Reflect.get(currentTx(), property),
+      get: (_target, property) => (property === '$transaction' ? nested : Reflect.get(currentTx(), property)),
     },
   ),
 }))

@@ -18,6 +18,8 @@ export interface OrderDraft {
   phone: string
   lines: CartLine[]
   note: string
+  /** The table's open bill this order adds to: a waiter's only, never the guest's cart. */
+  addTo?: string
 }
 
 /** The body to send, or the field that is wrong and what to say about it in the guest's language. */
@@ -48,6 +50,7 @@ export function checkOrder(draft: OrderDraft, locale: Locale, requirePhone: bool
     locale,
     note: draft.note.trim() || undefined,
     lines: draft.lines,
+    addTo: draft.addTo,
   })
   if (!parsed.success) return { ok: false, ...refusal(parsed.error.issues[0]?.path ?? [], draft, locale) }
   if (requirePhone && !phone) return { ok: false, field: 'phone', message: t.phoneRequired }

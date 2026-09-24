@@ -15,13 +15,15 @@ const SECRET_FIELDS = [
   'otp', 'emailOtpCode', 'totpSecret', 'token', 'passwordResetToken', 'emailChangeToken', 'emailVerifyToken',
   'authorization', 'cookie',
   'email', 'newEmail', 'phone', 'recipient',
+  'endpoint', 'p256dh',
   'apiKey', 'api_key', 'secret', 'signature',
-  'DATABASE_URL', 'RESEND_API_KEY', 'BREVO_API_KEY', 'CLOUDINARY_API_SECRET', 'NEXTAUTH_SECRET', 'AUTH_SECRET',
+  'DATABASE_URL', 'RESEND_API_KEY', 'BREVO_API_KEY', 'CLOUDINARY_API_SECRET', 'NEXTAUTH_SECRET', 'AUTH_SECRET', 'VAPID_PRIVATE_KEY',
 ]
 
 /**
  * Field paths never written: credentials and second factors, the session, reset and change-email
- * tokens, the request headers that carry them, addresses and phone numbers (personal data in a
+ * tokens, the request headers that carry them, addresses, phone numbers and a device's push
+ * endpoint (a capability URL: whoever holds it, with the keys, can wake that device) (personal data in a
  * log is a leak waiting for a breach) and the environment's secrets should a record ever carry them. `code`
  * is redacted at the top and under `credentials` only: `err.code` (ECONNREFUSED) and an API code
  * are not secrets and a log needs them. A new secret is added here, not masked where it is logged.

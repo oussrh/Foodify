@@ -6,7 +6,7 @@
 import type { Prisma } from '@/generated/prisma/client'
 import type { BoardOrder } from '@/lib/orders'
 
-/** The columns an order is shown by: its own, plus each line with what the guest asked for. */
+/** The columns an order is shown by: its own, the number of the order it adds to, and each line with what the guest asked for. */
 export const boardOrderSelect = {
   id: true,
   number: true,
@@ -21,6 +21,8 @@ export const boardOrderSelect = {
   readyAt: true,
   servedAt: true,
   placedBy: { select: { email: true } },
+  parentId: true,
+  parent: { select: { number: true } },
   lines: { select: { id: true, nameEn: true, nameFr: true, quantity: true, note: true } },
 } satisfies Prisma.OrderSelect
 
@@ -28,8 +30,10 @@ type OrderRow = Prisma.OrderGetPayload<{ select: typeof boardOrderSelect }>
 
 /** A row read with `boardOrderSelect`, as the board and the history render it. */
 export function serializeOrder(row: OrderRow): BoardOrder {
+  const { parent, ...rest } = row
   return {
-    ...row,
+    ...rest,
+    parentNumber: parent?.number ?? null,
     subtotal: row.subtotal.toFixed(2),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),

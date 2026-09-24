@@ -52,6 +52,12 @@ export const orderInput = z.object({
    * about the menu having changed.
    */
   phone: z.preprocess((value) => (typeof value === 'string' && value.trim() === '' ? undefined : value), orderPhone.optional()),
+  /**
+   * The table's open bill this order adds to (lib/table-tab.ts): a waiter taking more at a table
+   * that already ordered. Staff only, since a guest's order is always its own; the handler checks
+   * it is this table's bill, not this shape.
+   */
+  addTo: uuid.optional(),
   /** The language the guest is reading the menu in; the confirmation is written in it. */
   locale: z.enum(['en', 'fr']).optional(),
   note: orderNote.optional(),
@@ -61,6 +67,9 @@ export const orderInput = z.object({
     .max(MAX_LINES, 'Too many dishes in one order')
     .refine((lines) => new Set(lines.map((l) => l.dishId)).size === lines.length, 'A dish is listed twice'),
 })
+/** A waiter's question to GET /api/orders/tab: which restaurant, which table. */
+export const tableTabQuery = z.object({ restaurantId: uuid, table: orderTable })
+
 /** `orderInput` after parsing. */
 export type OrderInput = z.infer<typeof orderInput>
 

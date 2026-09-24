@@ -36,6 +36,13 @@ describe('the logger', () => {
     expect(last()).toMatchObject({ user: { email: CENSOR, totpSecret: CENSOR } })
   })
 
+  it('redacts a push endpoint and its key, which together can wake a device, wherever they sit', () => {
+    const { logger, last } = capture()
+    // web-push's error carries the endpoint as a property of `err`.
+    logger.warn({ endpoint: 'https://fcm.googleapis.com/fcm/send/x', err: { endpoint: 'https://fcm.googleapis.com/fcm/send/x', statusCode: 410 }, p256dh: 'BPk' }, 'push refused')
+    expect(last()).toMatchObject({ endpoint: CENSOR, err: { endpoint: CENSOR, statusCode: 410 }, p256dh: CENSOR })
+  })
+
   it('keeps the fields beside a redacted one', () => {
     const { logger, last } = capture()
     logger.warn({ password: 'hunter2', user: { totpSecret: 'JBSW', role: 'SUPER_ADMIN' }, restaurantId: 'r1' }, 'sign-in refused')

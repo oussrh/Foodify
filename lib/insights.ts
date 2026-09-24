@@ -38,8 +38,10 @@ export interface InsightsBucket {
   cartAdds: number
   /** Orders a guest sent from their own phone. */
   guestOrders: number
-  /** Orders a waiter took at the table. */
+  /** Orders a waiter took at the table. An addition to a table's bill is in neither count: it is not a new order. */
   staffOrders: number
+  /** Kitchen tickets: the orders and every addition to them, which is what the three waits are averaged over. */
+  tickets: number
   /** Seconds from the order arriving to the kitchen taking it on, averaged; null when none was. */
   acceptSeconds: number | null
   /** Seconds from the order arriving to it going out, averaged; null when none went out. */
@@ -48,7 +50,7 @@ export interface InsightsBucket {
   prepSeconds: number | null
   /** Of the orders, the ones cancelled. They are still counted in the two order figures above. */
   cancelledOrders: number
-  /** What the orders that were not cancelled came to, in minor units (cents): money is never a float. */
+  /** What the tickets that were not cancelled came to, additions included, in minor units (cents): money is never a float. */
   revenueMinor: number
 }
 
@@ -103,8 +105,8 @@ export function bucketStarts(grain: Grain, now: Date, count = GRAIN_BUCKETS[grai
 }
 
 /**
- * The totals of a window: counts add up, and the two averages are re-weighted by the orders
- * behind them. Averaging the bucket averages would let a quiet Tuesday with one slow order
+ * The totals of a window: counts add up, and the averages are re-weighted by the kitchen
+ * tickets behind them. Averaging the bucket averages would let a quiet Tuesday with one slow order
  * count as much as a Saturday with eighty.
  */
 export function totalsOf(buckets: InsightsBucket[]): InsightsTotals {
@@ -115,16 +117,17 @@ export function totalsOf(buckets: InsightsBucket[]): InsightsTotals {
     if (n === 0) return null
     return counted.reduce((total, b) => total + seconds(b)! * orders(b), 0) / n
   }
-  const orders = (b: InsightsBucket) => b.guestOrders + b.staffOrders
+  const tickets = (b: InsightsBucket) => b.tickets
   return {
     views: sum((b) => b.views),
     arViews: sum((b) => b.arViews),
     cartAdds: sum((b) => b.cartAdds),
     guestOrders: sum((b) => b.guestOrders),
     staffOrders: sum((b) => b.staffOrders),
-    acceptSeconds: weighted((b) => b.acceptSeconds, orders),
-    serveSeconds: weighted((b) => b.serveSeconds, orders),
-    prepSeconds: weighted((b) => b.prepSeconds, orders),
+    tickets: sum(tickets),
+    acceptSeconds: weighted((b) => b.acceptSeconds, tickets),
+    serveSeconds: weighted((b) => b.serveSeconds, tickets),
+    prepSeconds: weighted((b) => b.prepSeconds, tickets),
     cancelledOrders: sum((b) => b.cancelledOrders),
     revenueMinor: sum((b) => b.revenueMinor),
   }

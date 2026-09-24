@@ -35,75 +35,76 @@ enum DeviceType {
 }
 
 model Restaurant {
-  id              String         @id @default(uuid())
-  name            String
-  slug            String         @unique
+  id                String             @id @default(uuid())
+  name              String
+  slug              String             @unique
   // The short name this restaurant goes by in a link handed to a device (`lib/restaurant-code.ts`):
   // six Crockford characters, assigned once and never changed. The slug follows the restaurant's
   // name and would break a tab left open on the pass when somebody renames it; this does not.
-  code            String         @unique
-  email           String?
-  phone           String?
-  tagline         String?
-  logoUrl         String?
-  colorTheme      String?
-  defaultLocale   Locale
+  code              String             @unique
+  email             String?
+  phone             String?
+  tagline           String?
+  logoUrl           String?
+  colorTheme        String?
+  defaultLocale     Locale
   // Address Information
-  streetAddress   String?
-  city            String?
-  state           String?
-  postalCode      String?
-  country         String?
+  streetAddress     String?
+  city              String?
+  state             String?
+  postalCode        String?
+  country           String?
   // Additional Business Information
-  website         String?
-  description     String?
-  cuisineType     String?
+  website           String?
+  description       String?
+  cuisineType       String?
   // The dietary attributes this restaurant offers: keys of DIETARY_OPTIONS (lib/menu.ts). The dish
   // forms offer these and the public menu shows these; a new restaurant starts with all of them.
-  dietaryOptions  String[]       @default(["vegetarian", "vegan", "halal", "gluten_free", "spicy"])
-  openingHours    String? // JSON string with operating hours
-  socialMedia     String? // JSON string with social media links
-  socialDisplay   String         @default("icons") // icons | text: how the menu footer shows the social links
+  dietaryOptions    String[]           @default(["vegetarian", "vegan", "halal", "gluten_free", "spicy"])
+  openingHours      String? // JSON string with operating hours
+  socialMedia       String? // JSON string with social media links
+  socialDisplay     String             @default("icons") // icons | text: how the menu footer shows the social links
   // Ordering (Settings → General): with it on, the public menu shows the cart and POST /api/orders
   // takes an order; nextOrderNumber is the number the next order gets, incremented atomically.
-  orderingEnabled Boolean        @default(false)
-  nextOrderNumber Int            @default(1)
+  orderingEnabled   Boolean            @default(false)
+  nextOrderNumber   Int                @default(1)
   // How many tables the room has: the per-table QR sheet makes one code per table (1..N), each
   // opening the menu with its number, and 0 means no per-table codes.
-  tableCount      Int            @default(0)
+  tableCount        Int                @default(0)
   // The restaurant's own clock (an IANA zone, lib/time-zone.ts): when a sold-out dish comes back
   // (its 04:00) and how Insights cuts its days and hours. UTC until a manager sets it, which is
   // what every figure used before there was a setting.
-  timeZone        String         @default("UTC")
+  timeZone          String             @default("UTC")
   // Design/Branding
-  coverImageUrl   String?
-  coverImageStyle String? // "cover" or "repeat"
-  secondaryColor  String?
-  fontFamily      String?
-  googleFontUrl   String? // Google Fonts URL for easy implementation
-  menuTheme       String         @default("system") // system | light | dark: appearance of the public menu
+  coverImageUrl     String?
+  coverImageStyle   String? // "cover" or "repeat"
+  secondaryColor    String?
+  fontFamily        String?
+  googleFontUrl     String? // Google Fonts URL for easy implementation
+  menuTheme         String             @default("system") // system | light | dark: appearance of the public menu
   // Business Settings
-  currency        String? // e.g., "USD", "EUR", "GBP", "CAD"
-  currencySymbol  String? // e.g., "$", "€", "£", "C$"
-  createdAt       DateTime       @default(now())
-  users           User[]
-  categories      MenuCategory[]
-  dishes          Dish[]
-  orders          Order[]
-  cartAdds        CartAdd[]
+  currency          String? // e.g., "USD", "EUR", "GBP", "CAD"
+  currencySymbol    String? // e.g., "$", "€", "£", "C$"
+  createdAt         DateTime           @default(now())
+  users             User[]
+  categories        MenuCategory[]
+  dishes            Dish[]
+  orders            Order[]
+  cartAdds          CartAdd[]
+  pushSubscriptions PushSubscription[]
 }
 
 model User {
-  id                      String           @id @default(uuid())
+  id                      String             @id @default(uuid())
   // Every account has one, but only a person's is an address anyone reads: a device account's is
   // derived from its username on the reserved `.invalid` domain, which can never be routed.
-  email                   String           @unique
+  email                   String             @unique
   // How a device account signs in. People sign in with their address and have none; a tablet or a
   // waiter has no mailbox, so they are given a name instead.
-  username                String?          @unique
+  username                String?            @unique
   emailVerified           DateTime?
   passwordHash            String
-  mfaEnabled              Boolean          @default(false) // the second factor is opt-in: off, a password alone opens a session
+  mfaEnabled              Boolean            @default(false) // the second factor is opt-in: off, a password alone opens a session
   totpSecret              String?
   emailOtpCode            String?
   emailOtpExpires         DateTime?
@@ -116,7 +117,8 @@ model User {
   restaurants             Restaurant[]
   activityLogs            ActivityLog[]
   ordersPlaced            Order[]
-  createdAt               DateTime         @default(now())
+  pushSubscriptions       PushSubscription[]
+  createdAt               DateTime           @default(now())
   lastLogin               DateTime?
   passwordResetToken      String?
   passwordResetExpires    DateTime?
@@ -265,9 +267,17 @@ model Order {
   readyAt      DateTime?
   servedAt     DateTime?
   lines        OrderLine[]
+  // An addition to a table's bill: the guests asked for more after the first ticket went in. It
+  // is its own row with its own number and its own way across the board, so a dish already
+  // cooking is not disturbed and no timing resets, and it points at the order that opened the
+  // table (never at another addition: lib/table-tab.ts). Null on every order that opens a bill.
+  parentId     String?
+  parent       Order?      @relation("OrderAdditions", fields: [parentId], references: [id], onDelete: Cascade)
+  additions    Order[]     @relation("OrderAdditions")
 
   @@unique([restaurantId, number])
   @@index([restaurantId, status, createdAt])
+  @@index([parentId])
 }
 
 // One dish of an order, its name and unit price copied at the time: a dish edited or deleted
@@ -284,6 +294,27 @@ model OrderLine {
   unitPrice Decimal @db.Decimal(10, 2)
   quantity  Int
   note      String?
+}
+
+// A staff device's Web Push subscription (server/push.ts): the browser's endpoint and its two
+// keys, the app it was made for (`board`: a kitchen board; `waiter`: the waiter's phone) and who
+// was signed in. One row per endpoint: a device that subscribes again, after a sign-in as someone
+// else or on another restaurant, moves its row. A send re-checks that the user still works the
+// restaurant, so a person removed from it stops being woken without anybody deleting this row.
+model PushSubscription {
+  id           String     @id @default(uuid())
+  endpoint     String     @unique
+  p256dh       String
+  auth         String
+  app          String // board | waiter (lib/schemas/push.ts, STAFF_PUSH_APPS)
+  userId       String
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  lastUsedAt   DateTime?
+
+  @@index([restaurantId, app])
 }
 
 model UserSessionLog {

@@ -19,6 +19,8 @@ const order = (over: Partial<BoardOrder> = {}): BoardOrder =>
     readyAt: null,
     servedAt: null,
     placedBy: null,
+    parentId: null,
+    parentNumber: null,
     lines: [{ id: 'l1', nameEn: 'Chicken', nameFr: 'Poulet', quantity: 2, note: null }],
     ...over,
   }) as BoardOrder

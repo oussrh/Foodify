@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-23"
+last_verified: "2026-09-24"
 ---
 
 # Lessons
@@ -15,6 +15,34 @@ last_verified: "2026-09-23"
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
+
+## 2026-09-24 · An order is a kitchen ticket; a bill is a table's visit
+
+The waiter app made every send a new order, because the guest cart does and the waiter's order
+screen was built on it. A table that asked for one more thing got a second number and a second
+bill, and the waiter had no way to see what the table already had. The first fix then made the
+opposite mistake: "the table's latest order of the last twelve hours" merged the lunch party and
+the evening party at the same table, because nothing ever closes a bill.
+
+Generalise it as: when one row stands for two things (what the kitchen makes, what the table
+pays), split them before adding rules on top, and bound a grouping by the business's own clock
+(the service day, from the restaurant's local 04:00) plus an explicit choice for the person doing
+it, never by a fixed duration alone. A default that can silently attach work to a stranger's bill
+must be one the waiter sees and can flip.
+
+## 2026-09-24 · A device setting kept in React state is lost on the first reload
+
+The kitchen board's "keep the screen awake" was a `useState`. A tablet reloads more often than
+anyone thinks: the service worker updates, the wifi drops and the tab is restored, somebody pulls
+down on the screen. Each time the screen went back to sleeping mid-service, with nothing saying
+so. The sound switch had half the fix — it was remembered — and the other half of the same bug:
+a browser keeps audio locked until the page is touched, so the remembered "on" was silent until
+someone tapped.
+
+Generalise it as: a switch that belongs to the device is stored on the device and re-applied on
+load, and a capability the browser grants only on a gesture (wake lock on some browsers, audio
+everywhere, notifications, full screen) is re-asked on the first tap anywhere and says it is
+waiting until then. Test it by reloading, not by toggling: the toggle always worked.
 
 ## 2026-09-23 · A validation error on a field nobody can see is a save that silently does nothing
 
