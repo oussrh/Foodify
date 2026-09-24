@@ -15,6 +15,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { CartLineView } from '@/components/menu/cart/cart-lines'
+import type { OrderField } from '@/components/menu/cart/order-check'
+import { MAX_NOTE } from '@/lib/cart'
 import { formatPrice, type Locale, type Money } from '@/lib/menu'
 
 interface WaiterReviewProps {
@@ -32,6 +34,8 @@ interface WaiterReviewProps {
   onSend: () => void
   sending: boolean
   error: string | null
+  /** The field the last attempt was refused over before it was sent (`orderInput`), marked invalid. */
+  field: OrderField | null
 }
 
 /**
@@ -39,7 +43,7 @@ interface WaiterReviewProps {
  * dish and one for the whole order.
  */
 export function WaiterReview(props: WaiterReviewProps) {
-  const { open, onOpenChange, table, lines, subtotal, money, locale, note, onNote, onQuantity, onLineNote, onSend, sending, error } = props
+  const { open, onOpenChange, table, lines, subtotal, money, locale, note, onNote, onQuantity, onLineNote, onSend, sending, error, field } = props
   const name = (line: CartLineView) => (locale === 'fr' ? line.dish.nameFr : line.dish.nameEn)
   const items = lines.reduce((n, line) => n + line.quantity, 0)
 
@@ -87,6 +91,7 @@ export function WaiterReview(props: WaiterReviewProps) {
                   value={line.note}
                   onChange={(event) => onLineNote(line.dish.id, event.target.value)}
                   placeholder="No coriander, well done…"
+                  maxLength={MAX_NOTE}
                   className="mt-1 h-11"
                 />
               </li>
@@ -102,6 +107,8 @@ export function WaiterReview(props: WaiterReviewProps) {
               value={note}
               onChange={(event) => onNote(event.target.value)}
               placeholder="Starters first, one birthday…"
+              maxLength={300}
+              aria-invalid={field === 'note' ? true : undefined}
               className="mt-1 h-12"
             />
           </div>

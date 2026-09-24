@@ -2,18 +2,18 @@ import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { PageHeader } from '@/components/shell/page-header'
 import RestaurantsList from '@/components/shell/restaurants-list'
+import { listSearch, type SearchParams } from '@/lib/schemas/page-params'
 
 export default async function ManagerRestaurantsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ search?: string }>
+  searchParams?: Promise<SearchParams>
 }) {
   const session = await auth()
   if (!session?.user?.email) {
     throw new Error('Not authenticated')
   }
-  const sp = searchParams ? await searchParams : undefined
-  const search = (sp?.search || '').trim()
+  const search = listSearch.parse((await searchParams)?.search)
 
   const restaurants = await prisma.restaurant.findMany({
     where: {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dishInput, dishPatch } from './dish'
+import { availability, dishInput, dishPatch } from './dish'
 
 const dish = { nameEn: 'Grilled Chicken', nameFr: 'Poulet grillé', price: '12.5', imageUrl: '/chicken.jpg' }
 
@@ -40,5 +40,13 @@ describe('dish schemas', () => {
     expect(dishInput.safeParse({ ...dish, calories: -1 }).success).toBe(false)
     expect(dishInput.safeParse({ ...dish, calories: null }).success).toBe(true)
     expect(dishInput.safeParse({ ...dish, descriptionFr: 'x'.repeat(2001) }).success).toBe(false)
+  })
+})
+
+describe('availability', () => {
+  it('is sold out or not, and nothing else', () => {
+    expect(availability.parse({ soldOut: true })).toEqual({ soldOut: true })
+    expect(availability.safeParse({ soldOut: 'yes' }).success).toBe(false)
+    expect(availability.safeParse({}).success).toBe(false)
   })
 })

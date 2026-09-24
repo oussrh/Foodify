@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import { loadInsights } from '@/lib/insights-loader'
-import { parseGrain } from '@/lib/insights'
 import { InsightsScreen } from '@/components/insights/insights-screen'
+import { grainParam, idSegment, routeParams, type SearchParams } from '@/lib/schemas/page-params'
 
 /** The restaurant's report: how the menu is read, how far readers get, and how fast the kitchen turns an order around. */
 export default async function RestaurantInsightsPage({
@@ -9,10 +9,10 @@ export default async function RestaurantInsightsPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ grain?: string }>
+  searchParams: Promise<SearchParams>
 }) {
-  const { id } = await params
-  const grain = parseGrain((await searchParams).grain)
+  const { id } = routeParams(idSegment, await params)
+  const grain = grainParam.parse((await searchParams).grain)
   const data = await loadInsights(id, grain)
   if (!data) redirect('/manager/restaurants')
   const { restaurant, ...report } = data

@@ -6,6 +6,7 @@ import { EmptyState, PageHeader } from '@/components/shell/page-header'
 import { ListSearch } from '@/components/shell/list-search'
 import { AdminsTable } from '@/components/admin/admins-table'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
+import { listSearch, type SearchParams } from '@/lib/schemas/page-params'
 
 /** What the list says of an account's second factor: off, or which of the two it uses. */
 function secondFactorOf(mfaEnabled: boolean, usesAuthenticator: boolean) {
@@ -13,10 +14,9 @@ function secondFactorOf(mfaEnabled: boolean, usesAuthenticator: boolean) {
   return usesAuthenticator ? ('authenticator' as const) : ('email' as const)
 }
 
-export default async function AdminsPage({ searchParams }: { searchParams?: Promise<{ search?: string }> }) {
+export default async function AdminsPage({ searchParams }: { searchParams?: Promise<SearchParams> }) {
   const me = await requireSuperAdminPage()
-  const sp = searchParams ? await searchParams : undefined
-  const search = (sp?.search || '').trim()
+  const search = listSearch.parse((await searchParams)?.search)
 
   const rows = await prisma.user.findMany({
     where: {

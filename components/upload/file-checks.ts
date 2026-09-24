@@ -3,6 +3,8 @@
 // type, a double extension on branding images, and the size limit of the kind. A check answers
 // with the message the component shows, or null when the file passes.
 import type { ArModelType } from '@/components/upload/targets'
+import { issueOf } from '@/components/forms/schema-check'
+import { imageUpload } from '@/lib/schemas/restaurant'
 
 /**
  * A byte count as the size the upload messages quote, in binary units (1024), to two decimals: "1.5
@@ -44,18 +46,10 @@ export function validateDishImage(file: File): string | null {
   return null
 }
 
-const BRAND_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml']
-
-/** A logo or cover: JPG, PNG, WebP or SVG, no double extension, up to `maxMb` (5 for a logo, 10 for a cover). */
+/**
+ * A logo or cover, checked with the schema the upload action parses (`imageUpload`: JPG, PNG, WebP
+ * or SVG, no double extension, up to `maxMb`, 5 for a logo and 10 for a cover).
+ */
 export function validateBrandImage(file: File, maxMb: number): string | null {
-  if (!BRAND_IMAGE_TYPES.includes(file.type)) {
-    return 'Please select a valid image file (JPG, PNG, WebP, or SVG)'
-  }
-  if (file.name.match(/\.(svg|png|jpg|jpeg|webp)\.(png|jpg|jpeg|webp)$/i)) {
-    return 'File appears to have a double extension. Please rename the file and try again.'
-  }
-  if (file.size > maxMb * 1024 * 1024) {
-    return `File size must be less than ${maxMb}MB. Current size: ${formatFileSize(file.size)}`
-  }
-  return null
+  return issueOf(imageUpload(maxMb), file) || null
 }

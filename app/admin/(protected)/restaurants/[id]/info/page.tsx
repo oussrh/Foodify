@@ -4,11 +4,12 @@ import { publicEnv } from '@/lib/env'
 import { loadRestaurantInfo } from '@/lib/restaurant-loader'
 import { restaurantLinks } from '@/lib/restaurant-links'
 import { RestaurantInfoScreen } from '@/components/shell/restaurant-info-screen'
+import { idSegment, routeParams } from '@/lib/schemas/page-params'
 
 /** The same tab a manager sees; the loader's guard admits a super admin to any restaurant. */
 export default async function RestaurantInfoPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSuperAdminPage()
-  const data = await loadRestaurantInfo((await params).id)
+  const data = await loadRestaurantInfo(routeParams(idSegment, await params).id)
   if (!data) redirect('/admin/restaurants')
   return (
     <RestaurantInfoScreen

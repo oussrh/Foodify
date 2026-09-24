@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { call } from '@/lib/api-client'
 import { toast } from 'sonner'
+import { parsedOrToast } from '@/components/forms/schema-check'
+import { assignment } from '@/lib/schemas/assignment'
 
 /**
  * Unassigns one restaurant from a user by posting the user's full remaining list to
@@ -23,14 +25,15 @@ export default function RemoveUserRestaurantButton({
 
   const handleRemove = async () => {
     if (loading) return
+    // The body the route parses, checked with its own schema before it goes.
+    const body = parsedOrToast(assignment('restaurantIds'), { restaurantIds: restaurantIds.filter((id: string) => id !== restaurantId) })
+    if (!body) return
     setLoading(true)
     try {
-      await call(  `/api/users/${userId}/restaurants`, {
+      await call(`/api/users/${userId}/restaurants`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          restaurantIds: restaurantIds.filter((id: string) => id !== restaurantId),
-        }),
+        body: JSON.stringify(body),
       })
       router.refresh()
     } catch {

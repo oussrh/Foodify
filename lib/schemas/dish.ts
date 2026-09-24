@@ -47,3 +47,8 @@ export const ingredientPatch = bilingualName.partial()
 export type IngredientInput = z.infer<typeof ingredientInput>
 /** `ingredientPatch` after parsing. */
 export type IngredientPatch = z.infer<typeof ingredientPatch>
+
+/** A dish's stock as the kitchen or the floor sets it: available again, or sold out for the rest of this service. */
+export const availability = z.object({ soldOut: z.boolean() })
+/** `availability` after parsing. */
+export type Availability = z.infer<typeof availability>

@@ -6,15 +6,15 @@ import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/shell/page-header'
 import RestaurantsList from '@/components/shell/restaurants-list'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
+import { listSearch, type SearchParams } from '@/lib/schemas/page-params'
 
 export default async function RestaurantsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ search?: string }>
+  searchParams?: Promise<SearchParams>
 }) {
   await requireSuperAdminPage()
-  const sp = searchParams ? await searchParams : undefined
-  const search = (sp?.search || '').trim()
+  const search = listSearch.parse((await searchParams)?.search)
 
   const restaurants = await prisma.restaurant.findMany({
     where: search

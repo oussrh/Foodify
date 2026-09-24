@@ -1,14 +1,13 @@
-import { redirect } from 'next/navigation'
-import { loadServiceMenu } from '@/lib/restaurant-loader'
-import { restaurantIdFromParam } from '@/lib/restaurant-loader'
+import { notFound, redirect } from 'next/navigation'
+import { loadServiceMenu, restaurantIdFromParam } from '@/lib/restaurant-loader'
 import { AvailabilityPage } from '@/components/availability/availability-page'
 import { WaiterNav } from '@/components/waiter/waiter-nav'
 
 /** The waiter's phone: mark a dish off the moment the kitchen says so, from the floor. */
 export default async function WaiterAvailabilityPage({ params }: { params: Promise<{ id: string }> }) {
   const { id: param } = await params
-  const id = await restaurantIdFromParam(param)
-  const data = id ? await loadServiceMenu(id) : null
+  const id = await restaurantIdFromParam(param) ?? notFound()
+  const data = await loadServiceMenu(id)
   if (!data) redirect('/waiter/login')
   return (
     <>

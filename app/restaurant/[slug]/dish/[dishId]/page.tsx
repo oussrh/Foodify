@@ -4,6 +4,9 @@ import type { Metadata } from 'next'
 import DishPage from '@/components/menu/dish-page'
 import { brandStyle } from '@/lib/brand-color'
 import { serializeDish, serializeRestaurant, siteOrigin } from '@/lib/menu-data'
+import { menuDishSegments, menuQuery, routeParams, type SearchParams } from '@/lib/schemas/page-params'
+
+type Segments = Promise<{ slug: string; dishId: string }>
 
 async function getDish(dishId: string, slug: string) {
   const dish = await prisma.dish.findUnique({
@@ -18,8 +21,8 @@ async function getDish(dishId: string, slug: string) {
   return dish
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string; dishId: string }> }): Promise<Metadata> {
-  const { slug, dishId } = await params
+export async function generateMetadata({ params }: { params: Segments }): Promise<Metadata> {
+  const { slug, dishId } = routeParams(menuDishSegments, await params)
   const dish = await getDish(dishId, slug)
   if (!dish) return {}
   return {
@@ -34,11 +37,11 @@ export default async function DishRoute({
   params,
   searchParams,
 }: {
-  params: Promise<{ slug: string; dishId: string }>
-  searchParams?: Promise<{ lang?: string }>
+  params: Segments
+  searchParams?: Promise<SearchParams>
 }) {
-  const { slug, dishId } = await params
-  const sp = searchParams ? await searchParams : undefined
+  const { slug, dishId } = routeParams(menuDishSegments, await params)
+  const { lang } = menuQuery.parse((await searchParams) ?? {})
   const dish = await getDish(dishId, slug)
   if (!dish) notFound()
 
@@ -65,7 +68,7 @@ export default async function DishRoute({
         breadcrumb={breadcrumb}
         brandStyle={brandStyle(restaurant.colorTheme)}
         shareUrl={`${siteOrigin()}/restaurant/${slug}/dish/${dish.id}`}
-        urlLang={sp?.lang ?? null}
+        urlLang={lang ?? null}
       />
     </>
   )

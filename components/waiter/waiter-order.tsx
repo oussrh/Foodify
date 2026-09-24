@@ -48,8 +48,8 @@ export default function WaiterOrder({ restaurantId, restaurantName, table, categ
   const items = lines.reduce((n, line) => n + line.quantity, 0)
 
   const send = async () => {
-    await placing.send({ restaurantId, table, phone: '', lines: cartLinesToSend(lines), note })
-    setReviewing(false)
+    // No phone: a waiter has nobody to text. A refusal before sending keeps the sheet open on the field.
+    if (await placing.send({ restaurantId, table, phone: '', lines: cartLinesToSend(lines), note }, false)) setReviewing(false)
   }
 
   // `usePlaceOrder` holds the order once the server answers; that is the confirmation screen.
@@ -127,6 +127,7 @@ export default function WaiterOrder({ restaurantId, restaurantName, table, categ
         onSend={send}
         sending={placing.status === 'sending'}
         error={placing.error}
+        field={placing.field}
       />
     </div>
   )

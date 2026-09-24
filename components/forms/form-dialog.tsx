@@ -25,8 +25,12 @@ interface FormDialogProps {
   submitLabel: string
   /** False greys the submit; the caller decides what a filled-in form is. */
   canSubmit: boolean
-  /** Resolving closes the dialog; throwing shows `failure` and leaves it open on what was typed. */
-  onSubmit: () => Promise<void>
+  /**
+   * Resolving closes the dialog; throwing shows `failure` and leaves it open on what was typed.
+   * Resolving `false` leaves it open too, without `failure`: the form's own check refused it and
+   * its fields already say why.
+   */
+  onSubmit: () => Promise<void | false>
   /**
    * The one sentence shown when the action refuses. It has to cover every refusal: a server
    * action's own message does not survive to the browser in production.
@@ -58,8 +62,7 @@ export function FormDialog({
     setBusy(true)
     setError('')
     try {
-      await onSubmit()
-      onOpenChange(false)
+      if ((await onSubmit()) !== false) onOpenChange(false)
     } catch {
       setError(failure)
     } finally {

@@ -26,11 +26,6 @@ export const GRAIN_WINDOW: Record<Grain, string> = {
   year: 'the last 5 years',
 }
 
-/** A grain from a URL or a form; anything else reads as the default rather than failing a page. */
-export function parseGrain(value: unknown): Grain {
-  return GRAINS.includes(value as Grain) ? (value as Grain) : 'day'
-}
-
 /** What one bucket of the report counts. Every figure is of the bucket alone, never cumulative. */
 export interface InsightsBucket {
   /** The start of the bucket, as `date_trunc` put it. */

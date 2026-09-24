@@ -27,18 +27,19 @@ export function encodeCursor(key: Key): string {
   return Buffer.from(JSON.stringify([key.sort, key.id]), 'utf8').toString('base64url')
 }
 
+/** A cursor's decoded JSON as `encodeCursor` writes it: the pair [sort value, id], both strings. */
+const cursorKey = z.tuple([z.string(), z.string()]).transform(([sort, id]): Key => ({ sort, id }))
+
 /** The key inside a cursor, or null for anything that is not one this module wrote. */
 export function decodeCursor(cursor: string): Key | null {
+  let json: unknown
   try {
-    const parsed: unknown = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'))
-    if (Array.isArray(parsed) && parsed.length === 2) {
-      const [sort, id]: unknown[] = parsed
-      if (typeof sort === 'string' && typeof id === 'string') return { sort, id }
-    }
+    json = JSON.parse(Buffer.from(cursor, 'base64url').toString('utf8'))
   } catch {
-    // not a cursor of ours
+    return null // not JSON, so not a cursor of ours
   }
-  return null
+  const key = cursorKey.safeParse(json)
+  return key.success ? key.data : null
 }
 
 /** Prisma's `take` for a page: one row more than the limit tells whether a next page exists. */

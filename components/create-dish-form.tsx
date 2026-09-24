@@ -3,31 +3,22 @@
 "use client";
 
 import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createDish } from "@/app/actions/dish-actions";
 import { dishInput } from "@/lib/schemas/dish";
+import { firstIssue } from "@/lib/schemas/common";
 import { DishNameFields, DishDescriptionFields } from "@/components/dish-form/dish-fields";
 import DishDetailsGrid from "@/components/dish-form/dish-details-grid";
 import DishMediaUploads from "@/components/dish-form/dish-media-uploads";
 import DishModelPreview from "@/components/dish-form/dish-model-preview";
 import CreateDishSubmit from "@/components/dish-form/create-dish-submit";
 import { useDishAssets } from "@/components/dish-form/use-dish-assets";
-import { createDishPayload } from "@/components/dish-form/create-dish-payload";
+import { caloriesValue, dishFormSchema, dishPayload, type DishFormValues } from "@/components/dish-form/dish-form-schema";
 import { useState } from "react";
 import { ChefHat, AlertCircle, CheckCircle } from "lucide-react";
 
 type Subcategory = { id: string; nameEn: string };
-
-// Simple schema without transforms - handle conversion manually
-// The dish rules, with the two numeric fields as the text they are typed in (the submit converts them).
-const schema = dishInput.omit({ calories: true, subcategoryId: true }).extend({
-  calories: z.string().optional(),
-  subcategoryId: z.string().optional(),
-});
-
-type FormValues = z.infer<typeof schema>;
 
 /**
  * Creates a dish in one restaurant with its names, details, dietary tags and uploaded image and AR
@@ -58,40 +49,24 @@ export default function CreateDishForm({
     reset,
     setValue,
     control,
-    setError: setFormError,
-  } = useForm<FormValues>({
-    resolver: zodResolver(schema),
+  } = useForm<DishFormValues>({
+    resolver: zodResolver(dishFormSchema),
     mode: "onChange",
   });
   const [dietary = [], allergens = [], nameEn] = useWatch({ control, name: ['dietary', 'allergens', 'nameEn'] })
 
-  const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true)
+  const onSubmit = async (data: DishFormValues) => {
     setError(null)
-
-    // Manual validation and conversion
-    let calories: number | undefined;
-    if (data.calories && data.calories !== "") {
-      calories = parseInt(data.calories);
-      if (isNaN(calories)) {
-        setFormError("calories", { message: "Calories must be a valid number" });
-        setIsSubmitting(false);
-        return;
-      }
+    // The whole payload through createDish's own schema: the asset URLs join it here, after the fields' check.
+    const parsed = dishInput.safeParse(dishPayload(data, { imageUrl: imageUrl || data.imageUrl, usdzUrl, glbUrl }))
+    if (!parsed.success) {
+      setError(firstIssue(parsed.error))
+      return
     }
-
-    const finalData = createDishPayload(data, calories, { imageUrl, usdzUrl, glbUrl })
-
-    console.log('Create dish form submission data:', {
-      formData: data,
-      usdzUrl,
-      glbUrl,
-      imageUrl,
-      finalData
-    })
+    setIsSubmitting(true)
 
     try {
-      await createDish(restaurantId, finalData);
+      await createDish(restaurantId, parsed.data);
       setSuccess(true)
       reset()
       resetAssets({})
@@ -151,7 +126,7 @@ export default function CreateDishForm({
 
             <DishDetailsGrid
               price={{ field: register("price"), error: errors.price, placeholder: "0.00" }}
-              calories={{ field: register("calories"), error: errors.calories, placeholder: "250" }}
+              calories={{ field: register("calories", { setValueAs: caloriesValue }), error: errors.calories, placeholder: "250" }}
               subcategoryId={register("subcategoryId")}
               imageUrl={{ field: register("imageUrl"), value: imageUrl }}
               isMostPurchased={register("isMostPurchased")}

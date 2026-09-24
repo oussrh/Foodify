@@ -90,9 +90,10 @@ export default function CartSheet({ open, onOpenChange, restaurantId, restaurant
                 note={note}
                 onNote={setNote}
                 // The lines the sheet is showing, not every stored one: a dish taken off the menu is already gone from them.
-                onSubmit={() => placing.send({ restaurantId, table: cart.cart.table, phone, lines: cartLinesToSend(lines), note })}
+                onSubmit={() => placing.send({ restaurantId, table: cart.cart.table, phone, lines: cartLinesToSend(lines), note }, true)}
                 sending={placing.status === 'sending'}
                 error={placing.error}
+                field={placing.field}
                 locale={locale}
                 money={money}
               />

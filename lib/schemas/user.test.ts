@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { clientInput, credentials, emailToken, otpRequest } from './user'
+import { clientInput, credentials, emailToken, otpRequest, userListQuery } from './user'
 
 describe('user schemas', () => {
   it('refuses a restaurant id that is not a UUID on a new client', () => {
@@ -35,5 +35,17 @@ describe('user schemas', () => {
     const base = { email: 'manager@example.com', password: 'secret' }
     expect(clientInput.parse({ ...base, restaurantName: '  Chez Test ' }).restaurantName).toBe('Chez Test')
     expect(clientInput.safeParse({ ...base, restaurantName: 'x'.repeat(121) }).success).toBe(false)
+  })
+})
+
+describe('userListQuery', () => {
+  it('filters on a portal role, or on none', () => {
+    expect(userListQuery.parse({ role: 'RESTAURANT_ADMIN' })).toEqual({ limit: 100, role: 'RESTAURANT_ADMIN' })
+    expect(userListQuery.parse({ limit: '5' })).toEqual({ limit: 5 })
+  })
+
+  it('refuses any other role rather than listing everyone', () => {
+    expect(userListQuery.safeParse({ role: 'KITCHEN' }).success).toBe(false)
+    expect(userListQuery.safeParse({ role: 'super_admin' }).success).toBe(false)
   })
 })

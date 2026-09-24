@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { otpCode } from '@/lib/schemas/user'
 
 interface CodeStepProps {
   /** Where the code was sent */
@@ -62,7 +63,7 @@ export default function CodeStep({ email, code, onCode, onSubmit, codeRef, error
           {error}
         </p>
       )}
-      <Button type="submit" size="lg" disabled={busy || code.length !== 6} className="mt-1">
+      <Button type="submit" size="lg" disabled={busy || !otpCode.safeParse(code).success} className="mt-1">
         {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {busy ? 'Verifying…' : 'Sign in'}
       </Button>

@@ -4,12 +4,12 @@
 // the kitchen, and the button that sends it.
 'use client'
 
-import { useState } from 'react'
 import { formatPrice, type Locale, type Money } from '@/lib/menu'
 import { MENU_TEXT } from '@/lib/menu-text'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import type { OrderField } from './order-check'
 import TableField from './table-field'
 
 interface OrderFormProps {
@@ -22,11 +22,13 @@ interface OrderFormProps {
   onPhone: (phone: string) => void
   note: string
   onNote: (note: string) => void
-  /** Called only once the table and the phone are there; what is missing is this form's own message. */
+  /** Sends the order; the check against the route's schema is `usePlaceOrder`'s, which names the failing `field`. */
   onSubmit: () => void
   sending: boolean
   /** What went wrong with the last attempt, in the guest's language; '' when nothing did. */
   error: string
+  /** The field the last attempt was refused over, marked invalid; null when none was. */
+  field: OrderField | null
   locale: Locale
   money: Money
 }
@@ -35,20 +37,14 @@ interface OrderFormProps {
  * The foot of the cart: the subtotal, the table (shown, not asked for, when the QR code carried
  * it), the phone, the note and the send button.
  */
-export default function OrderForm({ subtotal, table, onTable, tableLocked, phone, onPhone, note, onNote, onSubmit, sending, error, locale, money }: OrderFormProps) {
+export default function OrderForm({ subtotal, table, onTable, tableLocked, phone, onPhone, note, onNote, onSubmit, sending, error, field, locale, money }: OrderFormProps) {
   const t = MENU_TEXT[locale]
-  // The fields are asked for only once the guest has tried to send: an empty one is not yet a mistake.
-  const [attempted, setAttempted] = useState(false)
-  const missingTable = !table.trim()
-  const missingPhone = !phone.trim()
-  const message = error || (attempted && missingTable ? t.tableRequired : attempted && missingPhone ? t.phoneRequired : '')
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault()
-        setAttempted(true)
-        if (!missingTable && !missingPhone) onSubmit()
+        onSubmit()
       }}
       noValidate
       className="flex flex-col gap-4 border-t border-border pt-4"
@@ -58,7 +54,7 @@ export default function OrderForm({ subtotal, table, onTable, tableLocked, phone
         <span className="tnum text-lg font-semibold">{formatPrice(subtotal, money)}</span>
       </div>
 
-      <TableField table={table} onTable={onTable} locked={tableLocked} invalid={attempted && missingTable} locale={locale} />
+      <TableField table={table} onTable={onTable} locked={tableLocked} invalid={field === 'table'} locale={locale} />
 
       <div className="space-y-1.5">
         <Label htmlFor="cart-phone">{t.phoneNumber}</Label>
@@ -71,7 +67,7 @@ export default function OrderForm({ subtotal, table, onTable, tableLocked, phone
           autoComplete="tel"
           maxLength={20}
           required
-          aria-invalid={attempted && missingPhone ? true : undefined}
+          aria-invalid={field === 'phone' ? true : undefined}
           aria-describedby="cart-phone-hint"
           className="h-12 text-base"
         />
@@ -82,12 +78,12 @@ export default function OrderForm({ subtotal, table, onTable, tableLocked, phone
 
       <div className="space-y-1.5">
         <Label htmlFor="cart-note">{t.orderNote}</Label>
-        <Textarea id="cart-note" value={note} onChange={(e) => onNote(e.target.value)} maxLength={300} rows={2} className="text-base" />
+        <Textarea id="cart-note" value={note} onChange={(e) => onNote(e.target.value)} maxLength={300} rows={2} aria-invalid={field === 'note' ? true : undefined} className="text-base" />
       </div>
 
-      {message && (
+      {error && (
         <p role="alert" className="text-sm text-destructive">
-          {message}
+          {error}
         </p>
       )}
 

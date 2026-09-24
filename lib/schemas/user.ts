@@ -2,6 +2,7 @@
 // Super admins, restaurant admins ("clients") and the signed-in user's own profile.
 import { z } from 'zod'
 import { MAX_NAME, email, password, uuid } from './common'
+import { listQuery } from './list'
 
 /** A new super admin: the address and the temporary `password` (six characters, meant to be changed; nothing enforces the change yet). */
 export const adminInput = z.object({ email, password })
@@ -83,3 +84,12 @@ export const credentials = z.object({
     .transform((v) => (v && /^\d{6}$/.test(v) ? v : undefined)),
   role: z.enum(['SUPER_ADMIN', 'RESTAURANT_ADMIN', 'KITCHEN', 'WAITER']).optional(),
 })
+
+/**
+ * GET /api/users: a page of `listQuery` and an optional `role` to filter on, one of the two
+ * portal roles. Any other role is refused (400), not read as no filter: a typo must not widen the list.
+ */
+export const userListQuery = listQuery.extend({ role: z.enum(['SUPER_ADMIN', 'RESTAURANT_ADMIN']).optional() })
+
+/** The code a person types at the second step of a sign-in: six digits, the emailed code and a TOTP alike (what `credentials.code` keeps). */
+export const otpCode = z.string().regex(/^\d{6}$/, 'Enter the 6-digit code')

@@ -8,7 +8,8 @@ import { AuthError, requireBoardAccess, requireOrderingStaff, requireRestaurantA
 import { loadMenu } from '@/lib/menu-loader'
 import { boardOrderSelect, serializeOrder } from '@/lib/order-data'
 import { daysAgo } from '@/lib/time'
-import { parseRestaurantCode } from '@/lib/restaurant-code'
+import { isRestaurantCode } from '@/lib/restaurant-code'
+import { restaurantRef } from '@/lib/schemas/staff-app'
 
 /** Whether the guard passes, as a boolean: a page redirects rather than throwing at a signed-out reader. */
 async function passes(guard: () => Promise<unknown>): Promise<boolean> {
@@ -22,16 +23,20 @@ async function passes(guard: () => Promise<unknown>): Promise<boolean> {
 }
 
 /**
- * The restaurant a device route was given, as a uuid. The path may carry either form: the short
- * code the links now hand out, or the uuid the links used to — a tablet with the old address
- * saved to its home screen must keep working, and a printed one cannot be recalled. Null when the
- * code matches nothing, which the caller turns into the same redirect every other miss gets.
+ * The restaurant a device route was given, as a uuid. The path may carry either form
+ * (`restaurantRef`): the short code the links now hand out, or the uuid the links used to — a
+ * tablet with the old address saved to its home screen must keep working, and a printed one
+ * cannot be recalled. Null only when the segment has neither shape: the caller's 404. A uuid is
+ * returned unread, and a code that matches nothing comes back as the code, which no restaurant's
+ * id is: whether either exists is the guard's question, answered with the same redirect to the
+ * sign-in. A 404 for an unknown code would tell a signed-out stranger which codes are real.
  */
 export async function restaurantIdFromParam(param: string): Promise<string | null> {
-  const code = parseRestaurantCode(param)
-  if (!code) return param
-  const found = await prisma.restaurant.findUnique({ where: { code }, select: { id: true } })
-  return found?.id ?? null
+  const ref = restaurantRef.safeParse(param)
+  if (!ref.success) return null
+  if (!isRestaurantCode(ref.data)) return ref.data
+  const found = await prisma.restaurant.findUnique({ where: { code: ref.data }, select: { id: true } })
+  return found?.id ?? ref.data
 }
 
 /** Whether the signed-in user may manage this restaurant; false for a stranger, a kitchen tablet, and nobody signed in. */

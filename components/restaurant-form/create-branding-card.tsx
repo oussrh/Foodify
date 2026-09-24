@@ -5,7 +5,8 @@
 "use client";
 
 import { useWatch } from "react-hook-form";
-import type { Control, UseFormRegister, UseFormSetValue } from "react-hook-form";
+import type { Control, FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
+import FieldError from "@/components/forms/field-error";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -23,11 +24,14 @@ import { Palette, ImageIcon, Monitor } from "lucide-react";
  */
 export default function CreateBrandingCard({
   register,
+  errors,
   setValue,
   control,
   isSubmitting,
 }: {
   register: UseFormRegister<RestaurantInput>;
+  /** The schema's refusals: each colour, upload and the font say theirs under themselves. */
+  errors: FieldErrors<RestaurantInput>;
   setValue: UseFormSetValue<RestaurantInput>;
   control: Control<RestaurantInput>;
   isSubmitting: boolean;
@@ -58,6 +62,7 @@ export default function CreateBrandingCard({
             onLogoUpload={(url) => setValue("logoUrl", url)}
             disabled={isSubmitting}
           />
+          <FieldError error={errors.logoUrl} />
         </div>
 
         {/* Cover Image Upload */}
@@ -73,6 +78,7 @@ export default function CreateBrandingCard({
             onCoverUpload={(url) => setValue("coverImageUrl", url)}
             disabled={isSubmitting}
           />
+          <FieldError error={errors.coverImageUrl} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -96,6 +102,7 @@ export default function CreateBrandingCard({
                 className="flex-1 border-border font-mono"
               />
             </div>
+            <FieldError error={errors.colorTheme} />
           </div>
 
           <div className="space-y-2">
@@ -115,6 +122,7 @@ export default function CreateBrandingCard({
                 className="flex-1 border-border font-mono"
               />
             </div>
+            <FieldError error={errors.secondaryColor} />
           </div>
         </div>
 
@@ -128,6 +136,7 @@ export default function CreateBrandingCard({
             }}
             disabled={isSubmitting}
           />
+          <FieldError error={errors.googleFontUrl ?? errors.fontFamily} />
         </div>
 
         {/* Cover Image Style */}

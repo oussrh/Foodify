@@ -3,11 +3,12 @@ import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import DishEditor from '@/components/shell/dish-editor'
+import { dishSegments, routeParams } from '@/lib/schemas/page-params'
 
 export default async function EditDishPage({ params }: { params: Promise<{ id: string; dishId: string }> }) {
-  const { id, dishId } = await params
   const session = await auth()
   if (!session?.user?.email) redirect('/manager/login')
+  const { id, dishId } = routeParams(dishSegments, await params)
 
   const restaurant = await prisma.restaurant.findFirst({
     where: { id, users: { some: { email: session.user.email } } },

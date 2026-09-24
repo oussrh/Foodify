@@ -8,7 +8,8 @@ import { cn } from '@/lib/utils'
 interface BrandColourSectionProps {
   /** The colour as typed, valid or not */
   hex: string
-  validHex: boolean
+  /** Why `hex` would be refused on save (`hexColor`'s message); '' when it is a colour. */
+  issue: string
   onChange: (hex: string) => void
   disabled?: boolean | undefined
 }
@@ -25,7 +26,8 @@ const PRESETS: { hex: string; name: string }[] = [
 ]
 
 /** Presets, a custom colour, and how the brand ink reads on a light and a dark menu. */
-export default function BrandColourSection({ hex, validHex, onChange, disabled }: BrandColourSectionProps) {
+export default function BrandColourSection({ hex, issue, onChange, disabled }: BrandColourSectionProps) {
+  const validHex = !issue
   const palette = useMemo(() => brandPalette(hex), [hex])
   const { ratioLight, ratioDark } = palette
   const adjusted = palette.raw.toLowerCase() !== palette.inkLight.toLowerCase()
@@ -64,7 +66,7 @@ export default function BrandColourSection({ hex, validHex, onChange, disabled }
           <input
             type="color"
             aria-label="Custom brand colour"
-            value={validHex ? hex : '#1F6B49'}
+            value={palette.raw}
             disabled={disabled}
             onChange={(e) => onChange(e.target.value)}
             className="h-7 w-8 cursor-pointer rounded border-0 bg-transparent p-0"
@@ -76,10 +78,17 @@ export default function BrandColourSection({ hex, validHex, onChange, disabled }
             onChange={(e) => onChange(e.target.value)}
             spellCheck={false}
             aria-label="Brand colour hex"
+            aria-invalid={validHex ? undefined : true}
+            aria-describedby={validHex ? undefined : 'brand-colour-issue'}
             className={cn('h-8 w-24 bg-transparent font-mono text-sm focus:outline-hidden', !validHex && 'text-destructive')}
           />
         </label>
       </div>
+      {issue && (
+        <p id="brand-colour-issue" className="-mt-2 text-xs text-destructive">
+          {issue}
+        </p>
+      )}
 
       <div className="grid gap-2 sm:grid-cols-2">
         {[

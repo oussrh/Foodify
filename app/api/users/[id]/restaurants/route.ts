@@ -1,8 +1,8 @@
 import prisma from '@/lib/prisma'
 import { NextRequest } from 'next/server'
-import { ok, fail } from '@/lib/api'
+import { ok, fail, jsonBody } from '@/lib/api'
 import { authErrorResponse, requireSuperAdmin } from '@/lib/auth-guard'
-import { assignment, jsonBody } from '@/lib/schemas/assignment'
+import { assignment } from '@/lib/schemas/assignment'
 import { uuid } from '@/lib/schemas/common'
 
 /**

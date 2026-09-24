@@ -1,8 +1,7 @@
-import { redirect } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { boardMetadata } from '@/lib/order-board-page'
-import { loadBoardRestaurant } from '@/lib/restaurant-loader'
-import { restaurantIdFromParam } from '@/lib/restaurant-loader'
+import { loadBoardRestaurant, restaurantIdFromParam } from '@/lib/restaurant-loader'
 import BoardScreen from '@/components/orders/board-screen'
 
 /** The tablet installs this one: the manifest names the restaurant and opens straight onto its board. */
@@ -15,8 +14,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
  * not a signed-in manager. A reader who may not open this restaurant is sent to the tablet login.
  */
 export default async function KitchenOrdersPage({ params }: { params: Promise<{ id: string }> }) {
-  const id = await restaurantIdFromParam((await params).id)
-  const restaurant = id ? await loadBoardRestaurant(id) : null
+  const id = await restaurantIdFromParam((await params).id) ?? notFound()
+  const restaurant = await loadBoardRestaurant(id)
   if (!restaurant) redirect('/kitchen/login')
   return <BoardScreen restaurant={restaurant} portal="kitchen" />
 }

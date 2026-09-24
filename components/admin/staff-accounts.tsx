@@ -14,8 +14,9 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { StaffAccountRow } from '@/components/admin/staff-account-row'
 import { PlainField } from '@/components/forms/plain-field'
+import { fieldIssues } from '@/components/forms/schema-check'
 import { ROLE_DESCRIPTION, ROLE_LABEL } from '@/lib/roles'
-import type { StaffRole } from '@/lib/schemas/staff'
+import { staffAccount, type StaffRole } from '@/lib/schemas/staff'
 
 interface StaffAccountRow {
   id: string
@@ -43,6 +44,7 @@ export default function StaffAccounts({ restaurantId, staffRole: role, accounts,
   const [password, setPassword] = useState('')
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [issues, setIssues] = useState<Record<string, string>>({})
   const label = ROLE_LABEL[role]
   const Icon = role === 'KITCHEN' ? Tablet : Utensils
 
@@ -64,11 +66,15 @@ export default function StaffAccounts({ restaurantId, staffRole: role, accounts,
 
   const create = async (event: React.FormEvent) => {
     event.preventDefault()
+    // The schema createStaffUser parses: the username's characters and length, the password's length.
+    const found = fieldIssues(staffAccount, { username, password })
+    setIssues(found)
+    if (Object.keys(found).length > 0) return
     await run(async () => {
       await createStaffUser(restaurantId, role, { username, password })
       setUsername('')
       setPassword('')
-    }, 'Could not create it. The username may be taken or too short, or the password too short.')
+    }, 'Could not create it. The username may be taken.')
   }
 
   return (
@@ -106,6 +112,7 @@ export default function StaffAccounts({ restaurantId, staffRole: role, accounts,
             onChange={setUsername}
             placeholder={role === 'KITCHEN' ? 'kitchen1' : 'waiter1'}
             required
+            error={issues.username}
           />
           <PlainField
             id={`${role}-password`}
@@ -114,8 +121,9 @@ export default function StaffAccounts({ restaurantId, staffRole: role, accounts,
             onChange={setPassword}
             placeholder="At least 6 characters"
             required
+            error={issues.password}
           />
-          <Button type="submit" disabled={busy || username.trim().length < 3 || password.length < 6}>
+          <Button type="submit" disabled={busy || !username.trim() || !password}>
             Add {label.toLowerCase()}
           </Button>
         </form>

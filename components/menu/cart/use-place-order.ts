@@ -5,26 +5,24 @@
 'use client'
 
 import { useState } from 'react'
+import { z } from 'zod'
 import { ApiError, call } from '@/lib/api-client'
-import type { CartLine } from '@/lib/cart'
 import { type Locale } from '@/lib/menu'
 import { MENU_TEXT } from '@/lib/menu-text'
-import type { PlacedOrder } from '@/lib/schemas/order'
+import { placedOrder, refusedDish, type PlacedOrder } from '@/lib/schemas/order'
+import { checkOrder, type OrderDraft, type OrderField } from './order-check'
 
-type State = { status: 'idle' | 'sending'; error: string } | { status: 'sent'; order: PlacedOrder }
+type State = { status: 'idle' | 'sending'; error: string; field: OrderField | null } | { status: 'sent'; order: PlacedOrder }
 
-/** What `POST /api/orders` sends with a 409: the dishes it would not take, and why. */
-interface RefusedDish {
-  nameEn: string | null
-  nameFr: string | null
-  reason: 'sold_out' | 'off_menu'
-}
+const IDLE: State = { status: 'idle', error: '', field: null }
+// What a 409 carries: the dishes it would not take. A body of another shape names none.
+const refusedDishes = z.array(refusedDish).catch([])
 
 /** The dishes the server named, in the guest's language; empty when it named none it could name. */
 function soldOutNames(details: unknown, locale: Locale): string[] {
-  if (!Array.isArray(details)) return []
-  return (details as RefusedDish[])
-    .filter((dish) => dish && dish.reason === 'sold_out')
+  return refusedDishes
+    .parse(details)
+    .filter((dish) => dish.reason === 'sold_out')
     .map((dish) => (locale === 'fr' ? dish.nameFr : dish.nameEn))
     .filter((name): name is string => typeof name === 'string' && name.length > 0)
 }
@@ -55,49 +53,58 @@ export interface PlaceOrder {
   status: 'idle' | 'sending' | 'sent'
   /** What went wrong with the last attempt, in the guest's language; '' when nothing did. */
   error: string
+  /** The field the last attempt was refused over before it was sent; null when none was. */
+  field: OrderField | null
   /** The order the server took, once it has. */
   order: PlacedOrder | null
-  send: (input: { restaurantId: string; table: string; phone: string; lines: CartLine[]; note: string }) => Promise<void>
+  /**
+   * Checks the order with the route's own schema, then sends it; `requirePhone` is the guest's case.
+   * Resolves false when the check refused it and nothing was sent.
+   */
+  send: (draft: OrderDraft, requirePhone: boolean) => Promise<boolean>
   /** Back to the form, for a second order at the same table. */
   reset: () => void
 }
 
 /**
- * Sends the order to POST /api/orders and says what went wrong in the guest's language; the cart is
- * emptied only once an order number comes back.
+ * Checks the order with `orderInput` (the route's own schema) and sends it to POST /api/orders,
+ * saying what went wrong in the guest's language; the cart is emptied only once an order number
+ * comes back.
  */
 export function usePlaceOrder(locale: Locale, onSent: () => void): PlaceOrder {
-  const [state, setState] = useState<State>({ status: 'idle', error: '' })
+  const [state, setState] = useState<State>(IDLE)
 
-  const send = async ({ restaurantId, table, phone, lines, note }: { restaurantId: string; table: string; phone: string; lines: CartLine[]; note: string }) => {
-    setState({ status: 'sending', error: '' })
+  const send = async (draft: OrderDraft, requirePhone: boolean): Promise<boolean> => {
+    const checked = checkOrder(draft, locale, requirePhone)
+    if (!checked.ok) {
+      setState({ status: 'idle', error: checked.message, field: checked.field })
+      return false
+    }
+    setState({ status: 'sending', error: '', field: null })
     try {
-      const { data } = await call<PlacedOrder>('/api/orders', {
+      const { data } = await call<unknown>('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // An empty phone is left out rather than sent as '': a waiter has nobody to text, and the
-        // shape reads a missing key as "no phone" (the schema also folds '' to the same thing).
-        body: JSON.stringify({
-          restaurantId,
-          table: table.trim(),
-          phone: phone.trim() || undefined,
-          locale,
-          note: note.trim() || undefined,
-          lines,
-        }),
+        body: JSON.stringify(checked.body),
       })
-      setState({ status: 'sent', order: data })
+      // The order is stored once the POST answers: a body off its expected shape must not read as a
+      // failure, or the guest sends again and the kitchen gets it twice. The sent screen then has
+      // the table the guest gave and no number, rather than an error over an order that stands.
+      const placed = placedOrder.safeParse(data)
+      setState({ status: 'sent', order: placed.success ? placed.data : { id: '', number: 0, table: checked.body.table ?? '', subtotal: '' } })
       onSent()
     } catch (error) {
-      setState({ status: 'idle', error: messageFor(error, locale) })
+      setState({ status: 'idle', error: messageFor(error, locale), field: null })
     }
+    return true
   }
 
   return {
     status: state.status,
     error: state.status === 'sent' ? '' : state.error,
+    field: state.status === 'sent' ? null : state.field,
     order: state.status === 'sent' ? state.order : null,
     send,
-    reset: () => setState({ status: 'idle', error: '' }),
+    reset: () => setState(IDLE),
   }
 }

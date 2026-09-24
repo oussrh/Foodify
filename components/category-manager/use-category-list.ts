@@ -10,6 +10,7 @@ import {
   updateCategory,
   reorderCategories,
 } from "@/app/actions/menu-actions";
+import { checkNames } from "./check-names";
 import type { Category, Names } from "./types";
 
 /**
@@ -20,19 +21,23 @@ import type { Category, Names } from "./types";
 export function useCategoryList(initialData: Category[], restaurantId: string) {
   const [categories, setCategories] = useState<Category[]>(initialData);
 
-  const addCategory = async (names: Names) => {
-    const cat = await createCategory(restaurantId, {
-      nameEn: names.en,
-      nameFr: names.fr,
-    });
+  // Both handlers check with `categoryInput` (trimmed, both languages, 120 at most; a rename sends both, so the
+  // patch the action parses takes it as it is) and toast its message.
+  const addCategory = async (names: Names): Promise<boolean> => {
+    const input = checkNames(names);
+    if (!input) return false;
+    const cat = await createCategory(restaurantId, input);
     setCategories([...categories, { ...cat, subcategories: [], isActive: true }]);
+    return true;
   };
 
   const renameCategory = async (id: string, names: Names) => {
-    await updateCategory(id, { nameEn: names.en, nameFr: names.fr });
+    const patch = checkNames(names);
+    if (!patch) return;
+    await updateCategory(id, patch);
     setCategories(prev =>
       prev.map(cat =>
-        cat.id === id ? { ...cat, nameEn: names.en, nameFr: names.fr } : cat
+        cat.id === id ? { ...cat, ...patch } : cat
       )
     );
   };

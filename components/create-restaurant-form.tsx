@@ -14,6 +14,9 @@ import CreateBasicCard from "@/components/restaurant-form/create-basic-card";
 import CreateContactCard from "@/components/restaurant-form/create-contact-card";
 import CreateAddressCard from "@/components/restaurant-form/create-address-card";
 import CreateBrandingCard from "@/components/restaurant-form/create-branding-card";
+import FieldError from "@/components/forms/field-error";
+import { firstFieldError } from "@/components/forms/schema-check";
+import { RESTAURANT_FIELD_LABELS } from "@/components/restaurant-form/field-labels";
 import { Clock, Share2 } from "lucide-react";
 
 const schema = restaurantInput;
@@ -61,8 +64,14 @@ export default function CreateRestaurantForm() {
     }
   };
 
+  // A refusal is toasted by its field's label too: the uploads, the font and the colour pickers have
+  // no line of their own, and a create that did nothing on submit said nothing at all.
+  const onInvalid = (errs: Record<string, unknown>) => {
+    toast.error("Could not create the restaurant", { description: firstFieldError(errs, RESTAURANT_FIELD_LABELS) ?? "Check the fields and try again." });
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="space-y-8">
       {/* Basic Information Section */}
       <CreateBasicCard register={register} errors={errors} setValue={setValue} dietaryOptions={dietaryOptions ?? []} />
 
@@ -89,6 +98,7 @@ export default function CreateRestaurantForm() {
               placeholder="Mon-Fri: 9:00 AM - 10:00 PM&#10;Sat-Sun: 10:00 AM - 11:00 PM"
               className="border-border min-h-[80px]"
             />
+            <FieldError error={errors.openingHours} />
             <span className="text-xs text-muted-foreground">
               Enter your operating hours. Use line breaks for different days.
             </span>
@@ -97,7 +107,7 @@ export default function CreateRestaurantForm() {
       </Card>
 
       {/* Branding & Design Section */}
-      <CreateBrandingCard register={register} setValue={setValue} control={control} isSubmitting={isSubmitting} />
+      <CreateBrandingCard register={register} errors={errors} setValue={setValue} control={control} isSubmitting={isSubmitting} />
 
       {/* Social Media Section */}
       <Card className="border-border">
@@ -116,6 +126,7 @@ export default function CreateRestaurantForm() {
               placeholder="Facebook: https://facebook.com/yourrestaurant&#10;Instagram: https://instagram.com/yourrestaurant&#10;Twitter: https://twitter.com/yourrestaurant"
               className="border-border min-h-[100px]"
             />
+            <FieldError error={errors.socialMedia} />
             <span className="text-xs text-muted-foreground">
               Enter your social media links, one per line with platform name.
             </span>

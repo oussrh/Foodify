@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { brandPalette } from '@/lib/brand-color'
+import { slug as slugRule } from '@/lib/schemas/restaurant'
 
 type Icon = { src: string; sizes: string; type: string; purpose: string }
 
@@ -24,8 +25,15 @@ function iconSet(logoUrl: string | null): [Icon, Icon, Icon] {
   ]
 }
 
+/**
+ * GET, public: the web app manifest of one restaurant's menu, named and coloured for it, with
+ * shortcuts to its AR dishes and to each language. A slug that is not one (`slug` in
+ * lib/schemas/restaurant) or matches no restaurant is 404; answers with an hour's cache.
+ */
 export async function GET(_req: Request, { params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params
+  const parsed = slugRule.safeParse((await params).slug)
+  if (!parsed.success) return new NextResponse('Not found', { status: 404 })
+  const slug = parsed.data
   const restaurant = await prisma.restaurant.findUnique({
     where: { slug },
     select: {

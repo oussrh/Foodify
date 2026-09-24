@@ -7,12 +7,12 @@
 import type { FieldErrors, UseFormRegister, UseFormSetValue } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RestaurantInput } from "@/lib/schemas/restaurant";
-import { Building2, Globe, ChefHat, CreditCard } from "lucide-react";
+import { Building2, Globe, CreditCard } from "lucide-react";
 import DietaryOptionsField from "./dietary-options-field";
+import ProfileTextFields from "./profile-text-fields";
 import { CURRENCIES, currencySymbolFor } from "./currencies";
 
 type Props = {
@@ -62,44 +62,13 @@ function IdentityFields({ register, errors, setValue, dietaryOptions }: Props) {
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="tagline">Tagline</Label>
-        <Input
-          id="tagline"
-          {...register("tagline")}
-          placeholder="Delicious food, unforgettable experience"
-          className="border-border"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
-          {...register("description")}
-          placeholder="Tell customers about your restaurant..."
-          className="border-border min-h-[100px]"
-        />
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="cuisineType" className="flex items-center gap-2">
-            <ChefHat className="h-4 w-4" />
-            Cuisine Type
-          </Label>
-          <Input
-            id="cuisineType"
-            {...register("cuisineType")}
-            placeholder="Italian, French, American..."
-            className="border-border"
-          />
-        </div>
-
-        <div className="space-y-2 md:pt-6">
-          <DietaryOptionsField value={dietaryOptions} onChange={(next) => setValue("dietaryOptions", next)} />
-        </div>
-      </div>
+      <ProfileTextFields
+        fields={{ tagline: register("tagline"), description: register("description"), cuisineType: register("cuisineType") }}
+        errors={errors}
+        placeholders={{ tagline: "Delicious food, unforgettable experience", description: "Tell customers about your restaurant...", cuisineType: "Italian, French, American..." }}
+      >
+        <DietaryOptionsField value={dietaryOptions} onChange={(next) => setValue("dietaryOptions", next)} />
+      </ProfileTextFields>
     </>
   );
 }

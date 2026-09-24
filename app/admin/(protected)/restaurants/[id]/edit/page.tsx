@@ -5,10 +5,11 @@ import { restaurantFormValues } from '@/components/forms/form-defaults'
 import { PageHeader } from '@/components/shell/page-header'
 import { AdminDeleteRestaurantButton } from '@/components/admin-delete-restaurant-button'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
+import { idSegment, routeParams } from '@/lib/schemas/page-params'
 
 export default async function EditRestaurantPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSuperAdminPage()
-  const { id } = await params
+  const { id } = routeParams(idSegment, await params)
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id } })
   if (!restaurant) redirect('/admin/restaurants')

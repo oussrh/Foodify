@@ -3,10 +3,11 @@ import { publicEnv } from '@/lib/env'
 import { loadRestaurantInfo } from '@/lib/restaurant-loader'
 import { restaurantLinks } from '@/lib/restaurant-links'
 import { RestaurantInfoScreen } from '@/components/shell/restaurant-info-screen'
+import { idSegment, routeParams } from '@/lib/schemas/page-params'
 
 /** How much the menu is being opened, the QR code to print, and every address this restaurant hands out. */
 export default async function RestaurantInfoPage({ params }: { params: Promise<{ id: string }> }) {
-  const data = await loadRestaurantInfo((await params).id)
+  const data = await loadRestaurantInfo(routeParams(idSegment, await params).id)
   if (!data) redirect('/manager/restaurants')
   return (
     <RestaurantInfoScreen

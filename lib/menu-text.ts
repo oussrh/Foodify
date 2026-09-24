@@ -90,6 +90,10 @@ export const MENU_TEXT = {
     soldOutSince: (dishes: string) => `${dishes} has just sold out. Take it off the order and send the rest.`,
     soldOutSincePlural: (dishes: string) => `${dishes} have just sold out. Take them off the order and send the rest.`,
     tableRequired: 'Enter your table number.',
+    tableTooLong: 'That table number is too long.',
+    phoneInvalid: 'That phone number cannot receive a text. Check it and try again.',
+    noteTooLong: 'The note for the kitchen is too long. Shorten it and try again.',
+    lineNoteTooLong: 'A note on a dish is too long. Shorten it and try again.',
   },
   fr: {
     search: 'Rechercher',
@@ -174,5 +178,9 @@ export const MENU_TEXT = {
     soldOutSince: (dishes: string) => `${dishes} vient d’être épuisé. Retirez-le de la commande et envoyez le reste.`,
     soldOutSincePlural: (dishes: string) => `${dishes} viennent d’être épuisés. Retirez-les de la commande et envoyez le reste.`,
     tableRequired: 'Indiquez votre numéro de table.',
+    tableTooLong: 'Ce numéro de table est trop long.',
+    phoneInvalid: 'Ce numéro ne peut pas recevoir de SMS. Vérifiez-le et réessayez.',
+    noteTooLong: 'La note pour la cuisine est trop longue. Raccourcissez-la et réessayez.',
+    lineNoteTooLong: 'Une note sur un plat est trop longue. Raccourcissez-la et réessayez.',
   },
 } as const satisfies Record<Locale, unknown>

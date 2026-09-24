@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CODE_LENGTH, isRestaurantCode, newRestaurantCode, parseRestaurantCode } from './restaurant-code'
+import { CODE_LENGTH, isRestaurantCode, newRestaurantCode, parseRestaurantCode, restaurantWhere } from './restaurant-code'
 
 // A code is read off a screen and typed into a tablet by somebody standing up, so what matters is
 // that it cannot contain a character that is read as another one, and that a near-miss is either
@@ -63,5 +63,12 @@ describe('parseRestaurantCode', () => {
     expect(parseRestaurantCode('54d3dcf7-5297-4b2e-99ac-ae4197735f29')).toBeNull()
     expect(parseRestaurantCode('')).toBeNull()
     expect(parseRestaurantCode('K7M2Q!')).toBeNull()
+  })
+})
+
+describe('restaurantWhere', () => {
+  it('finds a code by the code column and anything else by the id', () => {
+    expect(restaurantWhere('K7M2QX')).toEqual({ code: 'K7M2QX' })
+    expect(restaurantWhere('54d3dcf7-5297-4b2e-99ac-ae4197735f29')).toEqual({ id: '54d3dcf7-5297-4b2e-99ac-ae4197735f29' })
   })
 })

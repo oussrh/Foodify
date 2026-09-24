@@ -7,11 +7,11 @@ import { EmptyState, PageHeader } from '@/components/shell/page-header'
 import { ListSearch } from '@/components/shell/list-search'
 import { ManagersTable } from '@/components/admin/managers-table'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
+import { listSearch, type SearchParams } from '@/lib/schemas/page-params'
 
-export default async function UsersPage({ searchParams }: { searchParams?: Promise<{ search?: string }> }) {
+export default async function UsersPage({ searchParams }: { searchParams?: Promise<SearchParams> }) {
   await requireSuperAdminPage()
-  const sp = searchParams ? await searchParams : undefined
-  const search = (sp?.search || '').trim()
+  const search = listSearch.parse((await searchParams)?.search)
 
   const users = await prisma.user.findMany({
     where: {

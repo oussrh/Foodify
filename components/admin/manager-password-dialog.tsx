@@ -13,6 +13,8 @@ import { resetManagerPassword } from '@/app/actions/restaurant-manager-actions'
 import { FormDialog } from '@/components/forms/form-dialog'
 import { PlainField } from '@/components/forms/plain-field'
 import { PasswordTools } from '@/components/forms/password-tools'
+import { issueOf } from '@/components/forms/schema-check'
+import { password } from '@/lib/schemas/common'
 
 interface ManagerPasswordDialogProps {
   open: boolean
@@ -38,8 +40,13 @@ export default function ManagerPasswordDialog({
   const router = useRouter()
   const field = useId()
   const [next, setNext] = useState('')
+  const [issue, setIssue] = useState('')
 
   const set = async () => {
+    // The rule the action parses with, named under the field rather than as a refusal after the request.
+    const found = issueOf(password, next)
+    setIssue(found)
+    if (found) return false
     await (restaurantId ? resetManagerPassword(restaurantId, userId, next) : resetClientPassword(userId, next))
     setNext('')
     toast.success(`New password set for ${email}`)
@@ -53,7 +60,7 @@ export default function ManagerPasswordDialog({
       title="Set a new password"
       description={`It replaces the one ${email} uses now, straight away. Tell them what it is, and ask them to change it from Account settings.`}
       submitLabel="Set password"
-      canSubmit={next.length >= 6}
+      canSubmit={next.length > 0}
       onSubmit={set}
       failure="Could not set that password. Someone who manages other restaurants too can only be reset by a Foodify administrator."
     >
@@ -65,6 +72,7 @@ export default function ManagerPasswordDialog({
         placeholder="At least 6 characters"
         required
         action={<PasswordTools value={next} onChange={setNext} />}
+        error={issue}
       />
     </FormDialog>
   )

@@ -11,6 +11,8 @@ import { requestManagerOtp } from '@/app/actions/manager-auth-actions'
 import { requestWaiterSignIn } from '@/app/actions/waiter-auth-actions'
 import CredentialsStep from './credentials-step'
 import CodeStep from './code-step'
+import { issueOf } from '@/components/forms/schema-check'
+import { otpCode, otpRequest } from '@/lib/schemas/user'
 
 type Portal = 'admin' | 'manager' | 'kitchen' | 'waiter'
 type Step = 'credentials' | 'code'
@@ -125,6 +127,11 @@ export default function SignInFlow({ portal, initialStep = 'credentials' }: Sign
 
   const submitCredentials = async (e: React.FormEvent) => {
     e.preventDefault()
+    // The first step's own schema (loose on purpose: present and bounded), checked before the request.
+    if (!otpRequest.safeParse({ email, password }).success) {
+      setError(`Enter your ${cfg.identifier} and password.`)
+      return
+    }
     setBusy(true)
     setError('')
     try {
@@ -151,6 +158,11 @@ export default function SignInFlow({ portal, initialStep = 'credentials' }: Sign
 
   const submitCode = async (e: React.FormEvent) => {
     e.preventDefault()
+    const problem = issueOf(otpCode, code)
+    if (problem) {
+      setError(problem)
+      return
+    }
     setBusy(true)
     setError('')
     try {

@@ -8,10 +8,11 @@ import { PageHeader, StatStrip } from '@/components/shell/page-header'
 import { getMenu } from '@/app/actions/menu-actions'
 import AdminCategoryManager from '@/components/admin-category-manager'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
+import { idSegment, routeParams } from '@/lib/schemas/page-params'
 
 export default async function MenuPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSuperAdminPage()
-  const { id } = await params
+  const { id } = routeParams(idSegment, await params)
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id }, select: { id: true, name: true, dishes: { select: { id: true, isActive: true, subcategoryId: true } } } })
   if (!restaurant) redirect('/admin/restaurants')

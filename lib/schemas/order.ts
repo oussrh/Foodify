@@ -72,3 +72,16 @@ export interface PlacedOrder {
   /** The subtotal the server computed, an exact two-decimal string. */
   subtotal: string
 }
+
+/** `PlacedOrder` as the client reads it back from POST /api/orders, parsed rather than cast. */
+export const placedOrder = z.object({ id: z.string(), number: z.number().int(), table: z.string(), subtotal: z.string() }) satisfies z.ZodType<PlacedOrder>
+
+/**
+ * One dish a 409 from POST /api/orders names: its names (null for a dish of another restaurant
+ * or one deleted outright) and why it was refused. The route's `details` is an array of these.
+ */
+export const refusedDish = z.object({
+  nameEn: z.string().nullable(),
+  nameFr: z.string().nullable(),
+  reason: z.enum(['sold_out', 'off_menu']),
+})

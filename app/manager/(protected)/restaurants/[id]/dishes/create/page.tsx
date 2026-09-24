@@ -4,11 +4,12 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import CreateDishForm from '@/components/create-dish-form'
 import { PageHeader } from '@/components/shell/page-header'
+import { idSegment, routeParams } from '@/lib/schemas/page-params'
 
 export default async function CreateDishPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
   const session = await auth()
   if (!session?.user?.email) redirect('/manager/login')
+  const { id } = routeParams(idSegment, await params)
 
   const restaurant = await prisma.restaurant.findFirst({ where: { id, users: { some: { email: session.user.email } } } })
   if (!restaurant) redirect('/manager/restaurants')

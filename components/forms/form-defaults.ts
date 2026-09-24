@@ -53,7 +53,7 @@ export function dishFormValues(dish: Dish): EditDishValues {
     usdzUrl: dish.usdzUrl || '',
     glbUrl: dish.glbUrl || '',
     subcategoryId: dish.subcategoryId || '',
-    calories: dish.calories || undefined,
+    calories: dish.calories ?? undefined,
     isMostPurchased: dish.isMostPurchased || false,
     dietary: dish.dietary ?? [],
     allergens: dish.allergens ?? [],

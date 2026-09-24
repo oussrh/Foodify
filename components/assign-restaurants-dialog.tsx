@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { call, callAll } from "@/lib/api-client";
 import { toast } from "sonner";
+import { parsedOrToast } from "@/components/forms/schema-check";
+import { assignment } from "@/lib/schemas/assignment";
 import {
   Dialog,
   DialogTrigger,
@@ -65,12 +67,15 @@ export default function AssignRestaurantsDialog({
   };
 
   const handleSave = async () => {
+    // The body the route parses, checked with its own schema before it goes.
+    const body = parsedOrToast(assignment("restaurantIds"), { restaurantIds: selected });
+    if (!body) return;
     setLoading(true);
     try {
       await call(`/api/users/${userId}/restaurants`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ restaurantIds: selected }),
+        body: JSON.stringify(body),
       });
       setOpen(false);
       router.refresh();
