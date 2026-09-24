@@ -71,7 +71,7 @@ function AvailableRestaurantsCard({ restaurants }: { restaurants: AsideRestauran
           {restaurants.length > 0 && (
             <div className="space-y-2">
               <p className="text-xs text-muted-foreground font-medium">Recent restaurants:</p>
-              <div className="space-y-1 max-h-32 overflow-y-auto">
+              <div className="space-y-1">
                 {restaurants.slice(0, 5).map((restaurant) => (
                   <div key={restaurant.id} className="flex items-center gap-2 p-2 bg-muted rounded text-xs">
                     <Building2 className="h-3 w-3 text-muted-foreground" />
