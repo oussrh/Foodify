@@ -11,7 +11,7 @@
     "postinstall": "prisma generate",
     "prisma": "prisma",
     "db:seed": "prisma db seed",
-    "db:setup": "prisma generate && prisma db push --force-reset --accept-data-loss && prisma db seed",
+    "db:setup": "node scripts/db-setup.mjs",
     "vercel-build": "prisma generate && next build",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --coverage",
