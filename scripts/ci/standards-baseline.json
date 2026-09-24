@@ -50,6 +50,7 @@
     "size.excessCode": 0,
     "size.overBudget": 0,
     "size.overRaw": 0,
+    "test.coverageExclusions": 9,
     "types.escapes": 0,
     "types.nonNull": 0,
     "valid.rawEnv": 0,
@@ -59,11 +60,11 @@
   },
   "scanned": {
     "api.bareResponse": 10,
-    "api.floatMoney": 510,
+    "api.floatMoney": 509,
     "api.rowReturn": 14,
     "api.unboundedList": 10,
     "auth.unguardedAdminPage": 21,
-    "cache.serverCacheUse": 510,
+    "cache.serverCacheUse": 509,
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 6,
@@ -73,14 +74,14 @@
     "docs.indexDrift": 9,
     "dup.clonedLines": 776,
     "dup.clones": 776,
-    "size.excessCode": 503,
-    "size.overBudget": 503,
-    "size.overRaw": 529,
-    "types.escapes": 503,
-    "valid.rawEnv": 500,
+    "size.excessCode": 502,
+    "size.overBudget": 502,
+    "size.overRaw": 528,
+    "types.escapes": 502,
+    "valid.rawEnv": 499,
     "valid.unparsedBoundary": 25,
-    "valid.utcDay": 503,
-    "valid.wholeEnv": 500
+    "valid.utcDay": 502,
+    "valid.wholeEnv": 499
   },
   "debt": {
     "dup.clonedLines": {
@@ -158,6 +159,9 @@
       "components/restaurant-form/create-basic-card.tsx": 7,
       "components/ui/dialog.tsx": 3,
       "lib/cloudinary.ts": 2
+    },
+    "test.coverageExclusions": {
+      "vitest.config.ts": 9
     }
   },
   "versions": {
@@ -182,6 +186,7 @@
     "size.excessCode": 1,
     "size.overBudget": 1,
     "size.overRaw": 1,
+    "test.coverageExclusions": 1,
     "types.escapes": 1,
     "types.nonNull": 1,
     "valid.rawEnv": 1,

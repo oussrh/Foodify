@@ -82,7 +82,7 @@
     "exclude": [],
     "hard": [],
     "ratchet": ["size.overRaw"],
-    "enable": ["types.nonNull"]
+    "enable": ["types.nonNull", "test.coverageExclusions"]
   },
   "lintOnEdit": true,
   "lintExtensions": [".ts", ".tsx", ".js", ".jsx", ".mjs"],
