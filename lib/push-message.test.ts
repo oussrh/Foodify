@@ -19,6 +19,12 @@ describe('newOrderPush', () => {
   it('says one dish, not one dishes', () => {
     expect(newOrderPush({ ...order, dishes: 1 }, restaurant).body).toBe('Table 4 · 1 dish')
   })
+
+  it('titles an addition by the bill it belongs to, not by its own number', () => {
+    const addition = newOrderPush({ ...order, number: 15, dishes: 2, parentNumber: 12 }, restaurant)
+    expect(addition).toMatchObject({ title: 'Addition to #12', body: 'Table 4 · 2 dishes', tag: 'order-o-1' })
+    expect(newOrderPush({ ...order, parentNumber: null }, restaurant).title).toBe('New order #12')
+  })
 })
 
 describe('orderReadyPush', () => {

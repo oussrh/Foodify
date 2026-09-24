@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { MAX_LINES, MAX_NOTE, MAX_QUANTITY } from '@/lib/cart'
-import { orderInput } from './order'
+import { orderInput, tableTabQuery } from './order'
 
 const id = '11111111-1111-4111-8111-111111111111'
 const other = '22222222-2222-4222-8222-222222222222'
@@ -99,5 +99,24 @@ describe('an empty phone', () => {
   it('still refuses a phone that is typed but unusable', () => {
     expect(orderInput.safeParse({ ...base, phone: '12' }).success).toBe(false)
     expect(orderInput.safeParse({ ...base, phone: 'not a phone' }).success).toBe(false)
+  })
+})
+
+describe('orderInput.addTo', () => {
+  it('takes the id of the bill an order adds to, and leaves it out when absent', () => {
+    expect(orderInput.parse({ ...valid, addTo: other }).addTo).toBe(other)
+    expect(orderInput.parse(valid).addTo).toBeUndefined()
+  })
+
+  it('refuses one that is not an id', () => {
+    expect(orderInput.safeParse({ ...valid, addTo: '12' }).success).toBe(false)
+  })
+})
+
+describe('tableTabQuery', () => {
+  it('takes a restaurant and a table, trimmed, and refuses an empty table', () => {
+    expect(tableTabQuery.parse({ restaurantId: id, table: ' 4 ' })).toEqual({ restaurantId: id, table: '4' })
+    expect(tableTabQuery.safeParse({ restaurantId: id, table: '' }).success).toBe(false)
+    expect(tableTabQuery.safeParse({ restaurantId: 'r1', table: '4' }).success).toBe(false)
   })
 })

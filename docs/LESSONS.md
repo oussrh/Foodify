@@ -16,6 +16,20 @@ What we learned the hard way, one entry per lesson, newest first. A line added t
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
 
+## 2026-09-24 · An order is a kitchen ticket; a bill is a table's visit
+
+The waiter app made every send a new order, because the guest cart does and the waiter's order
+screen was built on it. A table that asked for one more thing got a second number and a second
+bill, and the waiter had no way to see what the table already had. The first fix then made the
+opposite mistake: "the table's latest order of the last twelve hours" merged the lunch party and
+the evening party at the same table, because nothing ever closes a bill.
+
+Generalise it as: when one row stands for two things (what the kitchen makes, what the table
+pays), split them before adding rules on top, and bound a grouping by the business's own clock
+(the service day, from the restaurant's local 04:00) plus an explicit choice for the person doing
+it, never by a fixed duration alone. A default that can silently attach work to a stranger's bill
+must be one the waiter sees and can flip.
+
 ## 2026-09-24 · A device setting kept in React state is lost on the first reload
 
 The kitchen board's "keep the screen awake" was a `useState`. A tablet reloads more often than

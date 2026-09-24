@@ -60,6 +60,30 @@ describe('the insights report', () => {
       expect(totals).toMatchObject({ guestOrders: 2, staffOrders: 1 })
     }))
 
+  it('counts a table’s bill once, with its additions in the revenue and in the kitchen’s waits', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      // Taking orders, so the rhythm is of orders rather than of dishes opened.
+      await tx.restaurant.update({ where: { id: mine.id }, data: { orderingEnabled: true } })
+      const server = await waiter(tx, [mine.id])
+      // One bill: 20.00, 2 min to accept; then 5.00 more at the same table, 6 min to accept.
+      const table = await order(tx, mine.id, { number: 1, created: '2026-09-22T12:00:00Z', accepted: '2026-09-22T12:02:00Z', placedById: server.id, subtotal: '20.00' })
+      await order(tx, mine.id, { number: 2, created: '2026-09-22T12:40:00Z', accepted: '2026-09-22T12:46:00Z', placedById: server.id, subtotal: '5.00', parentId: table.id })
+      // And a guest's order of its own: 10.00, 4 min to accept.
+      await order(tx, mine.id, { number: 3, created: '2026-09-22T13:00:00Z', accepted: '2026-09-22T13:04:00Z', subtotal: '10.00' })
+      signInAs(await manager(tx, [mine.id]))
+
+      const report = (await loadInsights(mine.id, 'day', NOW))!
+      const totals = totalsOf(report.buckets)
+
+      // Two orders, not three: an addition is more for a table already counted.
+      expect(totals).toMatchObject({ guestOrders: 1, staffOrders: 1, tickets: 3, revenueMinor: 3500 })
+      // Every ticket is kitchen work: (2 + 6 + 4) / 3 minutes.
+      expect(totals.acceptSeconds).toBeCloseTo(240, 5)
+      // The rhythm counts arrivals, and the addition did not arrive: 12:00 and 13:00 once each.
+      expect(report.rhythm.flat().reduce((n, count) => n + count, 0)).toBe(2)
+    }))
+
   it('averages only the orders that reached a stage, not the ones still open', () =>
     withRollback(async (tx) => {
       const mine = await restaurant(tx)

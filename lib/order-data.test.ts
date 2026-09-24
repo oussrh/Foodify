@@ -22,6 +22,8 @@ const row = (over: Partial<Parameters<typeof serializeOrder>[0]> = {}) =>
     readyAt: null,
     servedAt: null,
     placedBy: null,
+    parentId: null,
+    parent: null,
     lines: [{ id: 'l1', nameEn: 'Chicken', nameFr: 'Poulet', quantity: 2, note: 'No onions' }],
     ...over,
   }) as Parameters<typeof serializeOrder>[0]
@@ -83,6 +85,14 @@ describe('serializeOrder', () => {
       email: 'waiter1@staff.invalid',
     })
     expect(serializeOrder(row()).placedBy).toBeNull()
+  })
+
+  it('names the order an addition belongs to by its number, and says null on one that opened the bill', () => {
+    const addition = serializeOrder(row({ parentId: 'o0', parent: { number: 7 } }))
+    expect(addition).toMatchObject({ parentId: 'o0', parentNumber: 7 })
+    // The nested row itself is not sent: the board reads the number, never a second order.
+    expect(addition).not.toHaveProperty('parent')
+    expect(serializeOrder(row())).toMatchObject({ parentId: null, parentNumber: null })
   })
 
   it('is JSON all the way down, which is what a client component receives', () => {

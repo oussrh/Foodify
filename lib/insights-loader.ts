@@ -30,6 +30,7 @@ const TRUNC: Record<Grain, string> = { day: 'day', week: 'week', month: 'month',
 const NO_VIEWS: ViewCounts = { views: 0, ar_views: 0 }
 const NO_CARTS: CartCounts = { adds: 0 }
 const NO_ORDERS: OrderCounts = {
+  tickets: 0,
   guest_orders: 0,
   staff_orders: 0,
   cancelled_orders: 0,
@@ -66,6 +67,7 @@ async function loadBuckets(id: string, grain: Grain, local: Date, tz: string): P
       cartAdds: cart.adds,
       guestOrders: order.guest_orders,
       staffOrders: order.staff_orders,
+      tickets: order.tickets,
       acceptSeconds: order.accept_seconds,
       serveSeconds: order.serve_seconds,
       prepSeconds: order.prep_seconds,

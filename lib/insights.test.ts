@@ -16,6 +16,7 @@ const bucket = (over: Partial<InsightsBucket> = {}): InsightsBucket => ({
   cartAdds: 0,
   guestOrders: 0,
   staffOrders: 0,
+  tickets: 0,
   acceptSeconds: null,
   serveSeconds: null,
   prepSeconds: null,
@@ -57,10 +58,10 @@ describe('totalsOf', () => {
     expect(totals).toMatchObject({ views: 15, cartAdds: 3, guestOrders: 2, staffOrders: 1 })
   })
 
-  it('weights an average by the orders behind it, not by the bucket', () => {
+  it('weights an average by the tickets behind it, not by the bucket', () => {
     // One slow order on a quiet day must not weigh the same as eighty quick ones on a busy one.
-    const quiet = bucket({ guestOrders: 1, serveSeconds: 3600 })
-    const busy = bucket({ guestOrders: 99, serveSeconds: 600 })
+    const quiet = bucket({ guestOrders: 1, tickets: 1, serveSeconds: 3600 })
+    const busy = bucket({ guestOrders: 99, tickets: 99, serveSeconds: 600 })
     expect(totalsOf([quiet, busy]).serveSeconds).toBeCloseTo((3600 + 99 * 600) / 100, 5)
   })
 
@@ -71,17 +72,26 @@ describe('totalsOf', () => {
 
   it('adds up revenue and cancellations, and weights the preparing time like the others', () => {
     const totals = totalsOf([
-      bucket({ guestOrders: 3, cancelledOrders: 1, revenueMinor: 2450, prepSeconds: 600 }),
-      bucket({ staffOrders: 1, revenueMinor: 1000, prepSeconds: 1200 }),
+      bucket({ guestOrders: 3, tickets: 3, cancelledOrders: 1, revenueMinor: 2450, prepSeconds: 600 }),
+      bucket({ staffOrders: 1, tickets: 1, revenueMinor: 1000, prepSeconds: 1200 }),
     ])
     expect(totals).toMatchObject({ cancelledOrders: 1, revenueMinor: 3450 })
     expect(totals.prepSeconds).toBeCloseTo((3 * 600 + 1200) / 4, 5)
   })
 
   it('ignores a bucket that timed nothing, rather than reading it as zero', () => {
-    const timed = bucket({ guestOrders: 2, acceptSeconds: 300 })
-    const untimed = bucket({ guestOrders: 5, acceptSeconds: null })
+    const timed = bucket({ guestOrders: 2, tickets: 2, acceptSeconds: 300 })
+    const untimed = bucket({ guestOrders: 5, tickets: 5, acceptSeconds: null })
     expect(totalsOf([timed, untimed]).acceptSeconds).toBe(300)
+  })
+
+  it('weights the waits by every ticket, additions included, though they are not orders', () => {
+    // A bucket of one order with three additions cooked four tickets; the waits are the kitchen's.
+    const table = bucket({ staffOrders: 1, tickets: 4, prepSeconds: 600 })
+    const single = bucket({ guestOrders: 1, tickets: 1, prepSeconds: 1100 })
+    const totals = totalsOf([table, single])
+    expect(totals.prepSeconds).toBeCloseTo((4 * 600 + 1100) / 5, 5)
+    expect(totals).toMatchObject({ staffOrders: 1, guestOrders: 1, tickets: 5 })
   })
 })
 

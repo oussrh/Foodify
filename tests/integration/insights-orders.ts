@@ -16,6 +16,8 @@ export interface OrderSpec {
   status?: 'NEW' | 'ACCEPTED' | 'READY' | 'DONE' | 'CANCELLED'
   subtotal?: string
   lines?: { dishId: string; quantity: number; unitPrice: string }[]
+  /** The bill this order adds to: an addition, not an order of its own. */
+  parentId?: string
 }
 
 export async function order(tx: Tx, restaurantId: string, spec: OrderSpec) {
@@ -28,6 +30,7 @@ export async function order(tx: Tx, restaurantId: string, spec: OrderSpec) {
       subtotal: spec.subtotal ?? '9.50',
       status: spec.status ?? 'NEW',
       placedById: spec.placedById ?? null,
+      parentId: spec.parentId ?? null,
       createdAt: at(spec.created),
       acceptedAt: spec.accepted ? at(spec.accepted) : null,
       readyAt: spec.ready ? at(spec.ready) : null,

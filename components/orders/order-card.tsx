@@ -8,6 +8,7 @@
 
 import { ChevronRight, Clock } from 'lucide-react'
 import { itemCount, minutesWaiting, waitingTier, type BoardOrder } from '@/lib/orders'
+import { additionLabel } from '@/lib/table-tab'
 import { cn } from '@/lib/utils'
 
 interface OrderCardProps {
@@ -40,6 +41,8 @@ export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }
   const items = itemCount(order)
   const preview = order.lines.slice(0, PREVIEW_LINES)
   const hidden = order.lines.length - preview.length
+  // An addition goes out with a table already cooking or served: the cook reads that before the dishes.
+  const addition = additionLabel(order)
 
   return (
     <article className={cn('flex flex-col overflow-hidden rounded-lg border-2 bg-card', fresh ? 'border-brand' : 'border-border')}>
@@ -53,6 +56,7 @@ export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }
             <p className="tnum mt-1.5 text-sm text-muted-foreground">
               #{order.number} · {items} item{items === 1 ? '' : 's'}
             </p>
+            {addition && <p className="mt-2 inline-flex rounded-full bg-foreground px-2.5 py-1 text-sm font-semibold text-background">{addition}</p>}
           </div>
           <p className={cn('tnum inline-flex shrink-0 items-center gap-1.5 text-lg font-semibold', WAIT_STYLE[tier])}>
             <Clock className="h-4 w-4" aria-hidden="true" />

@@ -9,6 +9,7 @@ const totals = (over: Partial<InsightsTotals> = {}): InsightsTotals => ({
   cartAdds: 0,
   guestOrders: 0,
   staffOrders: 0,
+  tickets: 0,
   acceptSeconds: null,
   serveSeconds: null,
   prepSeconds: null,

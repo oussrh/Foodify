@@ -10,13 +10,18 @@ export type PushKind = 'order' | 'ready'
 /** One push as the service worker reads it. */
 export type PushPayload = { title: string; body: string; tag: string; url: string; kind: PushKind; restaurantId: string }
 
-/** The facts of an order a push may carry; `dishes` is the number of plates (quantities summed). */
-export type PushOrder = { id: string; number: number; table: string; dishes: number }
+/**
+ * The facts of an order a push may carry; `dishes` is the number of plates (quantities summed),
+ * `parentNumber` the number of the table's bill when this order is an addition to it.
+ */
+export type PushOrder = { id: string; number: number; table: string; dishes: number; parentNumber?: number | null }
 
 const plates = (n: number) => `${n} ${n === 1 ? 'dish' : 'dishes'}`
 
 /**
- * A new order, for the kitchen board: opens the tablet's board by the restaurant's short code. A
+ * A new order, for the kitchen board: opens the tablet's board by the restaurant's short code. An
+ * addition is titled by the bill it belongs to ("Addition to #12"), because the cook's question is
+ * which table's plates it goes out with, and a fresh number would read as a new table. A
  * manager's or an admin's board lives at `/{portal}/orders/<id>`, outside the tablet's address, so
  * the payload also names the restaurant and the worker builds that board's address from its scope.
  */
@@ -24,7 +29,7 @@ export function newOrderPush(order: PushOrder, restaurant: { id: string; code: s
   const restaurantCode = restaurant.code
   return {
     restaurantId: restaurant.id,
-    title: `New order #${order.number}`,
+    title: typeof order.parentNumber === 'number' ? `Addition to #${order.parentNumber}` : `New order #${order.number}`,
     body: `Table ${order.table} · ${plates(order.dishes)}`,
     tag: `order-${order.id}`,
     url: `/kitchen/orders/${restaurantCode}`,

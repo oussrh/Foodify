@@ -35,6 +35,11 @@ describe('pushNewOrder', () => {
     await pushNewOrder(restaurant, { id: 'o1', number: 12, table: '4', lines: [{ quantity: 2 }, { quantity: 1 }] })
     expect(sendPush).toHaveBeenCalledWith('r1', 'board', expect.objectContaining({ title: 'New order #12', body: 'Table 4 · 3 dishes', kind: 'order' }))
   })
+
+  it('titles an addition by the table’s bill', async () => {
+    await pushNewOrder(restaurant, { id: 'o2', number: 15, table: '4', parentNumber: 12, lines: [{ quantity: 2 }] })
+    expect(sendPush).toHaveBeenCalledWith('r1', 'board', expect.objectContaining({ title: 'Addition to #12', body: 'Table 4 · 2 dishes' }))
+  })
 })
 
 describe('pushOrderReady', () => {

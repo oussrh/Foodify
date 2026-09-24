@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isSoldOut, SERVICE_DAY_END_HOUR, soldOutUntilNextService } from './availability'
+import { isSoldOut, SERVICE_DAY_END_HOUR, soldOutUntilNextService, serviceDayStart } from './availability'
 
 // What makes this worth testing is the promise: a dish marked sold out during service comes back
 // for the next one, and never in the middle of the one it was marked in.
@@ -53,6 +53,28 @@ describe('soldOutUntilNextService', () => {
     const asked = new Date('2026-09-22T13:00:00Z')
     soldOutUntilNextService(asked)
     expect(asked.toISOString()).toBe('2026-09-22T13:00:00.000Z')
+  })
+})
+
+describe('serviceDayStart', () => {
+  it('is today’s 04:00 after it, and yesterday’s before it, on the restaurant’s clock', () => {
+    // Casablanca is UTC+1: 13:30 local is in the day that began at 03:00 UTC.
+    expect(serviceDayStart(new Date('2026-09-24T12:30:00Z'), 'Africa/Casablanca').toISOString()).toBe('2026-09-24T03:00:00.000Z')
+    // 01:00 local on the 25th is still the 24th's service.
+    expect(serviceDayStart(new Date('2026-09-25T00:00:00Z'), 'Africa/Casablanca').toISOString()).toBe('2026-09-24T03:00:00.000Z')
+  })
+
+  it('starts at 04:00 itself, not a day earlier', () => {
+    expect(serviceDayStart(new Date('2026-09-24T04:00:00Z'), 'UTC').toISOString()).toBe('2026-09-24T04:00:00.000Z')
+    expect(serviceDayStart(new Date('2026-09-24T03:59:59Z')).toISOString()).toBe('2026-09-23T04:00:00.000Z')
+  })
+
+  it('keeps 04:00 local across a clock change', () => {
+    // New York falls back at 02:00 on 1 November 2026: 04:00 EDT the day before, 04:00 EST after.
+    expect(serviceDayStart(new Date('2026-11-01T20:00:00Z'), 'America/New_York').toISOString()).toBe('2026-11-01T09:00:00.000Z')
+    expect(serviceDayStart(new Date('2026-10-31T20:00:00Z'), 'America/New_York').toISOString()).toBe('2026-10-31T08:00:00.000Z')
+    // And springs forward on 8 March 2026: 04:00 EDT is 08:00 UTC.
+    expect(serviceDayStart(new Date('2026-03-08T15:00:00Z'), 'America/New_York').toISOString()).toBe('2026-03-08T08:00:00.000Z')
   })
 })
 

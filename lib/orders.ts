@@ -92,6 +92,9 @@ export interface BoardOrder {
   servedAt: string | null
   /** The member of staff who took the order at the table; null when the guest ordered for themselves. */
   placedBy: { email: string } | null
+  /** The order this one adds to, and its number: null on an order that opened its table's bill (lib/table-tab.ts). */
+  parentId: string | null
+  parentNumber: number | null
   lines: BoardLine[]
 }
 

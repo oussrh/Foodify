@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button'
 import { formatPrice, type Money } from '@/lib/menu'
 import { cn } from '@/lib/utils'
 import { isClosed, itemCount, minutesWaiting, STATUS_LABEL, type BoardOrder, type OrderMove } from '@/lib/orders'
+import { additionLabel } from '@/lib/table-tab'
 import OrderTimeline from './order-timeline'
 
 interface OrderDetailsSheetProps {
@@ -46,7 +47,7 @@ export default function OrderDetailsSheet({ order, onClose, onAction, busy, mone
 
             <SheetTitle className="text-[26px] font-semibold leading-none tracking-display">Table {order.table}</SheetTitle>
             <SheetDescription className="tnum mt-1.5 text-sm">
-              #{order.number} · {STATUS_LABEL[order.status]} · {itemCount(order)} items
+              {additionLabel(order) && `${additionLabel(order)} · `}#{order.number} · {STATUS_LABEL[order.status]} · {itemCount(order)} items
               {!readOnly && ` · ${minutesWaiting(order.createdAt, now)} min`}
             </SheetDescription>
 
