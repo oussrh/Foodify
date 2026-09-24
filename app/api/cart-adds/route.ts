@@ -1,12 +1,8 @@
 import { NextRequest } from 'next/server'
-import { z } from 'zod'
 import prisma from '@/lib/prisma'
-import { ok, fail } from '@/lib/api'
+import { ok, fail, jsonBody } from '@/lib/api'
+import { cartAdd } from '@/lib/schemas/tracking'
 import { log } from '@/server/log'
-
-// Public endpoint hit by the guest menu with no session, so the body is validated strictly and
-// the restaurant is read from the dish rather than taken from the caller.
-const cartAddSchema = z.object({ dishId: z.uuid() })
 
 /**
  * POST, public: the guest menu records that a dish went into an order. Body `{ dishId }`. The
@@ -17,14 +13,10 @@ const cartAddSchema = z.object({ dishId: z.uuid() })
  * dedupes or rate-limits: every accepted call is a row, as with a dish view.
  */
 export async function POST(request: NextRequest) {
-  let body: unknown
-  try {
-    body = await request.json()
-  } catch {
-    return fail('invalid_json', 'The body is not JSON', 400)
-  }
+  const body = await jsonBody(request)
+  if (body === null) return fail('invalid_json', 'The body is not JSON', 400)
 
-  const parsed = cartAddSchema.safeParse(body)
+  const parsed = cartAdd.safeParse(body)
   if (!parsed.success) return fail('invalid_payload', 'Invalid cart add payload', 400, parsed.error.issues)
   const { dishId } = parsed.data
 

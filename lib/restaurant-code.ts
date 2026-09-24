@@ -53,3 +53,8 @@ export function parseRestaurantCode(value: string): string | null {
     .replace(/U/g, 'V')
   return isRestaurantCode(folded) ? folded : null
 }
+
+/** The unique key a parsed restaurant reference (a code or a uuid) finds its row by. */
+export function restaurantWhere(ref: string): { code: string } | { id: string } {
+  return isRestaurantCode(ref) ? { code: ref } : { id: ref }
+}

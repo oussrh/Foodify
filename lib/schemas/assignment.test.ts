@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { assignment, jsonBody } from './assignment'
+import { assignment } from './assignment'
+import { jsonBody } from '../api'
 
 describe('assignment schemas', () => {
   it('wants an array of UUIDs under the named field', () => {

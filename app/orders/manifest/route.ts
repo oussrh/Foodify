@@ -1,9 +1,7 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
-import { uuid } from '@/lib/schemas/common'
-import { z } from 'zod'
-
-const query = z.object({ id: uuid, portal: z.enum(['admin', 'manager', 'kitchen', 'waiter']) })
+import { restaurantWhere } from '@/lib/restaurant-code'
+import { staffManifestQuery } from '@/lib/schemas/staff-app'
 
 /** What each staff app is called on a home screen, and where tapping its icon lands. */
 const APPS = {
@@ -15,18 +13,18 @@ const APPS = {
 
 /**
  * GET, public: the web app manifest that makes one restaurant's staff app installable — the
- * kitchen board on a tablet, or the waiter's app on a phone. Query `id` (the restaurant) and
- * `portal`; a bad pair is 400. It carries the restaurant's name and the app's URL and nothing
+ * kitchen board on a tablet, or the waiter's app on a phone. Query `id` (the restaurant, by its
+ * code or its uuid, as the page's own link named it) and `portal`; a bad pair is 400. It carries the restaurant's name and the app's URL and nothing
  * else — a manifest is fetched without the session cookie, so it must hold nothing a signed-out
  * reader may not see; the app behind it is guarded. Answers with an hour's cache, or 404 for an
  * unknown restaurant.
  */
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams
-  const parsed = query.safeParse({ id: params.get('id') ?? undefined, portal: params.get('portal') ?? undefined })
+  const parsed = staffManifestQuery.safeParse({ id: params.get('id') ?? undefined, portal: params.get('portal') ?? undefined })
   if (!parsed.success) return new NextResponse('Bad request', { status: 400 })
 
-  const restaurant = await prisma.restaurant.findUnique({ where: { id: parsed.data.id }, select: { name: true } })
+  const restaurant = await prisma.restaurant.findUnique({ where: restaurantWhere(parsed.data.id), select: { name: true } })
   if (!restaurant) return new NextResponse('Not found', { status: 404 })
 
   const app = APPS[parsed.data.portal]

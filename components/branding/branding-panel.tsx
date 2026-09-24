@@ -1,6 +1,9 @@
 'use client'
 
 import { updateRestaurant } from '@/app/actions/restaurant-actions'
+import { issueOf } from '@/components/forms/schema-check'
+import { hexColor } from '@/lib/schemas/common'
+import { uploadedImageUrl } from '@/lib/schemas/restaurant'
 import type { CoverStyle, MenuTheme } from '@/lib/menu'
 import { cn } from '@/lib/utils'
 import ImageTile from './image-tile'
@@ -45,13 +48,18 @@ const COVER_FITS: { key: CoverStyle; label: string }[] = [
  * preview. Image uploads are saved at once; everything else waits for the form's save.
  */
 export default function BrandingPanel({ restaurantId, restaurantSlug, values, onChange, disabled }: BrandingPanelProps) {
+  // Saved at once, so checked here with the rule the action parses: an upload's https address, or '' for a removal.
   const persist = (field: 'logoUrl' | 'coverImageUrl') => async (url: string) => {
+    const problem = url === '' ? '' : issueOf(uploadedImageUrl, url)
+    if (problem) throw new Error(problem)
     await updateRestaurant(restaurantId, { [field]: url })
     onChange(field, url, { persisted: true })
   }
 
   const hex = values.colorTheme || '#1F6B49'
-  const validHex = /^#[0-9a-f]{6}$/i.test(hex)
+  // The rule the save parses the colour with; its message is shown under the field.
+  const hexIssue = issueOf(hexColor, hex)
+  const validHex = !hexIssue
 
   return (
     <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_300px]">
@@ -123,7 +131,7 @@ export default function BrandingPanel({ restaurantId, restaurantSlug, values, on
         </section>
 
         {/* Colour */}
-        <BrandColourSection hex={hex} validHex={validHex} onChange={(next) => onChange('colorTheme', next)} disabled={disabled} />
+        <BrandColourSection hex={hex} issue={hexIssue} onChange={(next) => onChange('colorTheme', next)} disabled={disabled} />
 
         {/* Type */}
         <section className="flex flex-col gap-3">

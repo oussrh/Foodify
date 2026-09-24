@@ -1,11 +1,12 @@
 'use client'
 
 import { useForm, useWatch } from 'react-hook-form'
-import { z } from 'zod'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { updateDish } from '@/app/actions/dish-actions'
-import { dishInput } from '@/lib/schemas/dish'
+import { dishPatch } from '@/lib/schemas/dish'
+import { firstIssue } from '@/lib/schemas/common'
+import { caloriesValue, dishFormSchema, dishPayload, type DishFormValues } from '@/components/dish-form/dish-form-schema'
 import { DishNameFields, DishDescriptionFields } from '@/components/dish-form/dish-fields'
 import DishDetailsGrid from '@/components/dish-form/dish-details-grid'
 import DishMediaUploads from '@/components/dish-form/dish-media-uploads'
@@ -20,37 +21,8 @@ import { Edit } from 'lucide-react'
 
 type Subcategory = { id: string; nameEn: string }
 
-/** The edit form's values as the schema below reads them: an optional member may be absent or `undefined`. */
-export interface EditDishValues {
-  nameEn: string
-  nameFr: string
-  descriptionEn?: string | undefined
-  descriptionFr?: string | undefined
-  price: string
-  imageUrl: string
-  usdzUrl?: string | undefined
-  glbUrl?: string | undefined
-  subcategoryId?: string | undefined
-  calories?: number | undefined
-  isMostPurchased?: boolean | undefined
-  dietary?: string[] | undefined
-  allergens?: string[] | undefined
-}
-
-/**
- * The calories box as the schema reads it: empty is no figure, not NaN. `valueAsNumber` turned an
- * empty box into NaN, which the schema refused, so a dish saved without calories could never be
- * edited again — the save failed with focus on a field that showed nothing wrong.
- */
-const caloriesValue = (raw: unknown) => (raw === '' || raw === null || raw === undefined ? undefined : Number(raw))
-
-const schema = dishInput.omit({ subcategoryId: true, calories: true }).extend({
-  subcategoryId: z.string().optional(),
-  calories: z.number().int('Calories must be a whole number').optional(),
-}).transform((data) => ({
-  ...data,
-  calories: data.calories ? Number(data.calories) : undefined,
-}))
+/** The edit form's values: the dish form's own (`dishFormSchema`), named for the defaults that fill it. */
+export type EditDishValues = DishFormValues
 
 /**
  * Edits an existing dish behind the sticky save bar and the save shortcuts; a save refreshes the
@@ -83,7 +55,7 @@ export default function EditDishForm({
     setValue,
     reset,
   } = useForm<EditDishValues>({
-    resolver: zodResolver(schema),
+    resolver: zodResolver(dishFormSchema),
     defaultValues,
     mode: 'onChange'
   })
@@ -104,19 +76,18 @@ export default function EditDishForm({
 
   // Handle save
   const onSubmit = useCallback(async (data: EditDishValues) => {
+    // The whole payload through updateDish's own schema: the asset URLs join it here, after the fields' check.
+    const parsed = dishPatch.safeParse(dishPayload(data, { imageUrl, usdzUrl, glbUrl }))
+    if (!parsed.success) {
+      setSaveStatus('error')
+      toast.error('Could not save the dish', { id: 'dish-save', description: firstIssue(parsed.error) })
+      return
+    }
     try {
       setSaveStatus('saving')
       toast.loading('Saving dish...', { id: 'dish-save' })
 
-      const finalData = {
-        ...data,
-        imageUrl,
-        subcategoryId: data.subcategoryId || null,
-        usdzUrl: usdzUrl || '',
-        glbUrl: glbUrl || '',
-      }
-
-      await updateDish(id, finalData)
+      await updateDish(id, parsed.data)
 
       setSaveStatus('saved')
 
@@ -184,7 +155,7 @@ export default function EditDishForm({
 
             <DishDetailsGrid
               price={{ field: register('price'), error: errors.price }}
-              calories={{ field: register('calories', { setValueAs: caloriesValue }) }}
+              calories={{ field: register('calories', { setValueAs: caloriesValue }), error: errors.calories }}
               subcategoryId={register('subcategoryId')}
               imageUrl={{ field: register('imageUrl'), value: imageUrl }}
               isMostPurchased={register('isMostPurchased')}

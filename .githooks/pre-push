@@ -1,5 +1,3 @@
 #!/bin/sh
-# One implementation, two callers: this hook and `npm run -s gate`. Installed by `npm run hooks:install`.
-# --refs: git hands the pushed refs on stdin, and the gate judges that push rather than whatever
-# is checked out; a branch deletion runs no gate.
-npm run -s gate -- --refs
+# One implementation, two callers: this hook and `pnpm run -s gate`. Installed by `pnpm run -s hooks:install`.
+pnpm run -s gate --refs

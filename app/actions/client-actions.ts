@@ -21,12 +21,13 @@ export async function createClient(raw: ClientInput) {
   const passwordHash = await bcrypt.hash(data.password, 10)
 
   const restaurantIds = [...(data.restaurantIds ?? [])]
-  if (data.restaurantName) {
+  const restaurantName = data.restaurantName
+  if (restaurantName) {
     const restaurant = await withRestaurantCode((code) =>
       prisma.restaurant.create({
         data: {
-          name: data.restaurantName!,
-          slug: slugify(data.restaurantName!),
+          name: restaurantName,
+          slug: slugify(restaurantName),
           defaultLocale: 'en',
           code,
         },

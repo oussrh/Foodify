@@ -9,20 +9,20 @@ import { dishListRow } from '@/components/shell/dish-list-rows'
 import { DishStatStrip } from '@/components/shell/dish-stat-strip'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
+import { listSearch, idSegment, routeParams, type SearchParams } from '@/lib/schemas/page-params'
 
 export default async function DishesPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams?: Promise<{ search?: string }>
+  searchParams?: Promise<SearchParams>
 }) {
-  const { id } = await params
-  const sp = searchParams ? await searchParams : undefined
-  const search = (sp?.search || '').trim()
-
   const session = await auth()
   if (!session?.user?.email) redirect('/manager/login')
+  const { id } = routeParams(idSegment, await params)
+  const search = listSearch.parse((await searchParams)?.search)
+
   const restaurant = await prisma.restaurant.findFirst({
     where: { id, users: { some: { email: session.user.email } } },
     select: { id: true, name: true, currencySymbol: true },

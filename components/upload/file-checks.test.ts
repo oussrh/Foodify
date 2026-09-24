@@ -49,11 +49,11 @@ describe('validateDishImage', () => {
 })
 
 describe('validateBrandImage', () => {
-  it('accepts JPG, JPEG, PNG, WebP and SVG', () => {
+  it('accepts JPG, JPEG, PNG, WebP and SVG, with the upload schema message otherwise', () => {
     for (const type of ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/svg+xml']) {
       expect(validateBrandImage(file('a', type, 10), 5)).toBeNull()
     }
-    expect(validateBrandImage(file('a.gif', 'image/gif', 10), 5)).toBe('Please select a valid image file (JPG, PNG, WebP, or SVG)')
+    expect(validateBrandImage(file('a.gif', 'image/gif', 10), 5)).toBe('Invalid file type. Please select a JPG, PNG, WebP, or SVG file.')
   })
 
   it('refuses a double extension', () => {
@@ -62,8 +62,8 @@ describe('validateBrandImage', () => {
   })
 
   it('holds the limit of the kind: 5MB for a logo, 10MB for a cover', () => {
-    expect(validateBrandImage(file('l.png', 'image/png', 6 * MB), 5)).toBe('File size must be less than 5MB. Current size: 6 MB')
+    expect(validateBrandImage(file('l.png', 'image/png', 6 * MB), 5)).toBe('File size must be less than 5MB')
     expect(validateBrandImage(file('c.png', 'image/png', 6 * MB), 10)).toBeNull()
-    expect(validateBrandImage(file('c.png', 'image/png', 11 * MB), 10)).toBe('File size must be less than 10MB. Current size: 11 MB')
+    expect(validateBrandImage(file('c.png', 'image/png', 11 * MB), 10)).toBe('File size must be less than 10MB')
   })
 })

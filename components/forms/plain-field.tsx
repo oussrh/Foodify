@@ -16,12 +16,14 @@ interface PlainFieldProps {
   autoComplete?: string
   required?: boolean
   /** `number` only; the same bounds the schema parses with, so the browser refuses first. */
-  min?: number
-  max?: number
+  min?: number | undefined
+  max?: number | undefined
   /** One line under the field, for what a placeholder cannot say. */
   hint?: string
   /** Controls beside the input, on the same line (a password's Generate and Copy). */
   action?: React.ReactNode
+  /** The schema's message for this field, shown under it and marking it invalid; '' or absent when it is fine. */
+  error?: string | undefined
 }
 
 /** Label, input and optional hint, tied together by id. */
@@ -38,6 +40,7 @@ export function PlainField({
   max,
   hint,
   action,
+  error,
 }: PlainFieldProps) {
   return (
     <div className="space-y-1.5">
@@ -54,9 +57,16 @@ export function PlainField({
           min={min}
           max={max}
           inputMode={type === 'number' ? 'numeric' : undefined}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? `${id}-error` : undefined}
         />
         {action}
       </div>
+      {error && (
+        <p id={`${id}-error`} className="text-xs text-destructive">
+          {error}
+        </p>
+      )}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>
   )

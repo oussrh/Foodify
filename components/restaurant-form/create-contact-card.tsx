@@ -4,6 +4,7 @@
 
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 import { Input } from "@/components/ui/input";
+import FieldError from "@/components/forms/field-error";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { RestaurantInput } from "@/lib/schemas/restaurant";
@@ -59,6 +60,7 @@ export default function CreateContactCard({
               placeholder="+1 (555) 123-4567"
               className="border-border"
             />
+            <FieldError error={errors.phone} />
           </div>
         </div>
 

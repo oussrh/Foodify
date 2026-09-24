@@ -9,6 +9,8 @@ const LOWER = 'abcdefghijkmnpqrstuvwxyz'
 const DIGITS = '23456789'
 const SYMBOLS = '!#$%*+-=?@'
 const ALL = UPPER + LOWER + DIGITS + SYMBOLS
+/** One from each, in this order, before the rest are drawn from ALL. */
+const REQUIRED = [UPPER, LOWER, DIGITS, SYMBOLS]
 
 /** How long a generated password is: well past any rule here, and still one line to read out. */
 export const GENERATED_LENGTH = 14
@@ -25,14 +27,14 @@ const platformRandom: RandomSource = (out) => globalThis.crypto.getRandomValues(
  */
 export function generatePassword(length: number = GENERATED_LENGTH, random: RandomSource = platformRandom): string {
   const size = Math.max(length, 4)
-  const values = random(new Uint32Array(size * 2))
-  const pick = (alphabet: string, i: number) => alphabet[values[i]! % alphabet.length]!
-  const chars = [pick(UPPER, 0), pick(LOWER, 1), pick(DIGITS, 2), pick(SYMBOLS, 3)]
-  for (let i = 4; i < size; i++) chars.push(pick(ALL, i))
-  // Fisher–Yates with the second half of the values, so the four required classes are not always first.
-  for (let i = chars.length - 1; i > 0; i--) {
-    const j = values[size + i]! % (i + 1)
-    ;[chars[i], chars[j]] = [chars[j]!, chars[i]!]
-  }
-  return chars.join('')
+  const values = Array.from(random(new Uint32Array(size * 2)))
+  const chars = values.slice(0, size).map((value, i) => {
+    const alphabet = REQUIRED[i] ?? ALL
+    return alphabet.charAt(value % alphabet.length)
+  })
+  // Drawn out of the pile in the order the second half of the values gives, so the four required
+  // classes are not always first: each draw takes one of those left, a uniform shuffle.
+  const shuffled: string[] = []
+  for (const value of values.slice(size)) shuffled.push(...chars.splice(value % chars.length, 1))
+  return shuffled.join('')
 }

@@ -7,6 +7,7 @@ import {
   updateSubcategory,
   reorderSubcategories,
 } from "@/app/actions/menu-actions";
+import { checkNames } from "./check-names";
 import type { Category, Names, SubDrafts, Subcategory } from "./types";
 
 /**
@@ -19,12 +20,12 @@ export function useSubcategoryList(
 ) {
   const [subDrafts, setSubDrafts] = useState<SubDrafts>({});
 
+  // Both handlers check with `categoryInput` (trimmed, both languages, 120 at most; a rename sends both, so the
+  // patch the action parses takes it as it is) and toast its message.
   const addSub = async (catId: string, names: Names) => {
-    if (!names.en || !names.fr) return;
-    const sub = await createSubcategory(catId, {
-      nameEn: names.en,
-      nameFr: names.fr,
-    });
+    const input = checkNames(names);
+    if (!input) return;
+    const sub = await createSubcategory(catId, input);
     setCategories((prev) =>
       prev.map((c: Category) =>
         c.id === catId ? { ...c, subcategories: [...c.subcategories, { ...sub, isActive: true }] } : c
@@ -37,10 +38,9 @@ export function useSubcategoryList(
   };
 
   const renameSub = async (id: string, names: Names) => {
-    await updateSubcategory(id, {
-      nameEn: names.en,
-      nameFr: names.fr,
-    });
+    const patch = checkNames(names);
+    if (!patch) return;
+    await updateSubcategory(id, patch);
   };
 
   const moveSub = async (catId: string, index: number, direction: "up" | "down") => {

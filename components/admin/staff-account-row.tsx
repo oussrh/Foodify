@@ -8,6 +8,8 @@ import { useId, useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PlainField } from '@/components/forms/plain-field'
+import { issueOf } from '@/components/forms/schema-check'
+import { password as passwordRule } from '@/lib/schemas/common'
 
 interface StaffAccountRowProps {
   account: { id: string; username: string; lastLogin: Date | null }
@@ -23,9 +25,14 @@ export function StaffAccountRow({ account, busy, onSetPassword, onRemove }: Staf
   const [editing, setEditing] = useState(false)
   const [password, setPassword] = useState('')
   const [done, setDone] = useState(false)
+  const [issue, setIssue] = useState('')
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault()
+    // The rule resetStaffPassword parses with, said under the field before the request.
+    const found = issueOf(passwordRule, password)
+    setIssue(found)
+    if (found) return
     if (!(await onSetPassword(password))) return
     setPassword('')
     setEditing(false)
@@ -73,9 +80,10 @@ export function StaffAccountRow({ account, busy, onSetPassword, onRemove }: Staf
               onChange={setPassword}
               placeholder="At least 6 characters"
               required
+              error={issue}
             />
           </div>
-          <Button type="submit" size="sm" disabled={busy || password.length < 6}>
+          <Button type="submit" size="sm" disabled={busy || password.length === 0}>
             Save
           </Button>
           <Button type="button" size="sm" variant="ghost" disabled={busy} onClick={() => setEditing(false)}>

@@ -8,11 +8,12 @@ import { serializeCategories, serializeDish, serializeRestaurant, siteOrigin } f
 import { loadMenu } from '@/lib/menu-loader'
 import { menuMetadata, menuViewport } from '@/lib/menu-metadata'
 import { restaurantJsonLd } from '@/lib/structured-data'
+import { menuQuery, menuSegment, routeParams, type SearchParams } from '@/lib/schemas/page-params'
 
-type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<{ lang?: string; filter?: string; table?: string }> }
+type Props = { params: Promise<{ slug: string }>; searchParams?: Promise<SearchParams> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params
+  const { slug } = routeParams(menuSegment, await params)
   const restaurant = await prisma.restaurant.findUnique({
     where: { slug },
     select: { name: true, tagline: true, coverImageUrl: true, logoUrl: true, city: true, cuisineType: true, defaultLocale: true },
@@ -22,14 +23,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export async function generateViewport({ params }: Props): Promise<Viewport> {
-  const { slug } = await params
-  const restaurant = await prisma.restaurant.findUnique({ where: { slug }, select: { colorTheme: true, menuTheme: true } })
+  const segment = menuSegment.safeParse(await params)
+  const restaurant = segment.success ? await prisma.restaurant.findUnique({ where: { slug: segment.data.slug }, select: { colorTheme: true, menuTheme: true } }) : null
   return menuViewport(restaurant)
 }
 
 export default async function RestaurantRoute({ params, searchParams }: Props) {
-  const { slug } = await params
-  const sp = searchParams ? await searchParams : undefined
+  const { slug } = routeParams(menuSegment, await params)
+  const query = menuQuery.parse((await searchParams) ?? {})
   const data = await loadMenu(slug)
   if (!data) notFound()
 
@@ -57,9 +58,9 @@ export default async function RestaurantRoute({ params, searchParams }: Props) {
         social={parseSocialMedia(restaurant.socialMedia)}
         brandStyle={brandStyle(restaurant.colorTheme)}
         origin={origin}
-        urlLang={sp?.lang ?? null}
-        urlFilter={sp?.filter ?? null}
-        urlTable={sp?.table ?? null}
+        urlLang={query.lang ?? null}
+        urlFilter={query.filter ?? null}
+        urlTable={query.table ?? null}
       />
     </>
   )

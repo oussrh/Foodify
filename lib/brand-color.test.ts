@@ -23,6 +23,14 @@ describe('brandPalette', () => {
     expect(brandPalette(null, '#000000').raw).toBe('#000000')
   })
 
+  it('reports the stored inks against the bare grounds, as they are painted', () => {
+    for (const hex of ['#3F6B8A', '#B8860B', '#F0A']) {
+      const p = brandPalette(hex)
+      expect(p.ratioLight).toBe(contrast(rgb(p.inkLight), PAPER))
+      expect(p.ratioDark).toBe(contrast(rgb(p.inkDark), COAL))
+    }
+  })
+
   it('derives inks that reach AA on the tint they are written over, even from a pale neon', () => {
     const p = brandPalette('#3F6B8A')
     const over = (raw: string, ground: RGB, alpha: number) => rgb(raw).map((c, i) => Math.round(ground[i]! * (1 - alpha) + c * alpha)) as RGB

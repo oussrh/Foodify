@@ -12,13 +12,14 @@ import type { Names } from "./types";
 
 /**
  * The card that creates a category from its English and French names. Both are required; the draft
- * is cleared only after the parent's onAdd resolves.
+ * is cleared only once the parent's onAdd has created it.
  */
 export default function AddCategoryCard({
   onAdd,
   iconClassName,
 }: {
-  onAdd: (names: Names) => Promise<void>;
+  /** Resolves whether the category was created; a refused name keeps the draft to correct. */
+  onAdd: (names: Names) => Promise<boolean>;
   iconClassName: string;
 }) {
   const ids = useId()
@@ -26,8 +27,7 @@ export default function AddCategoryCard({
 
   const handleAddCategory = async () => {
     if (!newCat.en || !newCat.fr) return;
-    await onAdd(newCat);
-    setNewCat({ en: "", fr: "" });
+    if (await onAdd(newCat)) setNewCat({ en: "", fr: "" });
   };
 
   return (

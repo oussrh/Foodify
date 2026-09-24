@@ -5,16 +5,11 @@
 // dish is on the menu at all — those stay with the people who run the restaurant.
 'use server'
 
-import { z } from 'zod'
 import prisma from '@/lib/prisma'
 import { requireServiceStaff } from '@/lib/auth-guard'
 import { soldOutUntilNextService } from '@/lib/availability'
 import { uuid } from '@/lib/schemas/common'
-
-/** Available again, or sold out for the rest of this service. */
-const availability = z.object({ soldOut: z.boolean() })
-/** `availability` after parsing. */
-export type Availability = z.infer<typeof availability>
+import { availability, type Availability } from '@/lib/schemas/dish'
 
 /**
  * The restaurant's own service staff — a manager, an order tablet, a waiter — or a super admin.

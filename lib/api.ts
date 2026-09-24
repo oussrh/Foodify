@@ -25,3 +25,6 @@ export function fail(code: ApiCode, error: string, status: number, details?: unk
   const body: ApiFailure = details === undefined ? { error, code } : { error, code, details }
   return Response.json(body, { status })
 }
+
+/** The request's JSON, or null when there is none or it does not parse: the schema refuses both alike. */
+export const jsonBody = (req: Request): Promise<unknown> => req.json().catch(() => null)

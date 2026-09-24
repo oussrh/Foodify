@@ -15,6 +15,8 @@ import SettingsTabs, { TABS } from '@/components/restaurant-form/settings-tabs'
 import { useSettingsTab } from '@/components/restaurant-form/use-settings-tab'
 import { toBrandingValues, toContactValues } from '@/components/restaurant-form/panel-values'
 import EditBasicCard from '@/components/restaurant-form/edit-basic-card'
+import { RESTAURANT_FIELD_LABELS } from '@/components/restaurant-form/field-labels'
+import { firstFieldError } from '@/components/forms/schema-check'
 import type { UseFormRegister } from 'react-hook-form'
 
 export type { EditRestaurantValues } from '@/components/restaurant-form/edit-restaurant-schema'
@@ -118,10 +120,13 @@ export default function EditRestaurantForm({
 
   // Validation errors on a hidden tab would be invisible: switch to the first tab that has one,
   // and say in the save bar that nothing was saved. A field can also be a hidden input with no
-  // message of its own, and a save that silently did nothing is how one of those went unseen.
+  // message of its own, and a save that silently did nothing is how one of those went unseen: the
+  // first refusal is also toasted by its label, whether or not its field has a line.
   const onInvalid = useCallback(
     (errs: Record<string, unknown>) => {
       setSaveStatus('error')
+      const why = firstFieldError(errs, RESTAURANT_FIELD_LABELS)
+      if (why) toast.error('Could not save the settings', { id: 'restaurant-save', description: why })
       const bad = new Set(Object.keys(errs))
       const tab = TABS.find((t) => t.fields.some((f) => bad.has(f)))
       if (tab) showTab(tab.key)

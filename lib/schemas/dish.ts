@@ -2,7 +2,16 @@
 // A dish and its ingredients. Dietary attributes and allergens are the keys of lib/menu.ts's
 // vocabularies: the menu renders a label per key and nothing else is storable.
 import { z } from 'zod'
-import { allergenKey, bilingualName, dietaryKey, money, uuid } from './common'
+import { MAX_TEXT, allergenKey, bilingualName, dietaryKey, money, shortText, uuid } from './common'
+
+/**
+ * A dish's image or AR model as a form sends it: '' (none), a path on this site ('/ar/…', never
+ * '//host', which a browser reads as another site), or an https address — a Cloudinary one is stored
+ * as it is, any other is fetched into the restaurant's folder by the action.
+ */
+const assetUrl = z
+  .string()
+  .refine((v) => v === '' || /^\/(?!\/)/.test(v) || z.url({ protocol: /^https$/ }).safeParse(v).success, 'An https:// address or a path on this site')
 
 /**
  * What the create form submits and createDish parses. `price` is `money` (a decimal string, never a
@@ -11,14 +20,14 @@ import { allergenKey, bilingualName, dietaryKey, money, uuid } from './common'
  * dish's restaurant is the action's guard (`requireSubcategoryOf`), not the schema's.
  */
 export const dishInput = bilingualName.extend({
-  descriptionEn: z.string().optional(),
-  descriptionFr: z.string().optional(),
+  descriptionEn: shortText(MAX_TEXT),
+  descriptionFr: shortText(MAX_TEXT),
   price: money,
-  imageUrl: z.string(),
-  usdzUrl: z.string().optional(),
-  glbUrl: z.string().optional(),
+  imageUrl: assetUrl,
+  usdzUrl: assetUrl.optional(),
+  glbUrl: assetUrl.optional(),
   subcategoryId: uuid.nullable().optional(),
-  calories: z.number().int().nullable().optional(),
+  calories: z.number().int().min(0, 'Calories cannot be negative').max(20000, 'That is more calories than a dish holds').nullable().optional(),
   isMostPurchased: z.boolean().optional(),
   dietary: z.array(dietaryKey).optional(),
   allergens: z.array(allergenKey).optional(),
@@ -38,3 +47,8 @@ export const ingredientPatch = bilingualName.partial()
 export type IngredientInput = z.infer<typeof ingredientInput>
 /** `ingredientPatch` after parsing. */
 export type IngredientPatch = z.infer<typeof ingredientPatch>
+
+/** A dish's stock as the kitchen or the floor sets it: available again, or sold out for the rest of this service. */
+export const availability = z.object({ soldOut: z.boolean() })
+/** `availability` after parsing. */
+export type Availability = z.infer<typeof availability>

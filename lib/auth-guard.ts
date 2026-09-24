@@ -39,10 +39,11 @@ export async function requireUser() {
   const session = await auth()
   const id = session?.user?.id
   const email = session?.user?.email
-  if (!id && !email) throw new AuthError('Not authenticated', 401)
+  const where = id ? { id } : email ? { email } : null
+  if (!where) throw new AuthError('Not authenticated', 401)
 
   const user = await prisma.user.findUnique({
-    where: id ? { id } : { email: email! },
+    where,
     select: { id: true, email: true, role: true },
   })
   if (!user) throw new AuthError('Not authenticated', 401)

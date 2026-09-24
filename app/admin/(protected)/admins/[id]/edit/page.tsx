@@ -5,6 +5,7 @@ import { AdminEditHeader } from '@/components/admin/admin-edit-header'
 import { redirect } from 'next/navigation'
 import { daysSince } from '@/lib/time'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
+import { idSegment, routeParams } from '@/lib/schemas/page-params'
 
 export default async function EditAdminPage({ 
   params 
@@ -12,7 +13,7 @@ export default async function EditAdminPage({
   params: Promise<{ id: string }> 
 }) {
   await requireSuperAdminPage()
-  const { id } = await params
+  const { id } = routeParams(idSegment, await params)
   const admin = await prisma.user.findUnique({ where: { id } })
   
   if (!admin) {

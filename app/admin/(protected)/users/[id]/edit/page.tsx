@@ -4,6 +4,7 @@ import { UserEditAside, type UserStats } from '@/components/admin/user-edit-asid
 import { UserEditHeader } from '@/components/admin/user-edit-header'
 import { redirect } from 'next/navigation'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
+import { idSegment, routeParams } from '@/lib/schemas/page-params'
 
 export default async function EditUserPage({
   params,
@@ -11,7 +12,7 @@ export default async function EditUserPage({
   params: Promise<{ id: string }>
 }) {
   await requireSuperAdminPage()
-  const { id } = await params
+  const { id } = routeParams(idSegment, await params)
   const user = await prisma.user.findUnique({
     where: { id },
     include: { 

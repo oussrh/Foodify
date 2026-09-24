@@ -25,9 +25,12 @@ export interface SocialNetwork {
 
 const handleUrl = (base: string, at = false) => (h: string) => `${base}/${at ? '@' : ''}${h.replace(/^@/, '')}`
 
+/** The first network listed, and the one a key no network carries is read as. */
+const INSTAGRAM: SocialNetwork = { key: 'instagram', label: 'Instagram', kind: 'handle', aliases: ['instagram', 'insta', 'ig'], hosts: ['instagram.com'], url: handleUrl('https://instagram.com'), placeholder: '@yourrestaurant or a profile link' }
+
 /** Every network a restaurant can link, in the order the form lists them; add a network by adding an entry. */
 export const SOCIAL_NETWORKS: readonly SocialNetwork[] = [
-  { key: 'instagram', label: 'Instagram', kind: 'handle', aliases: ['instagram', 'insta', 'ig'], hosts: ['instagram.com'], url: handleUrl('https://instagram.com'), placeholder: '@yourrestaurant or a profile link' },
+  INSTAGRAM,
   { key: 'facebook', label: 'Facebook', kind: 'handle', aliases: ['facebook', 'fb'], hosts: ['facebook.com', 'fb.com'], url: handleUrl('https://facebook.com'), placeholder: 'yourpage or a page link' },
   { key: 'twitter', label: 'X (Twitter)', kind: 'handle', aliases: ['twitter', 'x'], hosts: ['twitter.com', 'x.com'], url: handleUrl('https://x.com'), placeholder: '@yourrestaurant or a profile link' },
   { key: 'tiktok', label: 'TikTok', kind: 'handle', aliases: ['tiktok', 'tt'], hosts: ['tiktok.com'], url: handleUrl('https://tiktok.com', true), placeholder: '@yourrestaurant or a profile link' },
@@ -138,5 +141,5 @@ export function parseSocialMedia(raw: string | null | undefined): SocialHandles 
 
 /** The public URL for a network's stored value. */
 export function socialUrl(key: SocialKey, value: string): string {
-  return (BY_KEY.get(key) ?? SOCIAL_NETWORKS[0]!).url(value)
+  return (BY_KEY.get(key) ?? INSTAGRAM).url(value)
 }

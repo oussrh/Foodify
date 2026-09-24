@@ -16,6 +16,9 @@ describe('a followable list', () => {
     expect(decodeCursor(encodeCursor(key))).toEqual(key)
     expect(decodeCursor('not-a-cursor')).toBeNull()
     expect(decodeCursor(Buffer.from('["one"]').toString('base64url'))).toBeNull()
+    expect(decodeCursor(Buffer.from('["a","b","c"]').toString('base64url'))).toBeNull()
+    expect(decodeCursor(Buffer.from('["a",1]').toString('base64url'))).toBeNull()
+    expect(decodeCursor(Buffer.from('{"sort":"a","id":"b"}').toString('base64url'))).toBeNull()
   })
 
   it('asks Prisma for one row more than the page, and for the rows after the key in (field, id) order', () => {

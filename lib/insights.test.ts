@@ -4,7 +4,6 @@ import {
   bucketStarts,
   conversion,
   formatDuration,
-  parseGrain,
   totalsOf,
   windowStart,
   type InsightsBucket,
@@ -23,18 +22,6 @@ const bucket = (over: Partial<InsightsBucket> = {}): InsightsBucket => ({
   cancelledOrders: 0,
   revenueMinor: 0,
   ...over,
-})
-
-describe('parseGrain', () => {
-  it('takes the four grains', () => {
-    expect(['day', 'week', 'month', 'year'].map(parseGrain)).toEqual(['day', 'week', 'month', 'year'])
-  })
-
-  it('reads anything else as daily rather than failing the page', () => {
-    expect(parseGrain('hour')).toBe('day')
-    expect(parseGrain(undefined)).toBe('day')
-    expect(parseGrain(7)).toBe('day')
-  })
 })
 
 describe('windowStart', () => {

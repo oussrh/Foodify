@@ -9,6 +9,8 @@ import { addIngredient, updateIngredient, deleteIngredient } from '@/app/actions
 import IngredientDialogContent from '@/components/ingredients/ingredient-dialog-content'
 import IngredientRow, { type Ingredient } from '@/components/ingredients/ingredient-row'
 import EmptyIngredients from '@/components/ingredients/empty-ingredients'
+import { parsedOrToast } from '@/components/forms/schema-check'
+import { ingredientInput, ingredientPatch } from '@/lib/schemas/dish'
 
 interface IngredientManagerProps {
   dishId: string
@@ -28,15 +30,16 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
   const [nameFr, setNameFr] = useState('')
   const router = useRouter()
 
+  // A blank French name is the English one; the result goes through the action's own schema first.
+  const names = () => ({ nameEn: nameEn.trim(), nameFr: nameFr.trim() || nameEn.trim() })
+
   const handleAdd = async () => {
-    if (!nameEn.trim()) return
+    const input = parsedOrToast(ingredientInput, names())
+    if (!input) return
 
     setLoading(true)
     try {
-      await addIngredient(dishId, {
-        nameEn: nameEn.trim(),
-        nameFr: nameFr.trim() || nameEn.trim()
-      })
+      await addIngredient(dishId, input)
       setNameEn('')
       setNameFr('')
       setAddDialogOpen(false)
@@ -49,14 +52,13 @@ export default function IngredientManager({ dishId, ingredients }: IngredientMan
   }
 
   const handleEdit = async () => {
-    if (!editingIngredient || !nameEn.trim()) return
+    if (!editingIngredient) return
+    const patch = parsedOrToast(ingredientPatch, names())
+    if (!patch) return
 
     setLoading(true)
     try {
-      await updateIngredient(editingIngredient.id, {
-        nameEn: nameEn.trim(),
-        nameFr: nameFr.trim() || nameEn.trim()
-      })
+      await updateIngredient(editingIngredient.id, patch)
       setEditingIngredient(null)
       setNameEn('')
       setNameFr('')

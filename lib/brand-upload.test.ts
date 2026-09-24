@@ -14,18 +14,18 @@ describe('validateBrandImage', () => {
     expect(validateBrandImage(file('logo.png', 'image/png', 1024), 'logo')).toBeNull()
   })
 
-  it('refuses a type the tile does not support, naming the hint', () => {
-    expect(validateBrandImage(file('logo.gif', 'image/gif', 10), 'logo')).toContain(BRAND_IMAGE_LIMITS.logo.hint)
+  it('refuses a type the server does not take, with the server schema message', () => {
+    expect(validateBrandImage(file('logo.gif', 'image/gif', 10), 'logo')).toMatch(/Invalid file type/)
   })
 
-  it('allows SVG for a logo but not for a cover', () => {
+  it('allows SVG for a logo but not for a cover, naming the hint', () => {
     expect(validateBrandImage(file('a.svg', 'image/svg+xml', 10), 'logo')).toBeNull()
-    expect(validateBrandImage(file('a.svg', 'image/svg+xml', 10), 'cover')).not.toBeNull()
+    expect(validateBrandImage(file('a.svg', 'image/svg+xml', 10), 'cover')).toContain(BRAND_IMAGE_LIMITS.cover.hint)
   })
 
-  it('refuses a file over the size limit of its kind, stating both numbers', () => {
+  it('refuses a file over the size limit of its kind', () => {
     const msg = validateBrandImage(file('big.jpg', 'image/jpeg', 6 * 1024 * 1024), 'logo')
-    expect(msg).toBe('That file is 6.0 MB; the limit is 5 MB.')
+    expect(msg).toBe('File size must be less than 5MB')
     expect(validateBrandImage(file('big.jpg', 'image/jpeg', 6 * 1024 * 1024), 'cover')).toBeNull()
   })
 

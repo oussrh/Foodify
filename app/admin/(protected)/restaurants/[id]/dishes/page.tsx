@@ -9,18 +9,18 @@ import { dishListRow } from '@/components/shell/dish-list-rows'
 import { DishStatStrip } from '@/components/shell/dish-stat-strip'
 import { notFound } from 'next/navigation'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
+import { listSearch, idSegment, routeParams, type SearchParams } from '@/lib/schemas/page-params'
 
 export default async function DishesPage({
   params,
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams?: Promise<{ search?: string }>
+  searchParams?: Promise<SearchParams>
 }) {
   await requireSuperAdminPage()
-  const { id } = await params
-  const sp = searchParams ? await searchParams : undefined
-  const search = (sp?.search || '').trim()
+  const { id } = routeParams(idSegment, await params)
+  const search = listSearch.parse((await searchParams)?.search)
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id }, select: { id: true, name: true, currencySymbol: true } })
   if (!restaurant) notFound()

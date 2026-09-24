@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["testing", "coverage", "vitest"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 source_truth: ["vitest.config.ts", "vitest.integration.config.ts", "package.json"]
-last_verified: "2026-09-23"
+last_verified: "2026-09-24"
 ---
 
 # Testing
@@ -99,7 +99,8 @@ else the `e2e` database of the same throwaway container the integration suite us
 and serves the build against it. Without Docker or `E2E_DATABASE_URL` it refuses to run rather
 than fall back to the database `.env` names: the suite writes accounts and orders, and a spec
 reading a row someone last saved there fails for a reason that is not in the code. The gate
-(abatty 0.5.1) holds the same line for both local suites: with a `.env` naming `DATABASE_URL`
+(abatty 0.5.1, and 0.5.2, which also runs `test:changed` over the pushed range so a green local
+gate is CI's green) holds the same line for both local suites: with a `.env` naming `DATABASE_URL`
 and no `TEST_DATABASE_URL` in the shell, it defers the database and browser suites to CI and
 says so. Set `TEST_DATABASE_URL=postgresql://test:test@localhost:5499/test` in the environment
 to run them before a push. Arguments pass through to Playwright

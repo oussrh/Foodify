@@ -4,10 +4,11 @@ import { redirect } from 'next/navigation'
 import DishEditor from '@/components/shell/dish-editor'
 import { AdminDeleteDishButton } from '@/components/admin-delete-dish-button'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
+import { dishSegments, routeParams } from '@/lib/schemas/page-params'
 
 export default async function EditDishPage({ params }: { params: Promise<{ id: string; dishId: string }> }) {
   await requireSuperAdminPage()
-  const { id, dishId } = await params
+  const { id, dishId } = routeParams(dishSegments, await params)
 
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
