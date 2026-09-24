@@ -319,3 +319,36 @@
     mix-blend-mode: normal;
   }
 }
+
+/* The staff apps (the kitchen board, the waiter's phone) are apps held in a hand or fixed to a
+   wall, not pages being read. The page does not rubber-band or pull to refresh (a board that
+   reloads under a swipe drops its audio and its screen lock), a double tap on a control is two
+   taps rather than a zoom, and a long press on a card or button neither selects its text nor
+   opens the callout menu. What someone types stays selectable. The header pads itself by the
+   top safe area and the app keeps clear of a landscape phone's notch at the sides; with the
+   default status bar the top inset is zero on iOS, so the padding costs nothing there. */
+@layer components {
+  html:has(.staff-app),
+  body:has(.staff-app) {
+    overscroll-behavior: none;
+  }
+  .staff-app {
+    -webkit-tap-highlight-color: transparent;
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+  body:has(.staff-app) :is(button, a, [role='button'], article, li) {
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  body:has(.staff-app) :is(input, textarea, select, [contenteditable='true']) {
+    -webkit-touch-callout: default;
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  .staff-safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}

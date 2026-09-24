@@ -28,6 +28,10 @@ interface BoardHeaderProps {
   readyDrawer: React.ReactNode
   wakeLock: WakeLock
   pwa: StaffPwa
+  /** The "This device" button and its sheet. */
+  deviceSetup: React.ReactNode
+  /** A line under the controls that asks something of whoever is at the screen (enable the sound). */
+  notice: React.ReactNode
   /** Absent on a kitchen tablet: there is no portal behind it to go back to. */
   backHref?: Route | undefined
   /** The sold-out screen for this restaurant: the pass is where a dish runs out. */
@@ -40,9 +44,9 @@ const CONTROL = 'h-12 min-w-12 px-3'
  * The board's one strip of chrome: where it is, how many orders are open, whether the server
  * answers, the ready drawer and this device's switches.
  */
-export default function BoardHeader({ restaurantName, view, onView, openCount, online, loading, onRefresh, soundOn, onToggleSound, readyDrawer, wakeLock, pwa, backHref, soldOutHref }: BoardHeaderProps) {
+export default function BoardHeader({ restaurantName, view, onView, openCount, online, loading, onRefresh, soundOn, onToggleSound, readyDrawer, wakeLock, pwa, deviceSetup, notice, backHref, soldOutHref }: BoardHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
+    <header className="staff-safe-top sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
       <div className="flex flex-wrap items-center gap-2 px-3 py-2.5 sm:px-4">
         {backHref && !pwa.installed && (
           <Button asChild variant="ghost" size="icon" className="h-12 w-12 shrink-0">
@@ -99,8 +103,10 @@ export default function BoardHeader({ restaurantName, view, onView, openCount, o
           onToggleSound={onToggleSound}
           wakeLock={wakeLock}
           pwa={pwa}
+          deviceSetup={deviceSetup}
         />
       </div>
+      {notice}
     </header>
   )
 }

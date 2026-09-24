@@ -22,6 +22,8 @@ interface BoardControlsProps {
   onToggleSound: () => void
   wakeLock: WakeLock
   pwa: StaffPwa
+  /** The "This device" button: install, notifications, sound test, full screen. */
+  deviceSetup: React.ReactNode
 }
 
 const CONTROL = 'h-12 min-w-12 px-3'
@@ -30,7 +32,7 @@ const CONTROL = 'h-12 min-w-12 px-3'
  * This tablet's own switches (install, keep the screen awake, sound, refresh), kept apart from the
  * view switch because they change this device only.
  */
-export default function BoardControls({ loading, onRefresh, soundOn, onToggleSound, wakeLock, pwa }: BoardControlsProps) {
+export default function BoardControls({ loading, onRefresh, soundOn, onToggleSound, wakeLock, pwa, deviceSetup }: BoardControlsProps) {
   return (
     <>
       {pwa.canInstall && (
@@ -45,11 +47,12 @@ export default function BoardControls({ loading, onRefresh, soundOn, onToggleSou
           variant={wakeLock.on ? 'default' : 'outline'}
           onClick={wakeLock.toggle}
           aria-pressed={wakeLock.on}
+          aria-label="Keep awake"
           className={CONTROL}
-          title="Keep the screen awake"
+          title={wakeLock.on && !wakeLock.held ? 'On: tap anywhere to hold the screen' : 'Keep the screen awake'}
         >
           <Sun className="h-5 w-5" />
-          <span className="hidden md:inline">{wakeLock.on ? 'Screen on' : 'Keep awake'}</span>
+          <span className="hidden md:inline">Keep awake</span>
         </Button>
       )}
 
@@ -66,6 +69,8 @@ export default function BoardControls({ loading, onRefresh, soundOn, onToggleSou
         {soundOn ? <Bell className="h-5 w-5" /> : <BellOff className="h-5 w-5" />}
         <span className="hidden md:inline">{soundOn ? 'Sound on' : 'Sound off'}</span>
       </Button>
+
+      {deviceSetup}
 
       <Button variant="outline" onClick={onRefresh} aria-label="Check for new orders now" className={CONTROL}>
         <RefreshCw className={cn('h-5 w-5', loading && 'animate-spin')} />

@@ -8,7 +8,9 @@ import { sumPrices } from '@/lib/money'
 import { orderConfirmationText } from '@/lib/order-message'
 import { orderInput, type OrderInput, type PlacedOrder } from '@/lib/schemas/order'
 import { sendSms } from '@/lib/sms'
+import { afterResponse } from '@/server/after-response'
 import { log } from '@/server/log'
+import { pushNewOrder } from '@/server/order-push'
 
 type PricedDish = { id: string; nameEn: string; nameFr: string; price: { toFixed(digits: number): string } }
 
@@ -104,7 +106,7 @@ function orderableDishes(restaurantId: string, dishIds: string[]) {
  * restaurant may leave it out, and the order records who took it instead (`placedById`). Answers 201 `{ data: { id, number, table, subtotal } }`; 400 invalid_json or invalid_payload (the issues);
  * 409 unavailable, naming each dish that is not this restaurant's active menu or has sold out (`reason`: `off_menu` or `sold_out`), because the
  * request was well formed and the kitchen's answer changed under it; 403 forbidden when the restaurant has ordering off, 404 not_found for an
- * unknown restaurant, 500 internal. The number is per restaurant, from `Restaurant.nextOrderNumber` (an order that
+ * unknown restaurant, 500 internal. A placed order is pushed to the restaurant's kitchen boards after the response (server/order-push.ts). The number is per restaurant, from `Restaurant.nextOrderNumber` (an order that
  * fails after the increment leaves a gap, never a duplicate). Nothing rate-limits: every accepted call is an order.
  */
 export async function POST(request: NextRequest) {
@@ -123,7 +125,7 @@ export async function POST(request: NextRequest) {
   try {
     const restaurant = await prisma.restaurant.findUnique({
       where: { id: restaurantId },
-      select: { id: true, orderingEnabled: true, currency: true, currencySymbol: true, name: true, defaultLocale: true },
+      select: { id: true, code: true, orderingEnabled: true, currency: true, currencySymbol: true, name: true, defaultLocale: true },
     })
     if (!restaurant) return fail('not_found', 'Restaurant not found', 404)
     if (!restaurant.orderingEnabled) return fail('forbidden', 'This restaurant is not taking orders', 403)
@@ -161,6 +163,8 @@ export async function POST(request: NextRequest) {
       select: { id: true, number: true, table: true, subtotal: true },
     })
     const placed: PlacedOrder = { id: order.id, number: order.number, table: order.table, subtotal: order.subtotal.toFixed(2) }
+    // The kitchen boards are woken once the guest has their answer: a slow push service never holds it.
+    afterResponse(() => pushNewOrder(restaurant, { ...placed, lines: priced }))
     // Only a guest is texted: an order taken at the table has nobody to confirm it to.
     if (phone) await confirmByText(placed, phone, restaurant, locale)
     return ok(placed, { status: 201 })

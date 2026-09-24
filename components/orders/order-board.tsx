@@ -15,6 +15,10 @@ import OrderColumns from './order-columns'
 import OrderDetailsSheet from './order-details-sheet'
 import ServedList from './served-list'
 import { useChime } from './use-chime'
+import { DeviceSetupSheet } from '@/components/staff/device-setup/device-setup-sheet'
+import { SoundUnlockStrip } from '@/components/staff/sound-unlock-strip'
+import { useAppBadge } from '@/components/staff/use-app-badge'
+import { useAudioUnlock } from '@/components/staff/use-audio-unlock'
 import { useSoundSetting } from '@/components/staff/use-sound-setting'
 import ReadyDrawer from './ready-drawer'
 import { useMinuteClock } from './use-minute-clock'
@@ -42,6 +46,8 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
   // A pass wants sound: it is the whole reason the board is there, so it starts on. Turning it
   // off is a choice the room makes, remembered on the tablet.
   const sound = useSoundSetting('foodify-board-sound', true, prime)
+  // Remembered "on" after a reload is not yet audible: the browser wants a tap first.
+  const audio = useAudioUnlock(sound.on)
   const announce = useCallback(() => {
     if (sound.on) chime()
   }, [sound.on, chime])
@@ -63,6 +69,8 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
   // the second is behind the drawer, because it is the floor's job and not the pass's.
   const working = orders.filter((order) => order.status !== 'READY')
   const ready = orders.filter((order) => order.status === 'READY')
+  // The installed app's icon carries the open count; the served view leaves it as it was.
+  useAppBadge(view === 'open' && !loading ? orders.length : null)
 
   const act = async (orderId: string, action: OrderMove) => {
     setBusyId(orderId)
@@ -76,7 +84,7 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
+    <div className="staff-app flex min-h-screen flex-col bg-background">
       <BoardHeader
         restaurantName={restaurantName}
         view={view}
@@ -90,6 +98,16 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
         readyDrawer={<ReadyDrawer orders={ready} now={now} busyId={busyId} onDeliver={(order) => act(order.id, 'done')} />}
         wakeLock={wakeLock}
         pwa={pwa}
+        deviceSetup={
+          <DeviceSetupSheet
+            restaurantId={restaurantId}
+            app="board"
+            pwa={pwa}
+            sound={{ on: sound.on, locked: audio.locked, toggle: sound.toggle, test: chime }}
+            wakeLock={wakeLock}
+          />
+        }
+        notice={<SoundUnlockStrip locked={audio.locked} onUnlock={audio.unlock} />}
         backHref={backHref}
         soldOutHref={`/kitchen/menu/${restaurantCode}` as Route}
       />

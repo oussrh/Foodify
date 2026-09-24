@@ -43,6 +43,10 @@ runs the migrations not yet applied and never resets anything.
    `DATABASE_URL=<production> pnpm exec prisma migrate deploy`. Nothing does this for you today:
    neither the build nor CI touches the production database.
 
+`20260924090000_push_subscriptions` (the `PushSubscription` table) is such a migration: deploy it
+before the build that ships Web Push, or every subscribe from a staff device fails and every
+push is logged as not sent.
+
 Write migrations the running version survives (add a column before the code reads it, stop
 reading it before it is dropped): for a moment, the old deploy runs on the new schema.
 
@@ -60,6 +64,7 @@ required variable, or half of a pair, fails at its first request rather than at 
 | `RESEND_API_KEY` + `RESEND_FROM` | together or neither | Sign-in codes and account email. Unset, the code is stored but never delivered, so an account with the second factor on cannot finish signing in. |
 | `BREVO_API_KEY` + `BREVO_SMS_SENDER` | together or neither | The guest's order confirmation by SMS. Unset, nothing is sent and the order still stands. |
 | `CLOUDINARY_CLOUD_NAME` + `CLOUDINARY_API_KEY` + `CLOUDINARY_API_SECRET` | all or none | Photos and AR models, in `restaurants/{slug}/` folders. |
+| `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` + `VAPID_SUBJECT` | all or none | Web Push to the staff apps (`server/push.ts`): a new order wakes the kitchen boards, a ready one the waiter's phone, with the app in the background or the screen locked. Generate the pair once with `pnpm exec web-push generate-vapid-keys` and keep it: a new pair orphans every device already subscribed until it opens the app again. The public key is inlined into the browser bundle at build time, so set it before the build. `VAPID_SUBJECT` is a `mailto:` or `https://` address the push services may contact. Unset, no device can subscribe and nothing is sent; the boards still poll and chime while open. |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` + `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | optional | Unsigned uploads straight from the browser; unset, uploads go through a server action. |
 
 `.env.example` lists them with placeholders. Off Vercel (a production build on another host or

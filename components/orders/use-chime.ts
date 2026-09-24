@@ -5,15 +5,12 @@
 // which is what a struck bell does and what a bare beep does not. The notes ring into each other,
 // so everything goes through one compressor: the alert stays loud enough for a kitchen without
 // the overlaps clipping. A browser will not let a page make noise before it has been touched, so
-// the context is created on the first play and the board's "Test sound" button is that touch.
+// the context is the page's one (`audio-context.ts`), opened by the first tap that asks for it.
 'use client'
 
-import { useCallback, useRef } from 'react'
+import { useCallback } from 'react'
+import { wakeAudio } from './audio-context'
 import { KITCHEN_CHIME, type ChimeNote, type ChimeVoice } from './chime-pattern'
-
-type AudioContextClass = typeof AudioContext
-const audioContextClass = (): AudioContextClass | undefined =>
-  typeof window === 'undefined' ? undefined : window.AudioContext ?? (window as { webkitAudioContext?: AudioContextClass }).webkitAudioContext
 
 /** A bell's tone is its fundamental plus quieter partials above: the ratio to the note, and its share of the level. */
 const PARTIALS = [
@@ -76,29 +73,18 @@ export interface Chime {
  * dependency, and a fresh object each render would restart its timer on every tick.
  */
 export function useChime(voice: ChimeVoice = KITCHEN_CHIME): Chime {
-  const context = useRef<AudioContext | null>(null)
-
-  /** The context, opened on first use and woken if the device suspended it; null where there is no audio. */
-  const open = useCallback((): AudioContext | null => {
-    const Ctor = audioContextClass()
-    if (!Ctor) return null
-    context.current ??= new Ctor()
-    // Suspended until the page has been interacted with, and again after a tablet wakes.
-    void context.current.resume()
-    return context.current
-  }, [])
-
   const prime = useCallback(() => {
     try {
-      open()
+      wakeAudio()
     } catch {
       // no audio on this device: the screen carries the alert on its own
     }
-  }, [open])
+  }, [])
 
   const play = useCallback(() => {
     try {
-      const ctx = open()
+      // Suspended until the page has been interacted with, and again after a tablet wakes.
+      const ctx = wakeAudio()
       if (!ctx) return
       const bus = makeBus(ctx, voice.volume)
       const start = ctx.currentTime + 0.02
@@ -106,7 +92,7 @@ export function useChime(voice: ChimeVoice = KITCHEN_CHIME): Chime {
     } catch {
       // no audio on this device: the board is still readable
     }
-  }, [open, voice])
+  }, [voice])
 
   return { play, prime }
 }
