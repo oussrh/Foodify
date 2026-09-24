@@ -39,13 +39,38 @@ export const STATUS_LABEL: Record<OrderStatus, string> = {
   CANCELLED: 'Cancelled',
 }
 
-/** One dish of an order as the board shows it: the name as it was ordered, how many, what the guest asked for. */
+/**
+ * One dish of an order as the board shows it: the name as it was ordered, how many were asked
+ * for, how many of those were taken off since (removed or voided: the line stays, struck through
+ * where it is shown), and what the guest asked for.
+ */
 export interface BoardLine {
   id: string
   nameEn: string
   nameFr: string
   quantity: number
+  removedQuantity: number
   note: string | null
+}
+
+/** How many of a line are still wanted: what was asked for less what was taken off. Never negative. */
+export function effectiveQuantity(line: { quantity: number; removedQuantity: number }): number {
+  return Math.max(0, line.quantity - line.removedQuantity)
+}
+
+/**
+ * A change to a ticket the kitchen has still to answer (lib/bill-rules.ts): the floor asked to
+ * cancel the whole ticket, or to take `quantity` of one line off it, while it was being made.
+ */
+export interface PendingRequest {
+  id: string
+  kind: 'CANCEL' | 'REMOVE'
+  /** The line a removal is for; null for a cancel. */
+  lineId: string | null
+  quantity: number | null
+  reason: string | null
+  note: string | null
+  createdAt: string
 }
 
 /** When an order was placed, taken on and served; the ones that have not happened yet are null. */
@@ -95,7 +120,11 @@ export interface BoardOrder {
   /** The order this one adds to, and its number: null on an order that opened its table's bill (lib/table-tab.ts). */
   parentId: string | null
   parentNumber: number | null
+  /** When the bill this ticket belongs to was closed (paid, the table let go); null while it is open. */
+  billClosedAt: string | null
   lines: BoardLine[]
+  /** What the floor has asked the kitchen to take off this ticket and is waiting on, oldest first. */
+  requests: PendingRequest[]
 }
 
 /** What a member of staff can do to an order from the board or the floor. */
@@ -140,9 +169,9 @@ export function byStatus<T extends { status: OrderStatus }>(orders: T[]): Record
   }
 }
 
-/** How many items an order is, over every line: what the board shows before the details are opened. */
-export function itemCount(order: { lines: { quantity: number }[] }): number {
-  return order.lines.reduce((total, line) => total + line.quantity, 0)
+/** How many items an order is, over every line and net of what was taken off: what the board shows before the details are opened. */
+export function itemCount(order: { lines: { quantity: number; removedQuantity: number }[] }): number {
+  return order.lines.reduce((total, line) => total + effectiveQuantity(line), 0)
 }
 
 /** Whole minutes since the order was placed, never negative; the board turns it into "4 min ago". */

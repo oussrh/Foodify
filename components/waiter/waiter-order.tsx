@@ -28,6 +28,8 @@ interface WaiterOrderProps {
   restaurantId: string
   restaurantName: string
   table: string
+  /** How many tables the room has: where a bill may be moved to. */
+  tableCount: number
   categories: MenuCategory[]
   loose: MenuDish[]
   money: Money
@@ -40,7 +42,7 @@ interface WaiterOrderProps {
  * Taking an order at one table: the menu to build it, the review sheet to read it back, and the
  * send; the cart is kept per table.
  */
-export default function WaiterOrder({ restaurantId, restaurantName, table, categories, loose, money, locale, onBack }: WaiterOrderProps) {
+export default function WaiterOrder({ restaurantId, restaurantName, table, tableCount, categories, loose, money, locale, onBack }: WaiterOrderProps) {
   const router = useRouter()
   // One cart per table: the key carries the table, so two tables never share an order.
   const cart = useCart(`${restaurantId}:t${table}`, table)
@@ -158,7 +160,7 @@ export default function WaiterOrder({ restaurantId, restaurantName, table, categ
         onRetryBill={current.refresh}
       />
 
-      {tab && <TableTabSheet tab={tab} open={showingTab} onOpenChange={showTab} money={money} />}
+      {tab && <TableTabSheet tab={tab} open={showingTab} onOpenChange={showTab} money={money} tableCount={tableCount} onChanged={current.refresh} />}
     </div>
   )
 }

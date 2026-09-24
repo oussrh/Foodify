@@ -14,7 +14,9 @@ import { log } from '@/server/log'
 
 // How long a push service holds one for a device that is off: past this a new order is on the
 // board already and a ready plate has gone cold or been carried, so a late alert only misleads.
-const TTL_SECONDS: Record<PushKind, number> = { order: 600, ready: 300 }
+// A request is answered on the board within minutes or not at all; an answer is news only while
+// the waiter is still at the table.
+const TTL_SECONDS: Record<PushKind, number> = { order: 600, ready: 300, request: 600, answer: 300 }
 // A socket that has said nothing for this long is not going to; a send runs after the response.
 const SOCKET_TIMEOUT_MS = 10_000
 // One restaurant's devices for one app; a bound, not a limit anybody should meet.

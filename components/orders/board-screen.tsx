@@ -29,6 +29,7 @@ export default function BoardScreen({ restaurant, portal }: BoardScreenProps) {
       restaurantName={restaurant.name}
       money={money}
       backHref={portal === 'kitchen' ? undefined : (`/${portal}/restaurants/${restaurant.id}/info` as Route)}
+      isManager={portal !== 'kitchen'}
     />
   )
 }

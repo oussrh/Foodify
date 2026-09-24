@@ -46,7 +46,7 @@ describe('GET /api/orders/board', () => {
       const rows = await ordersOf(await board(mine.id))
       expect(rows.map((o) => o.number)).toEqual([2, 1])
       expect(rows[0]).toMatchObject({ table: '2', phone: '+212600112233', status: 'ACCEPTED', subtotal: '9.50' })
-      expect(rows[0]?.lines).toEqual([{ id: expect.any(String), nameEn: 'Chicken', nameFr: 'Poulet', quantity: 1, note: 'No onions' }])
+      expect(rows[0]?.lines).toEqual([{ id: expect.any(String), nameEn: 'Chicken', nameFr: 'Poulet', quantity: 1, removedQuantity: 0, note: 'No onions' }])
       expect(typeof rows[0]?.createdAt).toBe('string')
     }))
 
@@ -169,8 +169,9 @@ describe('setOrderStatus', () => {
       const theirs = await restaurant(tx)
       const foreign = await order(tx, theirs.id, 1)
       signInAs(await manager(tx, [mine.id]))
-      await expect(setOrderStatus({ orderId: foreign.id, action: 'done' })).rejects.toThrow()
+      await expect(setOrderStatus({ orderId: foreign.id, action: 'done' })).rejects.toThrow('Forbidden')
       expect((await tx.order.findUniqueOrThrow({ where: { id: foreign.id }, select: { status: true } })).status).toBe('NEW')
-      await expect(setOrderStatus({ orderId: '11111111-1111-4111-8111-111111111111', action: 'done' })).rejects.toThrow(/not found/i)
+      // One that does not exist is refused the same way, so an id cannot be probed.
+      await expect(setOrderStatus({ orderId: '11111111-1111-4111-8111-111111111111', action: 'done' })).rejects.toThrow('Forbidden')
     }))
 })

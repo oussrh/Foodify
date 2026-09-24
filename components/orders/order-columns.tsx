@@ -6,7 +6,7 @@
 // with the same trays when the screen is narrow.
 'use client'
 
-import { byStatus, type BoardOrder, type OrderStatus } from '@/lib/orders'
+import { byStatus, type BoardOrder, type OrderStatus, type PendingRequest } from '@/lib/orders'
 import { cn } from '@/lib/utils'
 import OrderCard from './order-card'
 
@@ -17,6 +17,7 @@ interface OrderColumnsProps {
   arrived: string[]
   onOpen: (order: BoardOrder) => void
   onAdvance: (order: BoardOrder) => void
+  onDecide: (request: PendingRequest, accept: boolean) => void
 }
 
 interface Lane {
@@ -36,13 +37,14 @@ const LANES: Lane[] = [
 ]
 
 /** The board's two lanes, waiting to be started and being made, so where a card sits is its state. */
-export default function OrderColumns({ orders, now, busyId, arrived, onOpen, onAdvance }: OrderColumnsProps) {
+export default function OrderColumns({ orders, now, busyId, arrived, onOpen, onAdvance, onDecide }: OrderColumnsProps) {
   const lanes = byStatus(orders)
 
   return (
     <div className="grid gap-4 lg:grid-cols-2 lg:gap-5">
       {LANES.map((lane) => {
         const cards = lanes[lane.status]
+        const asking = cards.filter((order) => order.requests.length > 0).length
         return (
           <section
             key={lane.status}
@@ -55,7 +57,12 @@ export default function OrderColumns({ orders, now, busyId, arrived, onOpen, onA
             >
               <span className={cn('h-4 w-1.5 shrink-0 rounded-full', lane.accent)} aria-hidden="true" />
               {lane.title}
-              <span className="tnum ml-auto rounded-full bg-muted px-2.5 py-0.5 text-sm font-semibold tabular-nums text-foreground">{cards.length}</span>
+              {asking > 0 && (
+                <span className="ml-auto rounded-full bg-warning px-2.5 py-0.5 text-sm font-semibold normal-case tracking-normal text-white">
+                  {asking} asking
+                </span>
+              )}
+              <span className={cn('tnum rounded-full bg-muted px-2.5 py-0.5 text-sm font-semibold tabular-nums text-foreground', asking === 0 && 'ml-auto')}>{cards.length}</span>
             </h2>
 
             <div className="p-3">
@@ -72,6 +79,7 @@ export default function OrderColumns({ orders, now, busyId, arrived, onOpen, onA
                       fresh={arrived.includes(order.id)}
                       onOpen={() => onOpen(order)}
                       onAdvance={() => onAdvance(order)}
+                      onDecide={onDecide}
                     />
                   ))}
                 </div>

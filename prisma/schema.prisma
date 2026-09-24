@@ -92,6 +92,7 @@ model Restaurant {
   orders            Order[]
   cartAdds          CartAdd[]
   pushSubscriptions PushSubscription[]
+  orderChanges      OrderChange[]
 }
 
 model User {
@@ -116,7 +117,10 @@ model User {
   role                    UserRole
   restaurants             Restaurant[]
   activityLogs            ActivityLog[]
-  ordersPlaced            Order[]
+  ordersPlaced            Order[]            @relation("OrderPlacedBy")
+  billsClosed             Order[]            @relation("OrderClosedBy")
+  changesRequested        OrderChange[]      @relation("OrderChangeRequestedBy")
+  changesDecided          OrderChange[]      @relation("OrderChangeDecidedBy")
   pushSubscriptions       PushSubscription[]
   createdAt               DateTime           @default(now())
   lastLogin               DateTime?
@@ -243,22 +247,22 @@ enum OrderStatus {
 // server computed. `number` is the short label the kitchen sees (#12), per restaurant, from
 // Restaurant.nextOrderNumber. `phone` is personal data: never logged (server/log.ts).
 model Order {
-  id           String      @id @default(uuid())
+  id           String        @id @default(uuid())
   restaurantId String
-  restaurant   Restaurant  @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
   number       Int
   table        String
   // The guest's number, for the confirmation text. Empty when a waiter took the order at the
   // table: there is nobody to text, and `placedById` says who took it instead.
   phone        String
   placedById   String?
-  placedBy     User?       @relation(fields: [placedById], references: [id], onDelete: SetNull)
+  placedBy     User?         @relation("OrderPlacedBy", fields: [placedById], references: [id], onDelete: SetNull)
   note         String?
-  status       OrderStatus @default(NEW)
-  subtotal     Decimal     @db.Decimal(10, 2)
+  status       OrderStatus   @default(NEW)
+  subtotal     Decimal       @db.Decimal(10, 2)
   currency     String? // the restaurant's ISO 4217 code when the order was placed
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   // When the kitchen took the order on and when it went out: stamped once by the board's action,
   // so the history can say how long a table waited before it was started and before it was served.
   // `updatedAt` cannot answer that — it moves again on any later change.
@@ -272,8 +276,16 @@ model Order {
   // cooking is not disturbed and no timing resets, and it points at the order that opened the
   // table (never at another addition: lib/table-tab.ts). Null on every order that opens a bill.
   parentId     String?
-  parent       Order?      @relation("OrderAdditions", fields: [parentId], references: [id], onDelete: Cascade)
-  additions    Order[]     @relation("OrderAdditions")
+  parent       Order?        @relation("OrderAdditions", fields: [parentId], references: [id], onDelete: Cascade)
+  additions    Order[]       @relation("OrderAdditions")
+  // The bill was paid and the table let go (lib/bill-rules.ts): stamped on the order that opened
+  // the bill, never on an addition, and by whom. A closed bill is never a table's current one
+  // again, so the next order there opens a new bill. Null on every bill nobody closed; those
+  // still fall back to the service day and the 90-minute default (lib/table-tab.ts).
+  closedAt     DateTime?
+  closedById   String?
+  closedBy     User?         @relation("OrderClosedBy", fields: [closedById], references: [id], onDelete: SetNull)
+  changes      OrderChange[]
 
   @@unique([restaurantId, number])
   @@index([restaurantId, status, createdAt])
@@ -284,16 +296,83 @@ model Order {
 // later (dishId is then null) leaves the order as it was placed. `note` is what the guest asked
 // for on this dish ("no onions"), one per dish rather than per portion.
 model OrderLine {
-  id        String  @id @default(uuid())
-  orderId   String
-  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  dishId    String?
-  dish      Dish?   @relation(fields: [dishId], references: [id], onDelete: SetNull)
-  nameEn    String
-  nameFr    String
-  unitPrice Decimal @db.Decimal(10, 2)
-  quantity  Int
-  note      String?
+  id              String        @id @default(uuid())
+  orderId         String
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  dishId          String?
+  dish            Dish?         @relation(fields: [dishId], references: [id], onDelete: SetNull)
+  nameEn          String
+  nameFr          String
+  unitPrice       Decimal       @db.Decimal(10, 2)
+  quantity        Int
+  // How many of `quantity` were taken off after it was sent (cancelled, removed or voided: the
+  // OrderChange rows say which and why). The line stays, so the kitchen and the record still see
+  // what was asked for; what the guest pays for and what the kitchen makes is the difference.
+  removedQuantity Int           @default(0)
+  note            String?
+  changes         OrderChange[]
+}
+
+enum OrderChangeKind {
+  CANCEL
+  REMOVE
+  VOID
+  CLOSE
+  MERGE
+  UNMERGE
+  MOVE
+}
+
+// A request is a change the kitchen has still to answer (a dish already cooking); everything else
+// is applied as it is written, and a refused request stays on record as refused.
+enum OrderChangeStatus {
+  APPLIED
+  PENDING
+  REFUSED
+}
+
+// Why a dish or a ticket was taken off (lib/bill-rules.ts CHANGE_REASONS); `other` carries a note.
+enum OrderChangeReason {
+  changed_mind
+  mistake
+  too_slow
+  unavailable
+  other
+}
+
+// Every change to a bill after it was sent, in the order it happened: a ticket cancelled, a dish
+// removed or voided, a bill closed, merged, un-merged or moved. Nothing a waiter or a manager does
+// to a sent order deletes anything: it writes one of these, and the order's own columns follow.
+// `orderId` is the ticket or the bill acted on; `lineId` the dish, for a removal or a void.
+// A merge writes one row on the surviving bill (`mergedOrderId` the bill merged into it) and one
+// on each addition it re-parented (`mergedOrderId` the bill it came from), all with the same
+// `createdAt`, which is how an undo finds exactly what that merge moved. The people are kept as
+// ids and survive the account (SetNull): a record outlives the waiter who left.
+model OrderChange {
+  id            String             @id @default(uuid())
+  restaurantId  String
+  restaurant    Restaurant         @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderId       String
+  order         Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  lineId        String?
+  line          OrderLine?         @relation(fields: [lineId], references: [id], onDelete: Cascade)
+  kind          OrderChangeKind
+  quantity      Int?
+  reason        OrderChangeReason?
+  note          String?
+  fromTable     String?
+  toTable       String?
+  mergedOrderId String?
+  status        OrderChangeStatus
+  requestedById String?
+  requestedBy   User?              @relation("OrderChangeRequestedBy", fields: [requestedById], references: [id], onDelete: SetNull)
+  decidedById   String?
+  decidedBy     User?              @relation("OrderChangeDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+  decidedAt     DateTime?
+  createdAt     DateTime           @default(now())
+
+  @@index([orderId])
+  @@index([restaurantId, createdAt])
 }
 
 // A staff device's Web Push subscription (server/push.ts): the browser's endpoint and its two

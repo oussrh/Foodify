@@ -21,7 +21,9 @@ const order = (over: Partial<BoardOrder> = {}): BoardOrder =>
     placedBy: null,
     parentId: null,
     parentNumber: null,
-    lines: [{ id: 'l1', nameEn: 'Chicken', nameFr: 'Poulet', quantity: 2, note: null }],
+    billClosedAt: null,
+    lines: [{ id: 'l1', nameEn: 'Chicken', nameFr: 'Poulet', quantity: 2, removedQuantity: 0, note: null }],
+    requests: [],
     ...over,
   }) as BoardOrder
 
@@ -72,6 +74,22 @@ describe('floorTiles', () => {
   it('counts the items of everything on the table', () => {
     const tile = floorTiles([3], [order({ id: 'a', table: '3' })], [order({ id: 'b', table: '3' })], NOW)[0]
     expect(tile!.items).toBe(4)
+  })
+
+  it('counts what is left on a line, not what was first asked for', () => {
+    const lines = [{ id: 'l1', nameEn: 'Tea', nameFr: 'Thé', quantity: 3, removedQuantity: 1, note: null }]
+    expect(floorTiles([3], [order({ table: '3', lines })], [], NOW)[0]!.items).toBe(2)
+  })
+
+  it('is free once the table’s bill is closed, even with a plate of it still on the pass', () => {
+    const closed = '2026-09-22T19:59:00Z'
+    const tile = floorTiles([3], [order({ id: 'a', table: '3', billClosedAt: closed })], [order({ id: 'b', table: '3', status: 'READY', billClosedAt: closed })], NOW)[0]
+    expect(tile).toMatchObject({ state: 'free', items: 0, stage: null })
+  })
+
+  it('stays taken by the next party’s bill when an earlier one at the table is closed', () => {
+    const tile = floorTiles([3], [order({ id: 'a', table: '3', billClosedAt: '2026-09-22T19:00:00Z' }), order({ id: 'b', table: '3' })], [], NOW)[0]
+    expect(tile).toMatchObject({ state: 'cooking', items: 2 })
   })
 
   it('keeps one table\'s orders off another\'s tile', () => {
@@ -125,6 +143,10 @@ describe('newlyReady', () => {
   it('is what the phone buzzes about: the ones not seen before', () => {
     const ready = [order({ id: 'a' }), order({ id: 'b' })]
     expect(newlyReady(ready, new Set(['a']))).toEqual(['b'])
+  })
+
+  it('never buzzes for a plate of a closed bill, whose table has no tile', () => {
+    expect(newlyReady([order({ id: 'a', billClosedAt: '2026-09-22T19:59:00Z' }), order({ id: 'b' })], new Set())).toEqual(['b'])
   })
 
   it('says nothing when the same orders are still sitting there', () => {

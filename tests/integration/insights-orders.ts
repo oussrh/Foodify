@@ -15,7 +15,8 @@ export interface OrderSpec {
   placedById?: string
   status?: 'NEW' | 'ACCEPTED' | 'READY' | 'DONE' | 'CANCELLED'
   subtotal?: string
-  lines?: { dishId: string; quantity: number; unitPrice: string }[]
+  /** `removedQuantity` is what was taken off the line after it was sent (a removal or a void). */
+  lines?: { dishId: string; quantity: number; unitPrice: string; removedQuantity?: number }[]
   /** The bill this order adds to: an addition, not an order of its own. */
   parentId?: string
 }

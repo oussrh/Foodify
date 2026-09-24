@@ -16,6 +16,18 @@ What we learned the hard way, one entry per lesson, newest first. A line added t
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
 
+## 2026-09-24 · Who may change an order depends on where the food is
+
+A guest's "take the tea off" means three different things depending on the kitchen: before it
+starts, it is an edit; while the pan is on, it is a request only the cook can answer; once it is
+plated, it is money coming off a bill, which is a manager's decision. Modelling cancel and remove
+as one permission per role would have been wrong at two of the three stages.
+
+Generalise it as: a change to work in progress is gated by the work's state as well as the
+person's role, and a change nobody may simply make becomes a request with an answer rather than
+a refusal. Money never disappears: a removed line keeps its quantity and a record of who, when
+and why, because a restaurant's till has to reconcile with it and a POS will one day read it.
+
 ## 2026-09-24 · An order is a kitchen ticket; a bill is a table's visit
 
 The waiter app made every send a new order, because the guest cart does and the waiter's order
