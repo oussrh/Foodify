@@ -4,12 +4,14 @@ import prisma from '@/lib/prisma'
 import { requireBoardAction, requireDeliverAction } from '@/lib/auth-guard'
 import { nextStatus, type OrderStatus } from '@/lib/orders'
 import { orderAction, type OrderAction } from '@/lib/schemas/order-board'
+import { afterResponse } from '@/server/after-response'
+import { pushOrderReady } from '@/server/order-push'
 
 /**
  * The restaurant's managers or its kitchen tablet, on one of that restaurant's orders (a waiter reads the board but does
  * not move it): the guard reads the order's restaurant from the row, so a caller cannot name someone else's. Parses `orderAction` and moves the order on — accept takes a NEW one on, done
  * serves a NEW or ACCEPTED one, cancel stops anything not already served — and a move that does not apply leaves the row
- * alone. The move stamps its own moment (`acceptedAt`, `servedAt`), which is what the history measures its waits from.
+ * alone. The move stamps its own moment (`acceptedAt`, `servedAt`), which is what the history measures its waits from. A move to READY pushes to the waiters after the response.
  * Answers `{ id, status }`, the status as it now stands, so a board that raced another tablet shows the truth.
  */
 export async function setOrderStatus(raw: OrderAction) {
@@ -33,5 +35,7 @@ export async function setOrderStatus(raw: OrderAction) {
     },
     select: { id: true, status: true },
   })
+  // The floor is told the plate is up once the kitchen has its answer (server/order-push.ts).
+  if (next === 'READY') afterResponse(() => pushOrderReady(orderId))
   return { id: updated.id, status: updated.status as OrderStatus }
 }

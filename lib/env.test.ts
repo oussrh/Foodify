@@ -76,6 +76,28 @@ describe('serverEnv', () => {
     expect(() => partial.serverEnv.cloudinary).toThrow(/CLOUDINARY/)
   })
 
+  it('gives the Web Push trio as one value, or nothing, and refuses any partial set', async () => {
+    const vapid = { NEXT_PUBLIC_VAPID_PUBLIC_KEY: 'BPub', VAPID_PRIVATE_KEY: 'priv', VAPID_SUBJECT: 'mailto:ops@example.com' }
+    const all = await load({ DATABASE_URL: 'postgresql://x', ...vapid })
+    expect(all.serverEnv.webPush).toEqual({ publicKey: 'BPub', privateKey: 'priv', subject: 'mailto:ops@example.com' })
+    expect(all.publicEnv.vapidPublicKey).toBe('BPub')
+    const none = await load({ DATABASE_URL: 'postgresql://x', NEXT_PUBLIC_VAPID_PUBLIC_KEY: '', VAPID_PRIVATE_KEY: '', VAPID_SUBJECT: '' })
+    expect(none.serverEnv.webPush).toBeNull()
+    expect(none.publicEnv.vapidPublicKey).toBeUndefined()
+    // Each one missing on its own, including the private key, which is the one a deploy forgets.
+    for (const missing of Object.keys(vapid)) {
+      const partial = await load({ DATABASE_URL: 'postgresql://x', ...vapid, [missing]: '' })
+      expect(() => partial.serverEnv.webPush, missing).toThrow(/VAPID/)
+    }
+  })
+
+  it('takes a mailto: or https subject for the push services, nothing else', async () => {
+    const vapid = { NEXT_PUBLIC_VAPID_PUBLIC_KEY: 'BPub', VAPID_PRIVATE_KEY: 'priv' }
+    expect((await load({ DATABASE_URL: 'postgresql://x', ...vapid, VAPID_SUBJECT: 'https://foodify.app' })).serverEnv.webPush?.subject).toBe('https://foodify.app')
+    const plain = await load({ DATABASE_URL: 'postgresql://x', ...vapid, VAPID_SUBJECT: 'ops@example.com' })
+    expect(() => plain.serverEnv.webPush).toThrow(/VAPID_SUBJECT/)
+  })
+
   it('reads NODE_ENV once: development only when it says so', async () => {
     expect((await load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'development' })).serverEnv.isDevelopment).toBe(true)
     expect((await load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'test' })).serverEnv.isDevelopment).toBe(false)

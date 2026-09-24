@@ -23,6 +23,8 @@ export const publicEnv = {
   isTest: process.env.NODE_ENV === 'test',
   /** Public origin of the site, for links sent off-site (JSON-LD, the QR target). */
   appUrl: process.env.NEXT_PUBLIC_APP_URL || 'https://foodify.app',
+  /** The VAPID public key a staff device subscribes to Web Push with; unset, push is off and nothing subscribes. */
+  vapidPublicKey: process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY || undefined,
 } as const
 
 // An empty variable (`KEY=` in an env file, a CI matrix) is an unset one.
@@ -43,6 +45,10 @@ const serverSchema = z
     CLOUDINARY_CLOUD_NAME: optional,
     CLOUDINARY_API_KEY: optional,
     CLOUDINARY_API_SECRET: optional,
+    NEXT_PUBLIC_VAPID_PUBLIC_KEY: optional,
+    VAPID_PRIVATE_KEY: optional,
+    // Who the push services may contact about this sender: a mailto: or an https address.
+    VAPID_SUBJECT: z.preprocess(unset, z.string().regex(/^(mailto:|https:\/\/)\S+$/, 'VAPID_SUBJECT is a mailto: or https:// address').optional()),
     NODE_ENV: z.preprocess(unset, z.enum(['development', 'test', 'production']).default('development')),
   })
   .refine((e) => Boolean(e.RESEND_API_KEY) === Boolean(e.RESEND_FROM), {
@@ -53,6 +59,9 @@ const serverSchema = z
   })
   .refine((e) => [e.CLOUDINARY_CLOUD_NAME, e.CLOUDINARY_API_KEY, e.CLOUDINARY_API_SECRET].every(Boolean) === Boolean(e.CLOUDINARY_CLOUD_NAME), {
     message: 'CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY and CLOUDINARY_API_SECRET are set together or not at all',
+  })
+  .refine((e) => [e.NEXT_PUBLIC_VAPID_PUBLIC_KEY, e.VAPID_PRIVATE_KEY, e.VAPID_SUBJECT].filter(Boolean).length % 3 === 0, {
+    message: 'NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT are set together or not at all',
   })
 
 let parsed: z.infer<typeof serverSchema> | undefined
@@ -96,6 +105,15 @@ export const serverEnv = {
   get cloudinary() {
     const { CLOUDINARY_CLOUD_NAME: cloudName, CLOUDINARY_API_KEY: apiKey, CLOUDINARY_API_SECRET: apiSecret } = server()
     return cloudName && apiKey && apiSecret ? { cloudName, apiKey, apiSecret } : null
+  },
+  /**
+   * Web Push for the staff apps (server/push.ts): the VAPID key pair and the subject the push
+   * services may contact. All three or none, and null until they are set: `sendPush` then sends
+   * nothing, the way an unlinked Brevo sends no text.
+   */
+  get webPush() {
+    const { NEXT_PUBLIC_VAPID_PUBLIC_KEY: publicKey, VAPID_PRIVATE_KEY: privateKey, VAPID_SUBJECT: subject } = server()
+    return publicKey && privateKey && subject ? { publicKey, privateKey, subject } : null
   },
   get isDevelopment() {
     return server().NODE_ENV === 'development'

@@ -60,7 +60,7 @@ export function WaiterMenu({ categories, loose, money, locale, quantityOf, onAdd
 
   return (
     <>
-      <div className="sticky top-[57px] z-20 border-b border-border bg-background/95 px-3 py-2 backdrop-blur-sm">
+      <div className="sticky top-[calc(57px+env(safe-area-inset-top,0px))] z-20 border-b border-border bg-background/95 px-3 py-2 backdrop-blur-sm">
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
           <Input

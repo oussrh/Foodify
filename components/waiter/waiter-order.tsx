@@ -76,8 +76,8 @@ export default function WaiterOrder({ restaurantId, restaurantName, table, categ
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-30 flex h-[57px] items-center gap-2 border-b border-border bg-background/95 px-3 backdrop-blur-sm">
+    <div className="staff-app flex min-h-screen flex-col bg-background">
+      <header className="staff-safe-top sticky top-0 z-30 flex h-[calc(57px+env(safe-area-inset-top,0px))] items-center gap-2 border-b border-border bg-background/95 px-3 backdrop-blur-sm">
         <Button variant="ghost" size="icon" className="h-12 w-12 shrink-0" onClick={onBack} aria-label="Back to the tables">
           <ChevronLeft className="h-5 w-5" />
         </Button>

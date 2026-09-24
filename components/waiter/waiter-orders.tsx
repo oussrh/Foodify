@@ -93,8 +93,8 @@ export function WaiterOrders({ restaurant }: { restaurant: { id: string; code: s
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <header className="sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
+    <div className="staff-app flex min-h-screen flex-col bg-background">
+      <header className="staff-safe-top sticky top-0 z-30 border-b border-border bg-background/95 backdrop-blur-sm">
         <WaiterHeader
           title="Orders"
           restaurantName={restaurant.name}

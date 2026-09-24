@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useClientValue } from '@/components/use-client-value'
 import { publicEnv } from '@/lib/env'
+import { readStandalone } from './device-facts'
 
 type InstallEvent = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }> }
 
@@ -39,7 +40,8 @@ export function staffScope(pathname: string): string | null {
 export function useStaffPwa(): StaffPwa {
   const [prompt, setPrompt] = useState<InstallEvent | null>(null)
   // How the board was opened is a browser fact; installing it during the session is the event's.
-  const openedStandalone = useClientValue(() => window.matchMedia('(display-mode: standalone)').matches, false)
+  // An iPhone reports it through `navigator.standalone` as well as the display mode (device-facts.ts).
+  const openedStandalone = useClientValue(readStandalone, false)
   const [installedNow, setInstalledNow] = useState(false)
   const installed = openedStandalone || installedNow
 
