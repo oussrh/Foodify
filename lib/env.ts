@@ -49,6 +49,12 @@ const serverSchema = z
     VAPID_PRIVATE_KEY: optional,
     // Who the push services may contact about this sender: a mailto: or an https address.
     VAPID_SUBJECT: z.preprocess(unset, z.string().regex(/^(mailto:|https:\/\/)\S+$/, 'VAPID_SUBJECT is a mailto: or https:// address').optional()),
+    // The key POS credentials are sealed with (server/pos-crypto.ts): 32 random bytes, base64. Its id
+    // is stored beside each sealed value, so a rotation can tell which key opens which row.
+    POS_ENCRYPTION_KEY: z.preprocess(unset, z.string().regex(/^[A-Za-z0-9+/]{43}=$/, 'POS_ENCRYPTION_KEY is 32 bytes, base64').optional()),
+    POS_ENCRYPTION_KEY_ID: z.preprocess(unset, z.string().regex(/^[\w-]{1,32}$/, 'POS_ENCRYPTION_KEY_ID is a short name').default('k1')),
+    // What Vercel's cron sends as a bearer token to /api/pos/outbox; unset, the route refuses every call.
+    CRON_SECRET: z.preprocess(unset, z.string().min(16, 'CRON_SECRET is at least 16 characters').optional()),
     NODE_ENV: z.preprocess(unset, z.enum(['development', 'test', 'production']).default('development')),
   })
   .refine((e) => Boolean(e.RESEND_API_KEY) === Boolean(e.RESEND_FROM), {
@@ -114,6 +120,19 @@ export const serverEnv = {
   get webPush() {
     const { NEXT_PUBLIC_VAPID_PUBLIC_KEY: publicKey, VAPID_PRIVATE_KEY: privateKey, VAPID_SUBJECT: subject } = server()
     return publicKey && privateKey && subject ? { publicKey, privateKey, subject } : null
+  },
+  /**
+   * The key POS credentials are sealed with and its id (server/pos-crypto.ts), or null when none
+   * is set: connecting a POS is then refused with a message saying so, and nothing is decrypted.
+   * The key stays a base64 string here, because this module is shared with the browser bundle.
+   */
+  get posEncryption() {
+    const { POS_ENCRYPTION_KEY: key, POS_ENCRYPTION_KEY_ID: keyId } = server()
+    return key ? { key, keyId } : null
+  },
+  /** The bearer token the POS outbox cron must present; null refuses every call to it. */
+  get cronSecret() {
+    return server().CRON_SECRET ?? null
   },
   get isDevelopment() {
     return server().NODE_ENV === 'development'

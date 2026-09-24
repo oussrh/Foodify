@@ -9,6 +9,7 @@ import prisma from '@/lib/prisma'
 import { sumPrices } from '@/lib/money'
 import type { OrderInput } from '@/lib/schemas/order'
 import { addToRefusal, billCancelled, type AddToRefusal, type TabPlace } from '@/lib/table-tab'
+import { enqueuePos } from '@/server/pos/enqueue'
 
 /** One line as the row stores it: the dish's name and unit price copied at the time, the guest's note. */
 export type PricedLine = { dishId: string; nameEn: string; nameFr: string; unitPrice: string; quantity: number; note: string | null }
@@ -67,6 +68,8 @@ export async function storeOrder(input: OrderInput, context: StoreContext): Prom
       },
       select: PLACED,
     })
+    // The POS hears of the ticket in the same transaction, or not at all (server/pos/enqueue.ts).
+    await enqueuePos(tx, { restaurantId: input.restaurantId, orderId: order.id, billId: input.addTo ?? order.id, kind: 'TICKET' })
     return { order }
   })
 }

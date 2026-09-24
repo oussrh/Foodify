@@ -16,6 +16,18 @@ What we learned the hard way, one entry per lesson, newest first. A line added t
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
 
+## 2026-09-25 · Queue an outside call in the transaction that caused it, send it after
+
+Sending a new order to a POS inside the request would make every order as slow and as fragile as
+the slowest POS, and sending it after the transaction commits would lose it when the process
+dies between the two. The outbox row is written in the same transaction as the ticket, so an
+order that exists always has its message waiting, and a worker delivers it afterwards with
+retries, in order per bill, never twice.
+
+Generalise it as: a side effect on another system is recorded as data in the same transaction as
+the change that causes it, and delivered by something that can retry. The same rule already
+held for push (`after()`), where losing a message was acceptable; for money it is not.
+
 ## 2026-09-24 · Who may change an order depends on where the food is
 
 A guest's "take the tea off" means three different things depending on the kitchen: before it

@@ -75,6 +75,9 @@ model Restaurant {
   // (its 04:00) and how Insights cuts its days and hours. UTC until a manager sets it, which is
   // what every figure used before there was a setting.
   timeZone          String             @default("UTC")
+  // Whether this restaurant may connect a POS (prisma/pos.prisma): the super admin's switch, standing
+  // in for a plan until there are plans. Off, every POS action is refused and nothing is queued.
+  posEnabled        Boolean            @default(false)
   // Design/Branding
   coverImageUrl     String?
   coverImageStyle   String? // "cover" or "repeat"
@@ -93,6 +96,8 @@ model Restaurant {
   cartAdds          CartAdd[]
   pushSubscriptions PushSubscription[]
   orderChanges      OrderChange[]
+  posConnection     PosConnection?
+  posOutbox         PosOutbox[]
 }
 
 model User {
@@ -180,6 +185,7 @@ model Dish {
   views           DishView[]
   cartAdds        CartAdd[]
   orderLines      OrderLine[]
+  posItems        PosItemMap[]
 }
 
 model Ingredient {
@@ -286,10 +292,20 @@ model Order {
   closedById   String?
   closedBy     User?         @relation("OrderClosedBy", fields: [closedById], references: [id], onDelete: SetNull)
   changes      OrderChange[]
+  // What the restaurant's POS calls this ticket (the parent's is the bill's), once it has taken
+  // it (server/pos/deliver.ts). Null while nothing is connected, and on every order sent before.
+  externalId   String?
+  // The POS check this ticket was rung up on (its own id for a bill's first ticket, the bill's for
+  // an addition), and when the POS said that check was paid. A bill closes from the POS only once
+  // every ticket of it that reached the POS is paid, which matters after a merge.
+  posCheckId   String?
+  posPaidAt    DateTime?
+  posOutbox    PosOutbox[]
 
   @@unique([restaurantId, number])
   @@index([restaurantId, status, createdAt])
   @@index([parentId])
+  @@index([restaurantId, posCheckId])
 }
 
 // One dish of an order, its name and unit price copied at the time: a dish edited or deleted
@@ -325,6 +341,13 @@ enum OrderChangeKind {
 
 // A request is a change the kitchen has still to answer (a dish already cooking); everything else
 // is applied as it is written, and a refused request stays on record as refused.
+// Who made a change: somebody on the staff (`requestedById`, null once the account is gone), or the
+// restaurant's POS (a bill paid at the till, server/pos/webhook.ts), which has no account.
+enum ChangeSource {
+  STAFF
+  POS
+}
+
 enum OrderChangeStatus {
   APPLIED
   PENDING
@@ -369,7 +392,9 @@ model OrderChange {
   decidedById   String?
   decidedBy     User?              @relation("OrderChangeDecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
   decidedAt     DateTime?
+  source        ChangeSource       @default(STAFF)
   createdAt     DateTime           @default(now())
+  posOutbox     PosOutbox[]
 
   @@index([orderId])
   @@index([restaurantId, createdAt])

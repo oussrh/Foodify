@@ -6,7 +6,7 @@ status: living
 audience: ["developer", "agent"]
 tags: ["deployment", "vercel", "prisma", "environment"]
 related: ["./README.md", "./TESTING.md"]
-source_truth: ["package.json", "lib/env.ts", "prisma/schema.prisma", "next.config.js"]
+source_truth: ["package.json", "lib/env.ts", "prisma/schema.prisma", "prisma/pos.prisma", "next.config.js"]
 last_verified: "2026-09-24"
 ---
 
@@ -47,6 +47,13 @@ runs the migrations not yet applied and never resets anything.
 before the build that ships Web Push, or every subscribe from a staff device fails and every
 push is logged as not sent.
 
+`20260925090000_pos_groundwork` (the POS tables of `prisma/pos.prisma`, `Restaurant.posEnabled`,
+`Order.externalId`, `Order.posCheckId`, `Order.posPaidAt`, `OrderChange.source`) is additive: every
+restaurant starts with POS off. But the code reads the new tables on every change to an order, POS
+or not, so deploy it before the build that ships Settings → Integrations: without it, placing an
+order (guest or waiter), every board move (accept, ready, served, cancel), removing a dish,
+answering a request, voiding, and closing a bill all fail.
+
 Write migrations the running version survives (add a column before the code reads it, stop
 reading it before it is dropped): for a moment, the old deploy runs on the new schema.
 
@@ -65,10 +72,25 @@ required variable, or half of a pair, fails at its first request rather than at 
 | `BREVO_API_KEY` + `BREVO_SMS_SENDER` | together or neither | The guest's order confirmation by SMS. Unset, nothing is sent and the order still stands. |
 | `CLOUDINARY_CLOUD_NAME` + `CLOUDINARY_API_KEY` + `CLOUDINARY_API_SECRET` | all or none | Photos and AR models, in `restaurants/{slug}/` folders. |
 | `NEXT_PUBLIC_VAPID_PUBLIC_KEY` + `VAPID_PRIVATE_KEY` + `VAPID_SUBJECT` | all or none | Web Push to the staff apps (`server/push.ts`): a new order wakes the kitchen boards, a ready one the waiter's phone, with the app in the background or the screen locked. Generate the pair once with `pnpm exec web-push generate-vapid-keys` and keep it: a new pair orphans every device already subscribed until it opens the app again. The public key is inlined into the browser bundle at build time, so set it before the build. `VAPID_SUBJECT` is a `mailto:` or `https://` address the push services may contact. Unset, no device can subscribe and nothing is sent; the boards still poll and chime while open. |
+| `POS_ENCRYPTION_KEY` | to connect a POS | The key a POS connection's credentials are sealed with (AES-256-GCM, `server/pos-crypto.ts`): 32 random bytes as base64, generated once with `node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"`. Unset, connecting is refused ("POS integration is not configured on this server") and nothing is sent. Never replace it in place: every stored credential names the key it was sealed under (`POS_ENCRYPTION_KEY_ID`, `k1` by default), and a new key without that path makes them unreadable. Rotation is a second key id, a re-seal of every connection, then the old key retired. |
+| `POS_ENCRYPTION_KEY_ID` | optional | The name stored beside each sealed credential; `k1` unless set. Change it only together with a new key, as part of a rotation. |
+| `CRON_SECRET` | for the POS cron | The bearer token Vercel's cron sends to `/api/pos/outbox` (at least 16 characters; Vercel sends it by itself once the variable is set on the project). Unset, the route refuses every call and the outbox is swept only after a send and when a board polls. |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` + `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | optional | Unsigned uploads straight from the browser; unset, uploads go through a server action. |
 
-`.env.example` lists them with placeholders. Off Vercel (a production build on another host or
+`.env.example` lists them with placeholders, except the three POS variables (`POS_ENCRYPTION_KEY`,
+`POS_ENCRYPTION_KEY_ID`, `CRON_SECRET`), which have to be added to it by hand. Off Vercel (a production build on another host or
 port), Auth.js also needs `AUTH_TRUST_HOST=true`, or every page reads as signed out.
+
+## The POS outbox cron
+
+`vercel.json` schedules `GET /api/pos/outbox` daily at 05:00 UTC (`"0 5 * * *"`), the most the
+Hobby plan allows. It sends whatever the other two triggers missed (a sweep right after each
+event, and one at most every thirty seconds while a kitchen board or a waiter's phone polls, for a
+restaurant with an active POS). On Vercel Pro it can run every minute (`"* * * * *"`), which bounds
+how long a missed send waits. Delivery is at least once: a send the POS took but whose answer was
+lost (a timeout, an instance stopped mid-send) is sent again with the same idempotency key (the
+outbox row's id), which the POS adapter must use to recognise it. It answers a summary, errors
+counted, never a 500.
 
 ## Never on production
 

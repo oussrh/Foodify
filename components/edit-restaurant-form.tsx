@@ -23,14 +23,17 @@ export type { EditRestaurantValues } from '@/components/restaurant-form/edit-res
 
 /**
  * The Settings form across its General, Contact and Branding tabs, saved as one; uploads persist on
- * their own without dirtying it, and a refused save switches to the tab holding the error.
+ * their own without dirtying it, and a refused save switches to the tab holding the error. The
+ * Integrations tab shows `integrations` (the POS panel), outside the form: it saves step by step.
  */
 export default function EditRestaurantForm({
   id,
   defaultValues,
+  integrations,
 }: {
   id: string
   defaultValues: EditRestaurantValues
+  integrations?: React.ReactNode
 }) {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle')
   const { activeTab, showTab } = useSettingsTab()
@@ -187,6 +190,9 @@ export default function EditRestaurantForm({
       {/* Save bar: only when there is something to save */}
       <SaveBar saveStatus={saveStatus} hasUnsavedChanges={hasUnsavedChanges} isSubmitting={isSubmitting} onDiscard={handleCancel} onSave={submitForm} className="mt-6" />
     </form>
+    <div role="tabpanel" id="settings-panel-integrations" aria-labelledby="settings-tab-integrations" hidden={activeTab !== 'integrations'} className="mt-6">
+      {integrations}
+    </div>
     </div>
   )
 }

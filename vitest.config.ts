@@ -41,6 +41,16 @@ export default defineConfig({
         'server/bill-changes.ts', // close and move, in transactions: the same suite
         'server/change-log.ts', // a manager's read of the change log: tests/integration/ticket-changes.test.ts
         'server/order-moves.ts', // the board's moves under the ticket's lock: tests/integration/ticket-changes.test.ts and order-board.test.ts
+        'server/pos/connection.ts', // a stored connection opened into its adapter: tests/integration/pos-setup.test.ts
+        'server/pos/setup.ts', // connect, test and choose a location, over the database: the same suite
+        'server/pos/mapping.ts', // the dishes matched to the POS's items, over the database: the same suite
+        'server/pos/control.ts', // activate, pause, resume, retry, disconnect: the same suite and pos-delivery.test.ts
+        'server/pos/view.ts', // the Integrations tab's reading of the connection: tests/integration/pos-setup.test.ts
+        'server/pos/enqueue.ts', // an outbox row written in the event's transaction: tests/integration/pos-outbox.test.ts
+        'server/pos/claim.ts', // the claim's SQL, SKIP LOCKED over two connections: tests/integration/pos-delivery.test.ts
+        'server/pos/payloads.ts', // what a row says, read from the orders: the same suite
+        'server/pos/deliver.ts', // the sweep and the answers it records: the same suite
+        'server/pos/webhook.ts', // a webhook verified, deduplicated and applied: tests/integration/pos-webhook.test.ts
         'lib/emails/**', // HTML templates: presentational
       ],
       thresholds: {

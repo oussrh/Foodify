@@ -60,6 +60,10 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 | `server/order-lock.ts`, `server/ticket-apply.ts`, `server/ticket-changes.ts`, `server/order-moves.ts` | A row lock in SQL and the writes made under it: the floor's changes to a ticket, the kitchen's answers and the board's own moves; held by `tests/integration/ticket-changes.test.ts` |
 | `server/bill-merge.ts`, `server/bill-changes.ts` | Closing, merging, un-merging and moving a bill, each a transaction over locked rows; held by `tests/integration/bill-lifecycle.test.ts` |
 | `server/change-log.ts` | A manager's read of an order's change log; held by `tests/integration/ticket-changes.test.ts` |
+| `server/pos/connection.ts`, `server/pos/setup.ts`, `server/pos/mapping.ts`, `server/pos/control.ts`, `server/pos/view.ts` | Connecting, matching and switching a POS over the database; held by `tests/integration/pos-setup.test.ts` |
+| `server/pos/enqueue.ts` | An outbox row written in the event's own transaction; held by `tests/integration/pos-outbox.test.ts` |
+| `server/pos/claim.ts`, `server/pos/payloads.ts`, `server/pos/deliver.ts` | The claim's SQL (`SKIP LOCKED`, proven on two real connections), the payloads and the sweep; held by `tests/integration/pos-delivery.test.ts` |
+| `server/pos/webhook.ts` | A webhook verified, deduplicated and applied; held by `tests/integration/pos-webhook.test.ts` |
 | `lib/emails/**` | HTML templates; presentational |
 
 ## Contrast of the tokens
@@ -84,6 +88,7 @@ that fails on any serious or critical violation (TEST.3, A11Y.1):
 | `manager-settings.spec.ts` | General settings saved and held after a reload; a waiter added on the People tab signs in, then is removed |
 | `account.spec.ts` | The second factor turned off takes effect at the next sign-in; a changed password works and the old one is refused |
 | `sign-in.spec.ts`, `hours.spec.ts` | The sign-in pages and the opening-hours editor |
+| `pos.spec.ts` | A super admin switches POS on; the owner connects the Test POS, chooses a location, matches the dishes and activates; a guest's order shows as sent on the health panel; axe on each screen of Settings → Integrations |
 | `audit.spec.ts` | Every page of the guest, manager, admin and device screens at rest, under axe |
 
 Signed-in journeys sign in for real: `e2e/session.ts` makes an account for the test and writes
@@ -123,7 +128,7 @@ session it is signed in as through `session.ts`, so the guards, the actions and 
 unchanged on real rows and constraints, and nothing is mocked but the session and the cache
 revalidation. No coverage here: the unit floors hold the shared layer; this suite holds what a
 unit test cannot see: tenant isolation through the guards and the actions (`tenant-isolation.test.ts`,
-the negative proof DATA.3 asks for), the money column, a keyset page over real rows, the sort
+the negative proof DATA.3 asks for, and the POS actions in `pos-setup.test.ts`), the money column, a keyset page over real rows, the sort
 order a write leaves behind. The gate's database suite runs it when a push touches `prisma/` or
 `tests/integration/`; CI runs it on every push after the gate.
 

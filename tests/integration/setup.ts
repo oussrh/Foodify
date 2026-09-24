@@ -31,6 +31,11 @@ vi.mock('@/lib/prisma', () => ({
 
 vi.mock('@/auth', () => ({ auth: async () => session.current }))
 
+// The POS outbox is swept after the response (server/pos/trigger.ts). Outside a request that runs
+// at once and unawaited, on the test's own transaction, racing the assertions: here nothing is
+// swept by itself, and a test that sends calls `deliverDue` and awaits it.
+vi.mock('@/server/pos/trigger', () => ({ kickDelivery: () => {}, sweepSoon: () => false }))
+
 // Server actions revalidate the dashboards; outside a request there is nothing to revalidate.
 vi.mock('next/cache', () => ({ revalidatePath: () => {} }))
 
