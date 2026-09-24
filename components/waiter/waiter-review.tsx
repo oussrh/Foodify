@@ -7,6 +7,9 @@
 // pointing at a dish, and one for the whole order ("two starters first") because that is what
 // they say at the end. They are separate fields because they reach the kitchen as separate
 // things: a line note is printed against its dish, the order note against the ticket.
+//
+// At a table with a bill open the button says which bill the send goes to, and the other choice
+// is one tap away under it (bill-choice.tsx), never a second button of equal weight.
 'use client'
 
 import { Minus, Plus, Trash2 } from 'lucide-react'
@@ -18,6 +21,7 @@ import type { CartLineView } from '@/components/menu/cart/cart-lines'
 import type { OrderField } from '@/components/menu/cart/order-check'
 import { MAX_NOTE } from '@/lib/cart'
 import { formatPrice, type Locale, type Money } from '@/lib/menu'
+import { BillSwitch, sendLabel, type BillChoice } from './bill-choice'
 
 interface WaiterReviewProps {
   open: boolean
@@ -36,6 +40,10 @@ interface WaiterReviewProps {
   error: string | null
   /** The field the last attempt was refused over before it was sent (`orderInput`), marked invalid. */
   field: OrderField | null
+  /** Which bill the send goes to, or that the table is still being (or could not be) checked. */
+  bill: BillChoice
+  onAddingChange: (adding: boolean) => void
+  onRetryBill: () => void
 }
 
 /**
@@ -44,6 +52,7 @@ interface WaiterReviewProps {
  */
 export function WaiterReview(props: WaiterReviewProps) {
   const { open, onOpenChange, table, lines, subtotal, money, locale, note, onNote, onQuantity, onLineNote, onSend, sending, error, field } = props
+  const { bill, onAddingChange, onRetryBill } = props
   const name = (line: CartLineView) => (locale === 'fr' ? line.dish.nameFr : line.dish.nameEn)
   const items = lines.reduce((n, line) => n + line.quantity, 0)
 
@@ -126,9 +135,10 @@ export function WaiterReview(props: WaiterReviewProps) {
             </p>
           )}
 
-          <Button className="mt-3 h-16 w-full text-lg" disabled={sending || items === 0} onClick={onSend}>
-            {sending ? 'Sending…' : 'Send to the kitchen'}
+          <Button className="mt-3 h-16 w-full text-lg" disabled={sending || items === 0 || bill.kind === 'checking'} onClick={onSend}>
+            {sending ? 'Sending…' : sendLabel(bill)}
           </Button>
+          <BillSwitch bill={bill} onAddingChange={onAddingChange} onRetry={onRetryBill} />
         </div>
       </SheetContent>
     </Sheet>

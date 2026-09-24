@@ -4,18 +4,20 @@ import { ok, fail } from '@/lib/api'
 import { AuthError, requireOrderingStaff } from '@/lib/auth-guard'
 import { MAX_LINES } from '@/lib/cart'
 import type { Locale, Money } from '@/lib/menu'
-import { sumPrices } from '@/lib/money'
 import { orderConfirmationText } from '@/lib/order-message'
 import { orderInput, type OrderInput, type PlacedOrder } from '@/lib/schemas/order'
 import { sendSms } from '@/lib/sms'
+import { serviceDayStart } from '@/lib/availability'
+import { ADD_TO_REFUSED } from '@/lib/table-tab'
 import { afterResponse } from '@/server/after-response'
 import { log } from '@/server/log'
 import { pushNewOrder } from '@/server/order-push'
+import { storeOrder, type PricedLine } from '@/server/order-store'
 
 type PricedDish = { id: string; nameEn: string; nameFr: string; price: { toFixed(digits: number): string } }
 
 /** The order's lines as the row stores them: the dish's name and unit price copied now, so a later edit leaves the order as placed; the guest's note rides along. */
-function priceLines(lines: OrderInput['lines'], dishes: PricedDish[]) {
+function priceLines(lines: OrderInput['lines'], dishes: PricedDish[]): PricedLine[] {
   const byId = new Map(dishes.map((d) => [d.id, d]))
   return lines.flatMap((line) => {
     const dish = byId.get(line.dishId)
@@ -99,15 +101,29 @@ function orderableDishes(restaurantId: string, dishIds: string[]) {
 }
 
 /**
+ * What a guest's order must be and may not do: it gives a phone to be texted at, and it is always
+ * its own bill. A guest naming a table's bill (`addTo`) is told so rather than silently given a
+ * new order. Null when the order may go on.
+ */
+function guestRules(phone: string | undefined, addTo: string | undefined): Response | null {
+  if (!phone) return fail('invalid_payload', 'A phone number is required', 400)
+  if (addTo) return fail('forbidden', 'Only staff may add to a table’s order', 403)
+  return null
+}
+
+/**
  * POST, public: the guest menu sends an order with no session. Body as `orderInput` says (the restaurant, the table, a
  * phone for the confirmation, a note for the order, one to fifty lines of dish id, quantity and the note asked for on
  * that dish); every line is re-priced from the database, never from the body. A guest must give a phone and is texted
  * once the row exists (a send can only fail to arrive, never to be stored); a waiter or manager signed in to this
- * restaurant may leave it out, and the order records who took it instead (`placedById`). Answers 201 `{ data: { id, number, table, subtotal } }`; 400 invalid_json or invalid_payload (the issues);
+ * restaurant may leave it out, and the order records who took it instead (`placedById`). Staff may name the table's open bill in `addTo`:
+ * the order is then an addition to it (`parentId`), numbered and cooked as an order of its own; a guest naming one is 403 forbidden, and a
+ * bill that is not this table's open one of this service, checked under a lock on it (server/order-store.ts), is 409 unavailable with
+ * `details.addTo` the reason. Answers 201 `{ data: { id, number, table, subtotal } }`; 400 invalid_json or invalid_payload (the issues);
  * 409 unavailable, naming each dish that is not this restaurant's active menu or has sold out (`reason`: `off_menu` or `sold_out`), because the
  * request was well formed and the kitchen's answer changed under it; 403 forbidden when the restaurant has ordering off, 404 not_found for an
- * unknown restaurant, 500 internal. A placed order is pushed to the restaurant's kitchen boards after the response (server/order-push.ts). The number is per restaurant, from `Restaurant.nextOrderNumber` (an order that
- * fails after the increment leaves a gap, never a duplicate). Nothing rate-limits: every accepted call is an order.
+ * unknown restaurant, 500 internal. A placed order is pushed to the restaurant's kitchen boards after the response (server/order-push.ts). The number is per restaurant, from `Restaurant.nextOrderNumber`, taken in the
+ * same transaction as the row (never a duplicate). Nothing rate-limits: every accepted call is an order.
  */
 export async function POST(request: NextRequest) {
   let body: unknown
@@ -120,19 +136,20 @@ export async function POST(request: NextRequest) {
   if (!parsed.success) {
     return fail('invalid_payload', 'Invalid order payload', 400, parsed.error.issues)
   }
-  const { restaurantId, table, phone, locale, note, lines } = parsed.data
+  const { restaurantId, table, phone, locale, lines, addTo } = parsed.data
 
   try {
     const restaurant = await prisma.restaurant.findUnique({
       where: { id: restaurantId },
-      select: { id: true, code: true, orderingEnabled: true, currency: true, currencySymbol: true, name: true, defaultLocale: true },
+      select: { id: true, code: true, orderingEnabled: true, currency: true, currencySymbol: true, name: true, defaultLocale: true, timeZone: true },
     })
     if (!restaurant) return fail('not_found', 'Restaurant not found', 404)
     if (!restaurant.orderingEnabled) return fail('forbidden', 'This restaurant is not taking orders', 403)
 
     // A guest orders for themselves and is texted; a waiter orders at the table and is recorded.
     const staffId = await placedBy(restaurantId)
-    if (!staffId && !phone) return fail('invalid_payload', 'A phone number is required', 400)
+    const guestRefused = staffId ? null : guestRules(phone, addTo)
+    if (guestRefused) return guestRefused
 
     const dishes = await orderableDishes(restaurantId, lines.map((l) => l.dishId))
     const priced = priceLines(lines, dishes)
@@ -141,30 +158,14 @@ export async function POST(request: NextRequest) {
       const refused = await refusedDishes(restaurantId, lines.map((l) => l.dishId), priced)
       return fail('unavailable', 'A dish is not on this menu, or has sold out', 409, refused)
     }
-    const subtotal = sumPrices(priced.map((p) => ({ price: p.unitPrice, quantity: p.quantity })))
-
-    const { nextOrderNumber } = await prisma.restaurant.update({
-      where: { id: restaurantId },
-      data: { nextOrderNumber: { increment: 1 } },
-      select: { nextOrderNumber: true },
-    })
-    const order = await prisma.order.create({
-      data: {
-        restaurantId,
-        number: nextOrderNumber - 1,
-        table,
-        phone: phone ?? '',
-        placedById: staffId,
-        note: note || null,
-        subtotal,
-        currency: restaurant.currency,
-        lines: { create: priced },
-      },
-      select: { id: true, number: true, table: true, subtotal: true },
-    })
+    const place = { restaurantId, table, serviceStart: serviceDayStart(new Date(), restaurant.timeZone) }
+    const stored = await storeOrder(parsed.data, { staffId, currency: restaurant.currency, lines: priced, place })
+    // 409: the request was well formed and the table moved on under it (lib/table-tab.ts).
+    if ('refused' in stored) return fail('unavailable', ADD_TO_REFUSED[stored.refused], 409, { addTo: stored.refused })
+    const { order } = stored
     const placed: PlacedOrder = { id: order.id, number: order.number, table: order.table, subtotal: order.subtotal.toFixed(2) }
     // The kitchen boards are woken once the guest has their answer: a slow push service never holds it.
-    afterResponse(() => pushNewOrder(restaurant, { ...placed, lines: priced }))
+    afterResponse(() => pushNewOrder(restaurant, { ...placed, parentNumber: order.parent?.number ?? null, lines: priced }))
     // Only a guest is texted: an order taken at the table has nobody to confirm it to.
     if (phone) await confirmByText(placed, phone, restaurant, locale)
     return ok(placed, { status: 201 })

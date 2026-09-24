@@ -40,7 +40,9 @@ function OrderCard({ order, now, ready, onDeliver, busy }: { order: BoardOrder; 
       </div>
 
       <p className="tnum pt-1 text-[13px] text-muted-foreground">
-        #{order.number} · {items} item{items === 1 ? '' : 's'} · {waiting} min
+        {/* An addition is named by the bill it belongs to, so it reads as more for that table
+            rather than as an order nobody remembers taking. */}
+        {order.parentNumber === null ? `#${order.number}` : `#${order.parentNumber} · Addition`} · {items} item{items === 1 ? '' : 's'} · {waiting} min
         {order.placedBy ? ' · taken at the table' : ''}
       </p>
 

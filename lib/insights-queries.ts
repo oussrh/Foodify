@@ -12,8 +12,14 @@ import prisma from '@/lib/prisma'
 export type ViewCounts = { views: number; ar_views: number }
 /** A bucket's dishes put in a cart. */
 export type CartCounts = { adds: number }
-/** A bucket's orders: who placed them, how many were cancelled, what they came to, how long they took. */
+/**
+ * A bucket's orders: who placed them, how many were cancelled, what they came to, how long they
+ * took. An order is a table's bill: an addition to one (`parentId`) is not counted as an order,
+ * but its money is in the revenue and its kitchen work in the waits, which are per ticket.
+ */
 export type OrderCounts = {
+  /** Every kitchen ticket, orders and additions alike: what the waits are averaged over. */
+  tickets: number
   guest_orders: number
   staff_orders: number
   cancelled_orders: number
@@ -30,6 +36,7 @@ type Bucketed<T> = T & { bucket: Date }
  * seconds between two stamps; a stage an order never reached is left out of its average by the
  * FILTER rather than counted as a zero, and a clock that ran backwards is floored at zero. A
  * cancelled order is an order (it was sent) but brought in nothing, so it is out of the revenue.
+ * The order counts are of bills (`parentId` null); revenue and waits take every ticket.
  */
 export async function countBuckets(id: string, trunc: string, since: Date, tz: string) {
   return Promise.all([
@@ -48,9 +55,10 @@ export async function countBuckets(id: string, trunc: string, since: Date, tz: s
       GROUP BY 1`,
     prisma.$queryRaw<Bucketed<OrderCounts>[]>`
       SELECT date_trunc(${trunc}::text, (o."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz}) AS bucket,
-             (count(*) FILTER (WHERE o."placedById" IS NULL))::int AS guest_orders,
-             (count(*) FILTER (WHERE o."placedById" IS NOT NULL))::int AS staff_orders,
-             (count(*) FILTER (WHERE o."status" = 'CANCELLED'))::int AS cancelled_orders,
+             count(*)::int AS tickets,
+             (count(*) FILTER (WHERE o."parentId" IS NULL AND o."placedById" IS NULL))::int AS guest_orders,
+             (count(*) FILTER (WHERE o."parentId" IS NULL AND o."placedById" IS NOT NULL))::int AS staff_orders,
+             (count(*) FILTER (WHERE o."parentId" IS NULL AND o."status" = 'CANCELLED'))::int AS cancelled_orders,
              COALESCE(sum(o."subtotal") FILTER (WHERE o."status" <> 'CANCELLED'), 0)::text AS revenue,
              (avg(GREATEST(EXTRACT(EPOCH FROM (o."acceptedAt" - o."createdAt")), 0))
                FILTER (WHERE o."acceptedAt" IS NOT NULL))::float8 AS accept_seconds,
@@ -115,7 +123,8 @@ export type RhythmRow = { dow: number; hour: number; count: number }
 
 /**
  * When the restaurant is busy: orders by weekday and hour — or, for a restaurant that takes no
- * orders, dishes opened, which is the only activity it has.
+ * orders, dishes opened, which is the only activity it has. An addition is not a new order, so
+ * it is not counted here: a table that ordered twice arrived once.
  */
 export function countRhythm(id: string, since: Date, of: 'orders' | 'views', tz: string) {
   if (of === 'orders') {
@@ -124,7 +133,7 @@ export function countRhythm(id: string, since: Date, of: 'orders' | 'views', tz:
              EXTRACT(HOUR FROM (o."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${tz})::int AS hour,
              count(*)::int AS count
       FROM "Order" o
-      WHERE o."restaurantId" = ${id} AND o."createdAt" >= ${since}
+      WHERE o."restaurantId" = ${id} AND o."createdAt" >= ${since} AND o."parentId" IS NULL
       GROUP BY 1, 2`
   }
   return prisma.$queryRaw<RhythmRow[]>`

@@ -9,12 +9,12 @@ import { sendPush } from '@/server/push'
 /** How many plates an order is: its quantities summed, which is what the pass and the floor count. */
 const platesOf = (lines: readonly { quantity: number }[]) => lines.reduce((sum, line) => sum + line.quantity, 0)
 
-/** A new order, to every kitchen board of the restaurant (`code`, its short link name). */
+/** A new order, or an addition to a table's bill (`parentNumber`), to every kitchen board of the restaurant (`code`, its short link name). */
 export function pushNewOrder(
   restaurant: { id: string; code: string },
-  order: { id: string; number: number; table: string; lines: readonly { quantity: number }[] },
+  order: { id: string; number: number; table: string; parentNumber?: number | null; lines: readonly { quantity: number }[] },
 ): Promise<{ sent: number }> {
-  const payload = newOrderPush({ id: order.id, number: order.number, table: order.table, dishes: platesOf(order.lines) }, restaurant)
+  const payload = newOrderPush({ id: order.id, number: order.number, table: order.table, dishes: platesOf(order.lines), parentNumber: order.parentNumber ?? null }, restaurant)
   return sendPush(restaurant.id, 'board', payload)
 }
 

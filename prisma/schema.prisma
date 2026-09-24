@@ -267,9 +267,17 @@ model Order {
   readyAt      DateTime?
   servedAt     DateTime?
   lines        OrderLine[]
+  // An addition to a table's bill: the guests asked for more after the first ticket went in. It
+  // is its own row with its own number and its own way across the board, so a dish already
+  // cooking is not disturbed and no timing resets, and it points at the order that opened the
+  // table (never at another addition: lib/table-tab.ts). Null on every order that opens a bill.
+  parentId     String?
+  parent       Order?      @relation("OrderAdditions", fields: [parentId], references: [id], onDelete: Cascade)
+  additions    Order[]     @relation("OrderAdditions")
 
   @@unique([restaurantId, number])
   @@index([restaurantId, status, createdAt])
+  @@index([parentId])
 }
 
 // One dish of an order, its name and unit price copied at the time: a dish edited or deleted

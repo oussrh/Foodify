@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { db } from './session'
 import { deviceAccount, ownDish, signInDevice } from './staff'
 
@@ -46,4 +46,66 @@ test.describe('the waiter\'s phone', () => {
       await waiter.remove()
     }
   })
+
+  // One bill per table visit: the guests ask for more, the waiter opens the same table, sees what
+  // it already has, and the send joins that bill rather than opening an unrelated order; the
+  // kitchen reads the new ticket as more for a table it already knows.
+  test('adds to the order a table already has, and the kitchen sees it as an addition', async ({ page, browser }, info) => {
+    test.setTimeout(150_000)
+    const table = info.project.name === 'phone' ? '3' : '4'
+    const dish = await ownDish(info)
+    const waiter = await deviceAccount('WAITER', info)
+    const kitchen = await deviceAccount('KITCHEN', info)
+    const clearTable = () => db().order.deleteMany({ where: { table, restaurantId: dish.restaurantId } })
+
+    try {
+      // The table starts empty, so the first send opens its bill whatever an earlier run left.
+      await clearTable()
+      await signInDevice(page, 'waiter', waiter.username)
+      await orderOne(page, table, dish.name)
+      await page.getByRole('dialog').getByRole('button', { name: 'Send to the kitchen' }).click()
+      await expect(page.getByText(/^Order #\d+ sent$/)).toBeVisible()
+      const first = await db().order.findFirstOrThrow({ where: { placedById: waiter.id, table } })
+      await page.getByRole('button', { name: 'Back to the tables' }).click()
+
+      // Back at the same table: what it already has is one tap away, in the header.
+      await page.getByRole('button', { name: new RegExp(`^Table ${table},`) }).click()
+      await page.getByRole('button', { name: `Current order #${first.number}` }).click()
+      const tab = page.getByRole('dialog')
+      await expect(tab.getByRole('heading', { name: `Table ${table} · Order #${first.number}` })).toBeVisible()
+      await expect(tab).toContainText(dish.name)
+      await expect(tab).toContainText('Total')
+      await page.keyboard.press('Escape')
+      await expect(tab).toHaveCount(0)
+
+      // More for the same party: the send says where it is going, and goes there.
+      await orderOne(page, table, dish.name, false)
+      await page.getByRole('dialog').getByRole('button', { name: `Add to order #${first.number}` }).click()
+      await expect(page.getByText(`Added to order #${first.number}`)).toBeVisible()
+      const addition = await db().order.findFirstOrThrow({ where: { parentId: first.id } })
+      expect(addition).toMatchObject({ table, placedById: waiter.id, status: 'NEW' })
+      expect(await db().order.count({ where: { table, restaurantId: dish.restaurantId } })).toBe(2)
+
+      // The pass: the new ticket says whose table it belongs with.
+      const tablet = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage()
+      await signInDevice(tablet, 'kitchen', kitchen.username)
+      const card = tablet.getByRole('article').filter({ hasText: `#${addition.number}` }).filter({ hasText: `Table ${table}` })
+      await expect(card).toContainText(`Addition to #${first.number}`)
+      await tablet.context().close()
+    } finally {
+      await clearTable()
+      await dish.remove()
+      await waiter.remove()
+      await kitchen.remove()
+    }
+  })
 })
+
+/** Opens `table` from the room (unless already on it), finds the dish by name, adds one and opens the read-back. */
+async function orderOne(page: Page, table: string, dishName: string, fromRoom = true) {
+  if (fromRoom) await page.getByRole('button', { name: new RegExp(`^Table ${table},`) }).click()
+  await expect(page.getByRole('heading', { level: 1, name: `Table ${table}` })).toBeVisible()
+  await page.getByLabel('Search the menu').fill(dishName)
+  await page.getByRole('button', { name: `Add ${dishName}` }).click()
+  await page.getByRole('button', { name: /^Review 1 item/ }).click()
+}

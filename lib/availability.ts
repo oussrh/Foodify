@@ -25,6 +25,21 @@ export function soldOutUntilNextService(now: Date, timeZone: string = DEFAULT_TI
   return fromWallClock(until, timeZone)
 }
 
+/**
+ * When the service day `now` falls in began: the restaurant's most recent local 04:00, at or
+ * before `now`. A table's bill belongs to one service (lib/table-tab.ts), so last night's
+ * 23:30 bill is not this morning's, and the same boundary as a sold-out dish means the kitchen's
+ * day ends once, for everything. Worked on the wall clock and converted back, so a night the
+ * clocks change still starts at 04:00 local.
+ */
+export function serviceDayStart(now: Date, timeZone: string = DEFAULT_TIME_ZONE): Date {
+  const start = wallClock(now, timeZone)
+  const local = start.getTime()
+  start.setUTCHours(SERVICE_DAY_END_HOUR, 0, 0, 0)
+  if (start.getTime() > local) start.setUTCDate(start.getUTCDate() - 1)
+  return fromWallClock(start, timeZone)
+}
+
 /** Whether a dish is sold out at `now`. A moment already passed is available again, with nothing having run. */
 export function isSoldOut(soldOutUntil: Date | string | null | undefined, now: Date = new Date()): boolean {
   if (!soldOutUntil) return false
