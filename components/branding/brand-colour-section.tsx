@@ -3,7 +3,6 @@
 import { useMemo } from 'react'
 import { Check } from 'lucide-react'
 import { brandPalette } from '@/lib/brand-color'
-import { contrast, hexToRgb } from '@/lib/color'
 import { cn } from '@/lib/utils'
 
 interface BrandColourSectionProps {
@@ -25,14 +24,10 @@ const PRESETS: { hex: string; name: string }[] = [
   { hex: '#1B1A17', name: 'Ink' },
 ]
 
-const LIGHT_GROUND = hexToRgb('#FAFAF8')!
-const DARK_GROUND = hexToRgb('#141311')!
-
 /** Presets, a custom colour, and how the brand ink reads on a light and a dark menu. */
 export default function BrandColourSection({ hex, validHex, onChange, disabled }: BrandColourSectionProps) {
   const palette = useMemo(() => brandPalette(hex), [hex])
-  const ratioLight = useMemo(() => contrast(hexToRgb(palette.inkLight)!, LIGHT_GROUND), [palette])
-  const ratioDark = useMemo(() => contrast(hexToRgb(palette.inkDark)!, DARK_GROUND), [palette])
+  const { ratioLight, ratioDark } = palette
   const adjusted = palette.raw.toLowerCase() !== palette.inkLight.toLowerCase()
 
   return (

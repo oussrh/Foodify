@@ -29,6 +29,9 @@ export interface BrandPalette {
   /** Text colour to use on top of the ink */
   onLight: string
   onDark: string
+  /** The stored inks' contrast against the bare menu grounds (Paper and Coal), as the Branding tab reports it */
+  ratioLight: number
+  ratioDark: number
 }
 
 /** Push lightness away from the ground until the hue reaches AA; cap saturation so neons calm down. */
@@ -64,6 +67,8 @@ export function brandPalette(hex: string | null | undefined, fallback = '#1F6B49
   const inkLight = deriveInk(rgb, tintSurface(rgb, LIGHT_GROUND, TINT_ALPHA_LIGHT), true)
   const inkDark = deriveInk(rgb, tintSurface(rgb, DARK_GROUND, TINT_ALPHA_DARK), false)
   const [r, g, b] = rgb.map(Math.round)
+  // Read on the rounded ink, the one stored and painted, not the unrounded one derived.
+  const stored = (ink: RGB) => ink.map((v) => Math.max(0, Math.min(255, Math.round(v)))) as RGB
   return {
     raw: rgbToHex(rgb),
     inkLight: rgbToHex(inkLight),
@@ -72,6 +77,8 @@ export function brandPalette(hex: string | null | undefined, fallback = '#1F6B49
     tintDark: `rgba(${r}, ${g}, ${b}, ${TINT_ALPHA_DARK})`,
     onLight: onColor(inkLight),
     onDark: onColor(inkDark),
+    ratioLight: contrast(stored(inkLight), LIGHT_GROUND),
+    ratioDark: contrast(stored(inkDark), DARK_GROUND),
   }
 }
 

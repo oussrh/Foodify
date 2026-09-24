@@ -13,8 +13,8 @@ export function rhythmGrid(rows: readonly { dow: number; hour: number; count: nu
   const grid = WEEKDAYS.map(() => Array.from({ length: 24 }, () => 0))
   for (const row of rows) {
     const day = grid[row.dow - 1]
-    // In range, so the cell exists: every row of the grid is 24 zeros.
-    if (day && row.hour >= 0 && row.hour < 24) day[row.hour]! += row.count
+    const cell = day?.[row.hour]
+    if (day && cell !== undefined) day[row.hour] = cell + row.count
   }
   return grid
 }

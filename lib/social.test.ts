@@ -44,6 +44,13 @@ describe('parseSocialMedia', () => {
     expect(parseSocialMedia('["instagram","x"]').instagram).toBe(null)
     expect(parseSocialMedia('https://example.com/x\nunknown: value\njust some words').instagram).toBe(null)
   })
+
+  it('drops a profile URL with no handle in it and a line whose URL does not parse, and skips blank lines', () => {
+    expect(parseSocialMedia('{"instagram":"https://instagram.com/"}').instagram).toBe(null)
+    expect(parseSocialMedia('{"instagram":"   "}').instagram).toBe(null)
+    expect(parseSocialMedia('https://[instagram.com/x').instagram).toBe(null)
+    expect(parseSocialMedia('\n\nfollow us https://instagram.com/laplace\n').instagram).toBe('laplace')
+  })
 })
 
 describe('socialUrl', () => {
@@ -55,5 +62,10 @@ describe('socialUrl', () => {
     expect(socialUrl('snapchat', 'laplace')).toBe('https://snapchat.com/add/laplace')
     expect(socialUrl('whatsapp', '212612345678')).toBe('https://wa.me/212612345678')
     expect(socialUrl('tripadvisor', 'https://tripadvisor.fr/x')).toBe('https://tripadvisor.fr/x')
+    expect(socialUrl('tripadvisor', 'tripadvisor.fr/x')).toBe('https://tripadvisor.fr/x')
+  })
+
+  it('reads a key no network carries as Instagram, the first listed', () => {
+    expect(socialUrl('myspace', 'laplace')).toBe('https://instagram.com/laplace')
   })
 })

@@ -40,9 +40,9 @@ function messageFor(error: unknown, locale: Locale): string {
   if (error.code === 'forbidden') return t.orderingOff
   if (error.code === 'unavailable') {
     const names = soldOutNames(error.details, locale)
-    if (names.length === 1) return t.soldOutSince(names[0]!)
     if (names.length > 1) return t.soldOutSincePlural(names.join(', '))
-    return t.menuChanged
+    const [name] = names
+    return name ? t.soldOutSince(name) : t.menuChanged
   }
   // `invalid_payload` is something in what was sent, not the menu moving under it: saying "the
   // menu has changed" sends somebody to look at their order for a problem that is not there.
