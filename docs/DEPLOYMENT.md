@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["deployment", "vercel", "prisma", "environment"]
 related: ["./README.md", "./TESTING.md"]
 source_truth: ["package.json", "lib/env.ts", "prisma/schema.prisma", "next.config.js"]
-last_verified: "2026-09-23"
+last_verified: "2026-09-24"
 ---
 
 # Deployment

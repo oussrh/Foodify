@@ -22,4 +22,18 @@ describe('user schemas', () => {
     expect(credentials.safeParse({ email: 'a', password: 'b', role: 'RESTAURANT_ADMIN' }).success).toBe(true)
     expect(credentials.safeParse({ email: 'a', password: 'b', role: 'ROOT' }).success).toBe(false)
   })
+
+  it('reads a sign-in code as six digits or as no code, never refusing the sign-in for it', () => {
+    const base = { email: 'a@b.c', password: 'secret' }
+    expect(credentials.parse({ ...base, code: '123456' }).code).toBe('123456')
+    expect(credentials.parse({ ...base, code: 'undefined' }).code).toBeUndefined()
+    expect(credentials.parse({ ...base, code: '12345' }).code).toBeUndefined()
+    expect(credentials.parse(base).code).toBeUndefined()
+  })
+
+  it('bounds the new restaurant name a client is created with, trimmed', () => {
+    const base = { email: 'manager@example.com', password: 'secret' }
+    expect(clientInput.parse({ ...base, restaurantName: '  Chez Test ' }).restaurantName).toBe('Chez Test')
+    expect(clientInput.safeParse({ ...base, restaurantName: 'x'.repeat(121) }).success).toBe(false)
+  })
 })

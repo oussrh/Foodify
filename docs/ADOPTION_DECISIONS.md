@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["standards", "adoption", "decisions"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 source_truth: ["abatty.config.json", "docs/ADOPTION_STATE.json", "eslint.config.mjs"]
-last_verified: "2026-09-23"
+last_verified: "2026-09-24"
 ---
 
 # Adoption decisions
@@ -264,6 +264,13 @@ last_verified: "2026-09-23"
 - **Default taken**: the literal read in `instrumentation.ts`, and the file named beside the env module in `abatty.config.json` (`ratchet.envModule`), so the rule still holds everywhere else and the exception is one line the config names with its reason.
 - **Alternative set aside**: an exempt path (it would exempt the file from every probe); a separate `instrumentation-node.ts` (the switch that imports it needs the same literal); living with the warnings (a clean build is a signal worth keeping).
 - **Re-read when**: an edge runtime is actually used here, or Next reads the switch some other way.
+
+## 2026-09-24 · after the programme · the non-null assertion counted, and held at zero
+
+- **Situation**: abatty 0.5.2 ships `types.nonNull`, opt-in, because `types.escapes` counts `any` and the `@ts-` comments but not the postfix `!` — the form a `?? 0` fallback takes when it is removed to please a coverage gate, which is what happened here on 2026-09-23 (`lib/insights-rhythm.ts`). The reading on enabling it: 13.
+- **Default taken**: enabled in `ratchet.enable`, the 13 removed in the same change, and the floor recorded at 0 so the baseline makes it hard. Each was replaced by the check it asserted away (a local, a destructure, a named fallback, a value carried on the palette), never by a `??` that no test reaches.
+- **Alternative set aside**: enabling it at a floor of 13 and burning down later (a floor of assertions is a floor someone raises); an ESLint `no-non-null-assertion` rule instead (it would hold too, but the ratchet is where the other type metrics live and the probe is what CI already reads).
+- **Re-read when**: the probe's proxy misses a form the compiler reads as an assertion (it names its known misses: `x! + 1`).
 
 ## 2026-09-23 · after the programme · components held too, a directory at a time, functions only
 

@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["standards", "ratchet", "scoreboard"]
 related: ["./README.md", "./ADOPTION_DECISIONS.md"]
 source_truth: ["scripts/ci/standards-baseline.json", "abatty.probes.mjs", "docs/ADOPTION_STATE.json"]
-last_verified: "2026-09-23"
+last_verified: "2026-09-24"
 ---
 
 # Standards progress
@@ -26,6 +26,7 @@ last_verified: "2026-09-23"
 | axe serious/critical on the critical journeys | not measured | 0 | 0 | hard (`pnpm e2e`) | A11Y.1 |
 | Token pairs under WCAG AA (both themes) | not measured (warning on muted was 4.11:1) | 0 of 36 text pairs; input border 1.46:1 vs 3:1 | 0 | hard (`pnpm contrast`) | A11Y.1 |
 | `types.escapes` (`any`, `ts-ignore`) | 13 | 0 | 0 | hard | TYPES.1 |
+| `types.nonNull` (a postfix `!`; abatty 0.5.2's opt-in probe) | 13 (added 2026-09-24) | 0 | 0 | hard | TYPES.1 |
 | Typecheck errors with `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes` | 140 (measured 2026-09-20, flags off) | 0 (flags on) | 0 | hard (`tsc --noEmit` in the gate and CI) | TYPES.1 |
 | Unit coverage floor, `lib/**` (statements / branches / functions / lines) | 92.7 / 79.7 / 79.4 / 92.9 | 98.9 / 94.5 / 99.1 / 99.3 | raised with the measurement | hard (`pnpm test`) | TEST.4 |
 | Integration tests on a real Postgres (rolled-back transactions) | 0 | 65 (8 files) | grows with the surface | hard (`pnpm test:integration` in CI) | TEST.2 / DATA.3 |
@@ -70,6 +71,7 @@ last_verified: "2026-09-23"
 
 ## Log
 
+- 2026-09-24 · **abatty 0.5.2, `types.nonNull` hard at zero** · The harness moves to 0.5.2 (hooks on `pnpm exec`, the commit-msg changelog check, the gate running the changed-lines coverage). Its opt-in `types.nonNull` is enabled in `ratchet.enable`: 13 non-null assertions → 0, each replaced by the check it stood for, and the baseline promotes it to hard. `lib/social.ts` gained the tests for its untested branches once touching it put them in the changed-lines set. The same day the shared zod schemas were tightened (https and host rules on stored URLs, hex colours, bounded text, the sign-in code), each rule tested in `lib/schemas/*.test.ts`.
 - 2026-09-23 · **JSDoc: every component held** · The last 94 exported components and hooks documented and the rule's directory list replaced by `components/**`; 0 remain. The starting count is corrected to 236 distinct exports: the audit that reported 351 counted each `export default function` twice (once as a function, once as a default export), and the earlier log lines carry that inflated figure. Drafting the blocks found four real bugs, fixed in the same change (see the changelog).
 - 2026-09-23 · **JSDoc: the forms, the uploads and the AR viewer held** · 71 blocks on `dish-form`, `restaurant-form`, `category-manager`, `client-form`, `upload` and `ar-viewer`; the six directories join the rule. 280 → 209.
 - 2026-09-23 · **JSDoc: menu, shell and admin held** · 31 blocks on the public menu and its cart, the portals' shell and the People tab; the three directories join the rule's list in `eslint.config.mjs`. 311 → 280.

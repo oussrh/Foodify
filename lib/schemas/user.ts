@@ -1,7 +1,7 @@
 // lib/schemas/user.ts
 // Super admins, restaurant admins ("clients") and the signed-in user's own profile.
 import { z } from 'zod'
-import { email, password, uuid } from './common'
+import { MAX_NAME, email, password, uuid } from './common'
 
 /** A new super admin: the address and the temporary `password` (six characters, meant to be changed; nothing enforces the change yet). */
 export const adminInput = z.object({ email, password })
@@ -21,7 +21,7 @@ export const clientInput = z.object({
   email,
   password,
   restaurantIds: z.array(uuid).optional(),
-  restaurantName: z.string().optional(),
+  restaurantName: z.string().trim().max(MAX_NAME, `At most ${MAX_NAME} characters`).optional(),
 })
 /** What the admin panel can change on a restaurant admin: the address and the whole set of assigned restaurants (a `restaurantIds` sent replaces the set, one left out keeps it). */
 export const clientPatch = z.object({ email: email.optional(), restaurantIds: z.array(uuid).optional() })
@@ -68,13 +68,18 @@ export const emailToken = z.string().regex(/^[0-9a-f]{64}$/, 'Invalid token')
  * The first step of a sign-in. Deliberately loose (VALID.1's carve-out): the stored account is
  * the real gate, and a stricter shape would tell a caller which addresses are worth trying.
  */
-export const otpRequest = z.object({ email: z.string().min(1), password: z.string().min(1) })
+export const otpRequest = z.object({ email: z.string().min(1).max(320), password: z.string().min(1).max(200) })
 /** `otpRequest` after parsing; `requestOtp` in lib/otp-request takes it after the action's parse. */
 export type OtpRequest = z.infer<typeof otpRequest>
 /** What NextAuth's credentials provider receives; `role` is the portal the sign-in page serves. */
 export const credentials = z.object({
-  email: z.string().min(1),
-  password: z.string().min(1),
-  code: z.string().optional(),
+  email: z.string().min(1).max(320),
+  password: z.string().min(1).max(200),
+  // Six digits (the emailed code and a TOTP alike), else no code at all: NextAuth posts a missing
+  // one as the text "undefined", which must read as absent and not refuse a sign-in without the factor.
+  code: z
+    .string()
+    .optional()
+    .transform((v) => (v && /^\d{6}$/.test(v) ? v : undefined)),
   role: z.enum(['SUPER_ADMIN', 'RESTAURANT_ADMIN', 'KITCHEN', 'WAITER']).optional(),
 })
