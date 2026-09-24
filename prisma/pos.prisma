@@ -1,0 +1,130 @@
+// prisma/pos.prisma
+// A restaurant's point of sale, reached through one adapter contract (lib/pos/contract.ts): the
+// connection and its encrypted credentials, which POS item each dish is rung up as, and the two
+// logs that carry the events across: the outbox (what we owe the POS, written in the same
+// transaction as the ticket, the change or the close it reports, and sent at least once) and the
+// inbox (what the POS told us, kept by its event id across a reconnect, so a webhook delivered
+// twice is applied once). Only the super admin decides whether a restaurant may have one
+// (`Restaurant.posEnabled`).
+
+enum PosStatus {
+  NOT_CONNECTED
+  // Signed in to the POS, no location chosen yet.
+  CONNECTING
+  // A location is chosen: the dishes are being matched to POS items.
+  MAPPING
+  // Tickets, changes and closes are queued and sent.
+  ACTIVE
+  // The owner stopped sending. Events are still queued, and on Resume the owner sends or discards them.
+  PAUSED
+  // The POS refused the credentials: events are still queued, nothing is sent until the owner fixes them.
+  ERROR
+}
+
+enum PosOutboxKind {
+  TICKET
+  CHANGE
+  CLOSE
+}
+
+enum PosOutboxStatus {
+  PENDING
+  SENT
+  // Every retry was spent; "Retry now" puts it back.
+  FAILED
+  // The POS said no, and asking again would get the same answer.
+  REFUSED
+  // Never sent, on purpose: the owner discarded what waited during a pause, the super admin switched
+  // POS off, or the POS account changed. Kept for the record.
+  DISCARDED
+}
+
+// One per restaurant. `provider` is a key of lib/pos/registry.ts. `credentials` is AES-256-GCM
+// ciphertext (server/pos-crypto.ts) under the key `credentialsKeyId` names; it never leaves the
+// server, is never logged and is never part of a payload.
+model PosConnection {
+  id                   String       @id @default(uuid())
+  restaurantId         String       @unique
+  restaurant           Restaurant   @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  provider             String
+  status               PosStatus    @default(NOT_CONNECTED)
+  externalAccountId    String?
+  externalLocationId   String?
+  // The location's name as the POS gave it when it was chosen, for the health panel.
+  externalLocationName String?
+  credentials          String?
+  credentialsKeyId     String?
+  tokenExpiresAt       DateTime?
+  lastSyncAt           DateTime?
+  // What went wrong last, in plain words for the owner's health panel; never a secret.
+  lastError            String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  items                PosItemMap[]
+  outbox               PosOutbox[]
+  inbox                PosInbox[]
+}
+
+// Which POS item a dish is rung up as, and the POS's price for it when the owner confirmed the
+// match (an exact decimal, never a float): a dish repriced on one side only is then visible.
+model PosItemMap {
+  id             String        @id @default(uuid())
+  connectionId   String
+  connection     PosConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  dishId         String
+  dish           Dish          @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  externalItemId String
+  externalPrice  Decimal       @db.Decimal(10, 2)
+  createdAt      DateTime      @default(now())
+
+  @@unique([connectionId, dishId])
+}
+
+// One event owed to the POS. `orderId` is the ticket (TICKET, CHANGE) or the bill (CLOSE);
+// `billId` the bill it belongs to, so a bill's events go out in the order they were written
+// (`seq`): an addition never before its bill, a change never before its ticket. `lastAnswer` is
+// the adapter's last word, in plain text and without a secret.
+model PosOutbox {
+  id            String          @id @default(uuid())
+  seq           Int             @unique @default(autoincrement())
+  connectionId  String
+  connection    PosConnection   @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  restaurantId  String
+  restaurant    Restaurant      @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  orderId       String
+  order         Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  billId        String
+  changeId      String?
+  change        OrderChange?    @relation(fields: [changeId], references: [id], onDelete: Cascade)
+  kind          PosOutboxKind
+  status        PosOutboxStatus @default(PENDING)
+  attempts      Int             @default(0)
+  nextAttemptAt DateTime        @default(now())
+  lastAnswer    String?
+  externalId    String?
+  // Which claim holds the row (server/pos/claim.ts): an answer is recorded only by the claim that
+  // still holds it, so a worker whose lease ran out cannot write over the one that took the row after.
+  claimToken    String?
+  createdAt     DateTime        @default(now())
+  sentAt        DateTime?
+
+  @@index([status, nextAttemptAt])
+  @@index([orderId])
+  @@index([billId])
+}
+
+// One event the POS sent us, by its own id: a second delivery of the same id is ignored. The
+// payload is not kept, only its hash. `appliedAt` is null for an event nobody has acted on yet:
+// a changed POS menu waits here for the owner to review the matches.
+model PosInbox {
+  id              String        @id @default(uuid())
+  connectionId    String
+  connection      PosConnection @relation(fields: [connectionId], references: [id], onDelete: Cascade)
+  externalEventId String
+  kind            String
+  payloadHash     String
+  receivedAt      DateTime      @default(now())
+  appliedAt       DateTime?
+
+  @@unique([connectionId, externalEventId])
+}

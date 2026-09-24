@@ -4,7 +4,8 @@ import 'dotenv/config'
 import { defineConfig, env } from 'prisma/config'
 
 export default defineConfig({
-  schema: 'prisma/schema.prisma',
+  // A folder: schema.prisma holds the menu, the orders and the people, pos.prisma the point of sale.
+  schema: 'prisma',
   migrations: {
     path: 'prisma/migrations',
     seed: 'tsx prisma/seed.ts',

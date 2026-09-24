@@ -17,6 +17,7 @@ export const TICKET_SELECT = {
   status: true,
   subtotal: true,
   closedAt: true,
+  parentId: true,
   parent: { select: { closedAt: true } },
   lines: { select: { id: true, nameEn: true, unitPrice: true, quantity: true, removedQuantity: true } },
   changes: { where: { status: 'PENDING' }, select: { id: true, kind: true, lineId: true } },
@@ -70,11 +71,11 @@ export function billClosed(ticket: Pick<TicketRow, 'closedAt' | 'parent'>): bool
 }
 
 /**
- * Answers every request still open on `orderIds`: refused, by `deciderId`, because there is
- * nothing left for them to change (the ticket was cancelled, made, served, or its bill closed).
- * Answers the ids refused, so the waiters who asked can be told.
+ * Answers every request still open on `orderIds`: refused, by `deciderId` (null: the POS, closing a
+ * bill paid at its till), because there is nothing left for them to change (the ticket was
+ * cancelled, made, served, or its bill closed). Answers the ids refused, so the waiters who asked can be told.
  */
-export async function refusePending(tx: Prisma.TransactionClient, orderIds: readonly string[], deciderId: string): Promise<string[]> {
+export async function refusePending(tx: Prisma.TransactionClient, orderIds: readonly string[], deciderId: string | null): Promise<string[]> {
   const open = await tx.orderChange.findMany({ where: { orderId: { in: [...orderIds] }, status: 'PENDING' }, select: { id: true }, take: 200 })
   if (open.length === 0) return []
   const ids = open.map((change) => change.id)

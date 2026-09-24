@@ -1,5 +1,5 @@
 // components/restaurant-form/settings-tabs.tsx
-// The settings form's three sections and their tab strip: which fields each section holds
+// The settings form's three sections, the Integrations tab beside them, and their tab strip: which fields each section holds
 // (the tab that has a failing field shows a dot, and the submit switches to the first one),
 // the tablist itself, and at its end the link to the public menu as guests see it (a new tab,
 // the saved slug: what is on the page is what is saved, not what the form holds).
@@ -10,7 +10,7 @@ import { ExternalLink } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import type { EditRestaurantValues } from './edit-restaurant-schema'
 
-export type SettingsTab = 'general' | 'contact' | 'branding'
+export type SettingsTab = 'general' | 'contact' | 'branding' | 'integrations'
 
 export const TABS: { key: SettingsTab; label: string; fields: (keyof EditRestaurantValues)[] }[] = [
   {
@@ -28,6 +28,8 @@ export const TABS: { key: SettingsTab; label: string; fields: (keyof EditRestaur
     label: 'Branding',
     fields: ['logoUrl', 'colorTheme', 'coverImageUrl', 'coverImageStyle', 'fontFamily', 'googleFontUrl', 'menuTheme'],
   },
+  // Not part of the form: the POS panel saves each step on its own (components/pos/).
+  { key: 'integrations', label: 'Integrations', fields: [] },
 ]
 
 /**
@@ -72,11 +74,13 @@ export default function SettingsTabs({
         )
       })}
     </div>
+    {/* `relative`: its sr-only note is absolutely placed, and without it that note sits outside
+        this scroll strip, where it widens the whole page once the tabs overflow a phone. */}
     <a
       href={`/restaurant/${slug}`}
       target="_blank"
       rel="noopener noreferrer"
-      className="-mb-px ml-auto flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 border-transparent px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+      className="relative -mb-px ml-auto flex h-11 shrink-0 items-center gap-1.5 whitespace-nowrap border-b-2 border-transparent px-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
     >
       <ExternalLink className="h-4 w-4" aria-hidden="true" />
       Preview menu

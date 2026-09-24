@@ -8,6 +8,7 @@ import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import prisma from '@/lib/prisma'
 import { fail } from '@/lib/api'
+import { POS_NOT_INCLUDED } from '@/lib/pos/status'
 
 /**
  * Thrown by every guard here (requireSuperAdminPage catches it and redirects instead); `status` is 401 (nobody signed in) or 403 (signed in, not allowed).
@@ -92,6 +93,19 @@ export async function requireRestaurantAccess(where: { id: string } | { slug: st
     select: { id: true },
   })
   if (!restaurant) throw new AuthError('Forbidden', 403)
+  return user
+}
+
+/**
+ * Everything to do with one restaurant's point of sale: its manager or a super admin (who may act
+ * on the owner's behalf), and only once the super admin has switched POS on for it
+ * (`Restaurant.posEnabled`). The restaurant is checked before the switch, so another tenant's
+ * restaurant is refused exactly as before and learns nothing about its POS.
+ */
+export async function requirePosAccess(restaurantId: string) {
+  const user = await requireRestaurantAccess({ id: restaurantId })
+  const restaurant = await prisma.restaurant.findUnique({ where: { id: restaurantId }, select: { posEnabled: true } })
+  if (!restaurant?.posEnabled) throw new AuthError(POS_NOT_INCLUDED, 403)
   return user
 }
 

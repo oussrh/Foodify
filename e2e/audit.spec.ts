@@ -17,10 +17,10 @@ async function scan(page: Page, path: string) {
   await expectNoSeriousA11yViolations(page, path)
 }
 
-/** The settings page and its two other tabs. */
+/** The settings page and its other tabs (Integrations: the POS panel as a restaurant without POS sees it). */
 async function scanSettings(page: Page, editPath: string) {
   await scan(page, editPath)
-  for (const tab of ['Contact & hours', 'Branding']) {
+  for (const tab of ['Contact & hours', 'Branding', 'Integrations']) {
     await page.getByRole('tab', { name: tab }).click()
     await expectNoSeriousA11yViolations(page, `${editPath} (${tab})`)
   }
