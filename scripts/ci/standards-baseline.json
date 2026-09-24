@@ -50,6 +50,7 @@
     "size.excessCode": 0,
     "size.overBudget": 0,
     "size.overRaw": 0,
+    "test.coverageExclusions": 18,
     "types.escapes": 0,
     "types.nonNull": 0,
     "valid.rawEnv": 0,
@@ -58,29 +59,29 @@
     "valid.wholeEnv": 0
   },
   "scanned": {
-    "api.bareResponse": 10,
-    "api.floatMoney": 510,
-    "api.rowReturn": 14,
-    "api.unboundedList": 10,
+    "api.bareResponse": 11,
+    "api.floatMoney": 570,
+    "api.rowReturn": 18,
+    "api.unboundedList": 11,
     "auth.unguardedAdminPage": 21,
-    "cache.serverCacheUse": 510,
+    "cache.serverCacheUse": 570,
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 6,
-    "docs.citations": 135,
+    "docs.citations": 149,
     "docs.danglingSource": 17,
     "docs.frontMatter": 10,
     "docs.indexDrift": 9,
-    "dup.clonedLines": 776,
-    "dup.clones": 776,
-    "size.excessCode": 503,
-    "size.overBudget": 503,
-    "size.overRaw": 529,
-    "types.escapes": 503,
-    "valid.rawEnv": 500,
-    "valid.unparsedBoundary": 25,
-    "valid.utcDay": 503,
-    "valid.wholeEnv": 500
+    "dup.clonedLines": 855,
+    "dup.clones": 855,
+    "size.excessCode": 562,
+    "size.overBudget": 562,
+    "size.overRaw": 589,
+    "types.escapes": 562,
+    "valid.rawEnv": 559,
+    "valid.unparsedBoundary": 30,
+    "valid.utcDay": 562,
+    "valid.wholeEnv": 559
   },
   "debt": {
     "dup.clonedLines": {
@@ -158,6 +159,9 @@
       "components/restaurant-form/create-basic-card.tsx": 7,
       "components/ui/dialog.tsx": 3,
       "lib/cloudinary.ts": 2
+    },
+    "test.coverageExclusions": {
+      "vitest.config.ts": 18
     }
   },
   "versions": {
@@ -182,6 +186,7 @@
     "size.excessCode": 1,
     "size.overBudget": 1,
     "size.overRaw": 1,
+    "test.coverageExclusions": 1,
     "types.escapes": 1,
     "types.nonNull": 1,
     "valid.rawEnv": 1,
