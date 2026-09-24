@@ -76,6 +76,15 @@ describe('serverEnv', () => {
     expect(() => partial.serverEnv.cloudinary).toThrow(/CLOUDINARY/)
   })
 
+  it('gives the Brevo SMS pair as one value, or nothing, and refuses half of it', async () => {
+    const both = await load({ DATABASE_URL: 'postgresql://x', BREVO_API_KEY: 'xkeysib-1', BREVO_SMS_SENDER: 'Foodify' })
+    expect(both.serverEnv.brevoSms).toEqual({ apiKey: 'xkeysib-1', sender: 'Foodify' })
+    const neither = await load({ DATABASE_URL: 'postgresql://x', BREVO_API_KEY: '', BREVO_SMS_SENDER: '' })
+    expect(neither.serverEnv.brevoSms).toBeNull()
+    const half = await load({ DATABASE_URL: 'postgresql://x', BREVO_API_KEY: 'xkeysib-1', BREVO_SMS_SENDER: '' })
+    expect(() => half.serverEnv.brevoSms).toThrow(/BREVO_API_KEY and BREVO_SMS_SENDER/)
+  })
+
   it('gives the Web Push trio as one value, or nothing, and refuses any partial set', async () => {
     const vapid = { NEXT_PUBLIC_VAPID_PUBLIC_KEY: 'BPub', VAPID_PRIVATE_KEY: 'priv', VAPID_SUBJECT: 'mailto:ops@example.com' }
     const all = await load({ DATABASE_URL: 'postgresql://x', ...vapid })
