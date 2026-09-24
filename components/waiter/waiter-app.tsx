@@ -31,6 +31,7 @@ export default function WaiterApp({ restaurant, categories, loose, money, locale
         restaurantId={restaurant.id}
         restaurantName={restaurant.name}
         table={table}
+        tableCount={restaurant.tableCount}
         categories={categories}
         loose={loose}
         money={money}

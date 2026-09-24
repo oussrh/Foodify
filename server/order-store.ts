@@ -1,14 +1,14 @@
 // server/order-store.ts
 // Writing an order: the number taken from the restaurant's counter, then the row with its
 // re-priced lines. An addition to a table's bill is written in one transaction that first locks
-// the bill's row and checks it again (lib/table-tab.ts), so a bill cancelled on the pass while a
-// waiter was sending cannot gain an addition: the cancel waits for the lock, or the send reads
-// the cancel and is refused. Nothing is numbered for a refused addition, so it leaves no gap.
+// the bill's row and checks it again (lib/table-tab.ts), so a bill cancelled on the pass, or
+// closed on another phone (server/bill-changes.ts), while a waiter was sending cannot gain an
+// addition: the cancel or the close waits for the lock, or the send reads it and is refused. Nothing is numbered for a refused addition, so it leaves no gap.
 import type { Prisma } from '@/generated/prisma/client'
 import prisma from '@/lib/prisma'
 import { sumPrices } from '@/lib/money'
 import type { OrderInput } from '@/lib/schemas/order'
-import { addToRefusal, type AddToRefusal, type TabPlace } from '@/lib/table-tab'
+import { addToRefusal, billCancelled, type AddToRefusal, type TabPlace } from '@/lib/table-tab'
 
 /** One line as the row stores it: the dish's name and unit price copied at the time, the guest's note. */
 export type PricedLine = { dishId: string; nameEn: string; nameFr: string; unitPrice: string; quantity: number; note: string | null }
@@ -28,7 +28,12 @@ const PLACED = { id: true, number: true, table: true, subtotal: true, parent: { 
 async function lockBill(tx: Prisma.TransactionClient, id: string) {
   const locked = await tx.$queryRaw<{ id: string }[]>`SELECT "id" FROM "Order" WHERE "id" = ${id} FOR UPDATE`
   if (locked.length === 0) return null
-  return tx.order.findUnique({ where: { id }, select: { restaurantId: true, table: true, parentId: true, status: true, createdAt: true } })
+  const bill = await tx.order.findUnique({
+    where: { id },
+    select: { restaurantId: true, table: true, parentId: true, status: true, createdAt: true, closedAt: true, additions: { select: { status: true } } },
+  })
+  // Cancelled is the bill's state, not the opening ticket's (lib/table-tab.ts `billCancelled`).
+  return bill ? { ...bill, cancelled: billCancelled([bill, ...bill.additions]) } : null
 }
 
 /**

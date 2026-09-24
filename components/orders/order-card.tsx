@@ -7,9 +7,10 @@
 'use client'
 
 import { ChevronRight, Clock } from 'lucide-react'
-import { itemCount, minutesWaiting, waitingTier, type BoardOrder } from '@/lib/orders'
+import { effectiveQuantity, itemCount, minutesWaiting, waitingTier, type BoardOrder, type PendingRequest } from '@/lib/orders'
 import { additionLabel } from '@/lib/table-tab'
 import { cn } from '@/lib/utils'
+import { RequestBanner } from './request-banner'
 
 interface OrderCardProps {
   order: BoardOrder
@@ -20,6 +21,8 @@ interface OrderCardProps {
   busy: boolean
   /** Arrived on the last poll: the card is ringed until it has been looked at. */
   fresh: boolean
+  /** Answers a request from the floor on this ticket (lib/bill-rules.ts). */
+  onDecide: (request: PendingRequest, accept: boolean) => void
 }
 
 const WAIT_STYLE = {
@@ -35,7 +38,7 @@ const PREVIEW_LINES = 3
  * One order on the board, read at arm's length: the table, the wait, the dishes, and one large
  * button that moves it on; the card opens its details.
  */
-export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }: OrderCardProps) {
+export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh, onDecide }: OrderCardProps) {
   const waiting = minutesWaiting(order.createdAt, now)
   const tier = waitingTier(waiting)
   const items = itemCount(order)
@@ -43,9 +46,11 @@ export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }
   const hidden = order.lines.length - preview.length
   // An addition goes out with a table already cooking or served: the cook reads that before the dishes.
   const addition = additionLabel(order)
+  // A request from the floor outranks everything else on the card, the fresh ring included.
+  const asking = order.requests.length > 0
 
   return (
-    <article className={cn('flex flex-col overflow-hidden rounded-lg border-2 bg-card', fresh ? 'border-brand' : 'border-border')}>
+    <article className={cn('flex flex-col overflow-hidden rounded-lg border-2 bg-card', asking ? 'border-warning' : fresh ? 'border-brand' : 'border-border')}>
       {/* The whole card opens the order: one big target rather than a small "details" link. */}
       {/* flex-1: cards in a row stretch to the tallest, and the move belongs at the bottom of the
           card rather than under the text with white space beneath it. */}
@@ -67,9 +72,16 @@ export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }
         <ul className="flex flex-col gap-1.5">
           {preview.map((line) => (
             <li key={line.id} className="flex items-baseline gap-2.5">
-              <span className="tnum min-w-[2.2ch] text-lg font-semibold">{line.quantity}×</span>
+              <span className={cn('tnum min-w-[2.2ch] text-lg font-semibold', effectiveQuantity(line) === 0 && 'text-muted-foreground line-through')}>
+                {effectiveQuantity(line) || line.quantity}×
+              </span>
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-[15px] leading-snug">{line.nameEn}</span>
+                <span className={cn('block truncate text-[15px] leading-snug', effectiveQuantity(line) === 0 && 'text-muted-foreground line-through')}>{line.nameEn}</span>
+                {line.removedQuantity > 0 && (
+                  <span className="block text-[13px] font-bold text-destructive">
+                    −{line.removedQuantity} {line.nameEn}
+                  </span>
+                )}
                 {line.note && <span className="block truncate text-[13px] font-medium text-warning">{line.note}</span>}
               </span>
             </li>
@@ -82,6 +94,8 @@ export default function OrderCard({ order, now, onOpen, onAdvance, busy, fresh }
           <ChevronRight className="h-3.5 w-3.5" aria-hidden="true" />
         </p>
       </button>
+
+      <RequestBanner order={order} onDecide={onDecide} busy={busy} />
 
       {/* The one move this card can make, full width and thumb-sized. */}
       <button

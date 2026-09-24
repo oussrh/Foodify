@@ -98,7 +98,9 @@ self.addEventListener('push', (event) => {
     message = null
   }
   if (!message || typeof message.title !== 'string') return
-  const kind = message.kind === 'ready' ? 'ready' : 'order'
+  // The pass's alerts (a new order, a request to take something off) insist; the floor's (a
+  // plate ready, the kitchen's answer) buzz and go.
+  const kind = message.kind === 'ready' || message.kind === 'answer' ? 'ready' : 'order'
   event.waitUntil(
     (async () => {
       // Browsers want a notification for every push, so a visible page still gets one, silently.

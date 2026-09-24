@@ -4,8 +4,12 @@
 // push travels through a browser vendor's service and sits on a lock screen, so nothing about the
 // guest (their phone, their notes) is ever in it.
 
-/** The two alerts: a new order for the pass, an order ready for the floor. */
-export type PushKind = 'order' | 'ready'
+/**
+ * The alerts: a new order for the pass, an order ready for the floor, a request from the floor to
+ * take something off a ticket being cooked (for the pass), and the kitchen's answer to it (for
+ * the waiter who asked).
+ */
+export type PushKind = 'order' | 'ready' | 'request' | 'answer'
 
 /** One push as the service worker reads it. */
 export type PushPayload = { title: string; body: string; tag: string; url: string; kind: PushKind; restaurantId: string }
@@ -47,5 +51,40 @@ export function orderReadyPush(order: PushOrder, restaurant: { id: string; code:
     tag: `ready-${order.id}`,
     url: `/waiter/${restaurantCode}`,
     kind: 'ready',
+  }
+}
+
+/**
+ * What the floor asked the kitchen to take off a ticket being cooked: the whole ticket, or
+ * `quantity` of one dish (named as it was ordered; a dish name is the menu's, not the guest's).
+ */
+export type PushRequest = { changeId: string; orderNumber: number; table: string; dish: string | null; quantity: number | null }
+
+/** "remove 1 Tea" or "cancel order #12": what a request asks, in the words the card uses. */
+export function requestWords(request: Pick<PushRequest, 'orderNumber' | 'dish' | 'quantity'>): string {
+  return request.dish === null ? `cancel order #${request.orderNumber}` : `remove ${request.quantity ?? 1} ${request.dish}`
+}
+
+/** A request from the floor, for the kitchen board: the cook must accept or refuse it on the card. */
+export function changeRequestPush(request: PushRequest, restaurant: { id: string; code: string }): PushPayload {
+  return {
+    restaurantId: restaurant.id,
+    title: `Table ${request.table} asks to ${requestWords(request)}`,
+    body: 'Accept or refuse it on the board',
+    tag: `request-${request.changeId}`,
+    url: `/kitchen/orders/${restaurant.code}`,
+    kind: 'request',
+  }
+}
+
+/** The kitchen's answer to a request, for the waiter who asked: opens the waiter's floor. */
+export function changeAnswerPush(request: PushRequest, accepted: boolean, restaurant: { id: string; code: string }): PushPayload {
+  return {
+    restaurantId: restaurant.id,
+    title: `Kitchen ${accepted ? 'accepted' : 'refused'}: ${requestWords(request)}`,
+    body: `Table ${request.table} · order #${request.orderNumber}`,
+    tag: `answer-${request.changeId}`,
+    url: `/waiter/${restaurant.code}`,
+    kind: 'answer',
   }
 }

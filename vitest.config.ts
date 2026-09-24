@@ -34,6 +34,13 @@ export default defineConfig({
         'lib/insights-queries.ts', // the loader's SQL, split out of it: the same integration suite
         'lib/table-tab-loader.ts', // a table's bill read from the database: tests/integration/order-additions.test.ts
         'server/order-store.ts', // the order's transaction and the bill's row lock: the same integration suite
+        'server/order-lock.ts', // a row lock taken in SQL: tests/integration/bill-lifecycle.test.ts and ticket-changes.test.ts
+        'server/ticket-apply.ts', // a ticket's removal written under that lock: tests/integration/ticket-changes.test.ts
+        'server/ticket-changes.ts', // the floor's changes and the kitchen's answers, in transactions: the same suite
+        'server/bill-merge.ts', // merge and undo, in transactions: tests/integration/bill-lifecycle.test.ts
+        'server/bill-changes.ts', // close and move, in transactions: the same suite
+        'server/change-log.ts', // a manager's read of the change log: tests/integration/ticket-changes.test.ts
+        'server/order-moves.ts', // the board's moves under the ticket's lock: tests/integration/ticket-changes.test.ts and order-board.test.ts
         'lib/emails/**', // HTML templates: presentational
       ],
       thresholds: {

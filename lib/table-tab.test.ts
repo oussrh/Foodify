@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { serviceDayStart } from './availability'
-import { ADD_BY_DEFAULT_MINUTES, additionLabel, addToRefusal, currentTab, defaultsToAdd, tabTotal, type TabFacts } from './table-tab'
+import { ADD_BY_DEFAULT_MINUTES, additionLabel, addToRefusal, billCancelled, currentTab, defaultsToAdd, tabTotal, type TabFacts } from './table-tab'
 
 // One bill per table visit: the rule that says which order is a table's open bill, and whether a
 // send adds to it by default, stated with literal values rather than read back from the module,
@@ -15,14 +15,15 @@ const order = (over: Partial<TabFacts> & { id?: string } = {}) => ({
   restaurantId: 'r1',
   table: '4',
   parentId: null,
-  status: 'NEW' as const,
+  cancelled: false,
   createdAt: '2026-09-24T19:00:00Z',
+  closedAt: null,
   ...over,
 })
 
 describe('addToRefusal', () => {
   it('takes an order that opened this table this service, whatever the kitchen has done with it', () => {
-    for (const status of ['NEW', 'ACCEPTED', 'READY', 'DONE'] as const) expect(addToRefusal(order({ status }), AT)).toBeNull()
+    expect(addToRefusal(order(), AT)).toBeNull()
   })
 
   it('reads a missing order and another restaurant’s alike, so a guess learns nothing', () => {
@@ -33,7 +34,12 @@ describe('addToRefusal', () => {
   it('refuses another table, an addition and a cancelled order', () => {
     expect(addToRefusal(order({ table: '5' }), AT)).toBe('other_table')
     expect(addToRefusal(order({ parentId: 'o0' }), AT)).toBe('not_a_parent')
-    expect(addToRefusal(order({ status: 'CANCELLED' }), AT)).toBe('cancelled')
+    expect(addToRefusal(order({ cancelled: true }), AT)).toBe('cancelled')
+  })
+
+  it('refuses a bill somebody closed, whatever its tickets are doing', () => {
+    expect(addToRefusal(order({ closedAt: '2026-09-24T19:40:00Z' }), AT)).toBe('closed')
+    expect(addToRefusal(order({ closedAt: new Date('2026-09-24T19:40:00Z') }), AT)).toBe('closed')
   })
 
   it('refuses a bill of an earlier service, and takes one opened at 04:00 local itself', () => {
@@ -41,6 +47,23 @@ describe('addToRefusal', () => {
     expect(AT.serviceStart.toISOString()).toBe('2026-09-24T03:00:00.000Z')
     expect(addToRefusal(order({ createdAt: '2026-09-24T02:59:59Z' }), AT)).toBe('previous_service')
     expect(addToRefusal(order({ createdAt: new Date('2026-09-24T03:00:00Z') }), AT)).toBeNull()
+  })
+})
+
+describe('billCancelled', () => {
+  it('is true only when every ticket of the bill is cancelled', () => {
+    expect(billCancelled([{ status: 'CANCELLED' }, { status: 'CANCELLED' }])).toBe(true)
+    expect(billCancelled([{ status: 'CANCELLED' }, { status: 'ACCEPTED' }])).toBe(false)
+    expect(billCancelled([{ status: 'DONE' }])).toBe(false)
+  })
+
+  it('keeps a bill whose opening ticket was cancelled while an addition is live', () => {
+    const tickets = [{ status: 'CANCELLED' as const }, { status: 'NEW' as const }]
+    expect(addToRefusal(order({ cancelled: billCancelled(tickets) }), AT)).toBeNull()
+  })
+
+  it('is false for no tickets at all', () => {
+    expect(billCancelled([])).toBe(false)
   })
 })
 
@@ -54,9 +77,16 @@ describe('currentTab', () => {
 
   it('skips a later order that is cancelled or is an addition, and falls back to the bill still open', () => {
     const open = order({ id: 'open', createdAt: '2026-09-24T18:00:00Z' })
-    const cancelled = order({ id: 'x', status: 'CANCELLED', createdAt: '2026-09-24T19:00:00Z' })
+    const cancelled = order({ id: 'x', cancelled: true, createdAt: '2026-09-24T19:00:00Z' })
     const addition = order({ id: 'y', parentId: 'open', createdAt: '2026-09-24T19:30:00Z' })
     expect(currentTab([open, cancelled, addition], AT)?.id).toBe('open')
+  })
+
+  it('never picks a closed bill again: the table falls back to an older open one, or to none', () => {
+    const older = order({ id: 'older', createdAt: '2026-09-24T12:00:00Z' })
+    const closed = order({ id: 'closed', createdAt: '2026-09-24T19:30:00Z', closedAt: '2026-09-24T19:50:00Z' })
+    expect(currentTab([older, closed], AT)?.id).toBe('older')
+    expect(currentTab([closed], AT)).toBeNull()
   })
 
   it('is null for a table with nothing open: nothing sent, or another table', () => {

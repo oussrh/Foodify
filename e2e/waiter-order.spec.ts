@@ -1,5 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
-import { db } from './session'
+import { expectNoSeriousA11yViolations } from './axe'
+import { auditAccount, db, signInAs } from './session'
 import { deviceAccount, ownDish, signInDevice } from './staff'
 
 // A waiter taking an order at the table: pick the table from the room, find the dish by typing
@@ -97,6 +98,117 @@ test.describe('the waiter\'s phone', () => {
       await dish.remove()
       await waiter.remove()
       await kitchen.remove()
+    }
+  })
+})
+
+// The bill after it was sent: a dish the table no longer wants comes off a ticket the kitchen is
+// already cooking only when the kitchen says so, and the table is closed once it has paid. The
+// kitchen accepts on the card, the line is struck and the total drops on the waiter's phone, and
+// a closed table has no current order the next time it is opened; a manager then voids what was
+// left, from the order's details in the portal. Each new sheet is scanned.
+test.describe('the waiter’s bill', () => {
+  test('asks the kitchen to take a dish off, closes the table, and a manager voids the rest', async ({ page, browser }, info) => {
+    test.setTimeout(180_000)
+    const table = info.project.name === 'phone' ? '5' : '6'
+    const dish = await ownDish(info)
+    const waiter = await deviceAccount('WAITER', info)
+    const kitchen = await deviceAccount('KITCHEN', info)
+    const manager = await auditAccount('manager', info.testId, { mfa: false })
+    const clearTable = () => db().order.deleteMany({ where: { table, restaurantId: dish.restaurantId } })
+
+    try {
+      await clearTable()
+      await signInDevice(page, 'waiter', waiter.username)
+      await page.getByRole('button', { name: new RegExp(`^Table ${table},`) }).click()
+      await page.getByLabel('Search the menu').fill(dish.name)
+      await page.getByRole('button', { name: `Add ${dish.name}` }).click()
+      await page.getByRole('button', { name: `Add ${dish.name}` }).click()
+      await page.getByRole('button', { name: /^Review 2 items/ }).click()
+      await page.getByRole('dialog').getByRole('button', { name: 'Send to the kitchen' }).click()
+      await expect(page.getByText(/^Order #\d+ sent$/)).toBeVisible()
+      const sent = await db().order.findFirstOrThrow({ where: { placedById: waiter.id, table }, select: { id: true, number: true } })
+
+      // The pass starts it: from here the floor can only ask.
+      const tablet = await (await browser.newContext({ viewport: { width: 1280, height: 800 } })).newPage()
+      await signInDevice(tablet, 'kitchen', kitchen.username)
+      const card = tablet.getByRole('article').filter({ hasText: `#${sent.number}` }).filter({ hasText: `Table ${table}` })
+      await card.getByRole('button', { name: 'Start' }).click()
+      await expect(card.getByRole('button', { name: 'Ready to serve' })).toBeVisible()
+
+      await page.getByRole('button', { name: 'Back to the tables' }).click()
+      await page.getByRole('button', { name: new RegExp(`^Table ${table},`) }).click()
+      await page.getByRole('button', { name: `Current order #${sent.number}` }).click()
+      const sheet = page.getByRole('dialog')
+      await expect(sheet.getByRole('button', { name: `Ask to remove ${dish.name}` })).toBeVisible()
+      await expectNoSeriousA11yViolations(page, 'waiter: the table’s bill')
+      await sheet.getByRole('button', { name: `Ask to remove ${dish.name}` }).click()
+      await expect(sheet.getByRole('heading', { name: `Ask to remove ${dish.name}` })).toBeVisible()
+      await expectNoSeriousA11yViolations(page, 'waiter: the reason picker')
+      await sheet.getByRole('button', { name: 'Guest changed their mind' }).click()
+      await expect(sheet).toContainText('Waiting for the kitchen: remove 1')
+
+      // The pass: the request is on the card, and accepting it strikes the dish.
+      await expect(card).toContainText(`Table ${table} asks to remove 1 ${dish.name}`, { timeout: 15_000 })
+      await expectNoSeriousA11yViolations(tablet, 'kitchen: a request on the board')
+      await card.getByRole('button', { name: `Accept: remove 1 ${dish.name}` }).click()
+      await expect(card).toContainText(`−1 ${dish.name}`, { timeout: 15_000 })
+      const line = await db().orderLine.findFirstOrThrow({ where: { orderId: sent.id } })
+      expect(line).toMatchObject({ quantity: 2, removedQuantity: 1 })
+      expect((await db().order.findUniqueOrThrow({ where: { id: sent.id } })).subtotal.toFixed(2)).toBe('7.50')
+
+      // Back on the phone: the answer, the struck portion and the new total.
+      await page.keyboard.press('Escape')
+      await page.getByRole('button', { name: `Current order #${sent.number}` }).click()
+      await expect(sheet).toContainText(`Kitchen accepted: remove 1 ${dish.name}`)
+      await expect(sheet).toContainText('−1 removed')
+      await expect(sheet).toContainText(/Total\s*\D*7[.,]50/)
+
+      // Paid: a close is final, so the phone always asks; with one dish still cooking it asks again.
+      await sheet.getByRole('button', { name: 'Close table' }).click()
+      await expect(sheet.getByRole('alert')).toContainText(`Close table ${table}? The bill is paid and the table is free for the next party.`)
+      await expectNoSeriousA11yViolations(page, 'waiter: close the table?')
+      await sheet.getByRole('alert').getByRole('button', { name: 'Close table' }).click()
+      await expect(sheet.getByRole('alert')).toContainText('1 dish still in the kitchen. Close anyway?')
+      await expectNoSeriousA11yViolations(page, 'waiter: close anyway?')
+      await sheet.getByRole('button', { name: 'Close anyway' }).click()
+      await expect(sheet).toHaveCount(0)
+      expect((await db().order.findUniqueOrThrow({ where: { id: sent.id } })).closedAt).not.toBeNull()
+
+      // The table is free again, and opening it shows no current order.
+      await page.getByRole('button', { name: 'Back to the tables' }).click()
+      await page.getByRole('button', { name: `Table ${table}, free` }).click()
+      await expect(page.getByRole('heading', { level: 1, name: `Table ${table}` })).toBeVisible()
+      await expect(page.getByRole('button', { name: /^Current order/ })).toHaveCount(0)
+
+      // The pass plates the last one; once it is ready, taking it off is a manager's void.
+      await card.getByRole('button', { name: 'Ready to serve' }).click()
+      await expect(card).toHaveCount(0)
+      await tablet.context().close()
+
+      // The office: the guests had gone, and a manager voids the plate from the order's details,
+      // with the change log under it.
+      await page.context().clearCookies()
+      await signInAs(page, 'manager', manager.email, { mfa: false })
+      await page.goto(`/manager/restaurants/${dish.restaurantId}/orders`)
+      await page.getByRole('row').filter({ hasText: `#${sent.number}` }).click()
+      const details = page.getByRole('dialog')
+      await expect(details.getByRole('button', { name: `Void ${dish.name}` })).toBeVisible()
+      await expect(details).toContainText('Removed 1')
+      await expectNoSeriousA11yViolations(page, 'manager: an order’s details and change log')
+      await details.getByRole('button', { name: `Void ${dish.name}` }).click()
+      await expectNoSeriousA11yViolations(page, 'manager: the void’s reason picker')
+      await details.getByRole('button', { name: 'Took too long' }).click()
+      await expect(details).toContainText(`Voided 1 ${dish.name}`)
+      const voided = await db().order.findUniqueOrThrow({ where: { id: sent.id }, include: { lines: true } })
+      expect(voided).toMatchObject({ status: 'CANCELLED', lines: [expect.objectContaining({ quantity: 2, removedQuantity: 2 })] })
+      expect(voided.subtotal.toFixed(2)).toBe('0.00')
+    } finally {
+      await clearTable()
+      await dish.remove()
+      await waiter.remove()
+      await kitchen.remove()
+      await manager.remove()
     }
   })
 })

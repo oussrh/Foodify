@@ -112,6 +112,22 @@ describe('the insights report, breakdowns', () => {
       expect(report!.dishes.some((d) => d.id === quiet.id)).toBe(false)
     }))
 
+  it('counts what was left on a line, not a dish taken off it after it was sent', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      const tea = await dish(tx, mine.id, { nameEn: 'Tea' })
+      // Three teas ordered, one removed at the table and one voided after it went out: one was sold.
+      await order(tx, mine.id, { number: 1, created: '2026-09-22T12:00:00Z', subtotal: '2.50', status: 'DONE', lines: [{ dishId: tea.id, quantity: 3, unitPrice: '2.50', removedQuantity: 2 }] })
+      // Taken off whole: the dish was ordered and nothing of it was sold.
+      await order(tx, mine.id, { number: 2, created: '2026-09-22T12:30:00Z', subtotal: '0.00', status: 'CANCELLED', lines: [{ dishId: tea.id, quantity: 1, unitPrice: '2.50', removedQuantity: 1 }] })
+      signInAs(await manager(tx, [mine.id]))
+
+      const report = await loadInsights(mine.id, 'day', NOW)
+
+      expect(report!.dishes).toEqual([{ id: tea.id, name: 'Tea', views: 0, arViews: 0, cartAdds: 0, ordered: 1, revenueMinor: 250 }])
+      expect(totalsOf(report!.buckets).revenueMinor).toBe(250)
+    }))
+
   it('keeps an order line whose dish was deleted out of the dishes, not out of the orders', () =>
     withRollback(async (tx) => {
       const mine = await restaurant(tx)

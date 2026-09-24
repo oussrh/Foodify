@@ -7,7 +7,7 @@
 // now, so an order stays ready until somebody carries it and not a minute longer or shorter. The
 // window was the kind of heuristic that works until the evening it does not.
 
-import { OPEN_STATUSES, type BoardOrder, type OrderStatus } from '@/lib/orders'
+import { itemCount, OPEN_STATUSES, type BoardOrder, type OrderStatus } from '@/lib/orders'
 
 /** The orders the kitchen has called up: the food is on the pass and nobody has carried it yet. */
 export function readyOrders(orders: BoardOrder[]): BoardOrder[] {
@@ -46,12 +46,22 @@ export interface TableTile {
   stage: OrderStatus | null
 }
 
-/** The state of every table in the room, in order, from the two polls a waiter runs. */
+/**
+ * Whether an order still holds its table: a ticket of a closed bill does not. The guests paid and
+ * left, so the table is free for the next party even if a plate of theirs is still on the pass
+ * (it is still listed on the Orders tab, to carry or to throw away).
+ */
+const holdsTable = (table: string) => (order: BoardOrder) => order.table === table && order.billClosedAt === null
+
+/**
+ * The state of every table in the room, in order, from the two polls a waiter runs. A table whose
+ * bills are all closed is free; the items are counted net of what was taken off.
+ */
 export function floorTiles(tables: readonly (number | string)[], open: BoardOrder[], ready: BoardOrder[], now: Date = new Date()): TableTile[] {
   return tables.map((value) => {
     const table = String(value)
-    const cooking = open.filter((order) => order.table === table)
-    const waiting = ready.filter((order) => order.table === table)
+    const cooking = open.filter(holdsTable(table))
+    const waiting = ready.filter(holdsTable(table))
     const waits = cooking.map((order) => Math.max(0, Math.floor((now.getTime() - new Date(order.createdAt).getTime()) / 60_000)))
     const everything = [...cooking, ...waiting]
     return {
@@ -61,13 +71,17 @@ export function floorTiles(tables: readonly (number | string)[], open: BoardOrde
       state: waiting.length > 0 ? 'ready' : cooking.length > 0 ? 'cooking' : 'free',
       cooking,
       ready: waiting,
-      items: everything.reduce((n, order) => n + order.lines.reduce((m, line) => m + line.quantity, 0), 0),
+      items: everything.reduce((n, order) => n + itemCount(order), 0),
       waitingMinutes: waits.length > 0 ? Math.max(...waits) : 0,
     }
   })
 }
 
-/** The ids of orders that became ready since the last look; what the phone buzzes about. */
+/**
+ * The ids of orders that became ready since the last look; what the phone buzzes about. A plate
+ * of a closed bill is left out: its table is free and has no tile to light, so a buzz would send
+ * the waiter looking for nothing (it is still on the Orders tab to carry).
+ */
 export function newlyReady(ready: BoardOrder[], seen: ReadonlySet<string>): string[] {
-  return ready.filter((order) => !seen.has(order.id)).map((order) => order.id)
+  return ready.filter((order) => order.billClosedAt === null && !seen.has(order.id)).map((order) => order.id)
 }
