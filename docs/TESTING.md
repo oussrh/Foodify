@@ -57,6 +57,9 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 | `lib/restaurant-loader.ts` | The same guard over the same database; held by `tests/integration/order-board.test.ts` |
 | `lib/insights-loader.ts` | Grouped SQL over the same database; held by `tests/integration/insights.test.ts` |
 | `lib/insights-queries.ts` | The insights loader's SQL, split out of it; held by the same suite and `tests/integration/insights-breakdowns.test.ts` |
+| `server/order-lock.ts`, `server/ticket-apply.ts`, `server/ticket-changes.ts`, `server/order-moves.ts` | A row lock in SQL and the writes made under it: the floor's changes to a ticket, the kitchen's answers and the board's own moves; held by `tests/integration/ticket-changes.test.ts` |
+| `server/bill-merge.ts`, `server/bill-changes.ts` | Closing, merging, un-merging and moving a bill, each a transaction over locked rows; held by `tests/integration/bill-lifecycle.test.ts` |
+| `server/change-log.ts` | A manager's read of an order's change log; held by `tests/integration/ticket-changes.test.ts` |
 | `lib/emails/**` | HTML templates; presentational |
 
 ## Contrast of the tokens
@@ -75,7 +78,7 @@ that fails on any serious or critical violation (TEST.3, A11Y.1):
 | `menu.spec.ts`, `ar-viewer.spec.ts` | The guest's menu: load, language, dish sheet, 3D view, category bar |
 | `ordering.spec.ts` | A guest's order from a row to "sent", with the table from the QR link |
 | `order-life.spec.ts` | That order across the devices: started and called up on the kitchen board, carried out from the waiter's phone, every stamp on the row; and a tablet kept out of the portals |
-| `waiter-order.spec.ts` | A waiter taking an order at a table: search, notes on the dish and the order, sent and listed |
+| `waiter-order.spec.ts` | A waiter taking an order at a table: search, notes on the dish and the order, sent and listed; adding to the table's bill; asking the kitchen to take a dish off a ticket being cooked (accepted on the card, struck, the total down) and closing the table, with axe on each new sheet |
 | `sold-out.spec.ts` | A dish marked sold out on the tablet: shown but not orderable, refused by the endpoint (409), then back |
 | `manager-menu.spec.ts` | A dish created, repriced and deleted in the portal, each step read back on the public menu |
 | `manager-settings.spec.ts` | General settings saved and held after a reload; a waiter added on the People tab signs in, then is removed |

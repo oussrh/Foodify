@@ -23,8 +23,10 @@ const row = (over: Partial<Parameters<typeof serializeOrder>[0]> = {}) =>
     servedAt: null,
     placedBy: null,
     parentId: null,
+    closedAt: null,
     parent: null,
-    lines: [{ id: 'l1', nameEn: 'Chicken', nameFr: 'Poulet', quantity: 2, note: 'No onions' }],
+    lines: [{ id: 'l1', nameEn: 'Chicken', nameFr: 'Poulet', quantity: 2, removedQuantity: 0, note: 'No onions' }],
+    changes: [],
     ...over,
   }) as Parameters<typeof serializeOrder>[0]
 
@@ -40,7 +42,39 @@ describe('boardOrderSelect', () => {
   })
 
   it('takes each line with what the guest asked for on it', () => {
-    expect(boardOrderSelect.lines.select).toMatchObject({ nameEn: true, nameFr: true, quantity: true, note: true })
+    expect(boardOrderSelect.lines.select).toMatchObject({ nameEn: true, nameFr: true, quantity: true, removedQuantity: true, note: true })
+  })
+
+  it('reads only the requests still waiting on the kitchen', () => {
+    expect(boardOrderSelect.changes.where).toEqual({ status: 'PENDING' })
+  })
+})
+
+describe('the bill’s closed stamp and the pending requests', () => {
+  it('reads the bill’s stamp from the order that opened it, for the bill and for an addition alike', () => {
+    const closed = new Date('2026-09-22T13:00:00Z')
+    expect(serializeOrder(row({ closedAt: closed })).billClosedAt).toBe('2026-09-22T13:00:00.000Z')
+    expect(serializeOrder(row({ parentId: 'p', parent: { number: 3, closedAt: closed } })).billClosedAt).toBe('2026-09-22T13:00:00.000Z')
+    expect(serializeOrder(row({ parentId: 'p', parent: { number: 3, closedAt: null } })).billClosedAt).toBeNull()
+    expect(serializeOrder(row()).billClosedAt).toBeNull()
+  })
+
+  it('hands a pending request over as plain JSON, a cancel with no line', () => {
+    const at = new Date('2026-09-22T12:10:00Z')
+    const order = serializeOrder(
+      row({
+        changes: [
+          { id: 'c1', kind: 'REMOVE', lineId: 'l1', quantity: 1, reason: 'mistake', note: null, createdAt: at },
+          { id: 'c2', kind: 'CANCEL', lineId: null, quantity: null, reason: 'other', note: 'Left', createdAt: at },
+        ],
+      }),
+    )
+    expect(order.requests).toEqual([
+      { id: 'c1', kind: 'REMOVE', lineId: 'l1', quantity: 1, reason: 'mistake', note: null, createdAt: '2026-09-22T12:10:00.000Z' },
+      { id: 'c2', kind: 'CANCEL', lineId: null, quantity: null, reason: 'other', note: 'Left', createdAt: '2026-09-22T12:10:00.000Z' },
+    ])
+    expect(order).not.toHaveProperty('changes')
+    expect(order).not.toHaveProperty('closedAt')
   })
 })
 
@@ -88,7 +122,7 @@ describe('serializeOrder', () => {
   })
 
   it('names the order an addition belongs to by its number, and says null on one that opened the bill', () => {
-    const addition = serializeOrder(row({ parentId: 'o0', parent: { number: 7 } }))
+    const addition = serializeOrder(row({ parentId: 'o0', parent: { number: 7, closedAt: null } }))
     expect(addition).toMatchObject({ parentId: 'o0', parentNumber: 7 })
     // The nested row itself is not sent: the board reads the number, never a second order.
     expect(addition).not.toHaveProperty('parent')

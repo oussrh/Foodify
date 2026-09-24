@@ -12,13 +12,19 @@
 import { fromMinorUnits, toMinorUnits } from '@/lib/money'
 import type { BoardOrder, OrderStatus } from '@/lib/orders'
 
-/** The facts of an order that decide whether it is a table's open bill. */
+/**
+ * The facts of an order that decide whether it is a table's open bill. `cancelled` is the bill's,
+ * not the opening ticket's: a bill is cancelled only when every ticket of it is (`billCancelled`),
+ * so a table whose first ticket was cancelled while an addition is still cooking keeps its bill.
+ */
 export interface TabFacts {
   restaurantId: string
   table: string
   parentId: string | null
-  status: OrderStatus
+  cancelled: boolean
   createdAt: Date | string
+  /** When the bill was closed (paid, the table let go); null while nobody has closed it. */
+  closedAt: Date | string | null
 }
 
 /** Where an order would go: this restaurant, this table, and when the current service day began. */
@@ -30,7 +36,7 @@ export interface TabPlace {
 }
 
 /** Why an addition was refused: the order it names is not this table's open bill. */
-export type AddToRefusal = 'not_found' | 'other_table' | 'not_a_parent' | 'cancelled' | 'previous_service'
+export type AddToRefusal = 'not_found' | 'other_table' | 'not_a_parent' | 'cancelled' | 'closed' | 'previous_service'
 
 /** What the waiter is told for each refusal: the kitchen's answer, and what to do instead. */
 export const ADD_TO_REFUSED: Record<AddToRefusal, string> = {
@@ -38,7 +44,13 @@ export const ADD_TO_REFUSED: Record<AddToRefusal, string> = {
   other_table: 'That order belongs to another table',
   not_a_parent: 'That is an addition itself; add to the order that opened the table',
   cancelled: 'That order was cancelled; send a new order',
+  closed: 'That table’s bill was closed; send a new order',
   previous_service: 'That order is from an earlier service; send a new order',
+}
+
+/** Whether a bill is cancelled: every ticket of it, the opening one and each addition, is. */
+export function billCancelled(tickets: readonly { status: OrderStatus }[]): boolean {
+  return tickets.length > 0 && tickets.every((ticket) => ticket.status === 'CANCELLED')
 }
 
 /**
@@ -50,14 +62,16 @@ export function addToRefusal(order: TabFacts | null, at: TabPlace): AddToRefusal
   if (!order || order.restaurantId !== at.restaurantId) return 'not_found'
   if (order.table !== at.table) return 'other_table'
   if (order.parentId !== null) return 'not_a_parent'
-  if (order.status === 'CANCELLED') return 'cancelled'
+  if (order.cancelled) return 'cancelled'
+  if (order.closedAt !== null) return 'closed'
   if (new Date(order.createdAt).getTime() < at.serviceStart.getTime()) return 'previous_service'
   return null
 }
 
 /**
  * The table's current bill among `orders`: the most recent one of this service that may still be
- * added to, or null when the table has none. The most recent, because two parties at one table
+ * added to, or null when the table has none. A closed bill is never current again: the next
+ * order at the table opens a new one. The most recent, because two parties at one table
  * in a day are two bills, and the one still sitting there is the later.
  */
 export function currentTab<T extends TabFacts>(orders: readonly T[], at: TabPlace): T | null {
@@ -99,6 +113,32 @@ export interface TableTab {
   total: string
   /** `defaultsToAdd` when it was read: whether the waiter's send adds to it unless they choose otherwise. */
   addByDefault: boolean
+  /** The other bills still open at this table this service, oldest first: what it may be merged with. */
+  others: OtherBill[]
+  /** The additions that were bills of their own merged into this one, which an undo can split off again. */
+  merged: { id: string; number: number }[]
+  /** The kitchen's answers to this bill's requests, newest first: what the waiter's phone reports back. */
+  answers: RequestAnswer[]
+}
+
+/** Another bill open at the same table: its number, when it was opened and what it comes to. */
+export interface OtherBill {
+  id: string
+  number: number
+  createdAt: string
+  total: string
+}
+
+/** One request the kitchen has answered: which ticket, what was asked, and whether it was done. */
+export interface RequestAnswer {
+  id: string
+  orderId: string
+  kind: 'CANCEL' | 'REMOVE'
+  /** The dish a removal was for, as it was ordered; null for a cancel. */
+  dish: string | null
+  quantity: number | null
+  accepted: boolean
+  decidedAt: string
 }
 
 /** What a bill comes to over its tickets: every subtotal but a cancelled one, summed on integers. */

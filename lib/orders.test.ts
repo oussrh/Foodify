@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { byStatus, CLOSED_STATUSES, isClosed, itemCount, minutesWaiting, nextStatus, OPEN_STATUSES, ORDER_STATUSES, orderTimings, STATUS_LABEL, viewStatuses, WAIT_LATE_MIN, WAIT_WARNING_MIN, waitingTier } from './orders'
+import { byStatus, CLOSED_STATUSES, effectiveQuantity, isClosed, itemCount, minutesWaiting, nextStatus, OPEN_STATUSES, ORDER_STATUSES, orderTimings, STATUS_LABEL, viewStatuses, WAIT_LATE_MIN, WAIT_WARNING_MIN, waitingTier } from './orders'
 
 describe('nextStatus', () => {
   it('takes a new order on, and only a new one', () => {
@@ -100,8 +100,20 @@ describe('byStatus', () => {
 
 describe('itemCount', () => {
   it('counts the portions, not the lines', () => {
-    expect(itemCount({ lines: [{ quantity: 2 }, { quantity: 3 }] })).toBe(5)
+    expect(itemCount({ lines: [{ quantity: 2, removedQuantity: 0 }, { quantity: 3, removedQuantity: 0 }] })).toBe(5)
     expect(itemCount({ lines: [] })).toBe(0)
+  })
+
+  it('leaves out what was taken off, and a line removed whole counts nothing', () => {
+    expect(itemCount({ lines: [{ quantity: 2, removedQuantity: 1 }, { quantity: 3, removedQuantity: 3 }] })).toBe(1)
+  })
+})
+
+describe('effectiveQuantity', () => {
+  it('is what was asked for less what was taken off, never below zero', () => {
+    expect(effectiveQuantity({ quantity: 3, removedQuantity: 0 })).toBe(3)
+    expect(effectiveQuantity({ quantity: 3, removedQuantity: 2 })).toBe(1)
+    expect(effectiveQuantity({ quantity: 1, removedQuantity: 4 })).toBe(0)
   })
 })
 

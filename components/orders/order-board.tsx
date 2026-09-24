@@ -10,6 +10,7 @@ import type { Route } from 'next'
 import type { Money } from '@/lib/menu'
 import type { BoardOrder, BoardView, OrderMove } from '@/lib/orders'
 import { setOrderStatus } from '@/app/actions/order-actions'
+import { useRequestDecision } from './use-request-decision'
 import BoardHeader from './board-header'
 import OrderColumns from './order-columns'
 import OrderDetailsSheet from './order-details-sheet'
@@ -35,13 +36,27 @@ interface OrderBoardProps {
   money: Money
   /** Back to the rest of the portal, for whoever set the tablet up; absent on the tablet's own route. */
   backHref?: Route | undefined
+  /** The board is open in a manager's portal: the details offer voids and the change log. */
+  isManager: boolean
+}
+
+/**
+ * What the details sheet gets besides the order: busy while a move or an answer is in flight, the
+ * floor's requests to answer, and a manager's voids and change log when the board is a manager's.
+ */
+function detailsExtras(on: { isManager: boolean; refresh: () => void; decision: ReturnType<typeof useRequestDecision>; busyId: string | null }) {
+  return {
+    busy: on.busyId !== null || on.decision.busy,
+    onDecide: on.decision.decide,
+    manager: on.isManager ? { onChanged: on.refresh } : undefined,
+  }
 }
 
 /**
  * The kitchen board a tablet sits on all day: open orders in two lanes, the alert when one arrives,
  * the ready drawer, and each order's details a tap away.
  */
-export default function OrderBoard({ restaurantId, restaurantCode, restaurantName, money, backHref }: OrderBoardProps) {
+export default function OrderBoard({ restaurantId, restaurantCode, restaurantName, money, backHref, isManager }: OrderBoardProps) {
   const { play: chime, prime } = useChime()
   // A pass wants sound: it is the whole reason the board is there, so it starts on. Turning it
   // off is a choice the room makes, remembered on the tablet.
@@ -57,6 +72,8 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
   const pwa = useStaffPwa()
   const [busyId, setBusyId] = useState<string | null>(null)
   const [openId, setOpenId] = useState<string | null>(null)
+  // The floor's requests: accepted or refused from the card or the details, then read again.
+  const decision = useRequestDecision(refresh)
 
   // One clock for every card, so the waits tick without each one holding a timer.
   const now = useMinuteClock()
@@ -139,6 +156,7 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
             // One button per card, and which move it makes is the lane it is in: start it, call
             // it up, or mark it carried out.
             onAdvance={(order: BoardOrder) => act(order.id, order.status === 'NEW' ? 'accept' : order.status === 'ACCEPTED' ? 'ready' : 'done')}
+            onDecide={decision.decide}
           />
         ) : (
           <ServedList orders={orders} money={money} onOpen={(order: BoardOrder) => setOpenId(order.id)} />
@@ -149,9 +167,9 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
         order={openOrder}
         onClose={() => setOpenId(null)}
         onAction={(action) => openOrder && act(openOrder.id, action)}
-        busy={busyId !== null}
         money={money}
         now={now}
+        {...detailsExtras({ isManager, refresh, decision, busyId })}
       />
     </div>
   )

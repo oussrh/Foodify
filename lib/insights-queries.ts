@@ -85,7 +85,8 @@ export type DishRow = {
 
 /**
  * Per dish since `since`: opened, launched in AR, put in a cart, and ordered (portions, and what
- * they came to at the price on the line). Grouped apart and joined on the dish, because joining
+ * they came to at the price on the line, both net of what was taken off the line after it was
+ * sent: a dish removed or voided was not sold). Grouped apart and joined on the dish, because joining
  * the three event tables to each other would multiply their rows. A line whose dish was deleted
  * has no dish to report under and is left out; the bucket totals still count its order.
  */
@@ -102,7 +103,8 @@ export function countDishes(id: string, since: Date) {
       WHERE c."restaurantId" = ${id} AND c."createdAt" >= ${since}
       GROUP BY 1
     ), o AS (
-      SELECT l."dishId", sum(l."quantity")::int AS ordered, sum(l."unitPrice" * l."quantity")::text AS revenue
+      SELECT l."dishId", sum(l."quantity" - l."removedQuantity")::int AS ordered,
+             sum(l."unitPrice" * (l."quantity" - l."removedQuantity"))::text AS revenue
       FROM "OrderLine" l JOIN "Order" o ON o."id" = l."orderId"
       WHERE o."restaurantId" = ${id} AND o."createdAt" >= ${since}
         AND o."status" <> 'CANCELLED' AND l."dishId" IS NOT NULL

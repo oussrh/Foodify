@@ -6,6 +6,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Badge, type BadgeProps } from '@/components/ui/badge'
 import { formatPrice, type Money } from '@/lib/menu'
@@ -34,6 +35,7 @@ function minutes(value: number | null) {
  * and to go out; a row opens the details sheet.
  */
 export default function HistoryTable({ orders, money }: { orders: BoardOrder[]; money: Money }) {
+  const router = useRouter()
   const [openId, setOpenId] = useState<string | null>(null)
   // A history does not tick: the clock is read once, at mount, rather than on every render.
   const [now] = useState(() => Date.now())
@@ -93,8 +95,18 @@ export default function HistoryTable({ orders, money }: { orders: BoardOrder[]; 
         </TableBody>
       </Table>
 
-      {/* The same sheet the board opens, without its moves: this is a record, not a job. */}
-      <OrderDetailsSheet order={open} onClose={() => setOpenId(null)} onAction={() => undefined} busy money={money} now={now} readOnly />
+      {/* The same sheet the board opens, without its moves: this is a record, not a job. The
+          portals that show it are a manager's, so a void and the change log are offered. */}
+      <OrderDetailsSheet
+        order={open}
+        onClose={() => setOpenId(null)}
+        onAction={() => undefined}
+        busy
+        money={money}
+        now={now}
+        readOnly
+        manager={{ onChanged: () => router.refresh() }}
+      />
     </>
   )
 }
