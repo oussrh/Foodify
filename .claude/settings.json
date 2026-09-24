@@ -10,7 +10,8 @@
       "PowerShell(pnpm *)", "PowerShell(node scripts/*)", "PowerShell(git *)"
     ],
     "deny": [
-      "Read(./.env)", "Read(./.env.*)",
+      "Read(./.env)", "Read(./.env.local)", "Read(./.env.development)", "Read(./.env.development.local)",
+      "Read(./.env.production)", "Read(./.env.production.local)", "Read(./.env.test)", "Read(./.env.test.local)",
       "Bash(git push --force *)", "Bash(git push -f *)", "PowerShell(git push --force *)", "PowerShell(git push -f *)",
       "Bash(git commit --no-verify *)", "Bash(git push --no-verify *)",
       "PowerShell(git commit --no-verify *)", "PowerShell(git push --no-verify *)",
