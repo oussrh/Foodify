@@ -3,5 +3,7 @@ export type ShellPortal = 'admin' | 'manager'
 
 export interface ShellRestaurant {
   id: string
+  /** The short code every restaurant page's address carries (`/{portal}/restaurants/<code>/…`). */
+  code: string
   name: string
 }

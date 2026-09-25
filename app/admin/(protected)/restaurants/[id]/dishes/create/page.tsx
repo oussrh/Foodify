@@ -1,14 +1,14 @@
-import type { Route } from 'next'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import CreateDishForm from '@/components/create-dish-form'
 import { PageHeader } from '@/components/shell/page-header'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
-import { idSegment, routeParams } from '@/lib/schemas/page-params'
+import { restaurantPageId } from '@/lib/restaurant-page'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 export default async function CreateDishPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSuperAdminPage()
-  const { id } = routeParams(idSegment, await params)
+  const id = await restaurantPageId((await params).id, (code) => restaurantPath('admin', code, 'dishes/create'))
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id } })
   if (!restaurant) redirect('/admin/restaurants')
@@ -27,7 +27,7 @@ export default async function CreateDishPage({ params }: { params: Promise<{ id:
       <PageHeader
         title="New dish"
         description={`It appears on ${restaurant.name}'s menu as soon as it is saved and live.`}
-        back={{ href: `/admin/restaurants/${restaurant.id}/dishes` as Route, label: 'All dishes' }}
+        back={{ href: restaurantPath('admin', restaurant.code, 'dishes'), label: 'All dishes' }}
       />
       <CreateDishForm restaurantId={restaurant.id} subcategories={subcategories} restaurantName={restaurant.name} dietaryOptions={restaurant.dietaryOptions} />
     </div>

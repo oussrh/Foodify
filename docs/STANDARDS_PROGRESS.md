@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["standards", "ratchet", "scoreboard"]
 related: ["./README.md", "./ADOPTION_DECISIONS.md"]
 source_truth: ["scripts/ci/standards-baseline.json", "abatty.probes.mjs", "docs/ADOPTION_STATE.json"]
-last_verified: "2026-09-24"
+last_verified: "2026-09-25"
 ---
 
 # Standards progress
@@ -72,6 +72,7 @@ last_verified: "2026-09-24"
 ## Log
 
 - 2026-09-25 · **abatty 0.7.0-rc.1 (a release candidate)** · From 0.5.2 through 0.6.0 and 0.6.1. `abatty measure`: 79/100 over 77 applicable checks (57 present, 7 partial, 13 missing), one check more than 0.5.x applied, so not directly comparable to 79/100 over 76. `docs.behindCode` is redefined (definition 4: judged by commits, a date-only commit is not a re-read) and read 2 on upgrade, this document and the index; both re-read, the floor stays 0. Doctor reports six opt-in probes left off with today's readings (`code.clones` 100, `code.undocumentedExports` 124, `test.coverageExclusions` 28, `test.unvisitedRoutes` 20, `obs.catchOnlyLogs` 11, `api.unboundedList` 2); none is enabled in this change. Doctor fails on the narrowed env-file deny; the owner decides.
+- 2026-09-25 · **duplication 64 → 56 blocks, 817 → 714 lines** · The admin and manager Dishes tabs now render one shared screen (`components/shell/dishes-screen.tsx`) and the restaurant lists one row mapper, while the restaurant pages moved to short codes; the floor is lowered in the baseline. No other metric moved.
 
 - 2026-09-24 · **abatty 0.5.2, `types.nonNull` hard at zero** · The harness moves to 0.5.2 (hooks on `pnpm exec`, the commit-msg changelog check, the gate running the changed-lines coverage). Its opt-in `types.nonNull` is enabled in `ratchet.enable`: 13 non-null assertions → 0, each replaced by the check it stood for, and the baseline promotes it to hard. `lib/social.ts` gained the tests for its untested branches once touching it put them in the changed-lines set. The same day the shared zod schemas were tightened (https and host rules on stored URLs, hex colours, bounded text, the sign-in code), each rule tested in `lib/schemas/*.test.ts`.
 - 2026-09-23 · **JSDoc: every component held** · The last 94 exported components and hooks documented and the rule's directory list replaced by `components/**`; 0 remain. The starting count is corrected to 236 distinct exports: the audit that reported 351 counted each `export default function` twice (once as a function, once as a default export), and the earlier log lines carry that inflated figure. Drafting the blocks found four real bugs, fixed in the same change (see the changelog).

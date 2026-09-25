@@ -3,6 +3,7 @@
 // like the dashboards. It names an order by number, table and plate count and nothing else: a
 // push travels through a browser vendor's service and sits on a lock screen, so nothing about the
 // guest (their phone, their notes) is ever in it.
+import { kitchenBoardPath } from '@/lib/restaurant-paths'
 
 /**
  * The alerts: a new order for the pass, an order ready for the floor, a request from the floor to
@@ -11,8 +12,13 @@
  */
 export type PushKind = 'order' | 'ready' | 'request' | 'answer'
 
-/** One push as the service worker reads it. */
-export type PushPayload = { title: string; body: string; tag: string; url: string; kind: PushKind; restaurantId: string }
+/**
+ * One push as the service worker reads it. `restaurantCode` is how every board's address names the
+ * restaurant (`/kitchen/<code>`, `/{portal}/orders/<code>`), so a portal's board, whose scope the
+ * tablet's `url` is outside, builds its own address from it; `restaurantId` is the uuid an older
+ * board's address may still carry, for recognising a board that is already open.
+ */
+export type PushPayload = { title: string; body: string; tag: string; url: string; kind: PushKind; restaurantId: string; restaurantCode: string }
 
 /**
  * The facts of an order a push may carry; `dishes` is the number of plates (quantities summed),
@@ -26,17 +32,18 @@ const plates = (n: number) => `${n} ${n === 1 ? 'dish' : 'dishes'}`
  * A new order, for the kitchen board: opens the tablet's board by the restaurant's short code. An
  * addition is titled by the bill it belongs to ("Addition to #12"), because the cook's question is
  * which table's plates it goes out with, and a fresh number would read as a new table. A
- * manager's or an admin's board lives at `/{portal}/orders/<id>`, outside the tablet's address, so
- * the payload also names the restaurant and the worker builds that board's address from its scope.
+ * manager's or an admin's board lives at `/{portal}/orders/<code>`, outside the tablet's address, so
+ * the payload also carries the code and the worker builds that board's address from its scope.
  */
 export function newOrderPush(order: PushOrder, restaurant: { id: string; code: string }): PushPayload {
   const restaurantCode = restaurant.code
   return {
     restaurantId: restaurant.id,
+    restaurantCode: restaurant.code,
     title: typeof order.parentNumber === 'number' ? `Addition to #${order.parentNumber}` : `New order #${order.number}`,
     body: `Table ${order.table} · ${plates(order.dishes)}`,
     tag: `order-${order.id}`,
-    url: `/kitchen/orders/${restaurantCode}`,
+    url: kitchenBoardPath(restaurantCode),
     kind: 'order',
   }
 }
@@ -46,6 +53,7 @@ export function orderReadyPush(order: PushOrder, restaurant: { id: string; code:
   const restaurantCode = restaurant.code
   return {
     restaurantId: restaurant.id,
+    restaurantCode: restaurant.code,
     title: `Table ${order.table} is ready`,
     body: `Order #${order.number} · ${plates(order.dishes)}`,
     tag: `ready-${order.id}`,
@@ -69,10 +77,11 @@ export function requestWords(request: Pick<PushRequest, 'orderNumber' | 'dish' |
 export function changeRequestPush(request: PushRequest, restaurant: { id: string; code: string }): PushPayload {
   return {
     restaurantId: restaurant.id,
+    restaurantCode: restaurant.code,
     title: `Table ${request.table} asks to ${requestWords(request)}`,
     body: 'Accept or refuse it on the board',
     tag: `request-${request.changeId}`,
-    url: `/kitchen/orders/${restaurant.code}`,
+    url: kitchenBoardPath(restaurant.code),
     kind: 'request',
   }
 }
@@ -81,6 +90,7 @@ export function changeRequestPush(request: PushRequest, restaurant: { id: string
 export function changeAnswerPush(request: PushRequest, accepted: boolean, restaurant: { id: string; code: string }): PushPayload {
   return {
     restaurantId: restaurant.id,
+    restaurantCode: restaurant.code,
     title: `Kitchen ${accepted ? 'accepted' : 'refused'}: ${requestWords(request)}`,
     body: `Table ${request.table} · order #${request.orderNumber}`,
     tag: `answer-${request.changeId}`,

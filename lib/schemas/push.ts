@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { httpsUrl, uuid } from './common'
 
 /**
- * The staff apps a push can wake: `board` is any kitchen board (the tablet's `/kitchen/orders`,
+ * The staff apps a push can wake: `board` is any kitchen board (the tablet's `/kitchen/<code>`,
  * a manager's or an admin's `/orders`), `waiter` is the waiter's phone.
  */
 export const STAFF_PUSH_APPS = ['board', 'waiter'] as const

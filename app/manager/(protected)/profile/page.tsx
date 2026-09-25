@@ -23,7 +23,7 @@ export default async function ProfilePage() {
       createdAt: true,
       lastLogin: true,
       mfaEnabled: true,
-      restaurants: { select: { id: true, name: true, slug: true }, orderBy: { name: 'asc' } },
+      restaurants: { select: { id: true, code: true, name: true, slug: true }, orderBy: { name: 'asc' } },
     },
   })
   if (!user) notFound()

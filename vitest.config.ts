@@ -30,6 +30,7 @@ export default defineConfig({
         'lib/cloudinary.ts', // SDK wrapper over the network: integration, not unit
         'lib/auth-guard.ts', // needs a session and Postgres: the phase-10 integration suite
         'lib/restaurant-loader.ts', // the same guard over the same database: tests/integration/order-board.test.ts
+        'lib/restaurant-page.ts', // a portal page's segment read from the database under the manage guard: tests/integration/restaurant-page.test.ts
         'lib/insights-loader.ts', // grouped SQL over the same database: tests/integration/insights.test.ts
         'lib/insights-queries.ts', // the loader's SQL, split out of it: the same integration suite
         'lib/table-tab-loader.ts', // a table's bill read from the database: tests/integration/order-additions.test.ts

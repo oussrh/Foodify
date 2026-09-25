@@ -6,9 +6,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { EmptyState } from '@/components/shell/page-header'
 import { ListSearch } from '@/components/shell/list-search'
 import { RestaurantRowMenu } from '@/components/shell/row-actions'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 export interface RestaurantListRow {
   id: string
+  code: string
   name: string
   slug: string
   city: string | null
@@ -17,6 +19,34 @@ export interface RestaurantListRow {
   liveCount: number
   categoryCount: number
   managerCount: number
+}
+
+/** A restaurant as both portals' lists read it: its row, its dishes' live flags and its counts. */
+interface RestaurantListSource {
+  id: string
+  code: string
+  name: string
+  slug: string
+  city: string | null
+  logoUrl: string | null
+  dishes: { isActive: boolean }[]
+  _count: { categories: number; users: number }
+}
+
+/** The row the table shows for one restaurant: its dishes counted, and how many of them are live. */
+export function restaurantListRow(r: RestaurantListSource): RestaurantListRow {
+  return {
+    id: r.id,
+    code: r.code,
+    name: r.name,
+    slug: r.slug,
+    city: r.city,
+    logoUrl: r.logoUrl,
+    dishCount: r.dishes.length,
+    liveCount: r.dishes.filter((d) => d.isActive).length,
+    categoryCount: r._count.categories,
+    managerCount: r._count.users,
+  }
 }
 
 interface RestaurantsListProps {
@@ -65,7 +95,7 @@ export default function RestaurantsList({ portal, rows, search, emptyAction }: R
                       )}
                     </span>
                     <div className="min-w-0">
-                      <Link href={`/${portal}/restaurants/${r.id}/menu` as Route} className="block truncate font-medium hover:underline">
+                      <Link href={restaurantPath(portal, r.code, 'menu')} className="block truncate font-medium hover:underline">
                         {r.name}
                       </Link>
                       <span className="block truncate text-xs text-muted-foreground">/{r.slug}</span>
@@ -80,7 +110,7 @@ export default function RestaurantsList({ portal, rows, search, emptyAction }: R
                 <TableCell className="tnum hidden md:table-cell">{r.categoryCount}</TableCell>
                 {portal === 'admin' && <TableCell className="tnum hidden md:table-cell">{r.managerCount}</TableCell>}
                 <TableCell className="text-right">
-                  <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} portal={portal} slug={r.slug} />
+                  <RestaurantRowMenu restaurantId={r.id} code={r.code} restaurantName={r.name} portal={portal} slug={r.slug} />
                 </TableCell>
               </TableRow>
             ))}

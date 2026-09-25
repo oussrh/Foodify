@@ -17,9 +17,13 @@ async function scan(page: Page, path: string) {
   await expectNoSeriousA11yViolations(page, path)
 }
 
-/** The settings page and its other tabs (Integrations: the POS panel as a restaurant without POS sees it). */
+/**
+ * The settings page (its General tab with the restaurant's code and the two device links in Basic
+ * Information) and its other tabs (Integrations: the POS panel as a restaurant without POS sees it).
+ */
 async function scanSettings(page: Page, editPath: string) {
   await scan(page, editPath)
+  await expect(page.getByLabel('Restaurant code', { exact: true }), `${editPath}: no restaurant code`).toBeVisible()
   for (const tab of ['Contact & hours', 'Branding', 'Integrations']) {
     await page.getByRole('tab', { name: tab }).click()
     await expectNoSeriousA11yViolations(page, `${editPath} (${tab})`)
@@ -38,10 +42,10 @@ test.describe('accessibility sweep', () => {
   })
 
   test('the manager portal', async ({ page }, info) => {
-    const { restaurantId, dishId } = await seededIds()
+    const { restaurantCode, dishId } = await seededIds()
     const account = await auditAccount('manager', info.testId)
     await signInAs(page, 'manager', account.email)
-    const r = `/manager/restaurants/${restaurantId}`
+    const r = `/manager/restaurants/${restaurantCode}`
     // No `/manager`: the audit account manages one restaurant, so the portal home redirects into
     // it, and `${r}/info` below is the page it lands on.
     for (const path of ['/manager/restaurants', '/manager/profile', '/manager/change-email', `${r}/dishes`, `${r}/dishes/create`, `${r}/dishes/${dishId}/edit`, `${r}/menu`, `${r}/info`, `${r}/insights`, `${r}/orders`, `${r}/tables`, `${r}/users`]) {
@@ -52,13 +56,13 @@ test.describe('accessibility sweep', () => {
   })
 
   test('the admin portal', async ({ page }, info) => {
-    const { restaurantId, dishId, adminId, managerId } = await seededIds()
+    const { restaurantCode, dishId, adminId, managerId } = await seededIds()
     const account = await auditAccount('admin', info.testId)
     await signInAs(page, 'admin', account.email)
-    const r = `/admin/restaurants/${restaurantId}`
+    const r = `/admin/restaurants/${restaurantCode}`
     const pages = [
       '/admin', '/admin/profile', '/admin/admins', '/admin/admins/create', `/admin/admins/${adminId}/edit`,
-      '/admin/restaurants', '/admin/restaurants/create', `${r}/dishes`, `${r}/dishes/create`, `${r}/dishes/${dishId}/edit`, `${r}/menu`, `${r}/info`, `${r}/insights`, `${r}/users`, `${r}/orders`, `${r}/tables`,
+      '/admin/restaurants', '/admin/restaurants/create', `/admin/orders/${restaurantCode}`, `${r}/dishes`, `${r}/dishes/create`, `${r}/dishes/${dishId}/edit`, `${r}/menu`, `${r}/info`, `${r}/insights`, `${r}/users`, `${r}/orders`, `${r}/tables`,
       '/admin/users', '/admin/users/create', `/admin/users/${managerId}/edit`, `/admin/users/${managerId}/restaurants`,
     ]
     for (const path of pages) await scan(page, path)
@@ -67,15 +71,15 @@ test.describe('accessibility sweep', () => {
   })
 
   test('the devices', async ({ page }, info) => {
-    const { restaurantId } = await seededIds()
+    const { restaurantCode: code } = await seededIds()
     const kitchen = await deviceAccount('KITCHEN', info)
     const waiter = await deviceAccount('WAITER', info)
     try {
       await signInDevice(page, 'kitchen', kitchen.username)
-      for (const path of [`/kitchen/orders/${restaurantId}`, `/kitchen/menu/${restaurantId}`]) await scan(page, path)
+      for (const path of [`/kitchen/${code}`, `/kitchen/${code}/menu`]) await scan(page, path)
       await page.context().clearCookies()
       await signInDevice(page, 'waiter', waiter.username)
-      for (const path of [`/waiter/${restaurantId}`, `/waiter/${restaurantId}/orders`, `/waiter/${restaurantId}/availability`]) await scan(page, path)
+      for (const path of [`/waiter/${code}`, `/waiter/${code}/orders`, `/waiter/${code}/availability`]) await scan(page, path)
     } finally {
       await kitchen.remove()
       await waiter.remove()

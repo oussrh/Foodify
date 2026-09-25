@@ -28,10 +28,13 @@ export type { EditRestaurantValues } from '@/components/restaurant-form/edit-res
  */
 export default function EditRestaurantForm({
   id,
+  code,
   defaultValues,
   integrations,
 }: {
   id: string
+  /** The restaurant's short code: shown, never edited (Basic Information). */
+  code: string
   defaultValues: EditRestaurantValues
   integrations?: React.ReactNode
 }) {
@@ -150,7 +153,7 @@ export default function EditRestaurantForm({
 
       <div role="tabpanel" id="settings-panel-general" aria-labelledby="settings-tab-general" hidden={activeTab !== 'general'} className="space-y-6">
       {/* Basic Information Section */}
-      <EditBasicCard register={register} errors={errors} setValue={setValue} defaultValues={defaultValues} currencySymbol={values.currencySymbol} dietaryOptions={values.dietaryOptions ?? []} orderingEnabled={values.orderingEnabled ?? false} tableCount={values.tableCount ?? 0} />
+      <EditBasicCard register={register} errors={errors} setValue={setValue} defaultValues={defaultValues} currencySymbol={values.currencySymbol} dietaryOptions={values.dietaryOptions ?? []} orderingEnabled={values.orderingEnabled ?? false} tableCount={values.tableCount ?? 0} code={code} />
       </div>
 
       <div role="tabpanel" id="settings-panel-contact" aria-labelledby="settings-tab-contact" hidden={activeTab !== 'contact'} className="space-y-6">

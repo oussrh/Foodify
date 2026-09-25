@@ -111,6 +111,8 @@ counted, never a 500.
   `/restaurant/<slug>`, and open a dish with a model on a phone (Quick Look on iOS reads USDZ,
   Scene Viewer on Android reads GLB).
 - If a restaurant takes orders, place one from its menu and watch it reach the kitchen board
-  (`/kitchen/orders/<code>`).
+  (`/kitchen/<code>`). The addresses tablets installed before, `/kitchen/orders/<code>` and
+  `/kitchen/menu/<code>`, still serve the same screens: rewrites in `next.config.js`, not
+  redirects, so an installed tablet opens inside its own scope and picks up the new manifest.
 - A new service worker waits for the guest to tap Refresh: a tab already open keeps the previous
   version until then, by design.

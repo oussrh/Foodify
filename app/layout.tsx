@@ -1,7 +1,6 @@
 // app/layout.tsx
 import './globals.css'
 import { Instrument_Sans } from 'next/font/google'
-import { ThemeProvider } from '@/components/theme-provider'
 import { SessionProvider } from 'next-auth/react'
 import { Toaster } from 'sonner'
 import type { Metadata, Viewport } from 'next'
@@ -32,10 +31,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning className={sans.variable}>
       <body suppressHydrationWarning className="font-sans">
         <SessionProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
-            <Toaster position="top-center" toastOptions={{ className: 'font-sans' }} />
-          </ThemeProvider>
+          {/* No theme provider here: each route subtree mounts its own scope (components/theme-provider.tsx). */}
+          {children}
+          <Toaster position="top-center" toastOptions={{ className: 'font-sans' }} />
         </SessionProvider>
       </body>
     </html>

@@ -2,7 +2,7 @@
 // The kitchen board as a portal page shows it: the restaurant's money and the way back into the
 // portal, which are the only things the two portals' pages differ by. The pages stay composition
 // roots — guard, read, redirect — and this holds what they both render.
-import type { Route } from 'next'
+import { restaurantPath } from '@/lib/restaurant-paths'
 import type { Money } from '@/lib/menu'
 import OrderBoard from './order-board'
 
@@ -28,7 +28,7 @@ export default function BoardScreen({ restaurant, portal }: BoardScreenProps) {
       restaurantCode={restaurant.code}
       restaurantName={restaurant.name}
       money={money}
-      backHref={portal === 'kitchen' ? undefined : (`/${portal}/restaurants/${restaurant.id}/info` as Route)}
+      backHref={portal === 'kitchen' ? undefined : restaurantPath(portal, restaurant.code)}
       isManager={portal !== 'kitchen'}
     />
   )
