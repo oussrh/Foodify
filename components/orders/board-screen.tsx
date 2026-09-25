@@ -24,6 +24,7 @@ export default function BoardScreen({ restaurant, portal }: BoardScreenProps) {
   }
   return (
     <OrderBoard
+      app={portal === 'kitchen' ? 'kitchen' : 'orders'}
       restaurantId={restaurant.id}
       restaurantCode={restaurant.code}
       restaurantName={restaurant.name}

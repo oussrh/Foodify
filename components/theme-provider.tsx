@@ -1,6 +1,7 @@
 'use client'
 
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
+import { StaffSessionMark } from '@/components/staff/staff-session-mark'
 
 // The app has two theme scopes, each with its own remembered choice, and one provider per route
 // subtree so the two never mount together (the root layout has none: reading the path there would
@@ -16,10 +17,14 @@ import { ThemeProvider as NextThemesProvider } from 'next-themes'
 /** Where a staff device remembers its light / dark / follow-the-device choice. */
 export const STAFF_THEME_KEY = 'foodify-theme'
 
-/** The staff theme scope: light by default, dark or "follow the device" when chosen, remembered per device. */
+/**
+ * The staff theme scope: light by default, dark or "follow the device" when chosen, remembered per
+ * device. It also marks the installed app's session as begun on every staff page (StaffSessionMark).
+ */
 export function StaffTheme({ children }: { children: React.ReactNode }) {
   return (
     <NextThemesProvider attribute="class" defaultTheme="light" enableSystem storageKey={STAFF_THEME_KEY}>
+      <StaffSessionMark />
       {children}
     </NextThemesProvider>
   )

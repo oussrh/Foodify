@@ -10,10 +10,13 @@ import { Bell, BellOff, Download } from 'lucide-react'
 import { useMinuteClock } from '@/components/orders/use-minute-clock'
 import { useOrderBoard } from '@/components/orders/use-order-board'
 import { DeviceSetupSheet } from '@/components/staff/device-setup/device-setup-sheet'
+import { InstallInvitation } from '@/components/staff/install-invitation'
+import { LaunchScreen } from '@/components/staff/launch-screen'
 import { SoundUnlockStrip } from '@/components/staff/sound-unlock-strip'
 import { useAppBadge } from '@/components/staff/use-app-badge'
 import { useAudioUnlock } from '@/components/staff/use-audio-unlock'
 import { useStaffPwa } from '@/components/staff/use-staff-pwa'
+import { UpdateBar } from '@/components/staff/update-bar'
 import { Button } from '@/components/ui/button'
 import { floorTiles, newlyReady, readyOrders } from '@/lib/waiter-floor'
 import { tableNumbers } from '@/components/qr/table-qr'
@@ -118,6 +121,7 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
           />
         </WaiterHeader>
         <SoundUnlockStrip locked={audio.locked} onUnlock={audio.unlock} />
+        <UpdateBar app="waiter" />
 
         {readyTables.length > 0 && (
           // The one line worth putting above everything: what is going cold.
@@ -129,6 +133,7 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
 
       {/* Room for the tab bar: a list that ends under it hides its own last row. */}
       <main className="flex-1 px-3 pb-28 pt-4">
+        <InstallInvitation app="waiter" pwa={pwa} />
         {tables === 0 ? (
           <p className="py-20 text-center text-sm text-muted-foreground">
             No tables are set for this restaurant yet. An administrator sets how many in Settings.
@@ -159,6 +164,7 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
       </main>
 
       <WaiterNav restaurantId={restaurant.code} active="tables" />
+      <LaunchScreen app="waiter" ready={!open.loading} />
     </div>
   )
 }

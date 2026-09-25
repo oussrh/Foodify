@@ -6,6 +6,7 @@ vi.mock('@/lib/prisma', () => ({ default: { $queryRaw: queryRaw } }))
 vi.mock('@/server/drain', () => ({ isDraining: draining }))
 
 const { GET } = await import('./route')
+const { publicEnv } = await import('@/lib/env')
 
 describe('GET /api/health', () => {
   beforeEach(() => {
@@ -13,10 +14,10 @@ describe('GET /api/health', () => {
     draining.mockReset().mockReturnValue(false)
   })
 
-  it('answers 200 with the database reached', async () => {
+  it('answers 200 with the database reached, and the public build it runs', async () => {
     const res = await GET()
     expect(res.status).toBe(200)
-    await expect(res.json()).resolves.toEqual({ data: { status: 'ok', database: 'ok' } })
+    await expect(res.json()).resolves.toEqual({ data: { status: 'ok', database: 'ok', build: publicEnv.buildId } })
     expect(queryRaw).toHaveBeenCalledTimes(1)
   })
 
