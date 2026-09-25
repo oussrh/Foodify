@@ -66,3 +66,27 @@ export function pushAvailability(facts: PushFacts): PushAvailability {
   if (facts.permission !== 'granted') return 'ask'
   return facts.subscribed ? 'on' : 'off'
 }
+
+/**
+ * Whether this page load opens on the launch screen: only when the app runs from the home screen
+ * (a browser tab has its own loading), and only the first load of the session, so moving between
+ * the app's screens or reloading one never shows it again.
+ */
+export function launchScreenDue({ installed, seenThisSession }: { installed: boolean; seenThisSession: boolean }): boolean {
+  return installed && !seenThisSession
+}
+
+/** What the invitation to install offers: the browser's own prompt, Safari's Share steps, or nothing. */
+export type InstallInvitation = 'prompt' | 'share-steps' | null
+
+/**
+ * The install invitation a device gets, once: none when the app is installed or the invitation was
+ * dismissed; the browser's prompt where it offered one (Android, desktop Chrome); the Share → Add to
+ * Home Screen steps on an iPhone or iPad, which has no prompt; and nothing on a browser that has
+ * neither, where the device sheet's install row still says how.
+ */
+export function installInvitation(facts: { installed: boolean; dismissed: boolean; canInstall: boolean; appleMobile: boolean }): InstallInvitation {
+  if (facts.installed || facts.dismissed) return null
+  if (facts.canInstall) return 'prompt'
+  return facts.appleMobile ? 'share-steps' : null
+}
