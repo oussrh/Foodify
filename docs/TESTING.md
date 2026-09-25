@@ -56,6 +56,9 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 | `lib/auth-guard.ts` | Needs a NextAuth session and Postgres; belongs to the integration suite |
 | `lib/restaurant-loader.ts` | The same guard over the same database; held by `tests/integration/order-board.test.ts` |
 | `lib/insights-loader.ts` | Grouped SQL over the same database; held by `tests/integration/insights.test.ts` |
+| `lib/restaurant-page.ts` | A portal page's restaurant segment (code or id) read under the manage guard; held by `tests/integration/restaurant-page.test.ts` |
+| `lib/table-tab-loader.ts` | A table's current bill read from the database; held by `tests/integration/order-additions.test.ts` |
+| `server/order-store.ts` | An order written in one transaction with the bill's row locked; held by the same integration suite |
 | `lib/insights-queries.ts` | The insights loader's SQL, split out of it; held by the same suite and `tests/integration/insights-breakdowns.test.ts` |
 | `server/order-lock.ts`, `server/ticket-apply.ts`, `server/ticket-changes.ts`, `server/order-moves.ts` | A row lock in SQL and the writes made under it: the floor's changes to a ticket, the kitchen's answers and the board's own moves; held by `tests/integration/ticket-changes.test.ts` |
 | `server/bill-merge.ts`, `server/bill-changes.ts` | Closing, merging, un-merging and moving a bill, each a transaction over locked rows; held by `tests/integration/bill-lifecycle.test.ts` |
