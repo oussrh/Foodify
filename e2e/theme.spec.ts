@@ -16,7 +16,7 @@ const html = (page: Page) => page.locator('html')
 async function openThemeRow(page: Page) {
   const sheet = page.getByRole('dialog', { name: 'This device' })
   await expect(async () => {
-    await page.getByRole('button', { name: "This device's settings" }).click()
+    await page.getByRole('button', { name: 'Settings for this device' }).click()
     await expect(sheet).toBeVisible({ timeout: 1_000 })
   }).toPass()
   return { sheet, theme: sheet.getByRole('group', { name: 'Theme' }) }
@@ -55,6 +55,24 @@ for (const portal of ['kitchen', 'waiter'] as const) {
     }
   })
 }
+
+test("the waiter's Orders tab has the same device settings, the theme included", async ({ page }, info) => {
+  // Reported by the owner: the settings lived on the Tables tab only, so a waiter on Orders had no
+  // way to reach the theme.
+  const device = await deviceAccount('WAITER', info)
+  try {
+    await signInDevice(page, 'waiter', device.username)
+    await page.getByRole('link', { name: 'Orders' }).click()
+    await expect(page).toHaveURL(/\/waiter\/[^/]+\/orders$/)
+    const { sheet, theme } = await openThemeRow(page)
+    await theme.getByRole('button', { name: 'Dark' }).click()
+    await expect(html(page)).toHaveClass(/\bdark\b/)
+    await expectNoSeriousA11yViolations(page, 'the waiter Orders device sheet in dark')
+    await sheet.getByRole('button', { name: 'Done' }).click()
+  } finally {
+    await device.remove()
+  }
+})
 
 test('the guest menu still follows a dark device', async ({ page }) => {
   await page.goto('/restaurant/foodify-test-kitchen')
