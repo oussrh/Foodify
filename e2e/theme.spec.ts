@@ -12,6 +12,9 @@ test.use({ colorScheme: 'dark' })
 
 const html = (page: Page) => page.locator('html')
 
+/** Waits until no CSS transition is running: axe measures the colours on screen, and mid-way from light to dark they fail contrast. */
+const settled = (page: Page) => page.waitForFunction(() => document.getAnimations().length === 0)
+
 /** Opens "This device" once the page has hydrated (a click before then opens nothing) and returns its theme group. */
 async function openThemeRow(page: Page) {
   const sheet = page.getByRole('dialog', { name: 'This device' })
@@ -43,8 +46,10 @@ for (const portal of ['kitchen', 'waiter'] as const) {
       await expect(sheet.getByText('Following the device: dark right now')).toBeVisible()
       await theme.getByRole('button', { name: 'Dark' }).click()
       await expect(theme.getByRole('button', { name: 'Dark' })).toHaveAttribute('aria-pressed', 'true')
+      await settled(page)
       await expectNoSeriousA11yViolations(page, `the ${portal} device sheet in dark`)
       await sheet.getByRole('button', { name: 'Done' }).click()
+      await settled(page)
       await expectNoSeriousA11yViolations(page, `the ${portal} app in dark`)
 
       await page.reload()
@@ -67,6 +72,7 @@ test("the waiter's Orders tab has the same device settings, the theme included",
     const { sheet, theme } = await openThemeRow(page)
     await theme.getByRole('button', { name: 'Dark' }).click()
     await expect(html(page)).toHaveClass(/\bdark\b/)
+    await settled(page)
     await expectNoSeriousA11yViolations(page, 'the waiter Orders device sheet in dark')
     await sheet.getByRole('button', { name: 'Done' }).click()
   } finally {
