@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-24"
+last_verified: "2026-09-25"
 ---
 
 # Lessons
