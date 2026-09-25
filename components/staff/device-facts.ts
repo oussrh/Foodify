@@ -7,9 +7,14 @@ import { isAppleMobile } from '@/lib/staff-device'
 /**
  * Opened from the home screen rather than a browser tab: the display mode on Android and desktop,
  * and Safari's own `navigator.standalone` on an iPhone or iPad, which older iOS reports instead.
+ * The manifest asks for full screen first, so an installed app on Android reports `fullscreen`
+ * rather than `standalone`; a browser tab put full screen by the device sheet's button reports it
+ * too, but then an element holds the full screen, which an installed app's window does not.
  */
 export function readStandalone(): boolean {
-  return window.matchMedia('(display-mode: standalone)').matches || (navigator as Navigator & { standalone?: boolean }).standalone === true
+  if (window.matchMedia('(display-mode: standalone)').matches) return true
+  if (window.matchMedia('(display-mode: fullscreen)').matches && !document.fullscreenElement) return true
+  return (navigator as Navigator & { standalone?: boolean }).standalone === true
 }
 
 /** An iPhone or iPad (`isAppleMobile`), read from this browser's navigator. */

@@ -351,4 +351,21 @@
   .staff-safe-top {
     padding-top: env(safe-area-inset-top, 0px);
   }
+  /* The installed app's launch screen (components/staff/launch-screen.tsx): hidden in a browser
+     tab from the first paint, shown in an installed app's display mode before the page has
+     hydrated, and after that kept only when the browser says so (`data-due`). Its content stays
+     clear of the notch and the home indicator. */
+  .staff-launch {
+    display: none;
+    padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
+      env(safe-area-inset-left, 0px);
+  }
+  .staff-launch[data-due] {
+    display: flex;
+  }
+  @media (display-mode: standalone), (display-mode: fullscreen) {
+    .staff-launch {
+      display: flex;
+    }
+  }
 }

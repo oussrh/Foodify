@@ -47,9 +47,50 @@ describe('the staff app manifest', () => {
         expect(res.status).toBe(real.status)
         expect(res.headers.get('Cache-Control')).toBe(real.headers.get('Cache-Control'))
         const manifest = await res.json()
-        expect(manifest).toMatchObject({ name: 'Orders', short_name: 'Orders', start_url: `/kitchen/${ref}` })
+        expect(manifest).toMatchObject({ name: 'Foodizar Kitchen', short_name: 'Kitchen', start_url: `/kitchen/${ref}` })
         expect(JSON.stringify(manifest)).not.toContain(mine.name)
       }
       expect((await get('id=ZZZZZZ&portal=nope')).status).toBe(400)
+    }))
+
+  it('names each app Foodizar, with the restaurant, on Basil', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      const cases = [
+        { portal: 'waiter', name: `Foodizar Waiter · ${mine.name}`, short: 'Waiter', icon: 'waiter' },
+        { portal: 'kitchen', name: `Foodizar Kitchen · ${mine.name}`, short: 'Kitchen', icon: 'kitchen' },
+        { portal: 'manager', name: `Foodizar Orders · ${mine.name}`, short: 'Orders', icon: 'orders' },
+        { portal: 'admin', name: `Foodizar Orders · ${mine.name}`, short: 'Orders', icon: 'orders' },
+      ]
+      for (const { portal, name, short, icon } of cases) {
+        const manifest = await (await get(`id=${mine.code}&portal=${portal}`)).json()
+        expect(manifest).toMatchObject({ name, short_name: short, background_color: '#1F6B49', theme_color: '#1F6B49' })
+        expect(manifest.description).toContain(mine.name)
+        expect(manifest.icons).toEqual([
+          { src: `/icons/staff/${icon}-192.png`, sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: `/icons/staff/${icon}-512.png`, sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: `/icons/staff/${icon}-maskable-512.png`, sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+        ])
+        // Opening the app still focuses the one already open.
+        expect(manifest.launch_handler).toEqual({ client_mode: ['navigate-existing', 'auto'] })
+      }
+    }))
+
+  it('offers the screens a long press on the icon goes to, each inside the app', () =>
+    withRollback(async (tx) => {
+      const mine = await restaurant(tx)
+      const kitchen = await (await get(`id=${mine.code}&portal=kitchen`)).json()
+      expect(kitchen.shortcuts.map((s: { name: string; url: string }) => [s.name, s.url])).toEqual([['Sold out', `/kitchen/${mine.code}/menu`]])
+      const waiter = await (await get(`id=${mine.code}&portal=waiter`)).json()
+      expect(waiter.shortcuts.map((s: { name: string; url: string }) => [s.name, s.url])).toEqual([
+        ['Tables', `/waiter/${mine.code}`],
+        ['Orders', `/waiter/${mine.code}/orders`],
+      ])
+      for (const manifest of [kitchen, waiter]) {
+        for (const { url } of manifest.shortcuts as { url: string }[]) expect(url.startsWith(manifest.scope)).toBe(true)
+      }
+      const board = await (await get(`id=${mine.code}&portal=manager`)).json()
+      expect(board.shortcuts).toEqual([])
+      expect(board.id).toBe(`/manager/orders/${mine.code}`)
     }))
 })

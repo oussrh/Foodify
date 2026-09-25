@@ -8,7 +8,7 @@ import WaiterApp from '@/components/waiter/waiter-app'
 
 /** A waiter installs this one: the manifest names the restaurant and opens straight onto its tables. */
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
-  return staffAppMetadata((await params).id, 'waiter', 'Service')
+  return staffAppMetadata((await params).id, 'waiter')
 }
 
 /**
