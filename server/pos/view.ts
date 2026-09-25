@@ -1,8 +1,7 @@
 // server/pos/view.ts
-// The Integrations tab's reading of one restaurant's POS (lib/pos/view.ts): whether it may have
-// one, whether this server can seal credentials, the providers, and the connection with its health:
-// the outbox counted by state, the last sync and error, the menu changes waiting for review, how
-// many dishes are matched. It reads the database only, never the POS, so a slow till cannot hold
+// The Integrations tab's reading of one restaurant's POS (lib/pos/view.ts): whether this server
+// can seal credentials, the providers, and the connection with its health: the outbox counted by
+// state, the last sync and error, the menu changes waiting for review, how many dishes are matched. It reads the database only, never the POS, so a slow till cannot hold
 // the page (the location step asks for the POS's locations itself). No credentials, no key: the
 // page hands this to the browser as it is. The caller has guarded the restaurant.
 import { serverEnv } from '@/lib/env'
@@ -51,12 +50,10 @@ async function connectionView(restaurantId: string): Promise<PosConnectionView |
 
 /** Everything the Integrations tab shows for `restaurantId`. */
 export async function loadPosView(restaurantId: string): Promise<PosView> {
-  const restaurant = await prisma.restaurant.findUniqueOrThrow({ where: { id: restaurantId }, select: { posEnabled: true } })
   return {
     restaurantId,
-    enabled: restaurant.posEnabled,
     configured: serverEnv.posEncryption !== null,
     providers: providerSummaries(),
-    connection: restaurant.posEnabled ? await connectionView(restaurantId) : null,
+    connection: await connectionView(restaurantId),
   }
 }

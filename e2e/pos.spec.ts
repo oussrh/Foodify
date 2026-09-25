@@ -3,8 +3,8 @@ import { expectNoSeriousA11yViolations } from './axe'
 import { ownRestaurant } from './manager'
 import { auditAccount, db, signInAs } from './session'
 
-// Settings → Integrations end to end, on a restaurant of the test's own: a super admin switches
-// POS on (the owner cannot), the owner connects the Test POS, chooses a location, matches the
+// Settings → Integrations end to end, on a restaurant of the test's own, as it was created: the
+// owner connects the Test POS with nothing switched on first, chooses a location, matches the
 // dishes and activates it, and a guest's order then shows on the health panel as sent. Each screen
 // of the panel is scanned with axe on the way. The server runs with a sealing key of the suite's
 // own (playwright.config.ts).
@@ -26,7 +26,7 @@ async function openIntegrations(page: Page, portal: 'admin' | 'manager', restaur
 }
 
 test.describe('connecting a POS', () => {
-  test('a super admin switches it on, the owner connects the Test POS, and an order reaches it', async ({ page }, info) => {
+  test('the owner connects the Test POS on their own, and an order reaches it', async ({ page }, info) => {
     test.setTimeout(180_000)
     const restaurant = await ownRestaurant(info)
     await db().restaurant.update({ where: { id: restaurant.id }, data: { orderingEnabled: true } })
@@ -34,20 +34,10 @@ test.describe('connecting a POS', () => {
       data: { restaurantId: restaurant.id, subcategoryId: restaurant.subcategoryId, nameEn: 'Harira', nameFr: 'Harira', descriptionEn: '', descriptionFr: '', price: '4.50', imageUrl: '/images/chicken.svg', usdzUrl: '', glbUrl: '', sortOrder: 0 },
       select: { id: true },
     })
-    const admin = await auditAccount('admin', `${info.testId}-a`, { mfa: false })
     const owner = await auditAccount('manager', `${info.testId}-m`, { mfa: false, restaurantId: restaurant.id })
     try {
-      await signInAs(page, 'admin', admin.email, { mfa: false })
-      await openIntegrations(page, 'admin', restaurant.id)
-      await expect(page.getByText('POS integration isn’t included for this restaurant. Contact support.')).toBeVisible()
-      await scanPanel(page, 'integrations: admin, POS off')
-      await page.getByLabel('Include POS integration').check()
-      await expect.poll(async () => (await db().restaurant.findUniqueOrThrow({ where: { id: restaurant.id } })).posEnabled).toBe(true)
-
-      await page.context().clearCookies()
       await signInAs(page, 'manager', owner.email, { mfa: false })
       await openIntegrations(page, 'manager', restaurant.id)
-      await expect(page.getByLabel('Include POS integration')).toHaveCount(0)
       await expect(page.getByText('Coming soon', { exact: true })).toHaveCount(3)
       await scanPanel(page, 'integrations: providers')
 
@@ -84,7 +74,6 @@ test.describe('connecting a POS', () => {
       expect(row).toMatchObject({ status: 'SENT', externalId: expect.stringMatching(/^tpos-ticket-/), lastAnswer: expect.stringMatching(/^Received ticket #\d+ for table 3/) })
     } finally {
       await owner.remove()
-      await admin.remove()
       await restaurant.remove()
     }
   })

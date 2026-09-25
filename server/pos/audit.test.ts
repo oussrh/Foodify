@@ -7,8 +7,8 @@ const { audited, auditPos } = await import('./audit')
 
 describe('the POS audit line', () => {
   it('names the actor by id and role, and marks a super admin as acting on the owner’s behalf', () => {
-    auditPos({ id: 'u-1', role: 'SUPER_ADMIN' }, 'r-1', 'enable', 'ok')
-    expect(info).toHaveBeenLastCalledWith({ actorId: 'u-1', role: 'SUPER_ADMIN', onBehalf: true, restaurantId: 'r-1', action: 'enable', outcome: 'ok' }, 'pos: enable ok')
+    auditPos({ id: 'u-1', role: 'SUPER_ADMIN' }, 'r-1', 'activate', 'ok')
+    expect(info).toHaveBeenLastCalledWith({ actorId: 'u-1', role: 'SUPER_ADMIN', onBehalf: true, restaurantId: 'r-1', action: 'activate', outcome: 'ok' }, 'pos: activate ok')
     auditPos({ id: 'u-2', role: 'RESTAURANT_ADMIN' }, 'r-1', 'pause', 'ok')
     expect(info).toHaveBeenLastCalledWith(expect.objectContaining({ onBehalf: false }), 'pos: pause ok')
   })

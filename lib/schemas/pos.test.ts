@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { cronAuthorization, posConnectInput, posEnabledInput, posResumeInput, posLocationInput, posMappingInput, posWebhookTarget, testPosEvent } from './pos'
+import { cronAuthorization, posConnectInput, posResumeInput, posLocationInput, posMappingInput, posWebhookTarget, testPosEvent } from './pos'
 
 const dish = '6f1c2b1e-8f7a-4c3e-9a1b-2d3e4f5a6b7c'
 const other = '7a2d3c4e-5f6a-4b7c-8d9e-0f1a2b3c4d5e'
@@ -20,11 +20,6 @@ describe('the POS schemas', () => {
     expect(posMappingInput.parse({ items: [{ dishId: dish, externalItemId: 'i-1' }, { dishId: other, externalItemId: null }] }).items).toHaveLength(2)
     expect(posMappingInput.safeParse({ items: [{ dishId: dish, externalItemId: 'i-1' }, { dishId: dish, externalItemId: null }] }).success).toBe(false)
     expect(posMappingInput.safeParse({ items: [{ dishId: 'd1', externalItemId: 'i-1' }] }).success).toBe(false)
-  })
-
-  it('takes the super admin switch as a boolean only', () => {
-    expect(posEnabledInput.parse({ enabled: true })).toEqual({ enabled: true })
-    expect(posEnabledInput.safeParse({ enabled: 'yes' }).success).toBe(false)
   })
 
   it('resumes by sending or discarding what waited, nothing else', () => {

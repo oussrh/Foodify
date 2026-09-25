@@ -52,8 +52,8 @@ function answer(outcome: WebhookOutcome): Response {
 /**
  * POST, a POS only: the path's provider and `?connection=` (uuid) name the connection, else 400
  * invalid_query; a body over 64 KB is 413 invalid_payload. Before the event is verified, an unknown
- * connection, one of another provider, a restaurant whose POS is off or credentials that cannot be
- * opened all answer the same 404 "Unknown webhook"; a signature that does not verify (or a
+ * connection, one of another provider or credentials that cannot be opened all
+ * answer the same 404 "Unknown webhook"; a signature that does not verify (or a
  * timestamp older than five minutes) is 401. A verified event answers 200 `{ data: { duplicate,
  * result?, kind? } }` (applied, recorded for the owner, ignored, or already received), 403
  * forbidden for another location's event, 409 unavailable while the connection is not active (the

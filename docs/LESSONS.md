@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-24"
+last_verified: "2026-09-25"
 ---
 
 # Lessons
@@ -15,6 +15,18 @@ last_verified: "2026-09-24"
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
+
+## 2026-09-25 · On an owner-managed platform, a restaurant feature is the owner's to switch on
+
+The POS groundwork shipped behind a super-admin switch, off by default, so every manager opened
+Settings → Integrations and read "Contact support". The owner's model is the opposite: a SaaS where
+each restaurant's owner manages everything about their restaurant, and the platform's admin portal
+has the same restaurant screens (to build a client's menu, or to help them) plus a platform layer
+of its own. A switch set by hand was a guess at a subscription model that does not exist yet.
+
+Generalise it as: a restaurant feature is guarded by restaurant access (`requireRestaurantAccess`:
+the owner, or the platform acting for them), never by a flag only the platform can set. When plans
+arrive, their limits come from the plan, in one place, not from per-feature switches.
 
 ## 2026-09-25 · Queue an outside call in the transaction that caused it, send it after
 

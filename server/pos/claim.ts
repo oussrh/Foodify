@@ -1,12 +1,12 @@
 // server/pos/claim.ts
 // Taking due outbox rows for one worker, in one statement. A row is due when it is pending and its
-// time has come, its connection is ACTIVE on a restaurant that has POS on, and no earlier row of
-// its bill or of its ticket is still pending or has failed. The ticket half matters after a merge:
-// a change keeps its ticket's row in order even once the ticket belongs to another bill. Due rows
-// are locked with `FOR UPDATE SKIP LOCKED`, so a row another worker is claiming is skipped rather
-// than waited for, and leased: their next attempt moves past the lease, their attempts count up
-// and they carry this claim's token, so once the claim commits no other worker sees them as due
-// until the lease runs out. Delivery is at least once: a worker that dies, or whose lease runs out
+// time has come, its connection is ACTIVE, and no earlier row of its bill or of its ticket is
+// still pending or has failed. The ticket half matters after a merge: a change keeps its ticket's
+// row in order even once the ticket belongs to another bill. Due rows are locked with
+// `FOR UPDATE SKIP LOCKED`, so a row another worker is claiming is skipped rather than waited for,
+// and leased: their next attempt moves past the lease, their attempts count up and they carry
+// this claim's token, so once the claim commits no other worker sees them as due until the lease
+// runs out. Delivery is at least once: a worker that dies, or whose lease runs out
 // mid-send, leaves the row to be sent again, and the adapter gets the row id as its idempotency key
 // so the POS can recognise the second send. Only the claim still holding a row records its answer.
 import { randomUUID } from 'node:crypto'
@@ -35,7 +35,6 @@ export async function claimDue(db: Sql, scope: ClaimScope): Promise<Claim> {
     WHERE "id" IN (
       SELECT o."id" FROM "PosOutbox" o
       JOIN "PosConnection" c ON c."id" = o."connectionId" AND c."status" = 'ACTIVE'
-      JOIN "Restaurant" r ON r."id" = o."restaurantId" AND r."posEnabled"
       WHERE o."status" = 'PENDING' AND o."nextAttemptAt" <= ${scope.now} ${restaurant}
         AND NOT EXISTS (
           SELECT 1 FROM "PosOutbox" e

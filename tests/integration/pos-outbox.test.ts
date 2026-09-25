@@ -22,15 +22,11 @@ describe('a restaurant without an active POS', () => {
       expect(await tx.posOutbox.count()).toBe(0)
     }))
 
-  it('queues nothing before the connection is activated, nor while the super admin has POS off', () =>
+  it('queues nothing before the connection is activated', () =>
     withRollback(async (tx) => {
       const matching = await posFloor(tx)
       await connection(tx, matching.place.id, { status: 'MAPPING' })
       await place(guestOrder(matching.place.id, matching.harira.id))
-      const off = await posFloor(tx)
-      await connection(tx, off.place.id)
-      await tx.restaurant.update({ where: { id: off.place.id }, data: { posEnabled: false } })
-      await place(guestOrder(off.place.id, off.harira.id))
       expect(await tx.posOutbox.count()).toBe(0)
     }))
 })

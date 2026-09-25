@@ -75,8 +75,7 @@ model Restaurant {
   // (its 04:00) and how Insights cuts its days and hours. UTC until a manager sets it, which is
   // what every figure used before there was a setting.
   timeZone          String             @default("UTC")
-  // Whether this restaurant may connect a POS (prisma/pos.prisma): the super admin's switch, standing
-  // in for a plan until there are plans. Off, every POS action is refused and nothing is queued.
+  // Deprecated, unused: POS is available to every restaurant; to be dropped with the subscription-plan work.
   posEnabled        Boolean            @default(false)
   // Design/Branding
   coverImageUrl     String?

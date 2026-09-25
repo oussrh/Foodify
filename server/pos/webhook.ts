@@ -95,10 +95,10 @@ async function remember(connectionId: string, event: PosInboundEvent, body: stri
   }
 }
 
-/** The connection a webhook names, with the restaurant's clock; null when there is none for this provider or POS is off there. */
+/** The connection a webhook names, with the restaurant's clock; null when there is none for this provider. */
 async function connectionFor(input: WebhookInput): Promise<Connection | null> {
   const row = await prisma.posConnection.findFirst({
-    where: { id: input.connectionId, provider: input.provider, restaurant: { posEnabled: true } },
+    where: { id: input.connectionId, provider: input.provider },
     select: { ...CONNECTION_SELECT, restaurant: { select: { timeZone: true } } },
   })
   return row
@@ -106,7 +106,7 @@ async function connectionFor(input: WebhookInput): Promise<Connection | null> {
 
 /**
  * Verifies, deduplicates and applies one webhook. Nothing is read from the body before its
- * adapter has verified it, and before that every failure (no such connection, POS off, credentials
+ * adapter has verified it, and before that every failure (no such connection, credentials
  * that cannot be opened, an adapter that cannot verify) is the same `unknown`; a bad signature is
  * `unauthorized`, with no reason. The connection's state is told only to a verified sender.
  */

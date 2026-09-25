@@ -218,7 +218,7 @@ describe('two workers', () => {
     // Committed rows, on two real connections: a rolled-back test transaction cannot show a lock
     // held by another session. Removed at the end with the restaurant (the delete cascades).
     const code = newRestaurantCode()
-    const restaurant = await db.restaurant.create({ data: { name: 'POS lock test', slug: `pos-lock-${code.toLowerCase()}`, code, defaultLocale: 'en', posEnabled: true }, select: { id: true } })
+    const restaurant = await db.restaurant.create({ data: { name: 'POS lock test', slug: `pos-lock-${code.toLowerCase()}`, code, defaultLocale: 'en' }, select: { id: true } })
     try {
       const sealed = sealCredentials({ apiKey: 'test_demo_key' }, restaurant.id)
       const made = await db.posConnection.create({ data: { restaurantId: restaurant.id, provider: 'test-pos', status: 'ACTIVE', externalLocationId: LOCATION, credentials: sealed.credentials, credentialsKeyId: sealed.keyId }, select: { id: true } })

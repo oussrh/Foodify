@@ -39,7 +39,7 @@ describe('the outbox triggers', () => {
     findFirst.mockResolvedValueOnce(null)
     expect(sweepSoon('r-none', 1_000)).toBe(true)
     await Promise.all(tasks)
-    expect(findFirst).toHaveBeenCalledWith({ where: { restaurantId: 'r-none', status: 'ACTIVE', restaurant: { posEnabled: true } }, select: { id: true } })
+    expect(findFirst).toHaveBeenCalledWith({ where: { restaurantId: 'r-none', status: 'ACTIVE' }, select: { id: true } })
     expect(deliverDue).not.toHaveBeenCalled()
   })
 

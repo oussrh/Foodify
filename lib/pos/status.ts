@@ -30,8 +30,5 @@ export const POS_STATUS_LABEL: Record<PosStatus, string> = {
   ERROR: 'Needs attention',
 }
 
-/** What the Integrations tab says when the super admin has not switched POS on for a restaurant. */
-export const POS_NOT_INCLUDED = 'POS integration isn’t included for this restaurant. Contact support.'
-
 /** What connecting says when this server has no key to seal credentials with. */
 export const POS_NOT_CONFIGURED = 'POS integration is not configured on this server'

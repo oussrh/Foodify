@@ -4,8 +4,8 @@
 // logs that carry the events across: the outbox (what we owe the POS, written in the same
 // transaction as the ticket, the change or the close it reports, and sent at least once) and the
 // inbox (what the POS told us, kept by its event id across a reconnect, so a webhook delivered
-// twice is applied once). Only the super admin decides whether a restaurant may have one
-// (`Restaurant.posEnabled`).
+// twice is applied once). Every restaurant may have one: its owner connects it from Settings →
+// Integrations.
 
 enum PosStatus {
   NOT_CONNECTED
@@ -34,8 +34,8 @@ enum PosOutboxStatus {
   FAILED
   // The POS said no, and asking again would get the same answer.
   REFUSED
-  // Never sent, on purpose: the owner discarded what waited during a pause, the super admin switched
-  // POS off, or the POS account changed. Kept for the record.
+  // Never sent, on purpose: the owner discarded what waited during a pause, or the POS account
+  // changed. Kept for the record.
   DISCARDED
 }
 

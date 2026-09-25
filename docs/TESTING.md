@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["testing", "coverage", "vitest"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 source_truth: ["vitest.config.ts", "vitest.integration.config.ts", "package.json"]
-last_verified: "2026-09-24"
+last_verified: "2026-09-25"
 ---
 
 # Testing
@@ -88,7 +88,7 @@ that fails on any serious or critical violation (TEST.3, A11Y.1):
 | `manager-settings.spec.ts` | General settings saved and held after a reload; a waiter added on the People tab signs in, then is removed |
 | `account.spec.ts` | The second factor turned off takes effect at the next sign-in; a changed password works and the old one is refused |
 | `sign-in.spec.ts`, `hours.spec.ts` | The sign-in pages and the opening-hours editor |
-| `pos.spec.ts` | A super admin switches POS on; the owner connects the Test POS, chooses a location, matches the dishes and activates; a guest's order shows as sent on the health panel; axe on each screen of Settings → Integrations |
+| `pos.spec.ts` | The owner connects the Test POS with nothing switched on first, chooses a location, matches the dishes and activates; a guest's order shows as sent on the health panel; axe on each screen of Settings → Integrations |
 | `audit.spec.ts` | Every page of the guest, manager, admin and device screens at rest, under axe |
 
 Signed-in journeys sign in for real: `e2e/session.ts` makes an account for the test and writes
