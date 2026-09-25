@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["deployment", "vercel", "prisma", "environment"]
 related: ["./README.md", "./TESTING.md"]
 source_truth: ["package.json", "lib/env.ts", "prisma/schema.prisma", "prisma/pos.prisma", "next.config.js"]
-last_verified: "2026-09-24"
+last_verified: "2026-09-25"
 ---
 
 # Deployment
@@ -49,7 +49,10 @@ push is logged as not sent.
 
 `20260925090000_pos_groundwork` (the POS tables of `prisma/pos.prisma`, `Restaurant.posEnabled`,
 `Order.externalId`, `Order.posCheckId`, `Order.posPaidAt`, `OrderChange.source`) is additive: every
-restaurant starts with POS off. But the code reads the new tables on every change to an order, POS
+restaurant starts with no connection, and nothing is sent until its owner connects one.
+`Restaurant.posEnabled` is deprecated and read by nothing (POS is every restaurant's, no switch);
+it is dropped with the subscription-plan work, in a migration deployed after the code that stops
+naming it. But the code reads the new tables on every change to an order, POS
 or not, so deploy it before the build that ships Settings → Integrations: without it, placing an
 order (guest or waiter), every board move (accept, ready, served, cancel), removing a dish,
 answering a request, voiding, and closing a bill all fail.

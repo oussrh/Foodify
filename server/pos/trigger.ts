@@ -23,7 +23,7 @@ export function kickDelivery(restaurantId: string): void {
 
 /** Whether `restaurantId` has a connection that sends: the one read a poll costs a restaurant without a POS. */
 async function sends(restaurantId: string): Promise<boolean> {
-  const active = await prisma.posConnection.findFirst({ where: { restaurantId, status: 'ACTIVE', restaurant: { posEnabled: true } }, select: { id: true } })
+  const active = await prisma.posConnection.findFirst({ where: { restaurantId, status: 'ACTIVE' }, select: { id: true } })
   return active !== null
 }
 

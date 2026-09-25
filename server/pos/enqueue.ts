@@ -16,12 +16,12 @@ export type PosEvent = { restaurantId: string; orderId: string; billId: string; 
 const QUEUEING: PosStatus[] = ['ACTIVE', 'PAUSED', 'ERROR']
 
 /**
- * Queues `event` inside `tx` when the restaurant's POS is on and its connection has been activated,
+ * Queues `event` inside `tx` when the restaurant's POS connection has been activated,
  * and asks for a sweep after the response when it is active. Answers whether it queued anything.
  */
 export async function enqueuePos(tx: Prisma.TransactionClient, event: PosEvent): Promise<boolean> {
   const connection = await tx.posConnection.findFirst({
-    where: { restaurantId: event.restaurantId, status: { in: QUEUEING }, restaurant: { posEnabled: true } },
+    where: { restaurantId: event.restaurantId, status: { in: QUEUEING } },
     select: { id: true, status: true },
   })
   if (!connection) return false

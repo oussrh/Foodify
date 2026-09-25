@@ -119,7 +119,7 @@ describe('the POS webhook', () => {
       expect(await tx.posInbox.count()).toBe(0)
     }))
 
-  it('answers the same 404 for anything it cannot verify: an unknown connection, another provider, POS off, unreadable credentials', () =>
+  it('answers the same 404 for anything it cannot verify: an unknown connection, another provider, unreadable credentials', () =>
     withRollback(async (tx) => {
       const { place: restaurant } = await posFloor(tx)
       const made = await connection(tx, restaurant.id)
@@ -128,8 +128,6 @@ describe('the POS webhook', () => {
       expect(await (await send('6f1c2b1e-8f7a-4c3e-9a1b-2d3e4f5a6b7c', event)).json()).toEqual(unknown)
       expect(await (await send(made.id, event, { provider: 'square' })).json()).toEqual(unknown)
       await tx.posConnection.update({ where: { id: made.id }, data: { credentials: 'v1.broken.value.x' } })
-      expect(await (await send(made.id, event)).json()).toEqual(unknown)
-      await tx.restaurant.update({ where: { id: restaurant.id }, data: { posEnabled: false } })
       expect(await (await send(made.id, event)).json()).toEqual(unknown)
       expect((await send('not-a-uuid', event)).status).toBe(400)
       expect(await tx.posInbox.count()).toBe(0)

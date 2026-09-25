@@ -36,8 +36,6 @@ export interface PosConnectionView {
 /** Everything the Integrations tab needs for one restaurant. */
 export interface PosView {
   restaurantId: string
-  /** The super admin's switch (`Restaurant.posEnabled`). */
-  enabled: boolean
   /** Whether this server has a key to seal credentials with. */
   configured: boolean
   providers: ProviderSummary[]

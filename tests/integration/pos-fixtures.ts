@@ -1,6 +1,6 @@
 // tests/integration/pos-fixtures.ts
 // A restaurant's point of sale for the POS suites: the server's sealing key (a test key, set
-// before anything reads the environment), a restaurant with POS switched on, a Test POS
+// before anything reads the environment), a restaurant taking orders, a Test POS
 // connection sealed the way connectPos seals one, and the outbox read back. Importing this module
 // sets the key, so every POS suite imports it first.
 import { afterAll, vi } from 'vitest'
@@ -23,10 +23,9 @@ afterAll(() => vi.unstubAllEnvs())
 /** The Test POS location every fixture connection sends to. */
 export const LOCATION = 'tpos-dining-room'
 
-/** A restaurant taking orders with POS switched on (`enabled` false leaves it off), its staff, and a dish. */
-export async function posFloor(tx: Tx, { enabled = true }: { enabled?: boolean } = {}) {
+/** A restaurant taking orders, its staff, and a dish: nothing to switch on, POS is every restaurant's. */
+export async function posFloor(tx: Tx) {
   const staff = await floor(tx)
-  await tx.restaurant.update({ where: { id: staff.place.id }, data: { posEnabled: enabled } })
   const harira = await dish(tx, staff.place.id, { nameEn: 'Harira' })
   return { ...staff, harira }
 }

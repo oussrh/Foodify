@@ -13,5 +13,5 @@ export default async function EditRestaurantPage({ params }: { params: Promise<{
   const restaurant = await prisma.restaurant.findFirst({ where: { id, users: { some: { email: session.user.email } } } })
   if (!restaurant) redirect('/manager/restaurants')
 
-  return <SettingsScreen restaurant={restaurant} pos={await loadPosView(restaurant.id)} canEnablePos={false} />
+  return <SettingsScreen restaurant={restaurant} pos={await loadPosView(restaurant.id)} />
 }

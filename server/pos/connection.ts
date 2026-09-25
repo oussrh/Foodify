@@ -47,10 +47,10 @@ export function readConnection(restaurantId: string) {
 }
 
 /**
- * Marks every row still waiting to be sent for `where` (a connection, or a restaurant) as
- * DISCARDED, and answers how many: what the POS will now never be sent, kept for the record.
+ * Marks every row of `where.connectionId` still waiting to be sent as DISCARDED, and answers how
+ * many: what the POS will now never be sent, kept for the record.
  */
-export async function discardWaiting(tx: Prisma.TransactionClient, where: { connectionId: string } | { restaurantId: string }): Promise<number> {
+export async function discardWaiting(tx: Prisma.TransactionClient, where: { connectionId: string }): Promise<number> {
   const discarded = await tx.posOutbox.updateMany({ where: { ...where, status: { in: ['PENDING', 'FAILED'] } }, data: { status: 'DISCARDED', claimToken: null } })
   return discarded.count
 }

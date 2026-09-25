@@ -1,49 +1,35 @@
 import { describe, expect, it } from 'vitest'
 import { TEST_POS_KEY, connection, outbox, place, posFloor } from './pos-fixtures'
-import { setPosEnabled } from '@/app/actions/pos-admin-actions'
 import { choosePosLocation, connectPos, listPosLocations, testPos } from '@/app/actions/pos-connect-actions'
 import { disconnectPos, pausePos, resumePos, retryPosNow } from '@/app/actions/pos-control-actions'
 import { activatePos, readPosMenu, savePosMapping } from '@/app/actions/pos-mapping-actions'
-import { AuthError } from '@/lib/auth-guard'
 import { loadPosView } from '@/server/pos/view'
 import { withRollback } from './db'
 import { manager, restaurant, superAdmin } from './fixtures'
 import { signInAs } from './session'
 
-// Connecting a restaurant's POS from Settings → Integrations, on the real database: only the super
-// admin switches POS on for a restaurant; its owner then signs in to the Test POS, tests it,
-// chooses a location, matches the dishes and activates it; another restaurant's owner is refused
-// at every step. The key under test is the suite's own (pos-fixtures.ts).
+// Connecting a restaurant's POS from Settings → Integrations, on the real database: its owner
+// signs in to the Test POS, tests it, chooses a location, matches the dishes and activates it,
+// with nothing switched on for the restaurant first; a super admin may take every one of those
+// steps for the owner; another restaurant's owner is refused at every step. The key under test is
+// the suite's own (pos-fixtures.ts).
 
-describe('the super admin’s switch', () => {
-  it('is the super admin’s: POS goes on and off for one restaurant', () =>
+describe('a restaurant as it was created', () => {
+  it('lets its owner connect a POS, with nothing switched on first', () =>
     withRollback(async (tx) => {
-      const { place } = await posFloor(tx, { enabled: false })
-      signInAs(await superAdmin(tx))
-
-      expect(await setPosEnabled(place.id, { enabled: true })).toEqual({ id: place.id, posEnabled: true })
-      expect((await tx.restaurant.findUniqueOrThrow({ where: { id: place.id } })).posEnabled).toBe(true)
-      expect(await setPosEnabled(place.id, { enabled: false })).toEqual({ id: place.id, posEnabled: false })
+      const { place, manager: owner } = await posFloor(tx)
+      signInAs(owner)
+      expect(await loadPosView(place.id)).toMatchObject({ configured: true, connection: null })
+      expect(await connectPos(place.id, { provider: 'test-pos', apiKey: 'test_demo_key' })).toMatchObject({ ok: true })
+      expect(await tx.posConnection.findUniqueOrThrow({ where: { restaurantId: place.id } })).toMatchObject({ status: 'CONNECTING' })
     }))
 
-  it('is refused to the restaurant’s own owner, and to nobody signed in', () =>
+  it('refuses to connect for nobody signed in', () =>
     withRollback(async (tx) => {
-      const { place, manager: owner } = await posFloor(tx, { enabled: false })
-      signInAs(owner)
-      await expect(setPosEnabled(place.id, { enabled: true })).rejects.toMatchObject({ status: 403 })
+      const { place } = await posFloor(tx)
       signInAs(null)
-      await expect(setPosEnabled(place.id, { enabled: true })).rejects.toMatchObject({ status: 401 })
-      expect((await tx.restaurant.findUniqueOrThrow({ where: { id: place.id } })).posEnabled).toBe(false)
-    }))
-
-  it('off, refuses the owner every POS action, saying why', () =>
-    withRollback(async (tx) => {
-      const { place, manager: owner } = await posFloor(tx, { enabled: false })
-      signInAs(owner)
-      await expect(connectPos(place.id, { provider: 'test-pos', apiKey: 'test_demo_key' })).rejects.toThrow('POS integration isn’t included for this restaurant. Contact support.')
-      await expect(listPosLocations(place.id)).rejects.toBeInstanceOf(AuthError)
+      await expect(connectPos(place.id, { provider: 'test-pos', apiKey: 'test_demo_key' })).rejects.toMatchObject({ status: 401 })
       expect(await tx.posConnection.count({ where: { restaurantId: place.id } })).toBe(0)
-      expect((await loadPosView(place.id)).enabled).toBe(false)
     }))
 })
 
@@ -122,17 +108,27 @@ describe('an owner connecting the Test POS', () => {
     }))
 })
 
-describe('what the POS will never be sent', () => {
-  it('is discarded when the super admin switches POS off', () =>
+describe('a super admin acting for the owner', () => {
+  it('takes every step the owner takes, on a restaurant they are not assigned to', () =>
     withRollback(async (tx) => {
-      const { place: restaurant, harira } = await posFloor(tx)
-      await connection(tx, restaurant.id, { status: 'PAUSED' })
-      await place({ restaurantId: restaurant.id, table: '4', phone: '+212600112233', lines: [{ dishId: harira.id, quantity: 1 }] })
+      const { place, harira } = await posFloor(tx)
       signInAs(await superAdmin(tx))
-      await setPosEnabled(restaurant.id, { enabled: false })
-      expect(await outbox(tx, restaurant.id)).toMatchObject([{ status: 'DISCARDED' }])
-    }))
 
+      expect(await connectPos(place.id, { provider: 'test-pos', apiKey: 'test_demo_key' })).toMatchObject({ ok: true })
+      expect(await testPos(place.id)).toEqual({ ok: true, message: 'The Test POS answered' })
+      expect(await listPosLocations(place.id)).toMatchObject({ ok: true })
+      expect(await choosePosLocation(place.id, { locationId: 'tpos-dining-room' })).toEqual({ ok: true, locationId: 'tpos-dining-room' })
+      expect(await readPosMenu(place.id)).toMatchObject({ ok: true })
+      expect(await savePosMapping(place.id, { items: [{ dishId: harira.id, externalItemId: 'tpos-item-harira' }] })).toEqual({ ok: true, mapped: 1 })
+      expect(await activatePos(place.id)).toMatchObject({ ok: true, status: 'ACTIVE' })
+      expect(await pausePos(place.id)).toMatchObject({ ok: true, status: 'PAUSED' })
+      expect(await resumePos(place.id, { waiting: 'discard' })).toMatchObject({ ok: true, status: 'ACTIVE' })
+      expect(await retryPosNow(place.id)).toMatchObject({ ok: true })
+      expect(await disconnectPos(place.id)).toEqual({ ok: true })
+    }))
+})
+
+describe('what the POS will never be sent', () => {
   it('is discarded, with the item matches, when the owner signs in to another account', () =>
     withRollback(async (tx) => {
       const { place: restaurant, manager: owner, harira } = await posFloor(tx)
@@ -185,7 +181,6 @@ describe('another restaurant’s owner', () => {
         () => resumePos(place.id, { waiting: 'send' }),
         () => disconnectPos(place.id),
         () => retryPosNow(place.id),
-        () => setPosEnabled(place.id, { enabled: false }),
       ]
       for (const attempt of attempts) await expect(attempt()).rejects.toMatchObject({ status: 403 })
       expect(await tx.posConnection.findUniqueOrThrow({ where: { restaurantId: place.id } })).toMatchObject({ status: 'MAPPING', externalLocationId: 'tpos-dining-room' })

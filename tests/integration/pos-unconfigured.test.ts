@@ -17,7 +17,6 @@ describe('a server without the POS keys', () => {
   it('refuses to connect a POS, saying it is not configured, and stores nothing', () =>
     withRollback(async (tx) => {
       const { place, manager } = await floor(tx)
-      await tx.restaurant.update({ where: { id: place.id }, data: { posEnabled: true } })
       signInAs(manager)
       expect(await connectPos(place.id, { provider: 'test-pos', apiKey: 'test_demo_key' })).toEqual({ ok: false, error: 'POS integration is not configured on this server' })
       expect(await tx.posConnection.count({ where: { restaurantId: place.id } })).toBe(0)

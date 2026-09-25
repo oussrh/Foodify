@@ -1,18 +1,18 @@
 // app/actions/pos-control-actions.ts
 // The health panel's switches: pause and resume the sending, retry what failed, disconnect. The
-// restaurant's owner or a super admin acting for them (logged as such), POS on (`requirePosAccess`).
+// restaurant's owner or a super admin acting for them (logged as such) (`requireRestaurantAccess`).
 'use server'
 
-import { requirePosAccess } from '@/lib/auth-guard'
+import { requireRestaurantAccess } from '@/lib/auth-guard'
 import { uuid } from '@/lib/schemas/common'
 import { posResumeInput, type PosResumeInput } from '@/lib/schemas/pos'
 import { audited } from '@/server/pos/audit'
 import { disconnectPos as disconnect, movePos, retryPosNow as retryNow } from '@/server/pos/control'
 
-/** The restaurant's owner or a super admin, POS on. Stops sending; events go on being queued while paused, and wait for Resume. */
+/** The restaurant's owner or a super admin. Stops sending; events go on being queued while paused, and wait for Resume. */
 export async function pausePos(rawRestaurantId: string) {
   const restaurantId = uuid.parse(rawRestaurantId)
-  const actor = await requirePosAccess(restaurantId)
+  const actor = await requireRestaurantAccess({ id: restaurantId })
   return audited(actor, restaurantId, 'pause', await movePos(restaurantId, 'pause'))
 }
 
@@ -22,7 +22,7 @@ export async function pausePos(rawRestaurantId: string) {
  */
 export async function resumePos(rawRestaurantId: string, raw: PosResumeInput) {
   const restaurantId = uuid.parse(rawRestaurantId)
-  const actor = await requirePosAccess(restaurantId)
+  const actor = await requireRestaurantAccess({ id: restaurantId })
   const { waiting } = posResumeInput.parse(raw)
   return audited(actor, restaurantId, `resume-${waiting}`, await movePos(restaurantId, 'resume', waiting))
 }
@@ -30,13 +30,13 @@ export async function resumePos(rawRestaurantId: string, raw: PosResumeInput) {
 /** The same people. Removes the credentials, the matches and the queue; every order keeps the POS id it was given. */
 export async function disconnectPos(rawRestaurantId: string) {
   const restaurantId = uuid.parse(rawRestaurantId)
-  const actor = await requirePosAccess(restaurantId)
+  const actor = await requireRestaurantAccess({ id: restaurantId })
   return audited(actor, restaurantId, 'disconnect', await disconnect(restaurantId))
 }
 
 /** The same people. Puts failed rows back in the queue and sends what is due now. Answers what was put back and what the sweep did. */
 export async function retryPosNow(rawRestaurantId: string) {
   const restaurantId = uuid.parse(rawRestaurantId)
-  const actor = await requirePosAccess(restaurantId)
+  const actor = await requireRestaurantAccess({ id: restaurantId })
   return audited(actor, restaurantId, 'retry', await retryNow(restaurantId))
 }

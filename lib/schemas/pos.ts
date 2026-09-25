@@ -1,5 +1,5 @@
 // lib/schemas/pos.ts
-// What an owner, the super admin, a POS's webhook and Vercel's cron send about a point of sale,
+// What an owner (or a super admin for them), a POS's webhook and Vercel's cron send about a point of sale,
 // parsed at the boundary (VALID.1): the POS actions in app/actions/pos-*.ts, the forms of the
 // Integrations tab before they send, the webhook route and the outbox cron. The restaurant is
 // always a separate argument of an action, parsed first so the guard can be asked about it.
@@ -47,11 +47,6 @@ export type PosMappingInput = z.infer<typeof posMappingInput>
 export const posResumeInput = z.object({ waiting: z.enum(['send', 'discard']) })
 /** `posResumeInput` after parsing. */
 export type PosResumeInput = z.infer<typeof posResumeInput>
-
-/** The super admin's switch: whether this restaurant may connect a POS at all. */
-export const posEnabledInput = z.object({ enabled: z.boolean() })
-/** `posEnabledInput` after parsing. */
-export type PosEnabledInput = z.infer<typeof posEnabledInput>
 
 /** Where a webhook is addressed: the provider in the path, the connection it was registered for in `?connection=`. */
 export const posWebhookTarget = z.object({ provider: posProviderKey, connection: uuid })
