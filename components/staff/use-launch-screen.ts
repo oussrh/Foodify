@@ -1,8 +1,8 @@
 // components/staff/use-launch-screen.ts
 // When the launch screen covers an installed staff app, and when it lifts. It is decided once per
-// page load, on the first read in the browser: installed, and not yet shown this session (a
-// sessionStorage flag, so it comes back after the app is closed but not on a reload or a move
-// between the app's screens). It lifts as soon as the app's first poll has answered, and never
+// page load, on the first read in the browser: installed, the first load of the session (a
+// sessionStorage flag every staff page writes, so it comes back after the app is closed but not on
+// a reload or a move between the app's screens), and read while the page is still loading. It lifts as soon as the app's first poll has answered, and never
 // later than 1.2 s after the page began loading, whatever the network is doing.
 'use client'
 
@@ -17,10 +17,12 @@ const MAX_MS = 1200
 /** The fade out; with reduced motion there is no fade, only this wait before it is removed. */
 const LAUNCH_FADE_MS = 300
 
-/** This page load's answer, once read; set to false when the screen lifts so a remount never shows it again. */
+/** Whether this page load opened the session in an installed app, once decided. */
+let sessionOpened: boolean | null = null
+/** Whether this page load shows the launch screen, once claimed; false once it has lifted. */
 let thisLoad: boolean | null = null
 
-/** Whether the session has already opened on the launch screen; refused storage reads as "not yet". */
+/** Whether the session has already begun on an earlier page load; refused storage reads as "not yet". */
 function seenThisSession(): boolean {
   try {
     return window.sessionStorage.getItem(SEEN_KEY) === 'yes'
@@ -29,16 +31,30 @@ function seenThisSession(): boolean {
   }
 }
 
-/** Whether this page load opens on the launch screen, decided on the first read and remembered for the session. */
-function readLaunchDue(): boolean {
-  if (thisLoad === null) {
-    thisLoad = launchScreenDue({ installed: readStandalone(), seenThisSession: seenThisSession() })
+/**
+ * Records that the session has begun, from every staff page (components/staff/staff-session-mark.tsx),
+ * so an app opened from a shortcut or a notification onto a screen with no launch screen never
+ * shows one later, on a move to the tables or the board. Decided on the first call of the page
+ * load and the same answer after: whether this load opened the session in an installed app.
+ */
+export function noteStaffSession(): boolean {
+  if (sessionOpened === null) {
+    sessionOpened = launchScreenDue({ installed: readStandalone(), seenThisSession: seenThisSession() })
     try {
-      if (thisLoad) window.sessionStorage.setItem(SEEN_KEY, 'yes')
+      window.sessionStorage.setItem(SEEN_KEY, 'yes')
     } catch {
       // private window, or storage refused: the screen may show again next load, which is harmless
     }
   }
+  return sessionOpened
+}
+
+/**
+ * Whether this page load shows the launch screen: the load opened the session, and the screen is
+ * first read while the page is still loading, not after a later move onto a screen that has one.
+ */
+function readLaunchDue(): boolean {
+  if (thisLoad === null) thisLoad = noteStaffSession() && performance.now() < MAX_MS
   return thisLoad
 }
 

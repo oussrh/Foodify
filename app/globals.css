@@ -357,6 +357,9 @@
      clear of the notch and the home indicator. */
   .staff-launch {
     display: none;
+    /* A bound that needs no script: whatever happens to the page's JavaScript, the screen stops
+       covering the app 2.5 s after it appeared (the script lifts it by 1.2 s). */
+    animation: staff-launch-bound 0s linear 2.5s forwards;
     padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px)
       env(safe-area-inset-left, 0px);
   }
@@ -366,6 +369,12 @@
   @media (display-mode: standalone), (display-mode: fullscreen) {
     .staff-launch {
       display: flex;
+    }
+  }
+  @keyframes staff-launch-bound {
+    to {
+      visibility: hidden;
+      pointer-events: none;
     }
   }
 }

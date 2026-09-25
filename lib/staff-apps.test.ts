@@ -48,7 +48,7 @@ describe('startupImages', () => {
 
   it('draws a tablet app both ways up, with the portrait device size in both queries', () => {
     const images = startupImages('kitchen')
-    expect(images).toHaveLength(8)
+    expect(images).toHaveLength(12)
     expect(images).toContainEqual({
       url: '/icons/staff/splash/kitchen-2732x2048.png',
       media: '(device-width: 1024px) and (device-height: 1366px) and (-webkit-device-pixel-ratio: 2) and (orientation: landscape)',

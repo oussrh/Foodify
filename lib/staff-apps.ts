@@ -92,8 +92,8 @@ interface StartupScreen {
  * the devices in service today. Phones, portrait (a waiter holds the phone upright): iPhone SE 2/3
  * and 8; 12, 13, 14; 14 Pro, 15, 15 Pro, 16; 16 Pro, 17, 17 Pro; 14 Pro Max, 15 Plus / Pro Max,
  * 16 Plus; 16 Pro Max, 17 Pro Max. Tablets, both ways up (a tablet stands in a dock either way):
- * iPad 10.2" (7th to 9th generation); iPad 10th generation and iPad Air 10.9"; iPad Pro and Air 11";
- * iPad Pro 12.9" and Air 13". Any other device shows a plain screen for a moment and then the
+ * iPad 10.2" (7th to 9th generation); iPad 10th generation and iPad Air 10.9"; iPad Pro 11" (to M2)
+ * and Air 11"; iPad Pro 11" (M4); iPad Pro 12.9" and Air 13"; iPad Pro 13" (M4). Any other device shows a plain screen for a moment and then the
  * app's own launch screen.
  */
 export const STARTUP_SCREENS: Record<ScreenKind, StartupScreen[]> = {
@@ -109,7 +109,9 @@ export const STARTUP_SCREENS: Record<ScreenKind, StartupScreen[]> = {
     { width: 810, height: 1080, ratio: 2 },
     { width: 820, height: 1180, ratio: 2 },
     { width: 834, height: 1194, ratio: 2 },
+    { width: 834, height: 1210, ratio: 2 },
     { width: 1024, height: 1366, ratio: 2 },
+    { width: 1032, height: 1376, ratio: 2 },
   ],
 }
 
