@@ -48,7 +48,7 @@ test.describe('the kitchen tablet as a device', () => {
     const kitchen = await deviceAccount('KITCHEN', info)
     try {
       await signInDevice(page, 'kitchen', kitchen.username)
-      const open = page.getByRole('button', { name: "This device's settings" })
+      const open = page.getByRole('button', { name: 'Settings for this device' })
       await expect(async () => {
         await open.click()
         await expect(page.getByRole('dialog', { name: 'This device' })).toBeVisible({ timeout: 1_000 })
