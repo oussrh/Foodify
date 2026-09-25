@@ -1,23 +1,39 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { restaurantWhere } from '@/lib/restaurant-code'
+import { kitchenBoardPath } from '@/lib/restaurant-paths'
+import type { StaffApp } from '@/lib/order-board-page'
 import { staffManifestQuery } from '@/lib/schemas/staff-app'
 
-/** What each staff app is called on a home screen, and where tapping its icon lands. */
-const APPS = {
-  admin: { path: (id: string) => `/admin/orders/${id}`, name: 'Orders', of: (n: string) => `The kitchen board for ${n}: new orders as they arrive.` },
-  manager: { path: (id: string) => `/manager/orders/${id}`, name: 'Orders', of: (n: string) => `The kitchen board for ${n}: new orders as they arrive.` },
-  kitchen: { path: (id: string) => `/kitchen/orders/${id}`, name: 'Orders', of: (n: string) => `The kitchen board for ${n}: new orders as they arrive.` },
-  waiter: { path: (id: string) => `/waiter/${id}`, name: 'Service', of: (n: string) => `Taking orders at the table in ${n}, and what is ready to carry out.` },
-} as const
+const BOARD = { name: 'Orders', of: (n: string) => `The kitchen board for ${n}: new orders as they arrive.` }
 
 /**
- * GET, public: the web app manifest that makes one restaurant's staff app installable — the
+ * What each staff app is called on a home screen, and where tapping its icon lands: `path` is the
+ * app's address for the restaurant as the page named it (a code or a uuid), and `id`, when the app
+ * has moved, is the address it was installed under.
+ */
+const APPS: Record<StaffApp, { path: (ref: string) => string; id?: (ref: string) => string; name: string; of: (n: string) => string }> = {
+  admin: { path: (ref) => `/admin/orders/${ref}`, ...BOARD },
+  manager: { path: (ref) => `/manager/orders/${ref}`, ...BOARD },
+  // The tablet's board moved from /kitchen/orders/<ref> to /kitchen/<ref>. A manifest's `id` is
+  // the app's identity: a changed one is a different app, which an installed tablet would never
+  // update to. So the id stays the address tablets installed under, and only start_url and scope
+  // move. The old address still serves the board (a rewrite in next.config.js, not a redirect), so
+  // an installed tablet opens inside the scope it was installed with, finds this same manifest URL
+  // and id with a new start and scope, and updates in place. The new scope, /kitchen/<ref>, also
+  // covers the sold-out screen beside the board (/kitchen/<ref>/menu), which the old one left out.
+  kitchen: { path: kitchenBoardPath, id: (ref) => `/kitchen/orders/${ref}`, ...BOARD },
+  waiter: { path: (ref) => `/waiter/${ref}`, name: 'Service', of: (n) => `Taking orders at the table in ${n}, and what is ready to carry out.` },
+}
+
+/**
+ * GET, public: the web app manifest that makes one restaurant's staff app installable: the
  * kitchen board on a tablet, or the waiter's app on a phone. Query `id` (the restaurant, by its
- * code or its uuid, as the page's own link named it) and `portal`; a bad pair is 400. It carries the restaurant's name and the app's URL and nothing
- * else — a manifest is fetched without the session cookie, so it must hold nothing a signed-out
- * reader may not see; the app behind it is guarded. Answers with an hour's cache, or 404 for an
- * unknown restaurant.
+ * code or its uuid, as the page's own link named it) and `portal`; a pair of the wrong shape is
+ * 400. It carries the restaurant's name and the app's URL and nothing else: a manifest is fetched
+ * without the session cookie, so it must hold nothing a signed-out reader may not see, and the app
+ * behind it is guarded. A well-shaped reference that matches no restaurant gets the same answer
+ * with no name in it, so the status never tells a stranger which codes are real. An hour's cache.
  */
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams
@@ -25,15 +41,13 @@ export async function GET(request: Request) {
   if (!parsed.success) return new NextResponse('Bad request', { status: 400 })
 
   const restaurant = await prisma.restaurant.findUnique({ where: restaurantWhere(parsed.data.id), select: { name: true } })
-  if (!restaurant) return new NextResponse('Not found', { status: 404 })
-
   const app = APPS[parsed.data.portal]
   const board = app.path(parsed.data.id)
   const manifest = {
-    id: board,
-    name: `${app.name} · ${restaurant.name}`,
+    id: app.id ? app.id(parsed.data.id) : board,
+    name: restaurant ? `${app.name} · ${restaurant.name}` : app.name,
     short_name: app.name,
-    description: app.of(restaurant.name),
+    description: restaurant ? app.of(restaurant.name) : 'A Foodify staff app.',
     start_url: board,
     scope: board,
     // Immersive where the platform allows it: an installed staff app on Android opens with no status

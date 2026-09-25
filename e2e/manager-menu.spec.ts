@@ -24,7 +24,7 @@ test.describe('a manager\'s menu', () => {
     try {
       await signInAs(page, 'manager', manager.email, { mfa: false })
 
-      await page.goto(`/manager/restaurants/${restaurant.id}/dishes/create`)
+      await page.goto(`/manager/restaurants/${restaurant.code}/dishes/create`)
       await page.locator('#nameEn').fill(name)
       await page.locator('#nameFr').fill(name)
       await page.locator('#price').fill('12.50')
@@ -37,7 +37,7 @@ test.describe('a manager\'s menu', () => {
       await guestPrice('€12.50')
 
       // Repriced from the dish's own row: the menu, then Edit, then the save bar.
-      await page.goto(`/manager/restaurants/${restaurant.id}/dishes`)
+      await page.goto(`/manager/restaurants/${restaurant.code}/dishes`)
       await page.getByRole('button', { name: `Actions for ${name}` }).click()
       await page.getByRole('menuitem', { name: 'Edit' }).click()
       await page.locator('#price').fill('14')
@@ -46,7 +46,7 @@ test.describe('a manager\'s menu', () => {
       await guestPrice('€14.00')
 
       // Deleted behind its confirmation, and gone from the guest's menu.
-      await page.goto(`/manager/restaurants/${restaurant.id}/dishes`)
+      await page.goto(`/manager/restaurants/${restaurant.code}/dishes`)
       await page.getByRole('button', { name: `Actions for ${name}` }).click()
       await page.getByRole('menuitem', { name: 'Delete' }).click()
       await page.getByRole('alertdialog').getByRole('button', { name: 'Delete' }).click()

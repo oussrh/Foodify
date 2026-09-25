@@ -27,15 +27,15 @@ export function db(): PrismaClient {
   return client
 }
 
-/** The seeded rows the audit navigates to: the restaurant, one of its dishes, the seeded admin and manager. */
+/** The seeded rows the audit navigates to: the restaurant (its uuid and the short code its pages are addressed by), one of its dishes, the seeded admin and manager. */
 export async function seededIds() {
-  const restaurant = await db().restaurant.findUniqueOrThrow({ where: { slug: SEEDED_SLUG }, select: { id: true } })
+  const restaurant = await db().restaurant.findUniqueOrThrow({ where: { slug: SEEDED_SLUG }, select: { id: true, code: true } })
   const dish = await db().dish.findFirstOrThrow({ where: { restaurantId: restaurant.id }, orderBy: { sortOrder: 'asc' }, select: { id: true } })
   const admin = await db().user.findFirstOrThrow({ where: { role: 'SUPER_ADMIN', email: { not: { startsWith: 'audit-' } } }, select: { id: true } })
   // The role, not just "attached to the restaurant": a device account made by a staff spec is
   // attached too, and one picked here is deleted under the page that is reading it.
   const manager = await db().user.findFirstOrThrow({ where: { role: 'RESTAURANT_ADMIN', restaurants: { some: { id: restaurant.id } }, email: { not: { startsWith: 'audit-' } } }, select: { id: true } })
-  return { restaurantId: restaurant.id, dishId: dish.id, adminId: admin.id, managerId: manager.id }
+  return { restaurantId: restaurant.id, restaurantCode: restaurant.code, dishId: dish.id, adminId: admin.id, managerId: manager.id }
 }
 
 /**

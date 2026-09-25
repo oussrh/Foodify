@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["standards", "ratchet", "scoreboard"]
 related: ["./README.md", "./ADOPTION_DECISIONS.md"]
 source_truth: ["scripts/ci/standards-baseline.json", "abatty.probes.mjs", "docs/ADOPTION_STATE.json"]
-last_verified: "2026-09-24"
+last_verified: "2026-09-25"
 ---
 
 # Standards progress
@@ -70,6 +70,8 @@ last_verified: "2026-09-24"
 | 13 | Observability: the logger with its redaction, no-console, the health endpoint, the SIGTERM drain | done 2026-09-21 |
 
 ## Log
+
+- 2026-09-25 · **duplication 64 → 56 blocks, 817 → 714 lines** · The admin and manager Dishes tabs now render one shared screen (`components/shell/dishes-screen.tsx`) and the restaurant lists one row mapper, while the restaurant pages moved to short codes; the floor is lowered in the baseline. No other metric moved.
 
 - 2026-09-24 · **abatty 0.5.2, `types.nonNull` hard at zero** · The harness moves to 0.5.2 (hooks on `pnpm exec`, the commit-msg changelog check, the gate running the changed-lines coverage). Its opt-in `types.nonNull` is enabled in `ratchet.enable`: 13 non-null assertions → 0, each replaced by the check it stood for, and the baseline promotes it to hard. `lib/social.ts` gained the tests for its untested branches once touching it put them in the changed-lines set. The same day the shared zod schemas were tightened (https and host rules on stored URLs, hex colours, bounded text, the sign-in code), each rule tested in `lib/schemas/*.test.ts`.
 - 2026-09-23 · **JSDoc: every component held** · The last 94 exported components and hooks documented and the rule's directory list replaced by `components/**`; 0 remain. The starting count is corrected to 236 distinct exports: the audit that reported 351 counted each `export default function` twice (once as a function, once as a default export), and the earlier log lines carry that inflated figure. Drafting the blocks found four real bugs, fixed in the same change (see the changelog).

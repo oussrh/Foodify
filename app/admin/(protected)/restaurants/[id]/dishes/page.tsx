@@ -1,16 +1,14 @@
-import Link from 'next/link'
-import type { Route } from 'next'
 import prisma from '@/lib/prisma'
-import { Plus } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { PageHeader } from '@/components/shell/page-header'
-import DishesList from '@/components/shell/dishes-list'
-import { dishListRow } from '@/components/shell/dish-list-rows'
-import { DishStatStrip } from '@/components/shell/dish-stat-strip'
 import { notFound } from 'next/navigation'
+import { DishesScreen } from '@/components/shell/dishes-screen'
+import { dishListRow } from '@/components/shell/dish-list-rows'
+import { dishListArgs } from '@/lib/dish-list-loader'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
-import { listSearch, idSegment, routeParams, type SearchParams } from '@/lib/schemas/page-params'
+import { restaurantPageId } from '@/lib/restaurant-page'
+import { restaurantPath } from '@/lib/restaurant-paths'
+import { listSearch, type SearchParams } from '@/lib/schemas/page-params'
 
+/** Any restaurant's dishes, for a super admin; an unknown restaurant is a 404. */
 export default async function DishesPage({
   params,
   searchParams,
@@ -19,61 +17,12 @@ export default async function DishesPage({
   searchParams?: Promise<SearchParams>
 }) {
   await requireSuperAdminPage()
-  const { id } = routeParams(idSegment, await params)
   const search = listSearch.parse((await searchParams)?.search)
+  const id = await restaurantPageId((await params).id, (code) => restaurantPath('admin', code, 'dishes', search && `search=${encodeURIComponent(search)}`))
 
-  const restaurant = await prisma.restaurant.findUnique({ where: { id }, select: { id: true, name: true, currencySymbol: true } })
+  const restaurant = await prisma.restaurant.findUnique({ where: { id }, select: { id: true, code: true, name: true, currencySymbol: true } })
   if (!restaurant) notFound()
 
-  const dishes = await prisma.dish.findMany({
-    where: {
-      restaurantId: restaurant.id,
-      ...(search
-        ? {
-            OR: [
-              { nameEn: { contains: search, mode: 'insensitive' } },
-              { nameFr: { contains: search, mode: 'insensitive' } },
-              { descriptionEn: { contains: search, mode: 'insensitive' } },
-              { descriptionFr: { contains: search, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
-    },
-    include: { subcategory: { include: { category: true } } },
-    orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
-  })
-
-  const rows = dishes.map(dishListRow)
-  const currency = restaurant.currencySymbol || '$'
-  const base = `/admin/restaurants/${restaurant.id}`
-
-  return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Dishes"
-        description={restaurant.name}
-        actions={
-          <Button asChild>
-            <Link href={`${base}/dishes/create` as Route}>
-              <Plus className="h-4 w-4" />
-              Add dish
-            </Link>
-          </Button>
-        }
-      />
-      {!search && rows.length > 0 && <DishStatStrip rows={rows} />}
-      <DishesList
-        portal="admin"
-        restaurantId={restaurant.id}
-        currency={currency}
-        rows={rows}
-        search={search}
-        emptyAction={
-          <Button asChild>
-            <Link href={`${base}/dishes/create` as Route}>Add dish</Link>
-          </Button>
-        }
-      />
-    </div>
-  )
+  const dishes = await prisma.dish.findMany(dishListArgs(restaurant.id, search))
+  return <DishesScreen portal="admin" restaurant={restaurant} rows={dishes.map(dishListRow)} search={search} />
 }

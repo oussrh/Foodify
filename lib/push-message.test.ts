@@ -10,9 +10,10 @@ describe('newOrderPush', () => {
       title: 'New order #12',
       body: 'Table 4 · 3 dishes',
       tag: 'order-o-1',
-      url: '/kitchen/orders/K7M2QX',
+      url: '/kitchen/K7M2QX',
       kind: 'order',
       restaurantId: 'r-1',
+      restaurantCode: 'K7M2QX',
     })
   })
 
@@ -36,6 +37,7 @@ describe('orderReadyPush', () => {
       url: '/waiter/K7M2QX',
       kind: 'ready',
       restaurantId: 'r-1',
+      restaurantCode: 'K7M2QX',
     })
   })
 })
@@ -54,9 +56,10 @@ describe('the floor’s requests and the kitchen’s answers', () => {
       title: 'Table 4 asks to remove 1 Tea',
       body: 'Accept or refuse it on the board',
       tag: 'request-c-1',
-      url: '/kitchen/orders/K7M2QX',
+      url: '/kitchen/K7M2QX',
       kind: 'request',
       restaurantId: 'r-1',
+      restaurantCode: 'K7M2QX',
     })
   })
 
@@ -68,6 +71,7 @@ describe('the floor’s requests and the kitchen’s answers', () => {
       url: '/waiter/K7M2QX',
       kind: 'answer',
       restaurantId: 'r-1',
+      restaurantCode: 'K7M2QX',
     })
     expect(changeAnswerPush(removal, true, restaurant).title).toBe('Kitchen accepted: remove 1 Tea')
   })

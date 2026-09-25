@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import type { Route } from 'next'
+import { restaurantPath } from '@/lib/restaurant-paths'
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { Button } from '@/components/ui/button'
@@ -28,7 +28,8 @@ export default async function ManagerDashboard() {
 
   // One restaurant is not a portfolio: this page would be a table of one row above a strip of
   // numbers the restaurant's own Info tab already says. Their home is the restaurant.
-  if (restaurants.length === 1) redirect(`/manager/restaurants/${restaurants[0]!.id}/info` as Route)
+  const [only, ...others] = restaurants
+  if (only && others.length === 0) redirect(restaurantPath('manager', only.code))
 
   const restaurantIds = restaurants.map((r) => r.id)
   const [views, arViews] = await Promise.all([
@@ -78,7 +79,7 @@ export default async function ManagerDashboard() {
               return (
                 <TableRow key={r.id}>
                   <TableCell>
-                    <Link href={`/manager/restaurants/${r.id}/menu`} className="font-medium hover:underline">
+                    <Link href={restaurantPath('manager', r.code, 'menu')} className="font-medium hover:underline">
                       {r.name}
                     </Link>
                     <span className="block text-xs text-muted-foreground">/{r.slug}</span>
@@ -92,9 +93,9 @@ export default async function ManagerDashboard() {
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button asChild size="sm" variant="outline" className="hidden sm:inline-flex">
-                        <Link href={`/manager/restaurants/${r.id}/menu`}>Menu</Link>
+                        <Link href={restaurantPath('manager', r.code, 'menu')}>Menu</Link>
                       </Button>
-                      <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} portal="manager" slug={r.slug} />
+                      <RestaurantRowMenu restaurantId={r.id} code={r.code} restaurantName={r.name} portal="manager" slug={r.slug} />
                     </div>
                   </TableCell>
                 </TableRow>

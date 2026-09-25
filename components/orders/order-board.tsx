@@ -8,6 +8,7 @@
 import { useCallback, useState } from 'react'
 import type { Route } from 'next'
 import type { Money } from '@/lib/menu'
+import { kitchenMenuPath } from '@/lib/restaurant-paths'
 import type { BoardOrder, BoardView, OrderMove } from '@/lib/orders'
 import { setOrderStatus } from '@/app/actions/order-actions'
 import { useRequestDecision } from './use-request-decision'
@@ -126,7 +127,7 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
         }
         notice={<SoundUnlockStrip locked={audio.locked} onUnlock={audio.unlock} />}
         backHref={backHref}
-        soldOutHref={`/kitchen/menu/${restaurantCode}` as Route}
+        soldOutHref={kitchenMenuPath(restaurantCode)}
       />
 
       <main className="flex-1 px-3 py-4 pb-[max(16px,env(safe-area-inset-bottom))] sm:px-4">

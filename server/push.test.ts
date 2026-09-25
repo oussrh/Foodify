@@ -32,7 +32,7 @@ import { WebPushError } from 'web-push'
 import { sendPush } from './push'
 
 const vapid = { publicKey: 'BPub', privateKey: 'priv', subject: 'mailto:ops@example.com' }
-const payload = { title: 'New order #12', body: 'Table 4 · 3 dishes', tag: 'order-o1', url: '/kitchen/orders/K7M2QX', kind: 'order' as const, restaurantId: 'r1' }
+const payload = { title: 'New order #12', body: 'Table 4 · 3 dishes', tag: 'order-o1', url: '/kitchen/K7M2QX', kind: 'order' as const, restaurantId: 'r1', restaurantCode: 'K7M2QX' }
 const device = (id: string) => ({ id, endpoint: `https://fcm.googleapis.com/fcm/send/${id}`, p256dh: 'BKey', auth: 'auth' })
 const refusal = (status: number) => new (WebPushError as unknown as new (status: number) => Error)(status)
 

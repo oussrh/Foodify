@@ -18,9 +18,9 @@ async function scanPanel(page: Page, where: string) {
   await expectNoSeriousA11yViolations(page, where)
 }
 
-/** Opens Settings → Integrations of `restaurantId` in `portal`. */
-async function openIntegrations(page: Page, portal: 'admin' | 'manager', restaurantId: string) {
-  await page.goto(`/${portal}/restaurants/${restaurantId}/edit`)
+/** Opens Settings → Integrations of the restaurant with this short `code` in `portal`. */
+async function openIntegrations(page: Page, portal: 'admin' | 'manager', code: string) {
+  await page.goto(`/${portal}/restaurants/${code}/edit`)
   await page.getByRole('tab', { name: 'Integrations' }).click()
   await expect(page.getByRole('heading', { name: 'Point of sale' })).toBeVisible()
 }
@@ -37,7 +37,7 @@ test.describe('connecting a POS', () => {
     const owner = await auditAccount('manager', `${info.testId}-m`, { mfa: false, restaurantId: restaurant.id })
     try {
       await signInAs(page, 'manager', owner.email, { mfa: false })
-      await openIntegrations(page, 'manager', restaurant.id)
+      await openIntegrations(page, 'manager', restaurant.code)
       await expect(page.getByText('Coming soon', { exact: true })).toHaveCount(3)
       await scanPanel(page, 'integrations: providers')
 

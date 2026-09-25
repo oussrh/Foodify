@@ -1,15 +1,15 @@
-import type { Route } from 'next'
 import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
 import CreateDishForm from '@/components/create-dish-form'
 import { PageHeader } from '@/components/shell/page-header'
-import { idSegment, routeParams } from '@/lib/schemas/page-params'
+import { restaurantPageId } from '@/lib/restaurant-page'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 export default async function CreateDishPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session?.user?.email) redirect('/manager/login')
-  const { id } = routeParams(idSegment, await params)
+  const id = await restaurantPageId((await params).id, (code) => restaurantPath('manager', code, 'dishes/create'))
 
   const restaurant = await prisma.restaurant.findFirst({ where: { id, users: { some: { email: session.user.email } } } })
   if (!restaurant) redirect('/manager/restaurants')
@@ -28,7 +28,7 @@ export default async function CreateDishPage({ params }: { params: Promise<{ id:
       <PageHeader
         title="New dish"
         description={`It appears on ${restaurant.name}'s menu as soon as it is saved and live.`}
-        back={{ href: `/manager/restaurants/${restaurant.id}/dishes` as Route, label: 'All dishes' }}
+        back={{ href: restaurantPath('manager', restaurant.code, 'dishes'), label: 'All dishes' }}
       />
       <CreateDishForm restaurantId={restaurant.id} subcategories={subcategories} restaurantName={restaurant.name} dietaryOptions={restaurant.dietaryOptions} />
     </div>
