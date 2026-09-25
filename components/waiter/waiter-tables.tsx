@@ -117,6 +117,7 @@ export function WaiterTables({ restaurant, onOpenTable }: WaiterTablesProps) {
             pwa={pwa}
             sound={{ on: alert.soundOn, locked: audio.locked, toggle: alert.toggleSound, test: alert.test }}
             vibration={{ supported: alert.canVibrate, test: alert.buzz }}
+            labelled
           />
         </WaiterHeader>
         <SoundUnlockStrip locked={audio.locked} onUnlock={audio.unlock} />
