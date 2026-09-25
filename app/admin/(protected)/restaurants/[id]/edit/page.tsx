@@ -3,12 +3,13 @@ import { redirect } from 'next/navigation'
 import { SettingsScreen } from '@/components/restaurant-form/settings-screen'
 import { AdminDeleteRestaurantButton } from '@/components/admin-delete-restaurant-button'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
-import { idSegment, routeParams } from '@/lib/schemas/page-params'
+import { restaurantPageId } from '@/lib/restaurant-page'
+import { restaurantPath } from '@/lib/restaurant-paths'
 import { loadPosView } from '@/server/pos/view'
 
 export default async function EditRestaurantPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSuperAdminPage()
-  const { id } = routeParams(idSegment, await params)
+  const id = await restaurantPageId((await params).id, (code) => restaurantPath('admin', code, 'edit'))
 
   const restaurant = await prisma.restaurant.findUnique({ where: { id } })
   if (!restaurant) redirect('/admin/restaurants')

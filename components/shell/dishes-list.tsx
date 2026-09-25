@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import type { Route } from 'next'
 import DishPhoto from '@/components/menu/dish-photo'
 import { Camera, Star } from 'lucide-react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
@@ -7,6 +6,7 @@ import { EmptyState } from '@/components/shell/page-header'
 import { ListSearch } from '@/components/shell/list-search'
 import { DishLiveSwitch, DishRowMenu, DishSoldOutButton } from '@/components/shell/row-actions'
 import { cn } from '@/lib/utils'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 export interface DishListRow {
   id: string
@@ -26,7 +26,8 @@ export interface DishListRow {
 
 interface DishesListProps {
   portal: 'admin' | 'manager'
-  restaurantId: string
+  /** The restaurant's short code: the links it builds address the restaurant by it. */
+  restaurantCode: string
   currency: string
   rows: DishListRow[]
   search: string
@@ -37,8 +38,9 @@ interface DishesListProps {
  * A restaurant's dishes as a searchable table (category, price, AR, live, stock, added, and each
  * row's actions), with an empty state carrying the caller's action.
  */
-export default function DishesList({ portal, restaurantId, currency, rows, search, emptyAction }: DishesListProps) {
-  const base = `/${portal}/restaurants/${restaurantId}`
+export default function DishesList({ portal, restaurantCode, currency, rows, search, emptyAction }: DishesListProps) {
+  const dishesHref = restaurantPath(portal, restaurantCode, 'dishes')
+  const editHref = (dishId: string) => restaurantPath(portal, restaurantCode, `dishes/${dishId}/edit`)
   return (
     <div className="flex flex-col gap-4">
       <ListSearch value={search} placeholder="Search dishes" label="Search dishes" />
@@ -49,7 +51,7 @@ export default function DishesList({ portal, restaurantId, currency, rows, searc
           description={search ? 'Try a shorter word, or clear the search.' : 'Add the first dish and it will show on the public menu as soon as it is live.'}
           action={
             search ? (
-              <Link href={`${base}/dishes` as Route} className="text-sm font-medium text-primary hover:underline">
+              <Link href={dishesHref} className="text-sm font-medium text-primary hover:underline">
                 Clear search
               </Link>
             ) : (
@@ -88,7 +90,7 @@ export default function DishesList({ portal, restaurantId, currency, rows, searc
                   </span>
                 </TableCell>
                 <TableCell>
-                  <Link href={`${base}/dishes/${d.id}/edit` as Route} className="flex items-center gap-1.5 font-medium text-foreground hover:underline">
+                  <Link href={editHref(d.id)} className="flex items-center gap-1.5 font-medium text-foreground hover:underline">
                     <span className="truncate">{d.nameEn}</span>
                     {d.isMostPurchased && <Star className="h-3.5 w-3.5 shrink-0 fill-warning text-warning" aria-label="Popular" />}
                   </Link>
@@ -119,7 +121,7 @@ export default function DishesList({ portal, restaurantId, currency, rows, searc
                   {d.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                 </TableCell>
                 <TableCell className="text-right">
-                  <DishRowMenu dishId={d.id} dishName={d.nameEn} editHref={`${base}/dishes/${d.id}/edit` as Route} isMostPurchased={d.isMostPurchased} />
+                  <DishRowMenu dishId={d.id} dishName={d.nameEn} editHref={editHref(d.id)} isMostPurchased={d.isMostPurchased} />
                 </TableCell>
               </TableRow>
             ))}

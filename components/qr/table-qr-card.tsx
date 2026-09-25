@@ -9,10 +9,10 @@
 // the one thing that differs card to card and cannot be read off the code by eye.
 'use client'
 
-import { useState } from 'react'
 import Image from 'next/image'
 import { Copy, Printer } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { useCopy } from '@/components/shell/use-copy'
 import { cn } from '@/lib/utils'
 import { QR_SIZES, qrCodeUrl } from './qr-urls'
 import { tableMenuUrl } from './table-qr'
@@ -33,17 +33,7 @@ interface TableQrCardProps {
  */
 export default function TableQrCard({ restaurantName, slug, origin, table, excluded, onPrint }: TableQrCardProps) {
   const url = tableMenuUrl(origin, slug, table)
-  const [copied, setCopied] = useState(false)
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 3000)
-    } catch {
-      // a browser without clipboard access: the code itself is the link
-    }
-  }
+  const { copied, copy } = useCopy(`Table ${table} link`)
 
   return (
     <div
@@ -67,7 +57,7 @@ export default function TableQrCard({ restaurantName, slug, origin, table, exclu
           <Printer className="h-4 w-4" />
           Print
         </Button>
-        <Button size="sm" variant="ghost" onClick={copy} aria-label={`Copy the link for table ${table}`}>
+        <Button size="sm" variant="ghost" onClick={() => copy(url)} aria-label={`Copy the link for table ${table}`}>
           <Copy className="h-4 w-4" />
           {copied ? 'Copied' : 'Copy'}
         </Button>

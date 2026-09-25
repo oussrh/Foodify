@@ -24,7 +24,7 @@ test.describe('sold out', () => {
 
     try {
       await signInDevice(page, 'kitchen', kitchen.username)
-      await page.goto(`/kitchen/menu/${dish.restaurantId}`)
+      await page.goto(`/kitchen/${dish.restaurantCode}/menu`)
       const toggle = page.getByRole('button', { name: new RegExp(dish.name) })
       await expect(toggle).toHaveAttribute('aria-pressed', 'false')
       await toggle.click()

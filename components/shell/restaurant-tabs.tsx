@@ -3,37 +3,38 @@
 import Link from 'next/link'
 import type { Route } from 'next'
 import { cn } from '@/lib/utils'
+import { restaurantPath, type RestaurantPage } from '@/lib/restaurant-paths'
 import type { ShellPortal } from './shell-types'
 
 interface RestaurantTabsProps {
   portal: ShellPortal
-  restaurantId: string
+  restaurantCode: string
   pathname: string
 }
 
 /** Sub-navigation shown while working inside one restaurant. */
-function restaurantTabs(portal: ShellPortal, id: string) {
-  const base = `/${portal}/restaurants/${id}`
+function restaurantTabs(portal: ShellPortal, code: string) {
+  const tab = (page: RestaurantPage) => restaurantPath(portal, code, page)
   const tabs: { href: Route; label: string }[] = [
-    { href: `${base}/info` as Route, label: 'Info' },
-    { href: `${base}/menu` as Route, label: 'Menu' },
-    { href: `${base}/dishes` as Route, label: 'Dishes' },
+    { href: tab('info'), label: 'Info' },
+    { href: tab('menu'), label: 'Menu' },
+    { href: tab('dishes'), label: 'Dishes' },
     // Orders inside the shell: the history, and the link to the tablet board (which is outside it).
-    { href: `${base}/orders` as Route, label: 'Orders' },
-    { href: `${base}/tables` as Route, label: 'Tables' },
-    { href: `${base}/insights` as Route, label: 'Insights' },
-    { href: `${base}/edit` as Route, label: 'Settings' },
+    { href: tab('orders'), label: 'Orders' },
+    { href: tab('tables'), label: 'Tables' },
+    { href: tab('insights'), label: 'Insights' },
+    { href: tab('edit'), label: 'Settings' },
     // Every restaurant has its people; what a reader may do with them is the page's business.
-    { href: `${base}/users` as Route, label: 'People' },
+    { href: tab('users'), label: 'People' },
   ]
   return tabs
 }
 
 /** The strip of tabs under the top bar, the current one filled. */
-export default function RestaurantTabs({ portal, restaurantId, pathname }: RestaurantTabsProps) {
+export default function RestaurantTabs({ portal, restaurantCode, pathname }: RestaurantTabsProps) {
   return (
     <div className="scrollbar-none flex gap-1 overflow-x-auto px-4 pb-2 md:px-6">
-      {restaurantTabs(portal, restaurantId).map((tab) => {
+      {restaurantTabs(portal, restaurantCode).map((tab) => {
         const active = pathname.startsWith(tab.href)
         return (
           <Link

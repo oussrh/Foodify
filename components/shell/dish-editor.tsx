@@ -3,7 +3,6 @@
 // status toggles, the edit form (offering the restaurant's dietary options and its subcategories
 // as "Category → Subcategory") and the ingredient manager. A page loads and guards, then hands
 // its rows here; the admin page adds its delete section after.
-import type { Route } from 'next'
 import type { Dish, Ingredient, MenuCategory, MenuSubcategory } from '@/generated/prisma/client'
 import EditDishForm from '@/components/edit-dish-form'
 import { dishFormValues } from '@/components/forms/form-defaults'
@@ -11,9 +10,10 @@ import IngredientManager from '@/components/ingredient-manager'
 import DishStatusManager from '@/components/dish-status-manager'
 import { PageHeader } from '@/components/shell/page-header'
 import type { ShellPortal } from '@/components/shell/shell-types'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 export type EditableDish = Dish & { ingredients: Ingredient[]; _count: { views: number } }
-export type DishRestaurant = { id: string; name: string; dietaryOptions: string[]; categories: (MenuCategory & { subcategories: MenuSubcategory[] })[] }
+export type DishRestaurant = { id: string; code: string; name: string; dietaryOptions: string[]; categories: (MenuCategory & { subcategories: MenuSubcategory[] })[] }
 
 /**
  * The dish edit page's body for both portals: the header and view count, the status toggles, the
@@ -28,7 +28,7 @@ export default function DishEditor({ portal, restaurant, dish }: { portal: Shell
       <PageHeader
         title={dish.nameEn}
         description={`${dish.nameFr} · ${dish._count.views} view${dish._count.views === 1 ? '' : 's'} so far`}
-        back={{ href: `/${portal}/restaurants/${restaurant.id}/dishes` as Route, label: 'All dishes' }}
+        back={{ href: restaurantPath(portal, restaurant.code, 'dishes'), label: 'All dishes' }}
       />
 
       <DishStatusManager dishId={dish.id} isActive={dish.isActive} isMostPurchased={dish.isMostPurchased} />

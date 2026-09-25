@@ -20,7 +20,7 @@ export function SettingsScreen({ restaurant, pos, children }: SettingsScreenProp
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-2">
       <PageHeader title="Settings" description="Name, address, hours, branding and currency. Changes go live on the public menu as soon as you save." />
-      <EditRestaurantForm id={restaurant.id} defaultValues={restaurantFormValues(restaurant)} integrations={<PosPanel view={pos} />} />
+      <EditRestaurantForm id={restaurant.id} code={restaurant.code} defaultValues={restaurantFormValues(restaurant)} integrations={<PosPanel view={pos} />} />
       {children}
     </div>
   )

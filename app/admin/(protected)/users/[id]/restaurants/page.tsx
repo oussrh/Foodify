@@ -7,6 +7,7 @@ import AssignRestaurantsDialog from '@/components/assign-restaurants-dialog'
 import RemoveUserRestaurantButton from '@/components/remove-user-restaurant-button'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
 import { idSegment, routeParams } from '@/lib/schemas/page-params'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 export default async function UserRestaurantsPage({ params }: { params: Promise<{ id: string }> }) {
   await requireSuperAdminPage()
@@ -15,7 +16,7 @@ export default async function UserRestaurantsPage({ params }: { params: Promise<
     where: { id },
     include: {
       restaurants: {
-        select: { id: true, name: true, slug: true, city: true, _count: { select: { dishes: true } } },
+        select: { id: true, code: true, name: true, slug: true, city: true, _count: { select: { dishes: true } } },
         orderBy: { name: 'asc' },
       },
     },
@@ -55,7 +56,7 @@ export default async function UserRestaurantsPage({ params }: { params: Promise<
             {user.restaurants.map((r) => (
               <TableRow key={r.id}>
                 <TableCell>
-                  <Link href={`/admin/restaurants/${r.id}/menu`} className="font-medium hover:underline">
+                  <Link href={restaurantPath('admin', r.code, 'menu')} className="font-medium hover:underline">
                     {r.name}
                   </Link>
                   <span className="block text-xs text-muted-foreground">/{r.slug}</span>
