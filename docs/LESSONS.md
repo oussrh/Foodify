@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-25"
+last_verified: "2026-09-28"
 ---
 
 # Lessons
@@ -15,6 +15,19 @@ last_verified: "2026-09-25"
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
+
+## 2026-09-28 · A device on the restaurant's network asks the server; the server never reaches in
+
+Kitchen printing looked like it needed Epson's browser SDK: the tablet's page sends the ticket to
+the printer's local IP. On an https site that is mixed content, refused by every browser unless a
+certificate is installed on each printer, and it prints nothing while the tablet sleeps. Epson's
+Server Direct Print turns the direction round: the printer polls an https address and prints what
+it is answered with, so nothing on the restaurant's network has to be reachable and no tablet has to
+be awake. What it owes is an outbox written in the event's own transaction, like the POS's.
+
+Generalise it as: for hardware in a restaurant (printers, and whatever comes next), prefer the mode
+where the device calls out to us on a schedule, name it by a secret stored only as a hash, and
+queue its work transactionally; a browser-to-device path is the fallback, not the design.
 
 ## 2026-09-25 · On an owner-managed platform, a restaurant feature is the owner's to switch on
 

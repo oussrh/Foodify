@@ -14,6 +14,7 @@ import { billActor, pendingRefusal, staffChange, voidRefusal, type ChangeMode, t
 import type { OrderStatus } from '@/lib/orders'
 import { lockWithBill } from '@/server/order-lock'
 import { enqueuePos } from '@/server/pos/enqueue'
+import { enqueueCancelPrint } from '@/server/print/enqueue'
 import { applyRemoval, billClosed, refusePending, TICKET_SELECT, type TicketRow } from '@/server/ticket-apply'
 
 /** Who is acting: the signed-in user as the guard answered it. */
@@ -85,6 +86,8 @@ export async function changeTicket(input: TicketChangeInput, actor: Actor, via: 
     const state = await applyRemoval(tx, ticket, { lineId: input.lineId, quantity: input.quantity, voided: via === 'void' })
     const change = await tx.orderChange.create({ data: { ...record, status: 'APPLIED' }, select: { id: true } })
     await enqueuePos(tx, { restaurantId: ticket.restaurantId, orderId: ticket.id, billId: ticket.parentId ?? ticket.id, kind: 'CHANGE', changeId: change.id })
+    // A void comes after the food was made: the kitchen has nothing left to stop, so no slip.
+    if (via === 'staff') await enqueueCancelPrint(tx, ticket.id, change.id)
     const answered = state.status === 'CANCELLED' ? await refusePending(tx, [ticket.id], actor.id) : []
     return { ok: true, outcome: 'applied', changeId: change.id, ...state, answered }
   })
@@ -139,6 +142,7 @@ export async function decideChange(changeId: string, accept: boolean, decider: A
     const state = await applyRemoval(tx, ticket, { lineId: change.lineId, quantity, voided: false })
     await tx.orderChange.update({ where: { id: changeId }, data: { status: 'APPLIED', quantity, ...decided }, select: { id: true } })
     await enqueuePos(tx, { restaurantId: ticket.restaurantId, orderId: ticket.id, billId: ticket.parentId ?? ticket.id, kind: 'CHANGE', changeId })
+    await enqueueCancelPrint(tx, ticket.id, changeId)
     const moot = state.status === 'CANCELLED' ? await refusePending(tx, [ticket.id], decider.id) : []
     return { ok: true, status: 'APPLIED', orderStatus: state.status, answered: [changeId, ...moot] }
   })

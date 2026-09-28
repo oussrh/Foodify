@@ -52,6 +52,11 @@ export default defineConfig({
         'server/pos/payloads.ts', // what a row says, read from the orders: the same suite
         'server/pos/deliver.ts', // the sweep and the answers it records: the same suite
         'server/pos/webhook.ts', // a webhook verified, deduplicated and applied: tests/integration/pos-webhook.test.ts
+        'server/print/enqueue.ts', // a print job written in the event's transaction: tests/integration/print-jobs.test.ts
+        'server/print/printers.ts', // a restaurant's printers written: tests/integration/print-endpoint.test.ts
+        'server/print/view.ts', // the Printers section's reading of them: the same suite
+        'server/print/poll.ts', // a printer's poll and result, SKIP LOCKED: the same suite
+        'server/print/render-job.ts', // a job read from the orders and laid out: the same suite
         'lib/emails/**', // HTML templates: presentational
       ],
       thresholds: {
