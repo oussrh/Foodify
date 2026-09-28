@@ -5,6 +5,7 @@ import { SettingsScreen } from '@/components/restaurant-form/settings-screen'
 import { restaurantPageId } from '@/lib/restaurant-page'
 import { restaurantPath } from '@/lib/restaurant-paths'
 import { loadPosView } from '@/server/pos/view'
+import { loadPrintView } from '@/server/print/view'
 
 export default async function EditRestaurantPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
@@ -14,5 +15,5 @@ export default async function EditRestaurantPage({ params }: { params: Promise<{
   const restaurant = await prisma.restaurant.findFirst({ where: { id, users: { some: { email: session.user.email } } } })
   if (!restaurant) redirect('/manager/restaurants')
 
-  return <SettingsScreen restaurant={restaurant} pos={await loadPosView(restaurant.id)} />
+  return <SettingsScreen restaurant={restaurant} pos={await loadPosView(restaurant.id)} print={await loadPrintView(restaurant.id)} />
 }

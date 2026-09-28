@@ -18,12 +18,23 @@ import { StaffSessionMark } from '@/components/staff/staff-session-mark'
 export const STAFF_THEME_KEY = 'foodify-theme'
 
 /**
+ * next-themes renders its no-flash script inside the tree. From the server it runs as the page is
+ * parsed, which is its job; but each scope's provider also mounts in the browser on a client-side
+ * navigation into its subtree (the landing page to a sign-in), and React warns about a <script>
+ * created there, since it never runs. In the browser the script is given a type that is not
+ * JavaScript, so React leaves it alone; the provider's own effect applies the theme there. The
+ * library marks the tag `suppressHydrationWarning`, so the attribute differing from the server's
+ * is not a mismatch.
+ */
+const scriptProps = typeof window === 'undefined' ? {} : { type: 'application/json' }
+
+/**
  * The staff theme scope: light by default, dark or "follow the device" when chosen, remembered per
  * device. It also marks the installed app's session as begun on every staff page (StaffSessionMark).
  */
 export function StaffTheme({ children }: { children: React.ReactNode }) {
   return (
-    <NextThemesProvider attribute="class" defaultTheme="light" enableSystem storageKey={STAFF_THEME_KEY}>
+    <NextThemesProvider attribute="class" defaultTheme="light" enableSystem storageKey={STAFF_THEME_KEY} scriptProps={scriptProps}>
       <StaffSessionMark />
       {children}
     </NextThemesProvider>
@@ -33,7 +44,7 @@ export function StaffTheme({ children }: { children: React.ReactNode }) {
 /** The guest menu's theme scope: follows the device unless the guest picks one on the menu. */
 export function MenuTheme({ children }: { children: React.ReactNode }) {
   return (
-    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem>
+    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem scriptProps={scriptProps}>
       {children}
     </NextThemesProvider>
   )

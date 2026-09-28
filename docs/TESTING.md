@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["testing", "coverage", "vitest"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 source_truth: ["vitest.config.ts", "vitest.integration.config.ts", "package.json"]
-last_verified: "2026-09-25"
+last_verified: "2026-09-28"
 ---
 
 # Testing
@@ -67,6 +67,8 @@ Each one is in `vitest.config.ts` → `coverage.exclude` with the same reason:
 | `server/pos/enqueue.ts` | An outbox row written in the event's own transaction; held by `tests/integration/pos-outbox.test.ts` |
 | `server/pos/claim.ts`, `server/pos/payloads.ts`, `server/pos/deliver.ts` | The claim's SQL (`SKIP LOCKED`, proven on two real connections), the payloads and the sweep; held by `tests/integration/pos-delivery.test.ts` |
 | `server/pos/webhook.ts` | A webhook verified, deduplicated and applied; held by `tests/integration/pos-webhook.test.ts` |
+| `server/print/enqueue.ts` | A print job written in the event's own transaction (a ticket on arrival or accept, a cancel slip only where the ticket printed, a reprint); held by `tests/integration/print-jobs.test.ts` |
+| `server/print/printers.ts`, `server/print/view.ts`, `server/print/poll.ts`, `server/print/render-job.ts` | A restaurant's printers and a printer's poll (`SKIP LOCKED`), its results and the tickets rendered from the orders; held by `tests/integration/print-endpoint.test.ts`, which plays the printer against the route |
 | `lib/emails/**` | HTML templates; presentational |
 
 ## Contrast of the tokens

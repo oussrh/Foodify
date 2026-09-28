@@ -77,6 +77,8 @@ model Restaurant {
   timeZone          String             @default("UTC")
   // Deprecated, unused: POS is available to every restaurant; to be dropped with the subscription-plan work.
   posEnabled        Boolean            @default(false)
+  // When a kitchen ticket prints on the restaurant's printers (prisma/print.prisma): on arrival or on accept.
+  printTrigger      PrintTrigger       @default(ARRIVAL)
   // Design/Branding
   coverImageUrl     String?
   coverImageStyle   String? // "cover" or "repeat"
@@ -97,6 +99,7 @@ model Restaurant {
   orderChanges      OrderChange[]
   posConnection     PosConnection?
   posOutbox         PosOutbox[]
+  printers          Printer[]
 }
 
 model User {
@@ -300,6 +303,7 @@ model Order {
   posCheckId   String?
   posPaidAt    DateTime?
   posOutbox    PosOutbox[]
+  printJobs    PrintJob[]
 
   @@unique([restaurantId, number])
   @@index([restaurantId, status, createdAt])
@@ -394,6 +398,7 @@ model OrderChange {
   source        ChangeSource       @default(STAFF)
   createdAt     DateTime           @default(now())
   posOutbox     PosOutbox[]
+  printJobs     PrintJob[]
 
   @@index([orderId])
   @@index([restaurantId, createdAt])
