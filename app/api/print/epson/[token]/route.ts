@@ -4,8 +4,9 @@
 // so there is no session. The printer posts a form: `ConnectionType=GetRequest` for its jobs,
 // answered with ePOS-Print XML or an empty 200 when there is nothing; `SetResponse` with the
 // result of the jobs it was handed, answered with an empty 200. Anything else it sends (status
-// notifications) is acknowledged and not read. The body is bounded before it is parsed.
-import { fail } from '@/lib/api'
+// notifications) is acknowledged and not read. The body is bounded before it is parsed. A printer
+// cannot read the JSON envelope, so its answers are `deviceAnswer` (lib/api.ts); failures are `fail`.
+import { deviceAnswer, fail } from '@/lib/api'
 import { parseResults } from '@/lib/print/epos-response'
 import { printRequest } from '@/lib/print/epos-xml'
 import { eposCall, printerToken } from '@/lib/schemas/print'
@@ -16,10 +17,10 @@ import { renderJobs } from '@/server/print/render-job'
 /** The largest form read: a result file for a handful of jobs is a few kilobytes. */
 const MAX_BODY = 256 * 1024
 
-const XML = { 'Content-Type': 'text/xml; charset=utf-8', 'Cache-Control': 'no-store' }
+const XML = 'text/xml; charset=utf-8'
 
 /** The empty 200 the printer expects when there is nothing more to say. */
-const nothing = () => new Response(null, { status: 200, headers: XML })
+const nothing = () => deviceAnswer(null, XML)
 
 /** The printer's form, or null when it is too large or not the shape a printer sends. */
 async function formOf(request: Request) {
@@ -52,7 +53,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ tok
     if (form.ConnectionType !== 'GetRequest') return nothing()
     const ids = await takeDueJobs(printer.id, now)
     if (ids.length === 0) return nothing()
-    return new Response(printRequest(await renderJobs(ids)), { status: 200, headers: XML })
+    return deviceAnswer(printRequest(await renderJobs(ids)), XML)
   } catch (error) {
     log.error({ err: error }, 'print: printer call failed')
     return fail('internal', 'Internal error', 500)

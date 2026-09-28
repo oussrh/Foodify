@@ -6,8 +6,8 @@ status: living
 audience: ["developer", "agent"]
 tags: ["deployment", "vercel", "prisma", "environment"]
 related: ["./README.md", "./TESTING.md"]
-source_truth: ["package.json", "lib/env.ts", "prisma/schema.prisma", "prisma/pos.prisma", "next.config.js"]
-last_verified: "2026-09-25"
+source_truth: ["package.json", "lib/env.ts", "prisma/schema.prisma", "prisma/pos.prisma", "prisma/print.prisma", "next.config.js"]
+last_verified: "2026-09-28"
 ---
 
 # Deployment
@@ -56,6 +56,13 @@ naming it. But the code reads the new tables on every change to an order, POS
 or not, so deploy it before the build that ships Settings → Integrations: without it, placing an
 order (guest or waiter), every board move (accept, ready, served, cancel), removing a dish,
 answering a request, voiding, and closing a bill all fail.
+
+`20260928090000_kitchen_printing` (the `Printer` and `PrintJob` tables of `prisma/print.prisma`,
+`Restaurant.printTrigger` defaulting to on arrival) is additive: no restaurant has a printer until
+its owner adds one, so nothing prints until then. The code reads the printers on every new
+ticket, accept, cancel and removal, so deploy it before the build that ships Kitchen printers, or
+placing an order and those board moves fail. A printer polls `/api/print/epson/<secret>` on the
+public origin (`NEXT_PUBLIC_APP_URL`), so that is the host its address is built on.
 
 Write migrations the running version survives (add a column before the code reads it, stop
 reading it before it is dropped): for a moment, the old deploy runs on the new schema.
