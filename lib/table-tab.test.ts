@@ -6,7 +6,8 @@ import { ADD_BY_DEFAULT_MINUTES, additionLabel, addToRefusal, billCancelled, cur
 // send adds to it by default, stated with literal values rather than read back from the module,
 // so a change to the rule has to change these too.
 
-const ZONE = 'Africa/Casablanca' // UTC+1 all year
+// A fixed offset: a real zone's rules move with the tz database (Morocco's did), an Etc zone's never do.
+const ZONE = 'Etc/GMT-1' // UTC+1 (Etc signs are inverted)
 const NOW = new Date('2026-09-24T20:00:00Z') // 21:00 local
 const AT = { restaurantId: 'r1', table: '4', serviceStart: serviceDayStart(NOW, ZONE) }
 
@@ -43,7 +44,7 @@ describe('addToRefusal', () => {
   })
 
   it('refuses a bill of an earlier service, and takes one opened at 04:00 local itself', () => {
-    // The day began at 03:00 UTC (04:00 in Casablanca).
+    // The day began at 03:00 UTC (04:00 at UTC+1).
     expect(AT.serviceStart.toISOString()).toBe('2026-09-24T03:00:00.000Z')
     expect(addToRefusal(order({ createdAt: '2026-09-24T02:59:59Z' }), AT)).toBe('previous_service')
     expect(addToRefusal(order({ createdAt: new Date('2026-09-24T03:00:00Z') }), AT)).toBeNull()

@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { isSoldOut, SERVICE_DAY_END_HOUR, soldOutUntilNextService, serviceDayStart } from './availability'
 
+// A fixed offset: a real zone's rules move with the tz database (Morocco's did), an Etc zone's never do.
+const FIXED_UTC_PLUS_1 = 'Etc/GMT-1' // UTC+1 (Etc signs are inverted)
+
 // What makes this worth testing is the promise: a dish marked sold out during service comes back
 // for the next one, and never in the middle of the one it was marked in.
 
@@ -13,8 +16,8 @@ describe('soldOutUntilNextService', () => {
   })
 
   it('takes the next local 04:00 when marked after midnight but before it', () => {
-    // 01:30 in Casablanca (UTC+1): the same morning's 04:00, not tomorrow's.
-    expect(soldOutUntilNextService(new Date('2026-09-23T00:30:00Z'), 'Africa/Casablanca').toISOString()).toBe('2026-09-23T03:00:00.000Z')
+    // 01:30 at UTC+1: the same morning's 04:00, not tomorrow's.
+    expect(soldOutUntilNextService(new Date('2026-09-23T00:30:00Z'), FIXED_UTC_PLUS_1).toISOString()).toBe('2026-09-23T03:00:00.000Z')
   })
 
   it('keeps the hour across a daylight-saving change', () => {
@@ -58,10 +61,10 @@ describe('soldOutUntilNextService', () => {
 
 describe('serviceDayStart', () => {
   it('is today’s 04:00 after it, and yesterday’s before it, on the restaurant’s clock', () => {
-    // Casablanca is UTC+1: 13:30 local is in the day that began at 03:00 UTC.
-    expect(serviceDayStart(new Date('2026-09-24T12:30:00Z'), 'Africa/Casablanca').toISOString()).toBe('2026-09-24T03:00:00.000Z')
+    // A fixed UTC+1 zone: 13:30 local is in the day that began at 03:00 UTC.
+    expect(serviceDayStart(new Date('2026-09-24T12:30:00Z'), FIXED_UTC_PLUS_1).toISOString()).toBe('2026-09-24T03:00:00.000Z')
     // 01:00 local on the 25th is still the 24th's service.
-    expect(serviceDayStart(new Date('2026-09-25T00:00:00Z'), 'Africa/Casablanca').toISOString()).toBe('2026-09-24T03:00:00.000Z')
+    expect(serviceDayStart(new Date('2026-09-25T00:00:00Z'), FIXED_UTC_PLUS_1).toISOString()).toBe('2026-09-24T03:00:00.000Z')
   })
 
   it('starts at 04:00 itself, not a day earlier', () => {
