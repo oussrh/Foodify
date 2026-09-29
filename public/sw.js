@@ -1,6 +1,6 @@
 /* Foodify menu service worker (v2).
    Scope: public menu routes, Next static assets, fonts and images. Admin/manager routes are never touched.
-   - Pages: network-first, cached fallback, /offline as last resort.
+   - Pages: network-first, cached fallback, /offline as last resort. A guest's order page is never cached.
    - Static assets: cache-first. Images/fonts: stale-while-revalidate, any cached size of an image
      serves when offline.
    - The page sends a `precache` message with everything a menu needs so it works offline after one visit.
@@ -16,6 +16,9 @@ const isMenuRoute = (url) => sameOrigin(url) && (url.pathname.startsWith('/resta
 const isNextImage = (url) => sameOrigin(url) && url.pathname === '/_next/image'
 const isImage = (url) => isNextImage(url) || /\.(png|jpe?g|webp|avif|gif|svg)(\?|$)/i.test(url.pathname) || url.hostname === 'res.cloudinary.com'
 const isFont = (url) => url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com'
+// A guest's order page carries a secret in its address and its status is always asked for live
+// (/api/orders/track/<secret>, never touched here): the page is fetched, never stored.
+const isOrderPage = (url) => /^\/restaurant\/[^/]+\/order\//.test(url.pathname)
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -152,7 +155,7 @@ async function networkFirst(event) {
   try {
     const preloaded = event.preloadResponse ? await event.preloadResponse : undefined
     const res = preloaded || (await fetch(request))
-    if (res && res.ok) cache.put(request, res.clone())
+    if (res && res.ok && !isOrderPage(new URL(request.url))) cache.put(request, res.clone())
     return res
   } catch {
     // ?lang, ?filter, ?source=pwa and Next's _rsc do not change which menu this is.

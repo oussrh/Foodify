@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-28"
+last_verified: "2026-09-29"
 ---
 
 # Lessons
@@ -15,6 +15,19 @@ last_verified: "2026-09-28"
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
+
+## 2026-09-29 · An id that is logged cannot also be the key to a door
+
+The guest's tracking link wanted the order's uuid: it is already unique, already in the row, and
+unguessable enough. But order ids are written to the logs on purpose, so every log reader, log
+shipper and support screenshot would hold a working link to a stranger's order and phone-side
+status. A value's secrecy is decided by everywhere it travels, not by its entropy. The link is a
+secret of its own, handed back once and stored only as its hash, made by the same helper as a
+printer's address (`server/secret.ts`), so a leaked table opens nothing either.
+
+Generalise it as: before an existing identifier becomes a capability, list where it is already
+written (logs, URLs, push payloads, exports); if the list is not empty, mint a secret for the job
+and keep only its hash.
 
 ## 2026-09-28 · A device on the restaurant's network asks the server; the server never reaches in
 

@@ -16,11 +16,14 @@ import CartLineRow from './cart-line-row'
 import OrderForm from './order-form'
 import OrderSent from './order-sent'
 import { usePlaceOrder } from './use-place-order'
+import { useGuestOrders } from '../tracking/use-guest-orders'
 
 interface CartSheetProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   restaurantId: string
+  /** The menu's slug, for the link that follows an order once it is sent. */
+  restaurantSlug: string
   restaurantName: string
   lines: CartLineView[]
   cart: CartApi
@@ -37,13 +40,16 @@ interface CartSheetProps {
  * The order the guest has built, in the restaurant's brand: its lines, then the table, the phone,
  * the note and the send; once sent, the order number.
  */
-export default function CartSheet({ open, onOpenChange, restaurantId, restaurantName, lines, cart, tableLocked, locale, money, themeClass, brandStyle }: CartSheetProps) {
+export default function CartSheet({ open, onOpenChange, restaurantId, restaurantSlug, restaurantName, lines, cart, tableLocked, locale, money, themeClass, brandStyle }: CartSheetProps) {
   const t = MENU_TEXT[locale]
   const [note, setNote] = useState('')
   const [phone, setPhone] = useState('')
-  const placing = usePlaceOrder(locale, () => {
+  const guestOrders = useGuestOrders(restaurantId)
+  const placing = usePlaceOrder(locale, (placed) => {
     cart.clear()
     setNote('')
+    // Remembered on the device, so the menu can say where it is (the pill) until it is served.
+    if (placed.token) guestOrders.remember({ token: placed.token, number: placed.number, table: placed.table })
   })
   const subtotal = cartSubtotal(lines)
 
@@ -61,7 +67,7 @@ export default function CartSheet({ open, onOpenChange, restaurantId, restaurant
           <SheetDescription className="sr-only">{restaurantName}</SheetDescription>
 
           {placing.order ? (
-            <OrderSent order={placing.order} onDone={close} locale={locale} />
+            <OrderSent order={placing.order} slug={restaurantSlug} onDone={close} locale={locale} />
           ) : lines.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">{t.emptyOrder}</p>
           ) : (

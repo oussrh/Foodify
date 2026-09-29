@@ -59,6 +59,8 @@ describe('labels', () => {
       noteFor: ['Harira'],
       soldOutSince: ['Harira'],
       soldOutSincePlural: ['Harira, Taktouka'],
+      yourOrderNumber: [12],
+      atTable: ['7'],
     }
     for (const locale of ['en', 'fr'] as const) {
       for (const [key, value] of Object.entries(MENU_TEXT[locale])) {
@@ -74,7 +76,17 @@ describe('labels', () => {
     }
   })
 
-  it('translates a known dietary or allergen key', () => {
+  it('names every step of a guest order, and a cancellation, in both languages', () => {
+    // Stated literally: the five things a guest can be told, not read from the module's own keys.
+    for (const locale of ['en', 'fr'] as const) {
+      const words = MENU_TEXT[locale].orderStatus
+      for (const status of ['sent', 'preparing', 'ready', 'served', 'cancelled'] as const) expect(words[status], `${locale}.${status}`).toMatch(/\S/)
+    }
+    expect(MENU_TEXT.en.orderStatus.ready).toBe('Ready — on its way')
+    expect(MENU_TEXT.fr.orderStatus.preparing).toBe('En préparation')
+  })
+
+    it('translates a known dietary or allergen key', () => {
     expect(dietaryLabel('gluten_free', 'fr')).toBe('Sans gluten')
     expect(allergenLabel('nuts', 'en')).toBe('Nuts')
   })

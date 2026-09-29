@@ -72,9 +72,9 @@ export interface PlaceOrder {
 /**
  * Checks the order with `orderInput` (the route's own schema) and sends it to POST /api/orders,
  * saying what went wrong in the guest's language; the cart is emptied only once an order number
- * comes back.
+ * comes back, and `onSent` hears the order the server took (with a guest's tracking secret).
  */
-export function usePlaceOrder(locale: Locale, onSent: () => void): PlaceOrder {
+export function usePlaceOrder(locale: Locale, onSent: (order: PlacedOrder) => void): PlaceOrder {
   const [state, setState] = useState<State>(IDLE)
 
   const send = async (draft: OrderDraft, requirePhone: boolean): Promise<boolean> => {
@@ -93,9 +93,10 @@ export function usePlaceOrder(locale: Locale, onSent: () => void): PlaceOrder {
       // The order is stored once the POST answers: a body off its expected shape must not read as a
       // failure, or the guest sends again and the kitchen gets it twice. The sent screen then has
       // the table the guest gave and no number, rather than an error over an order that stands.
-      const placed = placedOrder.safeParse(data)
-      setState({ status: 'sent', order: placed.success ? placed.data : { id: '', number: 0, table: checked.body.table ?? '', subtotal: '' } })
-      onSent()
+      const parsed = placedOrder.safeParse(data)
+      const placed = parsed.success ? parsed.data : { id: '', number: 0, table: checked.body.table ?? '', subtotal: '' }
+      setState({ status: 'sent', order: placed })
+      onSent(placed)
     } catch (error) {
       setState({ status: 'idle', error: messageFor(error, locale), field: null })
     }

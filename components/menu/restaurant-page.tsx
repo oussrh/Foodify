@@ -17,7 +17,7 @@ import MenuSections from './restaurant-page/menu-sections'
 import DishSheet from './restaurant-page/dish-sheet'
 import FiltersSheet from './restaurant-page/filters-sheet'
 import { precacheUrls } from './restaurant-page/menu-urls'
-import CartBar from './cart/cart-bar'
+import MenuBottom from './restaurant-page/menu-bottom'
 import CartSheet from './cart/cart-sheet'
 import { useMenuCart } from './restaurant-page/use-menu-cart'
 import { useMenuFilters } from './restaurant-page/use-menu-filters'
@@ -152,8 +152,8 @@ export default function RestaurantPage({
 
       <MenuFooter restaurant={restaurant} social={social} locale={locale} />
 
-      {/* Order bar: what is in the order, and the way into it */}
-      <CartBar count={order.count} subtotal={order.subtotal} onOpen={() => order.setOpen(true)} locale={locale} money={money} />
+      {/* Bottom bar: the order with the kitchen, what is in the order being built, and the ways into both */}
+      <MenuBottom restaurantId={restaurant.id} slug={restaurant.slug} count={order.count} subtotal={order.subtotal} onOpenCart={() => order.setOpen(true)} locale={locale} money={money} />
 
       {/* Dish sheet */}
       <DishSheet
@@ -175,6 +175,7 @@ export default function RestaurantPage({
           open={order.open}
           onOpenChange={order.setOpen}
           restaurantId={restaurant.id}
+          restaurantSlug={restaurant.slug}
           restaurantName={restaurant.name}
           lines={order.lines}
           cart={order.cart}
