@@ -5,10 +5,11 @@
 // Installed matters beyond tidiness: on iOS it is what makes notifications possible.
 'use client'
 
-import { Download, Share, Smartphone } from 'lucide-react'
+import { Download, Smartphone } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useClientValue } from '@/components/use-client-value'
 import type { StaffPwa } from '../use-staff-pwa'
+import { AddToHomeSteps } from '../add-to-home-steps'
 import { readAppleMobile } from '../device-facts'
 import { DeviceRow } from './device-row'
 
@@ -36,15 +37,7 @@ export function InstallRow({ pwa }: { pwa: StaffPwa }) {
         title="Home screen app"
         status="Not installed"
         tone="attention"
-        note={
-          <ol className="list-decimal space-y-1 pl-5">
-            <li>
-              In Safari, tap Share <Share className="inline h-4 w-4 align-text-bottom" aria-hidden="true" />
-              <span className="sr-only">(the square with an arrow pointing up)</span>
-            </li>
-            <li>Choose “Add to Home Screen”, then open the app from its icon.</li>
-          </ol>
-        }
+        note={<AddToHomeSteps />}
       />
     )
   }

@@ -30,6 +30,7 @@ export default defineConfig({
         'lib/cloudinary.ts', // SDK wrapper over the network: integration, not unit
         'lib/auth-guard.ts', // needs a session and Postgres: the phase-10 integration suite
         'lib/restaurant-loader.ts', // the same guard over the same database: tests/integration/order-board.test.ts
+        'lib/restaurant-page.ts', // a portal page's segment read from the database under the manage guard: tests/integration/restaurant-page.test.ts
         'lib/insights-loader.ts', // grouped SQL over the same database: tests/integration/insights.test.ts
         'lib/insights-queries.ts', // the loader's SQL, split out of it: the same integration suite
         'lib/table-tab-loader.ts', // a table's bill read from the database: tests/integration/order-additions.test.ts
@@ -41,6 +42,21 @@ export default defineConfig({
         'server/bill-changes.ts', // close and move, in transactions: the same suite
         'server/change-log.ts', // a manager's read of the change log: tests/integration/ticket-changes.test.ts
         'server/order-moves.ts', // the board's moves under the ticket's lock: tests/integration/ticket-changes.test.ts and order-board.test.ts
+        'server/pos/connection.ts', // a stored connection opened into its adapter: tests/integration/pos-setup.test.ts
+        'server/pos/setup.ts', // connect, test and choose a location, over the database: the same suite
+        'server/pos/mapping.ts', // the dishes matched to the POS's items, over the database: the same suite
+        'server/pos/control.ts', // activate, pause, resume, retry, disconnect: the same suite and pos-delivery.test.ts
+        'server/pos/view.ts', // the Integrations tab's reading of the connection: tests/integration/pos-setup.test.ts
+        'server/pos/enqueue.ts', // an outbox row written in the event's transaction: tests/integration/pos-outbox.test.ts
+        'server/pos/claim.ts', // the claim's SQL, SKIP LOCKED over two connections: tests/integration/pos-delivery.test.ts
+        'server/pos/payloads.ts', // what a row says, read from the orders: the same suite
+        'server/pos/deliver.ts', // the sweep and the answers it records: the same suite
+        'server/pos/webhook.ts', // a webhook verified, deduplicated and applied: tests/integration/pos-webhook.test.ts
+        'server/print/enqueue.ts', // a print job written in the event's transaction: tests/integration/print-jobs.test.ts
+        'server/print/printers.ts', // a restaurant's printers written: tests/integration/print-endpoint.test.ts
+        'server/print/view.ts', // the Printers section's reading of them: the same suite
+        'server/print/poll.ts', // a printer's poll and result, SKIP LOCKED: the same suite
+        'server/print/render-job.ts', // a job read from the orders and laid out: the same suite
         'lib/emails/**', // HTML templates: presentational
       ],
       thresholds: {

@@ -33,6 +33,7 @@ export async function loadChangeLog(orderId: string): Promise<ChangeLogEntry[]> 
       decidedAt: true,
       line: { select: { nameEn: true } },
       requestedBy: PERSON,
+      source: true,
       decidedBy: PERSON,
     },
   })
@@ -50,7 +51,8 @@ export async function loadChangeLog(orderId: string): Promise<ChangeLogEntry[]> 
     fromTable: row.fromTable,
     toTable: row.toTable,
     mergedNumber: row.mergedOrderId ? (numberOf.get(row.mergedOrderId) ?? null) : null,
-    by: nameOf(row.requestedBy),
+    // The POS closing a bill paid at its till is nobody's account.
+    by: row.source === 'POS' ? 'POS' : nameOf(row.requestedBy),
     decidedBy: nameOf(row.decidedBy),
     createdAt: row.createdAt.toISOString(),
     decidedAt: row.decidedAt?.toISOString() ?? null,

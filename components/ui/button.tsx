@@ -21,7 +21,9 @@ const buttonVariants = cva(
         sm: 'h-9 px-3 rounded-md text-sm',
         lg: 'h-11 px-6 rounded-md text-base',
         icon: 'h-10 w-10',
-        'icon-sm': 'h-8 w-8'
+        'icon-sm': 'h-8 w-8',
+        // A thumb's target on the staff devices (48px).
+        'icon-lg': 'h-12 w-12'
       }
     },
     defaultVariants: {

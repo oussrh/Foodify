@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { MoreHorizontal, Star, Trash2 } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { setDishAvailability } from '@/app/actions/dish-availability-actions'
+import { restaurantPath, type RestaurantPage } from '@/lib/restaurant-paths'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -183,6 +184,8 @@ export function DishRowMenu({ dishId, dishName, editHref, isMostPurchased }: Dis
 
 interface RestaurantRowMenuProps {
   restaurantId: string
+  /** The restaurant's short code, which its pages are addressed by. */
+  code: string
   restaurantName: string
   portal: 'admin' | 'manager'
   slug: string
@@ -192,11 +195,11 @@ interface RestaurantRowMenuProps {
  * A restaurant row's menu: straight to its menu, dishes, settings and people, open its public page,
  * and delete behind a confirmation.
  */
-export function RestaurantRowMenu({ restaurantId, restaurantName, portal, slug }: RestaurantRowMenuProps) {
+export function RestaurantRowMenu({ restaurantId, code, restaurantName, portal, slug }: RestaurantRowMenuProps) {
   const [confirm, setConfirm] = useState(false)
   const [pending, startTransition] = useTransition()
   const router = useRouter()
-  const base = `/${portal}/restaurants/${restaurantId}`
+  const tab = (page: RestaurantPage) => restaurantPath(portal, code, page)
 
   return (
     <>
@@ -204,17 +207,17 @@ export function RestaurantRowMenu({ restaurantId, restaurantName, portal, slug }
         <RowMenuTrigger label={restaurantName} pending={pending} />
         <DropdownMenuContent align="end" className="w-48">
           <DropdownMenuItem asChild>
-            <Link href={`${base}/menu` as Route}>Menu</Link>
+            <Link href={tab('menu')}>Menu</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href={`${base}/dishes` as Route}>Dishes</Link>
+            <Link href={tab('dishes')}>Dishes</Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>
-            <Link href={`${base}/edit` as Route}>Settings</Link>
+            <Link href={tab('edit')}>Settings</Link>
           </DropdownMenuItem>
           {portal === 'admin' && (
             <DropdownMenuItem asChild>
-              <Link href={`${base}/users` as Route}>People</Link>
+              <Link href={tab('users')}>People</Link>
             </DropdownMenuItem>
           )}
           <DropdownMenuItem asChild>

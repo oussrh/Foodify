@@ -18,7 +18,7 @@ export default async function ManagerLayout({ children }: LayoutProps) {
 
   const user = await prisma.user.findUnique({
     where: { email: session.user.email },
-    select: { role: true, email: true, restaurants: { select: { id: true, name: true }, orderBy: { name: 'asc' } } },
+    select: { role: true, email: true, restaurants: { select: { id: true, code: true, name: true }, orderBy: { name: 'asc' } } },
   })
 
   if (!user) {

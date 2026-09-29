@@ -115,7 +115,7 @@ export async function loadInsights(id: string, grain: Grain, now = new Date()) {
 
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
-    select: { id: true, name: true, orderingEnabled: true, currency: true, currencySymbol: true, timeZone: true },
+    select: { id: true, code: true, name: true, orderingEnabled: true, currency: true, currencySymbol: true, timeZone: true },
   })
   if (!restaurant) return null
 

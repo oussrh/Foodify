@@ -72,9 +72,10 @@ test.describe('an order through the kitchen and the floor', () => {
     const kitchen = await deviceAccount('KITCHEN', info)
     try {
       await signInDevice(page, 'kitchen', kitchen.username)
-      // The manager portal sends anyone who is not a manager to their own home: a tablet, its board.
+      // The manager portal sends anyone who is not a manager to their own home: a tablet, its board
+      // (`/kitchen/<code>`, the restaurant first, as the waiter's app is).
       await page.goto('/manager')
-      await expect(page).toHaveURL(/\/kitchen\/orders\//)
+      await expect(page).toHaveURL(/\/kitchen\/[0-9A-Z]{6}$/)
       // The admin portal lets only a super admin stay.
       await page.goto('/admin')
       await expect(page).not.toHaveURL(/\/admin/)

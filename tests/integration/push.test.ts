@@ -32,7 +32,7 @@ const subscribe = (restaurantId: string, app: 'board' | 'waiter', at = endpoint(
   savePushSubscription({ restaurantId, app, subscription: { endpoint: at, keys } })
 const rowsOf = (tx: Tx, restaurantId: string) =>
   tx.pushSubscription.findMany({ where: { restaurantId }, select: { endpoint: true, userId: true, app: true }, orderBy: { endpoint: 'asc' } })
-const payload = { title: 'Table 4 is ready', body: 'Order #12 · 3 dishes', tag: 'ready-o1', url: '/waiter/K7M2QX', kind: 'ready' as const, restaurantId: 'r1' }
+const payload = { title: 'Table 4 is ready', body: 'Order #12 · 3 dishes', tag: 'ready-o1', url: '/waiter/K7M2QX', kind: 'ready' as const, restaurantId: 'r1', restaurantCode: 'K7M2QX' }
 const sentTo = () => sendNotification.mock.calls.map(([subscription]) => (subscription as { endpoint: string }).endpoint).sort()
 
 describe('saving a subscription', () => {

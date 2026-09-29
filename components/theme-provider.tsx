@@ -1,15 +1,50 @@
 'use client'
 
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
-import type { ThemeProviderProps } from 'next-themes'
+import { StaffSessionMark } from '@/components/staff/staff-session-mark'
+
+// The app has two theme scopes, each with its own remembered choice, and one provider per route
+// subtree so the two never mount together (the root layout has none: reading the path there would
+// make every page dynamic).
+//
+// - Staff (admin, manager, kitchen, waiter, their sign-ins, the landing page): light until this
+//   device chooses otherwise. A tablet on the pass or a phone in a dining room is read under
+//   bright light, and a dark screen because the phone happens to be in dark mode was a surprise.
+//   Its key is its own, so a choice saved under the old shared key does not carry over.
+// - The guest menu: follows the device, under the key it has always used, and a restaurant's
+//   forced `menuTheme` is applied on top by the menu itself (`.brand-scope`).
+
+/** Where a staff device remembers its light / dark / follow-the-device choice. */
+export const STAFF_THEME_KEY = 'foodify-theme'
 
 /**
- * next-themes set up for the app: the theme is a class on <html>, defaulting to the system's; any
- * prop passed overrides these.
+ * next-themes renders its no-flash script inside the tree. From the server it runs as the page is
+ * parsed, which is its job; but each scope's provider also mounts in the browser on a client-side
+ * navigation into its subtree (the landing page to a sign-in), and React warns about a <script>
+ * created there, since it never runs. In the browser the script is given a type that is not
+ * JavaScript, so React leaves it alone; the provider's own effect applies the theme there. The
+ * library marks the tag `suppressHydrationWarning`, so the attribute differing from the server's
+ * is not a mismatch.
  */
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+const scriptProps = typeof window === 'undefined' ? {} : { type: 'application/json' }
+
+/**
+ * The staff theme scope: light by default, dark or "follow the device" when chosen, remembered per
+ * device. It also marks the installed app's session as begun on every staff page (StaffSessionMark).
+ */
+export function StaffTheme({ children }: { children: React.ReactNode }) {
   return (
-    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem {...props}>
+    <NextThemesProvider attribute="class" defaultTheme="light" enableSystem storageKey={STAFF_THEME_KEY} scriptProps={scriptProps}>
+      <StaffSessionMark />
+      {children}
+    </NextThemesProvider>
+  )
+}
+
+/** The guest menu's theme scope: follows the device unless the guest picks one on the menu. */
+export function MenuTheme({ children }: { children: React.ReactNode }) {
+  return (
+    <NextThemesProvider attribute="class" defaultTheme="system" enableSystem scriptProps={scriptProps}>
       {children}
     </NextThemesProvider>
   )

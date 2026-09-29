@@ -7,13 +7,13 @@ import type { Route } from 'next'
 
 interface RestaurantPickerProps {
   title: string
-  restaurants: { id: string; name: string }[]
-  /** The app this choice leads into, e.g. `/waiter` or `/kitchen/orders`. */
+  restaurants: { id: string; code: string; name: string }[]
+  /** The app this choice leads into, e.g. `/waiter` or `/kitchen`. */
   basePath: string
 }
 
 /**
- * Where a staff account covering several restaurants chooses one, each linking to `basePath/<id>`;
+ * Where a staff account covering several restaurants chooses one, each linking to `basePath/<code>`;
  * an account with none is told to ask for a People-tab assignment.
  */
 export default function RestaurantPicker({ title, restaurants, basePath }: RestaurantPickerProps) {
@@ -29,7 +29,7 @@ export default function RestaurantPicker({ title, restaurants, basePath }: Resta
           {restaurants.map((restaurant) => (
             <li key={restaurant.id}>
               <Link
-                href={`${basePath}/${restaurant.id}` as Route}
+                href={`${basePath}/${restaurant.code}` as Route}
                 className="flex h-16 items-center rounded-lg border border-border bg-card px-4 text-lg font-semibold hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
               >
                 {restaurant.name}

@@ -11,6 +11,7 @@ import { closeRefusal, landingBill, mergeRefusal, moveRefusal, type BillRefusal 
 import { billCancelled } from '@/lib/table-tab'
 import { BILL_FACTS, billFacts, mergeLocked, servicePlace } from '@/server/bill-merge'
 import { lockOrders } from '@/server/order-lock'
+import { enqueuePos } from '@/server/pos/enqueue'
 import { refusePending } from '@/server/ticket-apply'
 import type { Actor } from '@/server/ticket-changes'
 
@@ -29,10 +30,13 @@ export type CloseResult =
  * Closes `billId`: stamps who and when on the order that opened it, and answers every request
  * still open on its tickets (refused: after a close only a manager's void changes it). With
  * dishes of the bill still in the kitchen or on the pass it answers how many instead, unless
- * `force` (the waiter's "close anyway"); the forced close records that count. The caller has
- * guarded the bill's restaurant.
+ * `force` (the waiter's "close anyway"); the forced close records that count. `actor` null is the
+ * restaurant's POS closing a bill paid at its till (server/pos/webhook.ts): no person is stamped,
+ * the change's `source` is POS, and the close is not queued back to the POS that sent it. A close
+ * by staff is queued for the POS in the same transaction when one is active (server/pos/enqueue.ts).
+ * The caller has guarded the bill's restaurant.
  */
-export async function closeBill(billId: string, force: boolean, actor: Actor): Promise<CloseResult> {
+export async function closeBill(billId: string, force: boolean, actor: Actor | null): Promise<CloseResult> {
   return prisma.$transaction(async (tx) => {
     await lockOrders(tx, [billId])
     const bill = await tx.order.findUniqueOrThrow({
@@ -46,12 +50,14 @@ export async function closeBill(billId: string, force: boolean, actor: Actor): P
     if (dishes > 0 && !force) return { ok: false, refused: 'in_kitchen', dishes }
 
     const closedAt = new Date()
-    await tx.order.update({ where: { id: billId }, data: { closedAt, closedById: actor.id }, select: { id: true } })
+    const by = actor?.id ?? null
+    await tx.order.update({ where: { id: billId }, data: { closedAt, closedById: by }, select: { id: true } })
     await tx.orderChange.create({
-      data: { restaurantId: bill.restaurantId, orderId: billId, kind: 'CLOSE', status: 'APPLIED', quantity: dishes > 0 ? dishes : null, requestedById: actor.id },
+      data: { restaurantId: bill.restaurantId, orderId: billId, kind: 'CLOSE', status: 'APPLIED', quantity: dishes > 0 ? dishes : null, requestedById: by, source: actor ? 'STAFF' : 'POS' },
       select: { id: true },
     })
-    const answered = await refusePending(tx, [billId, ...bill.additions.map((addition) => addition.id)], actor.id)
+    const answered = await refusePending(tx, [billId, ...bill.additions.map((addition) => addition.id)], by)
+    if (actor) await enqueuePos(tx, { restaurantId: bill.restaurantId, orderId: billId, billId, kind: 'CLOSE' })
     return { ok: true, closedAt: closedAt.toISOString(), answered }
   })
 }

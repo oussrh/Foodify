@@ -8,6 +8,8 @@
 import prisma from '@/lib/prisma'
 import { nextStatus, type OrderMove, type OrderStatus } from '@/lib/orders'
 import { lockOrders } from '@/server/order-lock'
+import { enqueuePos } from '@/server/pos/enqueue'
+import { enqueueCancelPrint, enqueueTicketPrint } from '@/server/print/enqueue'
 import { refusePending } from '@/server/ticket-apply'
 import type { Actor } from '@/server/ticket-changes'
 
@@ -26,10 +28,15 @@ function stamps(next: OrderStatus): { acceptedAt?: Date; readyAt?: Date; servedA
 export async function moveOrder(orderId: string, action: OrderMove, actor: Actor): Promise<MoveOutcome> {
   return prisma.$transaction(async (tx) => {
     await lockOrders(tx, [orderId])
-    const order = await tx.order.findUniqueOrThrow({ where: { id: orderId }, select: { status: true } })
+    const order = await tx.order.findUniqueOrThrow({ where: { id: orderId }, select: { status: true, restaurantId: true, parentId: true } })
     const next = nextStatus(order.status, action)
     if (!next) return { id: orderId, status: order.status, moved: false, answered: [] }
     await tx.order.update({ where: { id: orderId }, data: { status: next, ...stamps(next) }, select: { id: true } })
+    // The board's cancel writes no change row of its own; the POS is told the ticket is off all the same.
+    if (next === 'CANCELLED') await enqueuePos(tx, { restaurantId: order.restaurantId, orderId, billId: order.parentId ?? orderId, kind: 'CHANGE' })
+    // A restaurant that prints on accept prints now; a cancel prints a slip wherever the ticket printed.
+    if (next === 'ACCEPTED') await enqueueTicketPrint(tx, order.restaurantId, orderId, 'ACCEPT')
+    if (next === 'CANCELLED') await enqueueCancelPrint(tx, orderId, null)
     const answered = next === 'ACCEPTED' ? [] : await refusePending(tx, [orderId], actor.id)
     return { id: orderId, status: next, moved: true, answered }
   })

@@ -1,4 +1,4 @@
-/* Foodify staff service worker (v3).
+/* Foodify staff service worker (v4).
    One file, three scopes: a portal's /orders board, the kitchen tablet, and the waiter's phone.
    The cache is named after the registration scope, so two staff apps on one device never share
    or evict each other's shell, and the public menu's worker never meets any of them. It exists
@@ -114,6 +114,7 @@ self.addEventListener('push', (event) => {
         data: {
           url: typeof message.url === 'string' ? message.url : self.registration.scope,
           restaurantId: typeof message.restaurantId === 'string' ? message.restaurantId : null,
+          restaurantCode: typeof message.restaurantCode === 'string' ? message.restaurantCode : null,
         },
         vibrate: VIBRATE[kind],
         requireInteraction: kind === 'order',
@@ -123,27 +124,42 @@ self.addEventListener('push', (event) => {
   )
 })
 
+// A restaurant's code (six Crockford characters) and a uuid: the only two shapes a board's address
+// carries, so nothing else from a payload is ever appended to a scope.
+const CODE = /^[0-9A-HJKMNP-TV-Z]{6}$/
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * The addresses this scope's board for the payload's restaurant can be open at: by its code, or by
+ * the uuid an older install carries; on the tablet also at /kitchen/orders/<ref>, the address it
+ * was installed under, which still serves the board (a rewrite in next.config.js).
+ */
+function ownBoards(data) {
+  const refs = [data.restaurantCode, data.restaurantId].filter((ref) => typeof ref === 'string' && (CODE.test(ref) || UUID.test(ref)))
+  const paths = refs.flatMap((ref) => (self.registration.scope.endsWith('/kitchen/') ? [ref, 'orders/' + ref] : [ref]))
+  return paths.map((path) => new URL(self.registration.scope + path, self.location.origin).href)
+}
+
 self.addEventListener('notificationclick', (event) => {
   event.notification.close()
   // Only a same-origin address is ever opened, whatever the payload said.
   const data = event.notification.data || {}
   const target = new URL(data.url || self.registration.scope, self.location.origin)
-  // A portal's board (/manager/orders/, /admin/orders/) is addressed by the restaurant's id, not
-  // the tablet's short link: outside this worker's scope, its own board is built from the scope.
-  const own = !target.href.startsWith(self.registration.scope) && /^[0-9a-f-]{36}$/i.test(data.restaurantId || '')
-    ? new URL(self.registration.scope + data.restaurantId, self.location.origin)
-    : target
+  // A portal's board (/manager/orders/<code>, /admin/orders/<code>) is outside the tablet's
+  // address the payload names: this worker's own board is built from its scope and the code.
+  const boards = ownBoards(data)
+  const own = !target.href.startsWith(self.registration.scope) && boards.length > 0 ? new URL(boards[0]) : target
   const url = sameOrigin(own) ? own.href : self.registration.scope
+  // The same board by either name: a window already open on it is focused, never moved.
+  const same = (href) => href === url || boards.includes(href)
   event.waitUntil(
     (async () => {
       const windows = await self.clients.matchAll({ type: 'window', includeUncontrolled: true })
       const open = windows.find((client) => client.url.startsWith(self.registration.scope))
       if (!open) return self.clients.openWindow(url)
       const focused = await open.focus()
-      // A manager's board is scoped to /manager/orders/ and the payload names the kitchen's
-      // address: the open board is already the right page, so it is focused, not moved.
       const inScope = url.startsWith(self.registration.scope)
-      return !inScope || focused.url === url || !('navigate' in focused) ? focused : focused.navigate(url)
+      return !inScope || same(focused.url) || !('navigate' in focused) ? focused : focused.navigate(url)
     })(),
   )
 })

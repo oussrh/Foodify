@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-24"
+last_verified: "2026-09-28"
 ---
 
 # Lessons
@@ -15,6 +15,43 @@ last_verified: "2026-09-24"
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
+
+## 2026-09-28 · A device on the restaurant's network asks the server; the server never reaches in
+
+Kitchen printing looked like it needed Epson's browser SDK: the tablet's page sends the ticket to
+the printer's local IP. On an https site that is mixed content, refused by every browser unless a
+certificate is installed on each printer, and it prints nothing while the tablet sleeps. Epson's
+Server Direct Print turns the direction round: the printer polls an https address and prints what
+it is answered with, so nothing on the restaurant's network has to be reachable and no tablet has to
+be awake. What it owes is an outbox written in the event's own transaction, like the POS's.
+
+Generalise it as: for hardware in a restaurant (printers, and whatever comes next), prefer the mode
+where the device calls out to us on a schedule, name it by a secret stored only as a hash, and
+queue its work transactionally; a browser-to-device path is the fallback, not the design.
+
+## 2026-09-25 · On an owner-managed platform, a restaurant feature is the owner's to switch on
+
+The POS groundwork shipped behind a super-admin switch, off by default, so every manager opened
+Settings → Integrations and read "Contact support". The owner's model is the opposite: a SaaS where
+each restaurant's owner manages everything about their restaurant, and the platform's admin portal
+has the same restaurant screens (to build a client's menu, or to help them) plus a platform layer
+of its own. A switch set by hand was a guess at a subscription model that does not exist yet.
+
+Generalise it as: a restaurant feature is guarded by restaurant access (`requireRestaurantAccess`:
+the owner, or the platform acting for them), never by a flag only the platform can set. When plans
+arrive, their limits come from the plan, in one place, not from per-feature switches.
+
+## 2026-09-25 · Queue an outside call in the transaction that caused it, send it after
+
+Sending a new order to a POS inside the request would make every order as slow and as fragile as
+the slowest POS, and sending it after the transaction commits would lose it when the process
+dies between the two. The outbox row is written in the same transaction as the ticket, so an
+order that exists always has its message waiting, and a worker delivers it afterwards with
+retries, in order per bill, never twice.
+
+Generalise it as: a side effect on another system is recorded as data in the same transaction as
+the change that causes it, and delivered by something that can retry. The same rule already
+held for push (`after()`), where losing a message was acceptable; for money it is not.
 
 ## 2026-09-24 · Who may change an order depends on where the food is
 

@@ -9,6 +9,7 @@ import { GRAINS } from '@/lib/insights'
 import { uuid } from './common'
 import { orderTable } from './order'
 import { slug } from './restaurant'
+import { restaurantRef } from './staff-app'
 
 /** A page's query as Next hands it, before any of it is parsed. */
 export type SearchParams = Record<string, string | string[] | undefined>
@@ -20,10 +21,16 @@ export function routeParams<T>(schema: z.ZodType<T>, segments: unknown): T {
   return parsed.data
 }
 
-/** The portals' `[id]` segment: a restaurant, user or admin row, by uuid. */
+/** The portals' `[id]` segment for a user or an admin row, by uuid. */
 export const idSegment = z.object({ id: uuid })
-/** The portals' `restaurants/[id]/dishes/[dishId]` segments: both uuids. */
-export const dishSegments = idSegment.extend({ dishId: uuid })
+/**
+ * A restaurant's `[id]` segment, in the portals (`restaurants/[id]/…`, `orders/[id]`) as on the
+ * devices: its six-character code as typed, parsed to the stored code, or the uuid an older link
+ * carried (`restaurantRef`). Anything else is the route's 404.
+ */
+export const restaurantSegment = z.object({ id: restaurantRef })
+/** The portals' `restaurants/[id]/dishes/[dishId]` segments: the restaurant (`restaurantSegment`) and the dish's uuid. */
+export const dishSegments = restaurantSegment.extend({ dishId: uuid })
 /** The public menu's `[slug]` segment, by the rule a stored slug met. */
 export const menuSegment = z.object({ slug })
 /** The public dish page's `[slug]/dish/[dishId]` segments. */

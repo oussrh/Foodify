@@ -40,7 +40,7 @@ export async function restaurantIdFromParam(param: string): Promise<string | nul
 }
 
 /** Whether the signed-in user may manage this restaurant; false for a stranger, a kitchen tablet, and nobody signed in. */
-const mayOpen = (id: string) => passes(() => requireRestaurantAccess({ id }))
+export const mayOpen = (id: string) => passes(() => requireRestaurantAccess({ id }))
 
 /**
  * The Info tab's read: the restaurant, and how much its menu is being opened (all time, the last
@@ -84,7 +84,7 @@ export async function loadOrderHistory(id: string) {
   if (!(await mayOpen(id))) return null
   const restaurant = await prisma.restaurant.findUnique({
     where: { id },
-    select: { id: true, name: true, currency: true, currencySymbol: true, defaultLocale: true },
+    select: { id: true, code: true, name: true, currency: true, currencySymbol: true, defaultLocale: true },
   })
   if (!restaurant) return null
   const rows = await prisma.order.findMany({
@@ -114,7 +114,7 @@ export async function loadKitchenRestaurants() {
   }
   return prisma.restaurant.findMany({
     where: { users: { some: { id: user.id } } },
-    select: { id: true, name: true },
+    select: { id: true, code: true, name: true },
     orderBy: { name: 'asc' },
   })
 }

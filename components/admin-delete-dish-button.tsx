@@ -16,18 +16,20 @@ import {
 } from '@/components/ui/alert-dialog'
 import { Trash2, Loader2, AlertTriangle } from 'lucide-react'
 import { deleteDish } from '@/app/actions/dish-actions'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 interface AdminDeleteDishButtonProps {
   dishId: string
   dishName: string
-  restaurantId: string
+  /** The restaurant's short code: the dish list it returns to is addressed by it. */
+  restaurantCode: string
 }
 
 /**
  * Deletes a dish after a confirm dialog, then goes to the admin portal's dish list for that
  * restaurant. It is admin-only because of that redirect.
  */
-export function AdminDeleteDishButton({ dishId, dishName, restaurantId }: AdminDeleteDishButtonProps) {
+export function AdminDeleteDishButton({ dishId, dishName, restaurantCode }: AdminDeleteDishButtonProps) {
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
   const router = useRouter()
@@ -36,7 +38,7 @@ export function AdminDeleteDishButton({ dishId, dishName, restaurantId }: AdminD
     setLoading(true)
     try {
       await deleteDish(dishId)
-      router.push(`/admin/restaurants/${restaurantId}/dishes`)
+      router.push(restaurantPath('admin', restaurantCode, 'dishes'))
     } catch (error) {
       console.error('Failed to delete dish:', error)
       alert('Failed to delete dish. Please try again.')

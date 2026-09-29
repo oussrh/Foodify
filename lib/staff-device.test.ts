@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { isAppleMobile, pushAvailability, urlBase64ToUint8Array, type PushFacts } from './staff-device'
+import { installInvitation, isAppleMobile, launchScreenDue, pushAvailability, urlBase64ToUint8Array, type PushFacts } from './staff-device'
 
 const IPHONE = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1'
 const IPAD_DESKTOP = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Safari/605.1.15'
@@ -57,5 +57,28 @@ describe('pushAvailability', () => {
     expect(pushAvailability({ ...ready, permission: 'denied' })).toBe('denied')
     expect(pushAvailability({ ...ready, permission: 'granted' })).toBe('off')
     expect(pushAvailability({ ...ready, permission: 'granted', subscribed: true })).toBe('on')
+  })
+})
+
+describe('launchScreenDue', () => {
+  it('opens an installed app on the launch screen once a session, and never a browser tab', () => {
+    expect(launchScreenDue({ installed: true, seenThisSession: false })).toBe(true)
+    expect(launchScreenDue({ installed: true, seenThisSession: true })).toBe(false)
+    expect(launchScreenDue({ installed: false, seenThisSession: false })).toBe(false)
+  })
+})
+
+describe('installInvitation', () => {
+  const base = { installed: false, dismissed: false, canInstall: false, appleMobile: false }
+
+  it("offers the browser's prompt where there is one, and Safari's steps on an iPhone or iPad", () => {
+    expect(installInvitation({ ...base, canInstall: true })).toBe('prompt')
+    expect(installInvitation({ ...base, appleMobile: true })).toBe('share-steps')
+  })
+
+  it('says nothing once installed or dismissed, or where the browser offers no way in', () => {
+    expect(installInvitation({ ...base, canInstall: true, installed: true })).toBeNull()
+    expect(installInvitation({ ...base, appleMobile: true, dismissed: true })).toBeNull()
+    expect(installInvitation(base)).toBeNull()
   })
 })

@@ -190,7 +190,7 @@ test.describe('the waiter’s bill', () => {
       // with the change log under it.
       await page.context().clearCookies()
       await signInAs(page, 'manager', manager.email, { mfa: false })
-      await page.goto(`/manager/restaurants/${dish.restaurantId}/orders`)
+      await page.goto(`/manager/restaurants/${dish.restaurantCode}/orders`)
       await page.getByRole('row').filter({ hasText: `#${sent.number}` }).click()
       const details = page.getByRole('dialog')
       await expect(details.getByRole('button', { name: `Void ${dish.name}` })).toBeVisible()

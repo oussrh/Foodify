@@ -107,6 +107,22 @@ describe('serverEnv', () => {
     expect(() => plain.serverEnv.webPush).toThrow(/VAPID_SUBJECT/)
   })
 
+  it('gives the POS key with its id (k1 unless named), nothing when unset, and refuses a key that is not 32 bytes', async () => {
+    const key = 'MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY='
+    expect((await load({ DATABASE_URL: 'postgresql://x', POS_ENCRYPTION_KEY: key, POS_ENCRYPTION_KEY_ID: '' })).serverEnv.posEncryption).toEqual({ key, keyId: 'k1' })
+    expect((await load({ DATABASE_URL: 'postgresql://x', POS_ENCRYPTION_KEY: key, POS_ENCRYPTION_KEY_ID: '2026-09' })).serverEnv.posEncryption).toEqual({ key, keyId: '2026-09' })
+    expect((await load({ DATABASE_URL: 'postgresql://x', POS_ENCRYPTION_KEY: '' })).serverEnv.posEncryption).toBeNull()
+    const short = await load({ DATABASE_URL: 'postgresql://x', POS_ENCRYPTION_KEY: 'c2hvcnQ=' })
+    expect(() => short.serverEnv.posEncryption).toThrow(/POS_ENCRYPTION_KEY/)
+  })
+
+  it('gives the cron secret, or null, and refuses one too short to be a secret', async () => {
+    expect((await load({ DATABASE_URL: 'postgresql://x', CRON_SECRET: 'a-long-enough-secret' })).serverEnv.cronSecret).toBe('a-long-enough-secret')
+    expect((await load({ DATABASE_URL: 'postgresql://x', CRON_SECRET: '' })).serverEnv.cronSecret).toBeNull()
+    const short = await load({ DATABASE_URL: 'postgresql://x', CRON_SECRET: 'short' })
+    expect(() => short.serverEnv.cronSecret).toThrow(/CRON_SECRET/)
+  })
+
   it('reads NODE_ENV once: development only when it says so', async () => {
     expect((await load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'development' })).serverEnv.isDevelopment).toBe(true)
     expect((await load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'test' })).serverEnv.isDevelopment).toBe(false)

@@ -9,7 +9,7 @@
 // while the sheet is open, and an existing subscription must be saved again on every load.
 'use client'
 
-import { Settings2 } from 'lucide-react'
+import { Settings } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import type { WakeLock } from '@/components/orders/use-wake-lock'
@@ -20,6 +20,7 @@ import type { StaffPwa } from '../use-staff-pwa'
 import { AwakeRow, FullscreenRow, SoundRow, VibrationRow, type SoundControl } from './alert-rows'
 import { InstallRow } from './install-row'
 import { PushRow } from './push-row'
+import { ThemeRow } from './theme-row'
 
 interface DeviceSetupSheetProps {
   /** The restaurant's uuid, which a notification subscription is saved against. */
@@ -31,22 +32,24 @@ interface DeviceSetupSheetProps {
   wakeLock?: WakeLock | undefined
   /** The waiter's buzz; a tablet on a stand has nothing to feel it. */
   vibration?: { supported: boolean; test: () => void } | undefined
+  /** Show the word "Settings" beside the gear on a phone too; the board's crowded header keeps it for wide screens. */
+  labelled?: boolean | undefined
 }
 
 /**
  * The "This device" button and its sheet: install, notifications, sound, vibration, the screen
- * held awake and full screen, each with its state and the tap that grants or tests it.
+ * held awake, full screen and the theme, each with its state and the tap that grants or tests it.
  */
-export function DeviceSetupSheet({ restaurantId, app, pwa, sound, wakeLock, vibration }: DeviceSetupSheetProps) {
+export function DeviceSetupSheet({ restaurantId, app, pwa, sound, wakeLock, vibration, labelled }: DeviceSetupSheetProps) {
   const push = usePushSubscription(restaurantId, app)
   const fullscreen = useFullscreen()
 
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button variant="outline" className="h-12 min-w-12 px-3" aria-label="This device's settings">
-          <Settings2 className="h-5 w-5" aria-hidden="true" />
-          <span className="hidden md:inline">Device</span>
+        <Button variant="outline" className="h-12 min-w-12 px-3" aria-label="Settings for this device">
+          <Settings className="h-5 w-5" aria-hidden="true" />
+          <span className={labelled ? 'inline' : 'hidden md:inline'}>Settings</span>
         </Button>
       </SheetTrigger>
       <SheetContent
@@ -64,6 +67,7 @@ export function DeviceSetupSheet({ restaurantId, app, pwa, sound, wakeLock, vibr
           {vibration && <VibrationRow supported={vibration.supported} test={vibration.test} />}
           {wakeLock && <AwakeRow wakeLock={wakeLock} />}
           {fullscreen.supported && !pwa.installed && <FullscreenRow fullscreen={fullscreen} />}
+          <ThemeRow />
         </ul>
         <SheetClose asChild>
           <Button variant="outline" className="mt-2 h-12 w-full">
