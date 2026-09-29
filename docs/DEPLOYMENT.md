@@ -87,7 +87,7 @@ required variable, or half of a pair, fails at its first request rather than at 
 | `CRON_SECRET` | for the POS cron | The bearer token Vercel's cron sends to `/api/pos/outbox` (at least 16 characters; Vercel sends it by itself once the variable is set on the project). Unset, the route refuses every call and the outbox is swept only after a send and when a board polls. |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` + `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | optional | Unsigned uploads straight from the browser; unset, uploads go through a server action. |
 
-`.env.example` lists them with placeholders, except the three POS variables (`POS_ENCRYPTION_KEY`,
+`env.example` lists them with placeholders, except the three POS variables (`POS_ENCRYPTION_KEY`,
 `POS_ENCRYPTION_KEY_ID`, `CRON_SECRET`), which have to be added to it by hand. Off Vercel (a production build on another host or
 port), Auth.js also needs `AUTH_TRUST_HOST=true`, or every page reads as signed out.
 
