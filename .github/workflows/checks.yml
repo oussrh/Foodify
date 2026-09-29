@@ -83,6 +83,10 @@ jobs:
             echo "range=origin/${{ github.base_ref }}..HEAD" >> "$GITHUB_OUTPUT"
           elif git cat-file -e "${{ github.event.before }}^{commit}" 2>/dev/null; then
             echo "range=${{ github.event.before }}..HEAD" >> "$GITHUB_OUTPUT"
+          elif fork=$(git merge-base origin/main HEAD 2>/dev/null) && [ "$fork" != "$(git rev-parse HEAD)" ]; then
+            # A branch's first push has no `before`: judge every commit since it left main, not
+            # only the last one (HEAD~1 judged 2 of 144 files on the first push of #128).
+            echo "range=$fork..HEAD" >> "$GITHUB_OUTPUT"
           else
             echo "range=HEAD~1..HEAD" >> "$GITHUB_OUTPUT"
           fi
