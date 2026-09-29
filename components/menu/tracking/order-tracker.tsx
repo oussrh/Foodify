@@ -5,7 +5,7 @@
 // orders up to date as it goes, and says so when the phone is offline rather than going blank.
 'use client'
 
-import { guestStatus, stepViews } from '@/lib/guest-status'
+import { guestStatus, isFinished, stepViews } from '@/lib/guest-status'
 import { formatPrice, type Locale, type MenuRestaurant } from '@/lib/menu'
 import { MENU_TEXT } from '@/lib/menu-text'
 import type { TrackedOrder } from '@/lib/schemas/order-tracking'
@@ -45,12 +45,15 @@ function OrderProgress({ order, locale }: { order: TrackedOrder; locale: Locale 
   const t = MENU_TEXT[locale]
   const status = guestStatus(order.status)
   const steps = stepViews(order)
+  // A bill closed while the ticket was still open (paid, the table let go): nothing more is followed.
+  const closedEarly = order.closed && !isFinished(order.status)
   return (
     <>
       <p role="status" className="rounded-lg bg-brand-tint px-4 py-3 text-lg font-semibold text-brand">
-        {t.orderStatus[status]}
+        {closedEarly ? t.billClosed : t.orderStatus[status]}
       </p>
       {steps ? <OrderSteps steps={steps} locale={locale} /> : <p className="text-sm text-muted-foreground">{t.orderCancelledHint}</p>}
+      {closedEarly && <p className="text-sm text-muted-foreground">{t.billClosedHint}</p>}
       {status === 'served' && <p className="text-sm text-muted-foreground">{t.orderServedHint}</p>}
     </>
   )
@@ -83,7 +86,7 @@ export default function OrderTracker({ token, restaurant, locale }: { token: str
   const guest = useGuestOrders(restaurant.id)
   const tracking = useOrderTracking(
     token,
-    (order) => guest.setStatus(token, order.status),
+    (order) => guest.setStatus(token, order),
     () => guest.forget(token),
   )
   // A secret of another restaurant's order opens that order under that restaurant's menu only.
@@ -96,9 +99,9 @@ export default function OrderTracker({ token, restaurant, locale }: { token: str
         <h1 className="text-2xl font-semibold">{order ? t.yourOrderNumber(order.number) : t.yourOrder}</h1>
         {order && <p className="text-sm text-muted-foreground">{t.atTable(order.table)}</p>}
       </div>
-      {!tracking.online && (
+      {(!tracking.online || tracking.outdated) && (
         <p role="status" className="rounded-md bg-warning/15 px-3 py-2 text-sm font-medium text-warning">
-          {t.trackingOffline}
+          {tracking.outdated ? t.trackingOutdated : t.trackingOffline}
         </p>
       )}
       <TrackerContent order={order} gone={gone} online={tracking.online} restaurant={restaurant} locale={locale} />

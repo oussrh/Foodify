@@ -5,18 +5,17 @@
 // crosses a boundary: the route's path, the response the tracker reads, and localStorage.
 import { z } from 'zod'
 import { ORDER_STATUSES } from '@/lib/orders'
+import { secretToken } from './common'
 
-/** The secret in a guest's tracking link (server/secret.ts `newSecret`): 32 URL-safe characters. */
-export const guestOrderToken = z.string().regex(/^[A-Za-z0-9_-]{32}$/)
-
-/** The route's `[token]` segment. */
-export const trackSegment = z.object({ token: guestOrderToken })
+/** The route's `[token]` segment: the secret in a guest's tracking link. */
+export const trackSegment = z.object({ token: secretToken })
 
 const isoDate = z.iso.datetime()
 
 /**
  * What GET /api/orders/track/<secret> answers: the order as the guest may see it. Lines are what
- * is actually coming (a dish taken off is not listed, a portion taken off is not counted); nothing
+ * is actually coming (a dish taken off is not listed, a portion taken off is not counted), and
+ * whether the bill it belongs to has been closed; nothing
  * staff-only (the phone, who took it, the change log, the POS) is part of it.
  */
 export const trackedOrder = z.object({
@@ -30,6 +29,8 @@ export const trackedOrder = z.object({
   acceptedAt: isoDate.nullable(),
   readyAt: isoDate.nullable(),
   servedAt: isoDate.nullable(),
+  /** The table's bill was closed (paid, the table let go): nothing more is coming, whatever the ticket says. */
+  closed: z.boolean(),
   restaurant: z.object({ slug: z.string(), name: z.string() }),
 })
 /** `trackedOrder` after parsing. */
@@ -41,7 +42,7 @@ export type TrackedOrder = z.infer<typeof trackedOrder>
  * when it was seen finished, so an old finished order can be forgotten without asking the server.
  */
 export const guestOrderEntry = z.object({
-  token: guestOrderToken,
+  token: secretToken,
   number: z.number().int(),
   table: z.string().max(20),
   placedAt: isoDate,

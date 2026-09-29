@@ -4,7 +4,8 @@
 // order (the phone, who took it, the notes, the change log and its reasons, the POS) is not
 // selected at all, so it cannot leak by a later spread. The table and the subtotal are the row's
 // own, which a move to another table or a dish taken off keeps current (server/bill-changes.ts,
-// server/ticket-apply.ts); a merge only re-points `parentId`, which the guest does not see.
+// server/ticket-apply.ts); a merge only re-points `parentId`, whose number the guest does not see
+// but whose close ends the guest's order as surely as its own would.
 import type { Prisma } from '@/generated/prisma/client'
 import { effectiveQuantity } from '@/lib/orders'
 import type { TrackedOrder } from '@/lib/schemas/order-tracking'
@@ -20,6 +21,10 @@ export const trackedOrderSelect = {
   acceptedAt: true,
   readyAt: true,
   servedAt: true,
+  // The bill's close is stamped on the order that opened it (lib/bill-structure.ts `closeRefusal`):
+  // this order's own when it opened the bill, else the one it was merged into.
+  closedAt: true,
+  parent: { select: { closedAt: true } },
   lines: { select: { nameEn: true, nameFr: true, quantity: true, removedQuantity: true } },
   restaurant: { select: { slug: true, name: true } },
 } satisfies Prisma.OrderSelect
@@ -45,6 +50,7 @@ export function serializeTrackedOrder(row: TrackedRow): TrackedOrder {
     acceptedAt: iso(row.acceptedAt),
     readyAt: iso(row.readyAt),
     servedAt: iso(row.servedAt),
+    closed: (row.parent ? row.parent.closedAt : row.closedAt) !== null,
     restaurant: row.restaurant,
   }
 }

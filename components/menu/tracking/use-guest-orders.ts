@@ -6,9 +6,8 @@
 'use client'
 
 import { useCallback, useMemo, useSyncExternalStore } from 'react'
-import { activeOrder, forgetOrder, pruneOrders, rememberOrder, withStatus, type PlacedTracking } from '@/lib/guest-orders'
+import { activeOrder, forgetOrder, pruneOrders, rememberOrder, withStatus, type PlacedTracking, type SeenOrder } from '@/lib/guest-orders'
 import { guestOrdersKey, parseGuestOrders, readGuestOrders, writeGuestOrders } from '@/lib/guest-orders-storage'
-import type { OrderStatus } from '@/lib/orders'
 import type { GuestOrderEntry } from '@/lib/schemas/order-tracking'
 
 type Store = { list: GuestOrderEntry[]; listeners: Set<() => void> }
@@ -37,8 +36,8 @@ export interface GuestOrders {
   active: GuestOrderEntry | null
   /** Remembers an order the guest has just placed. */
   remember: (placed: PlacedTracking) => void
-  /** Records the status a poll read. */
-  setStatus: (token: string, status: OrderStatus) => void
+  /** Records what a poll read: the status, and whether the bill was closed. */
+  setStatus: (token: string, seen: SeenOrder) => void
   /** Forgets an order the server no longer knows. */
   forget: (token: string) => void
 }
@@ -71,7 +70,7 @@ export function useGuestOrders(restaurantId: string): GuestOrders {
     () => ({
       active: activeOrder(list),
       remember: (placed: PlacedTracking) => commit(restaurantId, rememberOrder(storeFor(restaurantId).list, placed, new Date())),
-      setStatus: (token: string, status: OrderStatus) => commit(restaurantId, withStatus(storeFor(restaurantId).list, token, status, new Date())),
+      setStatus: (token: string, seen: SeenOrder) => commit(restaurantId, withStatus(storeFor(restaurantId).list, token, seen, new Date())),
       forget: (token: string) => commit(restaurantId, forgetOrder(storeFor(restaurantId).list, token)),
     }),
     [list, restaurantId],

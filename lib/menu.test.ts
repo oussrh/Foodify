@@ -82,7 +82,7 @@ describe('labels', () => {
       const words = MENU_TEXT[locale].orderStatus
       for (const status of ['sent', 'preparing', 'ready', 'served', 'cancelled'] as const) expect(words[status], `${locale}.${status}`).toMatch(/\S/)
     }
-    expect(MENU_TEXT.en.orderStatus.ready).toBe('Ready — on its way')
+    expect(MENU_TEXT.en.orderStatus.ready).toBe('Ready, on its way')
     expect(MENU_TEXT.fr.orderStatus.preparing).toBe('En préparation')
   })
 

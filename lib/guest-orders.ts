@@ -27,16 +27,22 @@ export function rememberOrder(list: readonly GuestOrderEntry[], placed: PlacedTr
   return [entry, ...list.filter((order) => order.token !== entry.token)].slice(0, MAX_REMEMBERED)
 }
 
+/** What a poll read of an order that the list keeps: its status, and whether its bill was closed. */
+export type SeenOrder = { status: OrderStatus; closed: boolean }
+
 /**
- * The list with the order named by `token` at `status`, seen at `now`; the moment it was first
- * seen finished is kept. The same list (the same reference) when nothing changed, so a store
- * that is told the same status on every poll does not re-render.
+ * The list with the order named by `token` as `seen` at `now`. An order is finished once served,
+ * cancelled or its bill closed, and the moment it was first seen so is kept. The same list (the
+ * same reference) when nothing changed, so a store told the same thing on every poll does not
+ * re-render.
  */
-export function withStatus(list: GuestOrderEntry[], token: string, status: OrderStatus, now: Date): GuestOrderEntry[] {
+export function withStatus(list: GuestOrderEntry[], token: string, seen: SeenOrder, now: Date): GuestOrderEntry[] {
   const order = list.find((entry) => entry.token === token)
-  if (!order || order.status === status) return list
-  const finishedAt = isFinished(status) ? (order.finishedAt ?? now.toISOString()) : null
-  return list.map((entry) => (entry === order ? { ...entry, status, finishedAt } : entry))
+  if (!order) return list
+  const finished = isFinished(seen.status) || seen.closed
+  if (order.status === seen.status && (order.finishedAt !== null) === finished) return list
+  const finishedAt = finished ? (order.finishedAt ?? now.toISOString()) : null
+  return list.map((entry) => (entry === order ? { ...entry, status: seen.status, finishedAt } : entry))
 }
 
 /** The list without the order named by `token` (the server no longer knows it); the same list when it was not there. */
@@ -54,7 +60,7 @@ export function pruneOrders(list: GuestOrderEntry[], now: Date): GuestOrderEntry
   return kept.length === list.length ? list : kept
 }
 
-/** The newest order still to follow (not served, not cancelled), or null when there is none. */
+/** The newest order still to follow (not served, not cancelled, its bill not closed), or null when there is none. */
 export function activeOrder(list: readonly GuestOrderEntry[]): GuestOrderEntry | null {
-  return list.find((entry) => !isFinished(entry.status)) ?? null
+  return list.find((entry) => entry.finishedAt === null && !isFinished(entry.status)) ?? null
 }

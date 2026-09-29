@@ -1,6 +1,6 @@
 // components/menu/tracking/use-active-order.ts
 // The one order the menu's pill talks about: the newest the guest placed from this device that is
-// not yet served or cancelled, followed live so the pill's words move with the kitchen, and
+// not yet served, cancelled or closed with its bill, followed live so the pill's words move with the kitchen, and
 // dropped from the device's list once it is finished or the server no longer knows it.
 'use client'
 
@@ -22,7 +22,7 @@ export function useActiveOrder(restaurantId: string): ActiveOrder | null {
   const tracking = useOrderTracking(
     active?.token ?? null,
     (order) => {
-      if (active) guest.setStatus(active.token, order.status)
+      if (active) guest.setStatus(active.token, order)
     },
     () => {
       if (active) guest.forget(active.token)

@@ -18,6 +18,8 @@ const row = (over: Partial<Row> = {}): Row =>
     acceptedAt: new Date('2026-09-29T19:03:00Z'),
     readyAt: null,
     servedAt: null,
+    closedAt: null,
+    parent: null,
     lines: [
       { nameEn: 'Chicken', nameFr: 'Poulet', quantity: 2, removedQuantity: 0 },
       { nameEn: 'Tea', nameFr: 'Thé', quantity: 3, removedQuantity: 1 },
@@ -30,10 +32,12 @@ const row = (over: Partial<Row> = {}): Row =>
 describe('trackedOrderSelect', () => {
   it('reads nothing staff-only', () => {
     const keys = Object.keys(trackedOrderSelect)
-    for (const secret of ['id', 'phone', 'note', 'placedBy', 'placedById', 'changes', 'externalId', 'posCheckId', 'guestTokenHash', 'parentId', 'closedBy']) {
+    for (const secret of ['id', 'phone', 'note', 'placedBy', 'placedById', 'changes', 'externalId', 'posCheckId', 'guestTokenHash', 'parentId', 'closedBy', 'closedById']) {
       expect(keys, secret).not.toContain(secret)
     }
     expect(Object.keys(trackedOrderSelect.lines.select)).not.toContain('note')
+    // Of the bill it may be part of, only whether it was closed.
+    expect(Object.keys(trackedOrderSelect.parent.select)).toEqual(['closedAt'])
   })
 })
 
@@ -53,6 +57,16 @@ describe('serializeTrackedOrder', () => {
   it('gives every moment of a served order', () => {
     const out = serializeTrackedOrder(row({ status: 'DONE', readyAt: new Date('2026-09-29T19:15:00Z'), servedAt: new Date('2026-09-29T19:17:00Z') }))
     expect([out.readyAt, out.servedAt]).toEqual(['2026-09-29T19:15:00.000Z', '2026-09-29T19:17:00.000Z'])
+  })
+
+  it('reads the bill as closed from the order itself when it opened the bill', () => {
+    expect(serializeTrackedOrder(row()).closed).toBe(false)
+    expect(serializeTrackedOrder(row({ closedAt: new Date('2026-09-29T20:00:00Z') })).closed).toBe(true)
+  })
+
+  it('reads the bill as closed from the order it was merged into, whatever its own stamp says', () => {
+    expect(serializeTrackedOrder(row({ parent: { closedAt: new Date('2026-09-29T20:00:00Z') } })).closed).toBe(true)
+    expect(serializeTrackedOrder(row({ parent: { closedAt: null }, closedAt: new Date('2026-09-29T20:00:00Z') })).closed).toBe(false)
   })
 
   it('answers what the client parses', () => {

@@ -30,22 +30,32 @@ describe('rememberOrder', () => {
 })
 
 describe('withStatus', () => {
+  const seen = (status: GuestOrderEntry['status'], closed = false) => ({ status, closed })
+
   it('records a new status, and the moment an order is first seen finished', () => {
-    const list = withStatus([entry(1)], token(1), 'DONE', NOW)
+    const list = withStatus([entry(1)], token(1), seen('DONE'), NOW)
     expect(list[0]).toMatchObject({ status: 'DONE', finishedAt: NOW.toISOString() })
     const later = new Date(NOW.getTime() + 60_000)
-    expect(withStatus(list, token(1), 'CANCELLED', later)[0]?.finishedAt).toBe(NOW.toISOString())
+    expect(withStatus(list, token(1), seen('CANCELLED'), later)[0]?.finishedAt).toBe(NOW.toISOString())
+  })
+
+  it('finishes an order whose bill was closed while the kitchen still had it', () => {
+    const list = withStatus([entry(1, { status: 'ACCEPTED' })], token(1), seen('ACCEPTED', true), NOW)
+    expect(list[0]).toMatchObject({ status: 'ACCEPTED', finishedAt: NOW.toISOString() })
+    expect(activeOrder(list)).toBeNull()
   })
 
   it('clears the finished moment if the order is back in the kitchen', () => {
     const done = [entry(1, { status: 'DONE', finishedAt: hoursAgo(0.1) })]
-    expect(withStatus(done, token(1), 'READY', NOW)[0]).toMatchObject({ status: 'READY', finishedAt: null })
+    expect(withStatus(done, token(1), seen('READY'), NOW)[0]).toMatchObject({ status: 'READY', finishedAt: null })
   })
 
   it('answers the same list when nothing changed, or the order is not there', () => {
     const list = [entry(1, { status: 'ACCEPTED' })]
-    expect(withStatus(list, token(1), 'ACCEPTED', NOW)).toBe(list)
-    expect(withStatus(list, token(9), 'DONE', NOW)).toBe(list)
+    expect(withStatus(list, token(1), seen('ACCEPTED'), NOW)).toBe(list)
+    expect(withStatus(list, token(9), seen('DONE'), NOW)).toBe(list)
+    const closed = withStatus(list, token(1), seen('ACCEPTED', true), NOW)
+    expect(withStatus(closed, token(1), seen('ACCEPTED', true), NOW)).toBe(closed)
   })
 })
 

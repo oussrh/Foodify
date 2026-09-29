@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { guestOrderEntry, guestOrderToken, storedGuestOrders, trackSegment, trackedOrder } from './order-tracking'
+import { guestOrderEntry, storedGuestOrders, trackSegment, trackedOrder } from './order-tracking'
 
 const token = 'Ab3_-'.repeat(6) + 'zz'
 const tracked = {
@@ -13,18 +13,12 @@ const tracked = {
   acceptedAt: null,
   readyAt: '2026-09-29T19:15:00.000Z',
   servedAt: null,
+  closed: false,
   restaurant: { slug: 'dar-zitoun', name: 'Dar Zitoun' },
 }
 
-describe('guestOrderToken', () => {
-  it('takes 32 URL-safe characters and nothing else', () => {
-    expect(guestOrderToken.safeParse(token).success).toBe(true)
-    for (const bad of ['', token.slice(1), `${token}a`, `${token.slice(1)}=`, `${token.slice(1)}/`, '11111111-1111-4111-8111-111111111111']) {
-      expect(guestOrderToken.safeParse(bad).success, bad).toBe(false)
-    }
-  })
-
-  it('is the route segment', () => {
+describe('trackSegment', () => {
+  it('is the secret of a tracking link', () => {
     expect(trackSegment.safeParse({ token }).success).toBe(true)
     expect(trackSegment.safeParse({ token: 'x' }).success).toBe(false)
   })
