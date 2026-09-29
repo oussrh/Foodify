@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-09-25",
+  "measuredAt": "2026-09-29",
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
   "score": 98,
   "hard": [
@@ -36,7 +36,7 @@
     "auth.unguardedAdminPage": 0,
     "cache.serverCacheUse": 0,
     "change.changelogMissing": 0,
-    "change.testTamper": 0,
+    "change.testTamper": 2,
     "code.barrels": 0,
     "context.overCap": 0,
     "context.unsourcedGrowth": 0,
@@ -53,6 +53,7 @@
     "size.excessCode": 0,
     "size.overBudget": 0,
     "size.overRaw": 0,
+    "test.coverageExclusions": 34,
     "types.escapes": 0,
     "types.nonNull": 0,
     "valid.rawEnv": 0,
@@ -61,32 +62,36 @@
     "valid.wholeEnv": 0
   },
   "scanned": {
-    "api.bareResponse": 13,
-    "api.floatMoney": 630,
-    "api.rowReturn": 21,
-    "api.unboundedList": 13,
+    "api.bareResponse": 14,
+    "api.floatMoney": 661,
+    "api.rowReturn": 22,
+    "api.unboundedList": 14,
     "auth.unguardedAdminPage": 21,
-    "cache.serverCacheUse": 630,
+    "cache.serverCacheUse": 661,
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 6,
-    "docs.citations": 167,
-    "docs.danglingSource": 18,
+    "docs.citations": 177,
+    "docs.danglingSource": 19,
     "docs.frontMatter": 10,
     "docs.frontMatterSyntax": 10,
     "docs.indexDrift": 9,
-    "dup.clonedLines": 926,
-    "dup.clones": 926,
-    "size.excessCode": 621,
-    "size.overBudget": 621,
-    "size.overRaw": 649,
-    "types.escapes": 621,
-    "valid.rawEnv": 618,
-    "valid.unparsedBoundary": 35,
-    "valid.utcDay": 621,
-    "valid.wholeEnv": 618
+    "dup.clonedLines": 968,
+    "dup.clones": 968,
+    "size.excessCode": 652,
+    "size.overBudget": 652,
+    "size.overRaw": 681,
+    "types.escapes": 652,
+    "valid.rawEnv": 649,
+    "valid.unparsedBoundary": 37,
+    "valid.utcDay": 652,
+    "valid.wholeEnv": 649
   },
   "debt": {
+    "change.testTamper": {
+      "lib/schemas/pos.test.ts": 1,
+      "tests/integration/pos-setup.test.ts": 1
+    },
     "dup.clonedLines": {
       "app/actions/admin-user-actions.ts": 9,
       "app/admin/(auth)/login/layout.tsx": 14,
@@ -158,6 +163,9 @@
       "components/restaurant-form/create-basic-card.tsx": 7,
       "components/ui/dialog.tsx": 3,
       "lib/cloudinary.ts": 2
+    },
+    "test.coverageExclusions": {
+      "vitest.config.ts": 34
     }
   },
   "versions": {
@@ -185,6 +193,7 @@
     "size.excessCode": 1,
     "size.overBudget": 1,
     "size.overRaw": 1,
+    "test.coverageExclusions": 1,
     "types.escapes": 1,
     "types.nonNull": 1,
     "valid.rawEnv": 1,
