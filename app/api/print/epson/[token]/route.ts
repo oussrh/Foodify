@@ -1,6 +1,6 @@
 // app/api/print/epson/[token]/route.ts
 // Where an Epson kitchen printer asks for work (Server Direct Print, User's Manual M00062910). Its
-// owner typed this address into it; the path's secret names the printer (server/print/token.ts),
+// owner typed this address into it; the path's secret names the printer (server/secret.ts),
 // so there is no session. The printer posts a form: `ConnectionType=GetRequest` for its jobs,
 // answered with ePOS-Print XML or an empty 200 when there is nothing; `SetResponse` with the
 // result of the jobs it was handed, answered with an empty 200. Anything else it sends (status

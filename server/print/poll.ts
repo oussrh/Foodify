@@ -9,7 +9,7 @@ import { Prisma } from '@/generated/prisma/client'
 import prisma from '@/lib/prisma'
 import type { EposResult } from '@/lib/print/epos-response'
 import { afterResult, codeMessage, JOBS_PER_POLL, MAX_ATTEMPTS, SENT_LEASE_MS } from '@/lib/print/job-rules'
-import { hashPrinterToken } from '@/server/print/token'
+import { hashSecret } from '@/server/secret'
 
 /** What a job not answered for is marked with when it runs out of attempts. */
 const NO_ANSWER = 'No answer from the printer'
@@ -21,7 +21,7 @@ const SEEN_EVERY_MS = 30_000
  * per SEEN_EVERY_MS, so a poll every five seconds is not a write every five seconds).
  */
 export async function printerByToken(token: string, now: Date): Promise<{ id: string } | null> {
-  const printer = await prisma.printer.findUnique({ where: { tokenHash: hashPrinterToken(token) }, select: { id: true } })
+  const printer = await prisma.printer.findUnique({ where: { tokenHash: hashSecret(token) }, select: { id: true } })
   if (!printer) return null
   const stale = new Date(now.getTime() - SEEN_EVERY_MS)
   await prisma.printer.updateMany({ where: { id: printer.id, OR: [{ lastSeenAt: null }, { lastSeenAt: { lt: stale } }] }, data: { lastSeenAt: now } })

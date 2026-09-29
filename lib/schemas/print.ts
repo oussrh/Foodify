@@ -13,7 +13,7 @@ export const printTrigger = z.enum(['ARRIVAL', 'ACCEPT'])
 /** `printTrigger` after parsing. */
 export type PrintTriggerInput = z.infer<typeof printTrigger>
 
-/** The secret in a printer's address (server/print/token.ts): 32 URL-safe characters. */
+/** The secret in a printer's address (server/secret.ts): 32 URL-safe characters. */
 export const printerToken = z.string().regex(/^[A-Za-z0-9_-]{32}$/)
 
 /**
