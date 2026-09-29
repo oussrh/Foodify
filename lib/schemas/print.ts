@@ -13,9 +13,6 @@ export const printTrigger = z.enum(['ARRIVAL', 'ACCEPT'])
 /** `printTrigger` after parsing. */
 export type PrintTriggerInput = z.infer<typeof printTrigger>
 
-/** The secret in a printer's address (server/secret.ts): 32 URL-safe characters. */
-export const printerToken = z.string().regex(/^[A-Za-z0-9_-]{32}$/)
-
 /**
  * What an Epson printer posts to its address (Server Direct Print): which call it is, and with a
  * result, the result file. Other fields (its ID, its name) are not read.

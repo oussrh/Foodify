@@ -4,8 +4,7 @@
 // `orderInput` and re-prices every line from the database, so nothing here carries money.
 import { z } from 'zod'
 import { MAX_LINES, MAX_NOTE, MAX_QUANTITY } from '@/lib/cart'
-import { uuid } from './common'
-import { guestOrderToken } from './order-tracking'
+import { secretToken, uuid } from './common'
 
 /** The table the order is for: what is written on the table or carried by the QR link; short, trimmed, required. */
 export const orderTable = z.string().trim().min(1, 'Table number is required').max(20, 'Table number is too long')
@@ -94,7 +93,7 @@ export const placedOrder = z.object({
   number: z.number().int(),
   table: z.string(),
   subtotal: z.string(),
-  token: guestOrderToken.optional().catch(undefined),
+  token: secretToken.optional().catch(undefined),
 }) satisfies z.ZodType<PlacedOrder>
 
 /**

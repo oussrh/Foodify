@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { z } from 'zod'
-import { bilingualName, email, firstIssue, money, password, username, uuid } from './common'
+import { bilingualName, email, firstIssue, money, password, secretToken, username, uuid } from './common'
 
 describe('the shared pieces', () => {
   it('accepts a v4 UUID and refuses a cuid', () => {
@@ -56,6 +56,21 @@ describe('username', () => {
     expect(username.safeParse('x'.repeat(33)).error?.issues[0]?.message).toBe('A username is at most 32 characters')
     for (const name of ['two words', 'kitchen@1', 'tablet/1']) {
       expect(username.safeParse(name).success, name).toBe(false)
+    }
+  })
+})
+
+describe('secretToken', () => {
+  const token = 'Ab3_-'.repeat(6) + 'zz'
+
+  it('takes 32 URL-safe characters, the shape server/secret.ts makes', () => {
+    expect(secretToken.safeParse(token).success).toBe(true)
+    expect(secretToken.safeParse('Ab_-'.repeat(8)).success).toBe(true)
+  })
+
+  it('refuses any other length, padding, a path and a uuid', () => {
+    for (const bad of ['', token.slice(1), `${token}a`, `${token.slice(1)}=`, `${token.slice(1)}/`, '../'.repeat(11), '11111111-1111-4111-8111-111111111111']) {
+      expect(secretToken.safeParse(bad).success, bad).toBe(false)
     }
   })
 })

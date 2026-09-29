@@ -8,6 +8,7 @@ import { ChevronRight } from 'lucide-react'
 import { guestStatus } from '@/lib/guest-status'
 import { type Locale } from '@/lib/menu'
 import { MENU_TEXT } from '@/lib/menu-text'
+import { orderHref } from '../restaurant-page/menu-urls'
 import type { ActiveOrder } from './use-active-order'
 
 /** The guest's order in one line, linking to its tracking page. */
@@ -15,7 +16,7 @@ export default function OrderPill({ order, slug, locale }: { order: ActiveOrder;
   const t = MENU_TEXT[locale]
   return (
     <Link
-      href={`/restaurant/${slug}/order/${order.token}?lang=${locale}`}
+      href={orderHref(slug, order.token, locale)}
       className="mx-auto flex h-10 w-full max-w-lg items-center gap-2.5 rounded-full border border-border-strong bg-card px-4 text-sm hover:bg-accent focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
     >
       <span className="h-2 w-2 shrink-0 rounded-full bg-brand motion-safe:animate-pulse" aria-hidden="true" />

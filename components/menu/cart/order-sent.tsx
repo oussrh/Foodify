@@ -8,6 +8,7 @@ import { CheckCircle2 } from 'lucide-react'
 import { type Locale } from '@/lib/menu'
 import { MENU_TEXT } from '@/lib/menu-text'
 import type { PlacedOrder } from '@/lib/schemas/order'
+import { orderHref } from '../restaurant-page/menu-urls'
 
 const BUTTON = 'inline-flex h-12 w-full max-w-xs items-center justify-center rounded-md px-6 text-[15px] font-semibold focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring'
 
@@ -33,7 +34,7 @@ export default function OrderSent({ order, slug, onDone, locale }: OrderSentProp
       <p className="text-lg font-semibold">{t.orderSent(order.number)}</p>
       <p className="max-w-xs text-sm text-muted-foreground">{t.orderSentHint(order.table)}</p>
       {token && (
-        <Link href={`/restaurant/${slug}/order/${token}?lang=${locale}`} className={`${BUTTON} mt-3 bg-brand text-brand-on transition-opacity hover:opacity-90`}>
+        <Link href={orderHref(slug, token, locale)} className={`${BUTTON} mt-3 bg-brand text-brand-on transition-opacity hover:opacity-90`}>
           {t.followOrder}
         </Link>
       )}

@@ -1,7 +1,11 @@
-import type { MenuCategory, MenuDish, MenuRestaurant } from '@/lib/menu'
+import type { Locale, MenuCategory, MenuDish, MenuRestaurant } from '@/lib/menu'
 
 /** The dish's own page: the href of its row and the target of its share link. */
 export const dishHref = (slug: string, dish: MenuDish) => `/restaurant/${slug}/dish/${dish.id}`
+
+/** A guest's order page: the tracking secret under the menu's slug, in the language they read. */
+export const orderHref = (slug: string, token: string, locale: Locale): `/restaurant/${string}/order/${string}?lang=${Locale}` =>
+  `/restaurant/${slug}/order/${token}?lang=${locale}`
 
 /** Everything the service worker should keep so this menu opens with no signal. */
 export function precacheUrls(restaurant: MenuRestaurant, categories: MenuCategory[], uncategorizedDishes: MenuDish[]): string[] {

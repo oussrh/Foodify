@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { eposCall, printerName, printerToken, printTrigger } from './print'
+import { eposCall, printerName, printTrigger } from './print'
 
 describe('printerName', () => {
   it('trims a name and refuses an empty or overlong one', () => {
@@ -16,13 +16,6 @@ describe('printTrigger', () => {
   })
 })
 
-describe('printerToken', () => {
-  it('takes 32 URL-safe characters only', () => {
-    expect(printerToken.safeParse('Ab_-'.repeat(8)).success).toBe(true)
-    expect(printerToken.safeParse('Ab_-'.repeat(7)).success).toBe(false)
-    expect(printerToken.safeParse('../'.repeat(11)).success).toBe(false)
-  })
-})
 
 describe('eposCall', () => {
   it('reads the call and its result file, ignoring the printer’s other fields', () => {
