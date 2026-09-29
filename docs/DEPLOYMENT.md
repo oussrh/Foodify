@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["deployment", "vercel", "prisma", "environment"]
 related: ["./README.md", "./TESTING.md"]
 source_truth: ["package.json", "lib/env.ts", "prisma/schema.prisma", "prisma/pos.prisma", "prisma/print.prisma", "next.config.js"]
-last_verified: "2026-09-28"
+last_verified: "2026-09-29"
 ---
 
 # Deployment
@@ -63,6 +63,10 @@ its owner adds one, so nothing prints until then. The code reads the printers on
 ticket, accept, cancel and removal, so deploy it before the build that ships Kitchen printers, or
 placing an order and those board moves fail. A printer polls `/api/print/epson/<secret>` on the
 public origin (`NEXT_PUBLIC_APP_URL`), so that is the host its address is built on.
+
+`20260929090000_order_guest_token` (`Order.guestTokenHash`, nullable and unique) is additive: every
+existing order has no tracking link. Placing a guest order writes it, so deploy it before the
+build that ships the guest's order tracking, or every guest order fails.
 
 Write migrations the running version survives (add a column before the code reads it, stop
 reading it before it is dropped): for a moment, the old deploy runs on the new schema.

@@ -119,7 +119,8 @@ function guestRules(phone: string | undefined, addTo: string | undefined): Respo
  * restaurant may leave it out, and the order records who took it instead (`placedById`). Staff may name the table's open bill in `addTo`:
  * the order is then an addition to it (`parentId`), numbered and cooked as an order of its own; a guest naming one is 403 forbidden, and a
  * bill that is not this table's open one of this service, checked under a lock on it (server/order-store.ts), is 409 unavailable with
- * `details.addTo` the reason. Answers 201 `{ data: { id, number, table, subtotal } }`; 400 invalid_json or invalid_payload (the issues);
+ * `details.addTo` the reason. Answers 201 `{ data: { id, number, table, subtotal, token? } }`, `token` only to a guest: the secret of the order's
+ * tracking link (GET /api/orders/track/<token>), stored as its hash and never answered again; 400 invalid_json or invalid_payload (the issues);
  * 409 unavailable, naming each dish that is not this restaurant's active menu or has sold out (`reason`: `off_menu` or `sold_out`), because the
  * request was well formed and the kitchen's answer changed under it; 403 forbidden when the restaurant has ordering off, 404 not_found for an
  * unknown restaurant, 500 internal. A placed order is pushed to the restaurant's kitchen boards after the response (server/order-push.ts). The number is per restaurant, from `Restaurant.nextOrderNumber`, taken in the
@@ -162,13 +163,14 @@ export async function POST(request: NextRequest) {
     const stored = await storeOrder(parsed.data, { staffId, currency: restaurant.currency, lines: priced, place })
     // 409: the request was well formed and the table moved on under it (lib/table-tab.ts).
     if ('refused' in stored) return fail('unavailable', ADD_TO_REFUSED[stored.refused], 409, { addTo: stored.refused })
-    const { order } = stored
+    const { order, token } = stored
     const placed: PlacedOrder = { id: order.id, number: order.number, table: order.table, subtotal: order.subtotal.toFixed(2) }
     // The kitchen boards are woken once the guest has their answer: a slow push service never holds it.
     afterResponse(() => pushNewOrder(restaurant, { ...placed, parentNumber: order.parent?.number ?? null, lines: priced }))
     // Only a guest is texted: an order taken at the table has nobody to confirm it to.
     if (phone) await confirmByText(placed, phone, restaurant, locale)
-    return ok(placed, { status: 201 })
+    // The tracking secret goes to the guest alone: never into `placed`, which the push and the text read.
+    return ok({ ...placed, token }, { status: 201 })
   } catch (error) {
     log.error({ err: error, restaurantId }, 'order: not placed')
     return fail('internal', 'Failed to place the order', 500)

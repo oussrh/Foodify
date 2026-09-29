@@ -255,55 +255,59 @@ enum OrderStatus {
 // server computed. `number` is the short label the kitchen sees (#12), per restaurant, from
 // Restaurant.nextOrderNumber. `phone` is personal data: never logged (server/log.ts).
 model Order {
-  id           String        @id @default(uuid())
-  restaurantId String
-  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
-  number       Int
-  table        String
+  id             String        @id @default(uuid())
+  restaurantId   String
+  restaurant     Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  number         Int
+  table          String
   // The guest's number, for the confirmation text. Empty when a waiter took the order at the
   // table: there is nobody to text, and `placedById` says who took it instead.
-  phone        String
-  placedById   String?
-  placedBy     User?         @relation("OrderPlacedBy", fields: [placedById], references: [id], onDelete: SetNull)
-  note         String?
-  status       OrderStatus   @default(NEW)
-  subtotal     Decimal       @db.Decimal(10, 2)
-  currency     String? // the restaurant's ISO 4217 code when the order was placed
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  phone          String
+  placedById     String?
+  placedBy       User?         @relation("OrderPlacedBy", fields: [placedById], references: [id], onDelete: SetNull)
+  // The guest's tracking link (GET /api/orders/track/<secret>): the SHA-256 of the secret handed
+  // back once when a guest placed the order (server/secret.ts), never the secret itself, because
+  // order ids are logged and this one must not be. Null on a staff order and on every earlier one.
+  guestTokenHash String?       @unique
+  note           String?
+  status         OrderStatus   @default(NEW)
+  subtotal       Decimal       @db.Decimal(10, 2)
+  currency       String? // the restaurant's ISO 4217 code when the order was placed
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
   // When the kitchen took the order on and when it went out: stamped once by the board's action,
   // so the history can say how long a table waited before it was started and before it was served.
   // `updatedAt` cannot answer that — it moves again on any later change.
-  acceptedAt   DateTime?
+  acceptedAt     DateTime?
   // Stamped when the kitchen called it up, which is the moment the waiter is told about.
-  readyAt      DateTime?
-  servedAt     DateTime?
-  lines        OrderLine[]
+  readyAt        DateTime?
+  servedAt       DateTime?
+  lines          OrderLine[]
   // An addition to a table's bill: the guests asked for more after the first ticket went in. It
   // is its own row with its own number and its own way across the board, so a dish already
   // cooking is not disturbed and no timing resets, and it points at the order that opened the
   // table (never at another addition: lib/table-tab.ts). Null on every order that opens a bill.
-  parentId     String?
-  parent       Order?        @relation("OrderAdditions", fields: [parentId], references: [id], onDelete: Cascade)
-  additions    Order[]       @relation("OrderAdditions")
+  parentId       String?
+  parent         Order?        @relation("OrderAdditions", fields: [parentId], references: [id], onDelete: Cascade)
+  additions      Order[]       @relation("OrderAdditions")
   // The bill was paid and the table let go (lib/bill-rules.ts): stamped on the order that opened
   // the bill, never on an addition, and by whom. A closed bill is never a table's current one
   // again, so the next order there opens a new bill. Null on every bill nobody closed; those
   // still fall back to the service day and the 90-minute default (lib/table-tab.ts).
-  closedAt     DateTime?
-  closedById   String?
-  closedBy     User?         @relation("OrderClosedBy", fields: [closedById], references: [id], onDelete: SetNull)
-  changes      OrderChange[]
+  closedAt       DateTime?
+  closedById     String?
+  closedBy       User?         @relation("OrderClosedBy", fields: [closedById], references: [id], onDelete: SetNull)
+  changes        OrderChange[]
   // What the restaurant's POS calls this ticket (the parent's is the bill's), once it has taken
   // it (server/pos/deliver.ts). Null while nothing is connected, and on every order sent before.
-  externalId   String?
+  externalId     String?
   // The POS check this ticket was rung up on (its own id for a bill's first ticket, the bill's for
   // an addition), and when the POS said that check was paid. A bill closes from the POS only once
   // every ticket of it that reached the POS is paid, which matters after a merge.
-  posCheckId   String?
-  posPaidAt    DateTime?
-  posOutbox    PosOutbox[]
-  printJobs    PrintJob[]
+  posCheckId     String?
+  posPaidAt      DateTime?
+  posOutbox      PosOutbox[]
+  printJobs      PrintJob[]
 
   @@unique([restaurantId, number])
   @@index([restaurantId, status, createdAt])
