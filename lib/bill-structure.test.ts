@@ -5,7 +5,8 @@ import { BILL_REFUSED, closeRefusal, landingBill, mergeRefusal, moveRefusal, unm
 // Closing, merging, un-merging and moving a bill, against literal bills: a table's lunch and its
 // dinner, another restaurant's, a closed one, a cancelled one, one of last night.
 
-const ZONE = 'Africa/Casablanca' // UTC+1 all year
+// A fixed offset: a real zone's rules move with the tz database (Morocco's did), an Etc zone's never do.
+const ZONE = 'Etc/GMT-1' // UTC+1 (Etc signs are inverted)
 const NOW = new Date('2026-09-24T20:00:00Z') // 21:00 local
 const PLACE = { restaurantId: 'r1', serviceStart: serviceDayStart(NOW, ZONE) }
 
