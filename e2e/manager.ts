@@ -33,9 +33,9 @@ export async function ownRestaurant(info: TestInfo) {
         },
       },
     },
-    select: { id: true, slug: true, name: true, categories: { select: { subcategories: { select: { id: true } } } } },
+    select: { id: true, code: true, slug: true, name: true, categories: { select: { subcategories: { select: { id: true } } } } },
   })
   const subcategoryId = restaurant.categories[0]?.subcategories[0]?.id
   if (!subcategoryId) throw new Error('e2e: the test restaurant was created without its subcategory')
-  return { id: restaurant.id, slug, name: restaurant.name, subcategoryId, remove: () => db().restaurant.deleteMany({ where: { slug } }) }
+  return { id: restaurant.id, code: restaurant.code, slug, name: restaurant.name, subcategoryId, remove: () => db().restaurant.deleteMany({ where: { slug } }) }
 }

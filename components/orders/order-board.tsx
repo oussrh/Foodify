@@ -8,6 +8,7 @@
 import { useCallback, useState } from 'react'
 import type { Route } from 'next'
 import type { Money } from '@/lib/menu'
+import { kitchenMenuPath } from '@/lib/restaurant-paths'
 import type { BoardOrder, BoardView, OrderMove } from '@/lib/orders'
 import { setOrderStatus } from '@/app/actions/order-actions'
 import { useRequestDecision } from './use-request-decision'
@@ -17,6 +18,9 @@ import OrderDetailsSheet from './order-details-sheet'
 import ServedList from './served-list'
 import { useChime } from './use-chime'
 import { DeviceSetupSheet } from '@/components/staff/device-setup/device-setup-sheet'
+import { InstallInvitation } from '@/components/staff/install-invitation'
+import { LaunchScreen } from '@/components/staff/launch-screen'
+import { UpdateBar } from '@/components/staff/update-bar'
 import { SoundUnlockStrip } from '@/components/staff/sound-unlock-strip'
 import { useAppBadge } from '@/components/staff/use-app-badge'
 import { useAudioUnlock } from '@/components/staff/use-audio-unlock'
@@ -28,6 +32,8 @@ import { useStaffPwa } from '@/components/staff/use-staff-pwa'
 import { useWakeLock } from './use-wake-lock'
 
 interface OrderBoardProps {
+  /** Which installed app the board is: the tablet's Foodizar Kitchen, or a portal's Foodizar Orders. */
+  app: 'kitchen' | 'orders'
   restaurantId: string
   /** The restaurant's short code: what its own links are built from, never the uuid. */
   restaurantCode: string
@@ -56,7 +62,7 @@ function detailsExtras(on: { isManager: boolean; refresh: () => void; decision: 
  * The kitchen board a tablet sits on all day: open orders in two lanes, the alert when one arrives,
  * the ready drawer, and each order's details a tap away.
  */
-export default function OrderBoard({ restaurantId, restaurantCode, restaurantName, money, backHref, isManager }: OrderBoardProps) {
+export default function OrderBoard({ app, restaurantId, restaurantCode, restaurantName, money, backHref, isManager }: OrderBoardProps) {
   const { play: chime, prime } = useChime()
   // A pass wants sound: it is the whole reason the board is there, so it starts on. Turning it
   // off is a choice the room makes, remembered on the tablet.
@@ -124,9 +130,14 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
             wakeLock={wakeLock}
           />
         }
-        notice={<SoundUnlockStrip locked={audio.locked} onUnlock={audio.unlock} />}
+        notice={
+          <>
+            <SoundUnlockStrip locked={audio.locked} onUnlock={audio.unlock} />
+            <UpdateBar app={app} />
+          </>
+        }
         backHref={backHref}
-        soldOutHref={`/kitchen/menu/${restaurantCode}` as Route}
+        soldOutHref={kitchenMenuPath(restaurantCode)}
       />
 
       <main className="flex-1 px-3 py-4 pb-[max(16px,env(safe-area-inset-bottom))] sm:px-4">
@@ -134,6 +145,7 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
         <p className="sr-only" role="status" aria-live="polite">
           {loading ? 'Loading orders' : `${orders.length} open order${orders.length === 1 ? '' : 's'}`}
         </p>
+        <InstallInvitation app={app} pwa={pwa} />
 
         {orders.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-28 text-center">
@@ -171,6 +183,7 @@ export default function OrderBoard({ restaurantId, restaurantCode, restaurantNam
         now={now}
         {...detailsExtras({ isManager, refresh, decision, busyId })}
       />
+      <LaunchScreen app={app} ready={!loading} />
     </div>
   )
 }

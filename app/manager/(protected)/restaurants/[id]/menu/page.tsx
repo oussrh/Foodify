@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import type { Route } from 'next'
 import prisma from '@/lib/prisma'
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
@@ -8,16 +7,17 @@ import { Button } from '@/components/ui/button'
 import { PageHeader, StatStrip } from '@/components/shell/page-header'
 import { getMenu } from '@/app/actions/menu-actions'
 import ManagerCategoryManager from '@/components/manager-category-manager'
-import { idSegment, routeParams } from '@/lib/schemas/page-params'
+import { restaurantPageId } from '@/lib/restaurant-page'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 export default async function MenuPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth()
   if (!session?.user?.email) redirect('/manager/login')
-  const { id } = routeParams(idSegment, await params)
+  const id = await restaurantPageId((await params).id, (code) => restaurantPath('manager', code, 'menu'))
 
   const restaurant = await prisma.restaurant.findFirst({
     where: { id, users: { some: { email: session.user.email } } },
-    select: { id: true, name: true, dishes: { select: { id: true, isActive: true, subcategoryId: true } } },
+    select: { id: true, code: true, name: true, dishes: { select: { id: true, isActive: true, subcategoryId: true } } },
   })
   if (!restaurant) redirect('/manager/restaurants')
 
@@ -26,7 +26,6 @@ export default async function MenuPage({ params }: { params: Promise<{ id: strin
   const live = restaurant.dishes.filter((d) => d.isActive).length
   const uncategorized = restaurant.dishes.filter((d) => !d.subcategoryId).length
   const subcategories = data.reduce((n, c) => n + c.subcategories.length, 0)
-  const base = `/manager/restaurants/${restaurant.id}`
 
   return (
     <div className="flex flex-col gap-6">
@@ -36,10 +35,10 @@ export default async function MenuPage({ params }: { params: Promise<{ id: strin
         actions={
           <>
             <Button asChild variant="outline">
-              <Link href={`${base}/dishes` as Route}>All dishes</Link>
+              <Link href={restaurantPath('manager', restaurant.code, 'dishes')}>All dishes</Link>
             </Button>
             <Button asChild>
-              <Link href={`${base}/dishes/create` as Route}>
+              <Link href={restaurantPath('manager', restaurant.code, 'dishes/create')}>
                 <Plus className="h-4 w-4" />
                 Add dish
               </Link>

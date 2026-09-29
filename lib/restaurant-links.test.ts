@@ -7,7 +7,7 @@ describe('restaurantLinks', () => {
   it('addresses the menu by slug and the devices by the short code', () => {
     expect(restaurantLinks('https://foodify.app', restaurant)).toEqual({
       menu: 'https://foodify.app/restaurant/le-jardin',
-      tablet: 'https://foodify.app/kitchen/orders/K7M2QX',
+      tablet: 'https://foodify.app/kitchen/K7M2QX',
       waiter: 'https://foodify.app/waiter/K7M2QX',
     })
   })

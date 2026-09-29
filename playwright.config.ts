@@ -30,6 +30,7 @@ export default defineConfig({
     url: `http://localhost:${port}/offline`,
     reuseExistingServer: false,
     timeout: 60_000,
-    env: { AUTH_TRUST_HOST: 'true', NEXTAUTH_URL: `http://localhost:${port}`, PORT: String(port) },
+    // POS_ENCRYPTION_KEY: a key of the suite's own, so e2e/pos.spec.ts can connect the Test POS; never a real one.
+    env: { AUTH_TRUST_HOST: 'true', NEXTAUTH_URL: `http://localhost:${port}`, PORT: String(port), POS_ENCRYPTION_KEY: 'ZTJlLW9ubHktcG9zLWtleS0wMTIzNDU2Nzg5YWJjZGU=' },
   },
 })

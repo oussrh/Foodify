@@ -4,9 +4,11 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 interface ProfileRestaurant {
   id: string
+  code: string
   name: string
   slug: string
 }
@@ -30,13 +32,13 @@ export function RestaurantsCard({ restaurants }: { restaurants: ProfileRestauran
             {restaurants.map((r) => (
               <li key={r.id} className="flex items-center gap-3 px-5 py-3">
                 <div className="min-w-0 flex-1">
-                  <Link href={`/manager/restaurants/${r.id}/info`} className="block truncate text-sm font-medium hover:underline">
+                  <Link href={restaurantPath('manager', r.code)} className="block truncate text-sm font-medium hover:underline">
                     {r.name}
                   </Link>
                   <span className="block truncate text-xs text-muted-foreground">/{r.slug}</span>
                 </div>
                 <Button asChild size="sm" variant="outline">
-                  <Link href={`/manager/restaurants/${r.id}/menu`}>Menu</Link>
+                  <Link href={restaurantPath('manager', r.code, 'menu')}>Menu</Link>
                 </Button>
               </li>
             ))}

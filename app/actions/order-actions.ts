@@ -8,6 +8,8 @@ import { pushChangeAnswers } from '@/server/change-push'
 import { moveOrder } from '@/server/order-moves'
 import { orderRestaurant } from '@/server/order-owner'
 import { pushOrderReady } from '@/server/order-push'
+import { reprintTicket as reprint } from '@/server/print/enqueue'
+import { uuid } from '@/lib/schemas/common'
 
 /**
  * The restaurant's managers or its kitchen tablet, on one of that restaurant's orders (a waiter reads the board but does
@@ -29,4 +31,16 @@ export async function setOrderStatus(raw: OrderAction) {
   if (outcome.moved && outcome.status === 'READY') afterResponse(() => pushOrderReady(orderId))
   if (outcome.answered.length > 0) afterResponse(() => pushChangeAnswers(outcome.answered))
   return { id: outcome.id, status: outcome.status as OrderStatus }
+}
+
+/**
+ * The restaurant's managers or its kitchen tablet, on one of that restaurant's tickets: prints it
+ * again on every printer, as it now stands (the paper was lost, or the printer was out of it).
+ * Answers `{ ok }`.
+ */
+export async function reprintTicket(rawOrderId: string) {
+  const orderId = uuid.parse(rawOrderId)
+  const restaurantId = await orderRestaurant(orderId)
+  await requireBoardAction(restaurantId)
+  return { ok: await reprint(restaurantId, orderId) }
 }

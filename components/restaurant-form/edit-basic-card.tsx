@@ -1,8 +1,8 @@
 // components/restaurant-form/edit-basic-card.tsx
 // The "Basic Information" card of the settings form's General tab: the identity fields (name,
 // slug, tagline, description, cuisine, the dietary options offered), the money and language fields
-// (currency, its read-only symbol carried by hidden inputs, default language) and the online
-// ordering switch. Every change dirties the form.
+// (currency, its read-only symbol carried by hidden inputs, default language), the online
+// ordering switch, and the restaurant's code with its two device links (read-only, outside the form's values). Every change dirties the form.
 'use client'
 
 import type { FieldErrors, UseFormRegister, UseFormSetValue } from 'react-hook-form'
@@ -15,6 +15,7 @@ import DietaryOptionsField from './dietary-options-field'
 import ProfileTextFields from './profile-text-fields'
 import OrderingField from './ordering-field'
 import TimeZoneField from './time-zone-field'
+import DeviceCodeField from './device-code-field'
 import { CURRENCIES, currencySymbolFor } from './currencies'
 import type { EditRestaurantValues } from './edit-restaurant-schema'
 
@@ -27,9 +28,11 @@ type Props = {
   dietaryOptions: string[]
   orderingEnabled: boolean
   tableCount: number
+  /** The restaurant's short code, shown read-only with the device links built from it. */
+  code: string
 }
 
-function IdentityFields({ register, errors, setValue, dietaryOptions }: Omit<Props, 'currencySymbol' | 'defaultValues' | 'orderingEnabled' | 'tableCount'>) {
+function IdentityFields({ register, errors, setValue, dietaryOptions }: Omit<Props, 'currencySymbol' | 'defaultValues' | 'orderingEnabled' | 'tableCount' | 'code'>) {
   return (
     <>
       <div className="grid md:grid-cols-2 gap-6">
@@ -74,7 +77,7 @@ function IdentityFields({ register, errors, setValue, dietaryOptions }: Omit<Pro
   )
 }
 
-function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omit<Props, 'errors' | 'dietaryOptions' | 'orderingEnabled' | 'tableCount'>) {
+function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omit<Props, 'errors' | 'dietaryOptions' | 'orderingEnabled' | 'tableCount' | 'code'>) {
   return (
     <>
       {/* Currency Selection */}
@@ -137,8 +140,8 @@ function LocaleFields({ register, setValue, defaultValues, currencySymbol }: Omi
 
 /**
  * The settings form's General card: identity, dietary options, currency (its symbol read-only,
- * submitted through hidden inputs), default language, time zone and the ordering switch. Every change marks
- * the form dirty.
+ * submitted through hidden inputs), default language, time zone, the ordering switch, and the
+ * restaurant's code with its device links. Every change marks the form dirty; the code is not a field of it.
  */
 export default function EditBasicCard(props: Props) {
   return (
@@ -161,6 +164,7 @@ export default function EditBasicCard(props: Props) {
             onTableCount={(next) => props.setValue('tableCount', next, { shouldDirty: true })}
           />
         </div>
+        <DeviceCodeField code={props.code} />
       </CardContent>
     </Card>
   )

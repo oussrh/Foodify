@@ -4,6 +4,7 @@ import { authErrorResponse, requireBoardAccess } from '@/lib/auth-guard'
 import { boardOrderSelect, serializeOrder } from '@/lib/order-data'
 import { type BoardOrder, isClosed, OPEN_STATUSES, type OrderStatus } from '@/lib/orders'
 import { orderBoardQuery } from '@/lib/schemas/order-board'
+import { sweepSoon } from '@/server/pos/trigger'
 
 /** At most this many orders in one answer: a board shows what a kitchen can hold, and the poll stays small. */
 const MAX_ORDERS = 100
@@ -43,6 +44,7 @@ const BOARD_ORDER = {
  * Answers `{ data: BoardOrder[] }`, at most a hundred: the ones being worked oldest first, so the longest wait is at the
  * top, and a list of finished ones newest first. The list is bounded rather than paged: a board that needs a second page
  * is a kitchen in trouble, not a UI to scroll, and the served list answers "what did we just send out", not "all of it".
+ * An authorised poll also starts a throttled sweep of the restaurant's POS outbox once the answer has gone (server/pos/trigger.ts).
  */
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams
@@ -57,6 +59,9 @@ export async function GET(request: Request) {
   } catch (error) {
     return authErrorResponse(error)
   }
+  // A board or a waiter polling is a sign of service: the POS outbox is swept after the answer,
+  // at most every thirty seconds per restaurant, so a missed send never waits for the daily cron.
+  sweepSoon(query.data.restaurantId)
 
   const statuses = query.data.status ?? [...OPEN_STATUSES]
   const recent = newestFirst(statuses)

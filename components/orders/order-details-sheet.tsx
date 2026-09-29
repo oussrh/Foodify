@@ -3,7 +3,8 @@
 // what came off it since, the floor's requests waiting on the kitchen, the note, the table, the
 // wait and the total, the number to call, and the moves staff can make. Cancel lives here rather
 // than on the card, behind a second tap, so a passing hand cannot throw an order away. A manager
-// also voids a dish or the whole ticket here, and reads the order's change log.
+// also voids a dish or the whole ticket here, and reads the order's change log. A ticket still
+// being worked can be printed again on the kitchen's printers.
 'use client'
 
 import { useState } from 'react'
@@ -18,6 +19,7 @@ import { additionLabel } from '@/lib/table-tab'
 import ChangeLogList from './change-log-list'
 import DetailsLines from './details-lines'
 import OrderTimeline from './order-timeline'
+import ReprintButton from './reprint-button'
 import { RequestBanner } from './request-banner'
 import VoidPanel from './void-panel'
 
@@ -39,7 +41,7 @@ interface OrderDetailsSheetProps {
 /** What is being voided: one line, or the whole ticket. */
 type Voiding = { line: BoardLine | null } | null
 
-/** The board's moves on an order still being worked: start, served, and cancel behind a second tap. */
+/** The board's moves on an order still being worked: start, served, cancel behind a second tap, and reprint. */
 function BoardMoves({ order, onAction, busy }: { order: BoardOrder; onAction: (action: OrderMove) => void; busy: boolean }) {
   // Cancel asks twice: the second tap is the answer, and closing the sheet forgets the question.
   const [confirmingCancel, setConfirmingCancel] = useState(false)
@@ -63,6 +65,7 @@ function BoardMoves({ order, onAction, busy }: { order: BoardOrder; onAction: (a
           Cancel order
         </Button>
       )}
+      <ReprintButton orderId={order.id} number={order.number} />
     </div>
   )
 }

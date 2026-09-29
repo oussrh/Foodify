@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dishSegments, grainParam, idSegment, listSearch, menuDishSegments, menuQuery, menuSegment, routeParams } from './page-params'
+import { dishSegments, grainParam, idSegment, listSearch, menuDishSegments, menuQuery, menuSegment, restaurantSegment, routeParams } from './page-params'
 
 const id = '54d3dcf7-5297-4b2e-99ac-ae4197735f29'
 
@@ -15,6 +15,28 @@ describe('routeParams', () => {
     expect(() => routeParams(idSegment, { id: 'not-an-id' })).toThrow(notFound)
     expect(() => routeParams(menuSegment, { slug: 'Chez Test' })).toThrow(notFound)
     expect(() => routeParams(menuDishSegments, { slug: 'chez-test', dishId: '1' })).toThrow(notFound)
+  })
+})
+
+describe('restaurantSegment', () => {
+  const notFound = expect.objectContaining({ digest: 'NEXT_HTTP_ERROR_FALLBACK;404' })
+
+  it('takes the short code, folded onto the alphabet as a person types it', () => {
+    expect(routeParams(restaurantSegment, { id: 'K7M2QX' })).toEqual({ id: 'K7M2QX' })
+    expect(routeParams(restaurantSegment, { id: 'k7m2qx' })).toEqual({ id: 'K7M2QX' })
+    expect(routeParams(restaurantSegment, { id: 'k7m2qo' })).toEqual({ id: 'K7M2Q0' })
+  })
+
+  it('still takes the uuid a link carried before codes existed', () => {
+    expect(routeParams(restaurantSegment, { id })).toEqual({ id })
+    expect(routeParams(dishSegments, { id: 'K7M2QX', dishId: id })).toEqual({ id: 'K7M2QX', dishId: id })
+  })
+
+  it('is the 404 for a segment of neither shape', () => {
+    for (const bad of ['K7M2Q', 'K7M2QXX', 'not-an-id', '../admin', '', 'K7M2Q!']) {
+      expect(() => routeParams(restaurantSegment, { id: bad })).toThrow(notFound)
+    }
+    expect(() => routeParams(dishSegments, { id: 'K7M2QX', dishId: 'K7M2QX' })).toThrow(notFound)
   })
 })
 

@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { LinkRow } from '@/components/shell/link-row'
 
 interface BoardLinkCardProps {
-  /** The absolute address of the kitchen board, e.g. https://foodify.app/manager/orders/<id> */
+  /** The absolute address of the kitchen board, e.g. https://foodify.app/manager/orders/K7M2QX (the restaurant's code) */
   url: string
   restaurantName: string
 }

@@ -14,7 +14,7 @@ test.describe('a manager\'s restaurant', () => {
     const renamed = `${restaurant.name} renamed`
     try {
       await signInAs(page, 'manager', manager.email, { mfa: false })
-      await page.goto(`/manager/restaurants/${restaurant.id}/edit`)
+      await page.goto(`/manager/restaurants/${restaurant.code}/edit`)
       await page.locator('#name').fill(renamed)
       await page.getByLabel('Online ordering').check()
       await page.getByLabel('Tables in the room').fill('4')
@@ -39,7 +39,7 @@ test.describe('a manager\'s restaurant', () => {
     const manager = await auditAccount('manager', info.testId, { mfa: false, restaurantId: restaurant.id })
     try {
       await signInAs(page, 'manager', manager.email, { mfa: false })
-      await page.goto(`/manager/restaurants/${restaurant.id}/edit`)
+      await page.goto(`/manager/restaurants/${restaurant.code}/edit`)
       await page.locator('#slug').fill('Not A Slug')
       await page.getByRole('button', { name: 'Save changes' }).click()
       // Not "You have unsaved changes", as if nothing had been tried: two saves once failed that silently.
@@ -58,7 +58,7 @@ test.describe('a manager\'s restaurant', () => {
     const email = `new-${restaurant.slug}@foodify.test`
     try {
       await signInAs(page, 'manager', manager.email, { mfa: false })
-      await page.goto(`/manager/restaurants/${restaurant.id}/users`)
+      await page.goto(`/manager/restaurants/${restaurant.code}/users`)
       await page.getByRole('button', { name: 'Add manager' }).click()
       const dialog = page.getByRole('dialog')
       await dialog.getByLabel('Email address').fill(email)
@@ -74,7 +74,7 @@ test.describe('a manager\'s restaurant', () => {
       await colleague.getByLabel(/email/i).fill(email)
       await colleague.getByLabel(/password/i).fill(password)
       await submitUntil(colleague.getByRole('button', { name: /continue|sign in/i }), async () => !colleague.url().includes('/login'))
-      await expect(colleague).toHaveURL(new RegExp(`/manager/restaurants/${restaurant.id}`))
+      await expect(colleague).toHaveURL(new RegExp(`/manager/restaurants/${restaurant.code}`))
       await colleague.close()
     } finally {
       await db().user.deleteMany({ where: { email } })
@@ -90,7 +90,7 @@ test.describe('a manager\'s restaurant', () => {
     const username = `w-${restaurant.slug}`.slice(0, 30)
     try {
       await signInAs(page, 'manager', manager.email, { mfa: false })
-      await page.goto(`/manager/restaurants/${restaurant.id}/users`)
+      await page.goto(`/manager/restaurants/${restaurant.code}/users`)
       await page.locator('#WAITER-username').fill(username)
       // The password `signInDevice` signs a device in with (`e2e/staff.ts`).
       await page.locator('#WAITER-password').fill('device-only')

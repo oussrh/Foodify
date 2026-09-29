@@ -4,10 +4,11 @@
 // typing it by hand means a mistyped uuid, so the link is on screen to read as well.
 'use client'
 
-import { useState, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { Copy, ExternalLink, Share2 } from 'lucide-react'
 import { shareLink } from '@/components/menu/share-link'
 import { Button } from '@/components/ui/button'
+import { useCopy } from './use-copy'
 
 interface LinkRowProps {
   icon: ReactNode
@@ -22,17 +23,7 @@ interface LinkRowProps {
 
 /** An addressed destination with Open, Copy and Share; the caller supplies the card around it. */
 export function LinkRow({ icon, title, description, url, shareTitle, shareText }: LinkRowProps) {
-  const [copied, setCopied] = useState(false)
-
-  const copy = async () => {
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 3000)
-    } catch {
-      // a browser without clipboard access: the link is on screen to copy by hand
-    }
-  }
+  const { copied, copy } = useCopy('Link')
 
   return (
     <div className="flex flex-col gap-3 p-5">
@@ -54,7 +45,7 @@ export function LinkRow({ icon, title, description, url, shareTitle, shareText }
               Open
             </a>
           </Button>
-          <Button variant="outline" onClick={copy}>
+          <Button variant="outline" onClick={() => copy(url)}>
             <Copy className="h-4 w-4" />
             {copied ? 'Copied' : 'Copy'}
           </Button>

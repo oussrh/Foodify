@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 import { Plus } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/shell/page-header'
-import RestaurantsList from '@/components/shell/restaurants-list'
+import RestaurantsList, { restaurantListRow } from '@/components/shell/restaurants-list'
 import { requireSuperAdminPage } from '@/lib/auth-guard'
 import { listSearch, type SearchParams } from '@/lib/schemas/page-params'
 
@@ -34,17 +34,7 @@ export default async function RestaurantsPage({
     },
   })
 
-  const rows = restaurants.map((r) => ({
-    id: r.id,
-    name: r.name,
-    slug: r.slug,
-    city: r.city,
-    logoUrl: r.logoUrl,
-    dishCount: r.dishes.length,
-    liveCount: r.dishes.filter((d) => d.isActive).length,
-    categoryCount: r._count.categories,
-    managerCount: r._count.users,
-  }))
+  const rows = restaurants.map(restaurantListRow)
 
   return (
     <div className="flex flex-col gap-2">

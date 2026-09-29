@@ -2,6 +2,7 @@
 // The addresses one restaurant runs on. Each is going to a different device — a guest's phone, a
 // tablet on the pass, a waiter's phone — so all three are absolute, built from the public origin
 // rather than from whatever host the portal happens to be open on.
+import { deviceLinks } from '@/lib/restaurant-paths'
 
 /** What a restaurant's three addresses are, given the public origin. */
 export interface RestaurantLinks {
@@ -23,9 +24,6 @@ export interface RestaurantLinks {
  * existed keeps working.
  */
 export function restaurantLinks(origin: string, restaurant: { code: string; slug: string }): RestaurantLinks {
-  return {
-    menu: `${origin}/restaurant/${restaurant.slug}`,
-    tablet: `${origin}/kitchen/orders/${restaurant.code}`,
-    waiter: `${origin}/waiter/${restaurant.code}`,
-  }
+  const devices = deviceLinks(origin, restaurant.code)
+  return { menu: `${origin}/restaurant/${restaurant.slug}`, tablet: devices.kitchen, waiter: devices.waiter }
 }

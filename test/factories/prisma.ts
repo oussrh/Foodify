@@ -57,6 +57,8 @@ export function restaurantRow(overrides: Partial<Restaurant> = {}): Restaurant {
     nextOrderNumber: 1,
     tableCount: 0,
     timeZone: 'UTC',
+    posEnabled: false,
+    printTrigger: 'ARRIVAL',
     openingHours: null,
     socialMedia: null,
     coverImageUrl: null,

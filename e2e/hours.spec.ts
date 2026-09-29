@@ -16,11 +16,11 @@ async function closeDay(page: Page, day: string) {
 test.describe('opening hours', () => {
   test('copies a day\'s hours to the days picked in the Copy popover', async ({ page }, info) => {
     test.setTimeout(120_000)
-    const { restaurantId } = await seededIds()
+    const { restaurantCode } = await seededIds()
     const account = await auditAccount('manager', info.testId)
     await signInAs(page, 'manager', account.email)
 
-    await page.goto(`/manager/restaurants/${restaurantId}/edit`)
+    await page.goto(`/manager/restaurants/${restaurantCode}/edit`)
     await page.getByRole('tab', { name: 'Contact & hours' }).click()
     for (const day of ['monday', 'tuesday', 'wednesday']) await closeDay(page, day)
 

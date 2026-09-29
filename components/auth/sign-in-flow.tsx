@@ -11,6 +11,7 @@ import { requestManagerOtp } from '@/app/actions/manager-auth-actions'
 import { requestWaiterSignIn } from '@/app/actions/waiter-auth-actions'
 import CredentialsStep from './credentials-step'
 import CodeStep from './code-step'
+import SignInHeader from './sign-in-header'
 import { issueOf } from '@/components/forms/schema-check'
 import { otpCode, otpRequest } from '@/lib/schemas/user'
 
@@ -203,11 +204,7 @@ export default function SignInFlow({ portal, initialStep = 'credentials' }: Sign
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-4 py-10">
       <div className="w-full max-w-sm">
-        <div className="mb-8 flex items-center gap-2 font-semibold">
-          <span className="h-2.5 w-2.5 rounded-full bg-primary" aria-hidden="true" />
-          Foodify
-          <span className="ml-auto text-xs font-medium text-muted-foreground">{cfg.label}</span>
-        </div>
+        <SignInHeader label={cfg.label} />
 
         {step === 'credentials' ? (
           <CredentialsStep

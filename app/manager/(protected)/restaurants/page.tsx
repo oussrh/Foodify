@@ -1,7 +1,7 @@
 import { auth } from '@/auth'
 import prisma from '@/lib/prisma'
 import { PageHeader } from '@/components/shell/page-header'
-import RestaurantsList from '@/components/shell/restaurants-list'
+import RestaurantsList, { restaurantListRow } from '@/components/shell/restaurants-list'
 import { listSearch, type SearchParams } from '@/lib/schemas/page-params'
 
 export default async function ManagerRestaurantsPage({
@@ -35,17 +35,7 @@ export default async function ManagerRestaurantsPage({
     },
   })
 
-  const rows = restaurants.map((r) => ({
-    id: r.id,
-    name: r.name,
-    slug: r.slug,
-    city: r.city,
-    logoUrl: r.logoUrl,
-    dishCount: r.dishes.length,
-    liveCount: r.dishes.filter((d) => d.isActive).length,
-    categoryCount: r._count.categories,
-    managerCount: r._count.users,
-  }))
+  const rows = restaurants.map(restaurantListRow)
 
   return (
     <div className="flex flex-col gap-2">

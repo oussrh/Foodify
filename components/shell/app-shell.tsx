@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { Building2, Home, Shield, User as UserIcon, Users, type LucideIcon } from 'lucide-react'
 import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
+import { restaurantPath } from '@/lib/restaurant-paths'
 import UserMenu from './user-menu'
 import RestaurantSwitcher from './restaurant-switcher'
 import RestaurantTabs from './restaurant-tabs'
@@ -50,9 +51,9 @@ const NAV: Record<ShellPortal, NavItem[]> = {
 function navFor(portal: ShellPortal, restaurants: ShellRestaurant[]): NavItem[] {
   const only = portal === 'manager' && restaurants.length === 1 ? restaurants[0]! : null
   if (!only) return NAV[portal]
-  const home = `/manager/restaurants/${only.id}`
+  const home = `/manager/restaurants/${only.code}`
   return [
-    { href: `${home}/info` as Route, label: 'Overview', icon: Home, activePrefix: home },
+    { href: restaurantPath('manager', only.code), label: 'Overview', icon: Home, activePrefix: home },
     { href: '/manager/profile', label: 'Account', icon: UserIcon },
   ]
 }
@@ -65,10 +66,10 @@ export default function AppShell({ portal, user, restaurants, children }: AppShe
   const pathname = usePathname()
   const nav = navFor(portal, restaurants)
 
-  // Are we inside /{portal}/restaurants/{id}/... ?
+  // Are we inside /{portal}/restaurants/{code}/... ? (A uuid there is a moment before the page's redirect to the code.)
   const match = pathname.match(new RegExp(`^/${portal}/restaurants/([^/]+)(?:/([^/]+))?`))
-  const restaurantId = match && match[1] !== 'create' ? match[1] : null
-  const currentRestaurant = restaurantId ? restaurants.find((r) => r.id === restaurantId) : null
+  const segment = match && match[1] !== 'create' ? match[1] : null
+  const currentRestaurant = segment ? restaurants.find((r) => r.code === segment || r.id === segment) : null
   const section = match?.[2] ?? 'info'
 
   const isActive = (item: NavItem) => {
@@ -124,7 +125,7 @@ export default function AppShell({ portal, user, restaurants, children }: AppShe
               <UserMenu portal={portal} user={user} />
             </div>
           </div>
-          {currentRestaurant && <RestaurantTabs portal={portal} restaurantId={currentRestaurant.id} pathname={pathname} />}
+          {currentRestaurant && <RestaurantTabs portal={portal} restaurantCode={currentRestaurant.code} pathname={pathname} />}
         </header>
 
         <main className="min-w-0 flex-1 px-4 py-5 pb-24 md:px-6 md:py-6 md:pb-10">

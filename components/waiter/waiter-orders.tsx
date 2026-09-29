@@ -19,6 +19,7 @@ import { itemCount, minutesWaiting, STATUS_LABEL, type BoardOrder } from '@/lib/
 import { readyOrders } from '@/lib/waiter-floor'
 import { cn } from '@/lib/utils'
 import { WaiterHeader } from './waiter-header'
+import { WaiterSettings } from './waiter-settings'
 import { WaiterNav } from './waiter-nav'
 
 /** A waiter placed these; nothing here should announce them a second time. */
@@ -103,7 +104,9 @@ export function WaiterOrders({ restaurant }: { restaurant: { id: string; code: s
           online={open.online}
           loading={open.loading}
           onRefresh={refresh}
-        />
+        >
+          <WaiterSettings restaurantId={restaurant.id} />
+        </WaiterHeader>
       </header>
 
       <main className="flex-1 px-3 pb-28 pt-4">

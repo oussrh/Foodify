@@ -55,7 +55,7 @@ export async function signInDevice(page: Page, portal: 'kitchen' | 'waiter', use
  * guest menu shows it; available, no model. Named so a search finds only it.
  */
 export async function ownDish(info: TestInfo) {
-  const { restaurantId, dishId } = await seededIds()
+  const { restaurantId, restaurantCode, dishId } = await seededIds()
   const seeded = await db().dish.findUniqueOrThrow({ where: { id: dishId }, select: { subcategoryId: true } })
   const nameEn = `E2E dish ${runTag(info)}`
   const dish = await db().dish.create({
@@ -79,5 +79,5 @@ export async function ownDish(info: TestInfo) {
     await db().dishView.deleteMany({ where: { dishId: dish.id } })
     await db().dish.deleteMany({ where: { id: dish.id } })
   }
-  return { id: dish.id, name: nameEn, restaurantId, remove }
+  return { id: dish.id, name: nameEn, restaurantId, restaurantCode, remove }
 }

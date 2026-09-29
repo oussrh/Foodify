@@ -12,6 +12,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
+import { restaurantPath, restaurantTab } from '@/lib/restaurant-paths'
 import type { ShellRestaurant, ShellPortal } from './shell-types'
 
 interface RestaurantSwitcherProps {
@@ -49,7 +50,7 @@ export default function RestaurantSwitcher({ portal, restaurants, current, secti
         <DropdownMenuSeparator />
         {restaurants.map((r) => (
           <DropdownMenuItem key={r.id} asChild>
-            <Link href={`/${portal}/restaurants/${r.id}/${section}` as Route} className={cn(r.id === current.id && 'font-semibold')}>
+            <Link href={restaurantPath(portal, r.code, restaurantTab(section))} className={cn(r.id === current.id && 'font-semibold')}>
               {r.name}
             </Link>
           </DropdownMenuItem>

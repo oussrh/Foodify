@@ -29,7 +29,7 @@ pnpm install
 pnpm dev
 ```
 
-`.env.example` lists the environment; only `DATABASE_URL` and `NEXTAUTH_SECRET` are required to
+`env.example` lists the environment; only `DATABASE_URL` and `NEXTAUTH_SECRET` are required to
 start. `pnpm db:setup` resets a **local** database, applies the schema and seeds a restaurant with
 two accounts (`ousrh7@gmail.com` and `owner@foodify.test`, password `changeme`).
 

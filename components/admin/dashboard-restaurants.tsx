@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { EmptyState } from '@/components/shell/page-header'
 import { RestaurantRowMenu } from '@/components/shell/row-actions'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 /** A restaurant row with the counts the overview shows beside it. */
 interface DashboardRestaurant {
   id: string
+  code: string
   name: string
   slug: string
   city: string | null
@@ -52,7 +54,7 @@ export function DashboardRestaurants({ restaurants }: { restaurants: DashboardRe
             {restaurants.slice(0, 8).map((r) => (
               <TableRow key={r.id}>
                 <TableCell>
-                  <Link href={`/admin/restaurants/${r.id}/menu`} className="font-medium hover:underline">
+                  <Link href={restaurantPath('admin', r.code, 'menu')} className="font-medium hover:underline">
                     {r.name}
                   </Link>
                   <span className="block text-xs text-muted-foreground">/{r.slug}</span>
@@ -67,7 +69,7 @@ export function DashboardRestaurants({ restaurants }: { restaurants: DashboardRe
                   {r.createdAt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </TableCell>
                 <TableCell className="text-right">
-                  <RestaurantRowMenu restaurantId={r.id} restaurantName={r.name} portal="admin" slug={r.slug} />
+                  <RestaurantRowMenu restaurantId={r.id} code={r.code} restaurantName={r.name} portal="admin" slug={r.slug} />
                 </TableCell>
               </TableRow>
             ))}

@@ -11,7 +11,7 @@ export default async function AdminLayout({ children }: LayoutProps) {
   const user = await requireSuperAdminPage()
 
   const restaurants = await prisma.restaurant.findMany({
-    select: { id: true, name: true },
+    select: { id: true, code: true, name: true },
     orderBy: { name: 'asc' },
   })
 

@@ -4,6 +4,7 @@ import SetPasswordButton from '@/components/admin/set-password-button'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { restaurantPath } from '@/lib/restaurant-paths'
 
 /** What the user's restaurants add up to, for the overview card. */
 export interface UserStats {
@@ -68,7 +69,7 @@ function UserOverviewCard({ createdAt, stats }: { createdAt: Date; stats: UserSt
   )
 }
 
-function UserQuickActionsCard({ id, email, restaurants }: { id: string; email: string; restaurants: { id: string; name: string }[] }) {
+function UserQuickActionsCard({ id, email, restaurants }: { id: string; email: string; restaurants: { id: string; code: string; name: string }[] }) {
   return (
     <Card className="border-0">
       <CardHeader className="border-b">
@@ -103,7 +104,7 @@ function UserQuickActionsCard({ id, email, restaurants }: { id: string; email: s
                   className="w-full justify-start text-xs h-8 border-border hover:bg-muted"
                 >
                   <Link
-                    href={`/admin/restaurants/${restaurant.id}/edit`}
+                    href={restaurantPath('admin', restaurant.code, 'edit')}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
@@ -162,7 +163,7 @@ interface UserEditAsideProps {
   id: string
   email: string
   createdAt: Date
-  restaurants: { id: string; name: string }[]
+  restaurants: { id: string; code: string; name: string }[]
   stats: UserStats
 }
 
