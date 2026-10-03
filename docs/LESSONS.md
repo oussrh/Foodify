@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-28"
+last_verified: "2026-09-29"
 ---
 
 # Lessons
@@ -15,6 +15,31 @@ last_verified: "2026-09-28"
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
+
+## 2026-09-29 · A poll's answers arrive in any order, and "finished" has more than one door
+
+The guest's tracker polled on a timer and again on `visibilitychange`, so two requests could be
+in flight and a slow ACCEPTED could land after DONE, reopening a served order and buzzing READY
+twice. It also only knew the ticket's own statuses, while a bill can be closed with its ticket
+still READY, so a paid table kept polling for hours. The rules now live in `lib/tracking-poll.ts`,
+a pure, tested state machine: one request at a time, answers numbered and an older one dropped,
+finished is one-way, and a closed bill counts as finished.
+
+Generalise it as: a poll is a stream of answers that may cross; number them, never let a later
+arrival undo a terminal state, and ask which other facts (a closed bill, a gone token) also end it.
+
+## 2026-09-29 · An id that is logged cannot also be the key to a door
+
+The guest's tracking link wanted the order's uuid: it is already unique, already in the row, and
+unguessable enough. But order ids are written to the logs on purpose, so every log reader, log
+shipper and support screenshot would hold a working link to a stranger's order and phone-side
+status. A value's secrecy is decided by everywhere it travels, not by its entropy. The link is a
+secret of its own, handed back once and stored only as its hash, made by the same helper as a
+printer's address (`server/secret.ts`), so a leaked table opens nothing either.
+
+Generalise it as: before an existing identifier becomes a capability, list where it is already
+written (logs, URLs, push payloads, exports); if the list is not empty, mint a secret for the job
+and keep only its hash.
 
 ## 2026-09-28 · A device on the restaurant's network asks the server; the server never reaches in
 

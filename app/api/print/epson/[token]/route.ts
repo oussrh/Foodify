@@ -1,6 +1,6 @@
 // app/api/print/epson/[token]/route.ts
 // Where an Epson kitchen printer asks for work (Server Direct Print, User's Manual M00062910). Its
-// owner typed this address into it; the path's secret names the printer (server/print/token.ts),
+// owner typed this address into it; the path's secret names the printer (server/secret.ts),
 // so there is no session. The printer posts a form: `ConnectionType=GetRequest` for its jobs,
 // answered with ePOS-Print XML or an empty 200 when there is nothing; `SetResponse` with the
 // result of the jobs it was handed, answered with an empty 200. Anything else it sends (status
@@ -9,7 +9,8 @@
 import { deviceAnswer, fail } from '@/lib/api'
 import { parseResults } from '@/lib/print/epos-response'
 import { printRequest } from '@/lib/print/epos-xml'
-import { eposCall, printerToken } from '@/lib/schemas/print'
+import { secretToken } from '@/lib/schemas/common'
+import { eposCall } from '@/lib/schemas/print'
 import { log } from '@/server/log'
 import { printerByToken, recordResults, takeDueJobs } from '@/server/print/poll'
 import { renderJobs } from '@/server/print/render-job'
@@ -38,7 +39,7 @@ async function formOf(request: Request) {
  * none; a result answers an empty 200 once recorded; anything else an empty 200. 500 internal.
  */
 export async function POST(request: Request, { params }: { params: Promise<{ token: string }> }) {
-  const token = printerToken.safeParse((await params).token)
+  const token = secretToken.safeParse((await params).token)
   if (!token.success) return fail('not_found', 'Unknown printer', 404)
   try {
     const now = new Date()

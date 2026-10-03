@@ -4,7 +4,7 @@
 // `orderInput` and re-prices every line from the database, so nothing here carries money.
 import { z } from 'zod'
 import { MAX_LINES, MAX_NOTE, MAX_QUANTITY } from '@/lib/cart'
-import { uuid } from './common'
+import { secretToken, uuid } from './common'
 
 /** The table the order is for: what is written on the table or carried by the QR link; short, trimmed, required. */
 export const orderTable = z.string().trim().min(1, 'Table number is required').max(20, 'Table number is too long')
@@ -80,10 +80,21 @@ export interface PlacedOrder {
   table: string
   /** The subtotal the server computed, an exact two-decimal string. */
   subtotal: string
+  /** A guest's tracking secret (lib/schemas/order-tracking.ts), answered once; absent on a staff order. */
+  token?: string | undefined
 }
 
-/** `PlacedOrder` as the client reads it back from POST /api/orders, parsed rather than cast. */
-export const placedOrder = z.object({ id: z.string(), number: z.number().int(), table: z.string(), subtotal: z.string() }) satisfies z.ZodType<PlacedOrder>
+/**
+ * `PlacedOrder` as the client reads it back from POST /api/orders, parsed rather than cast. A
+ * token that is not one reads as none, so the guest still sees their number without the link.
+ */
+export const placedOrder = z.object({
+  id: z.string(),
+  number: z.number().int(),
+  table: z.string(),
+  subtotal: z.string(),
+  token: secretToken.optional().catch(undefined),
+}) satisfies z.ZodType<PlacedOrder>
 
 /**
  * One dish a 409 from POST /api/orders names: its names (null for a dish of another restaurant

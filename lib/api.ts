@@ -13,10 +13,13 @@ export type ApiFailure = { error: string; code: ApiCode; details?: unknown }
 /**
  * The success envelope. `meta` (a list's `next` cursor) is left out of the body when not given
  * rather than sent as null, and the status is 200 unless the handler passes one (201 on a create).
+ * `noStore` marks an answer no cache may keep: one that changes by the minute and is read by a
+ * link anyone holding it can open (a guest's order status).
  */
-export function ok<T>(data: T, options: { meta?: Record<string, unknown>; status?: number } = {}): Response {
+export function ok<T>(data: T, options: { meta?: Record<string, unknown>; status?: number; noStore?: boolean } = {}): Response {
   const body = options.meta ? { data, meta: options.meta } : { data }
-  return Response.json(body, options.status ? { status: options.status } : undefined)
+  const headers: HeadersInit = options.noStore ? { 'Cache-Control': 'no-store' } : {}
+  return Response.json(body, { status: options.status ?? 200, headers })
 }
 
 /**

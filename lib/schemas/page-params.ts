@@ -6,7 +6,7 @@
 import { notFound } from 'next/navigation'
 import { z } from 'zod'
 import { GRAINS } from '@/lib/insights'
-import { uuid } from './common'
+import { secretToken, uuid } from './common'
 import { orderTable } from './order'
 import { slug } from './restaurant'
 import { restaurantRef } from './staff-app'
@@ -35,6 +35,8 @@ export const dishSegments = restaurantSegment.extend({ dishId: uuid })
 export const menuSegment = z.object({ slug })
 /** The public dish page's `[slug]/dish/[dishId]` segments. */
 export const menuDishSegments = menuSegment.extend({ dishId: uuid })
+/** A guest's order page, `[slug]/order/[token]`: the tracking secret (lib/schemas/order-tracking.ts). */
+export const menuOrderSegments = menuSegment.extend({ token: secretToken })
 
 // The first value of a repeated key, as URLSearchParams.get reads it.
 const first = (value: unknown) => (Array.isArray(value) ? value[0] : value)

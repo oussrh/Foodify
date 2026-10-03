@@ -85,6 +85,47 @@ test.describe('ordering', () => {
     await removeOrdersFor(table)
   })
 
+  // The guest follows the order from their own phone: the page the sent screen links to moves with
+  // the kitchen on its own, the menu carries a pill to it while it is being made, and both let go
+  // once it is served. The kitchen's moves are written to the row, as the board's action would.
+  test('follows the order it sent, on its own page and from the menu, until it is served', async ({ page }, info) => {
+    const table = tableFor(info.testId)
+    await openMenu(page, `${MENU}?lang=en&table=${table}`)
+    await page.getByRole('button', { name: /^Add Grilled Chicken/ }).first().click()
+    await page.getByRole('button', { name: /View order/ }).click()
+    const cart = page.getByRole('dialog')
+    await cart.getByLabel('Phone number').fill('+212600112233')
+    await cart.getByRole('button', { name: 'Place order' }).click()
+    await cart.getByRole('link', { name: 'Follow your order' }).click()
+
+    await expect(page).toHaveURL(new RegExp(`/restaurant/${SLUG}/order/[A-Za-z0-9_-]{32}\\?lang=en$`))
+    const order = await db().order.findFirstOrThrow({ where: { table, restaurant: { slug: SLUG } }, select: { id: true, number: true } })
+    await expect(page.getByRole('heading', { level: 1, name: `Your order #${order.number}` })).toBeVisible()
+    await expect(page.getByRole('status')).toHaveText('Sent to the kitchen')
+    await expect(page.getByText(`Table ${table}`)).toBeVisible()
+    await expectNoSeriousA11yViolations(page, 'the order tracking page')
+
+    // The kitchen starts it: the page hears it on its next poll, without a reload.
+    await db().order.update({ where: { id: order.id }, data: { status: 'ACCEPTED', acceptedAt: new Date() } })
+    await expect(page.getByRole('status')).toHaveText('Being prepared', { timeout: 15_000 })
+
+    // Back on the menu, the pill says where it is and leads back to it.
+    await page.getByRole('link', { name: /Back to menu/ }).click()
+    const pill = page.getByRole('link', { name: `Your order #${order.number} · Being prepared` })
+    await expect(pill).toBeVisible()
+    await pill.click()
+    await expect(page.getByRole('heading', { level: 1, name: `Your order #${order.number}` })).toBeVisible()
+
+    // Served: the page says so, and the menu lets the order go.
+    await db().order.update({ where: { id: order.id }, data: { status: 'DONE', readyAt: new Date(), servedAt: new Date() } })
+    await page.reload()
+    await expect(page.getByRole('status')).toHaveText('Served')
+    await openMenu(page, `${MENU}?lang=en`)
+    await expect(page.getByRole('link', { name: /^Your order #/ })).toBeHidden()
+
+    await removeOrdersFor(table)
+  })
+
   // Opened without the QR link, the table is asked for, and neither it nor the phone may be left out.
   test('refuses to send without a table number, then without a phone number', async ({ page }) => {
     await openMenu(page, `${MENU}?lang=en`)

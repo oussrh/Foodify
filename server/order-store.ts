@@ -11,6 +11,7 @@ import type { OrderInput } from '@/lib/schemas/order'
 import { addToRefusal, billCancelled, type AddToRefusal, type TabPlace } from '@/lib/table-tab'
 import { enqueuePos } from '@/server/pos/enqueue'
 import { enqueueTicketPrint } from '@/server/print/enqueue'
+import { newSecret } from '@/server/secret'
 
 /** One line as the row stores it: the dish's name and unit price copied at the time, the guest's note. */
 export type PricedLine = { dishId: string; nameEn: string; nameFr: string; unitPrice: string; quantity: number; note: string | null }
@@ -41,9 +42,15 @@ async function lockBill(tx: Prisma.TransactionClient, id: string) {
 /**
  * Writes the order, or refuses an addition whose bill is not this table's open one at the moment
  * of writing. The number is taken after the check, so a refusal takes none; an order that fails
- * after the increment rolls it back with the rest.
+ * after the increment rolls it back with the rest. A guest's order (no `staffId`) is given a
+ * tracking secret: its hash is stored, and the secret itself is answered here once and never
+ * again (`token`, undefined for a staff order, which has nobody to follow it).
  */
-export async function storeOrder(input: OrderInput, context: StoreContext): Promise<{ refused: AddToRefusal } | { order: Prisma.OrderGetPayload<{ select: typeof PLACED }> }> {
+export async function storeOrder(
+  input: OrderInput,
+  context: StoreContext,
+): Promise<{ refused: AddToRefusal } | { order: Prisma.OrderGetPayload<{ select: typeof PLACED }>; token: string | undefined }> {
+  const tracking = context.staffId ? null : newSecret()
   return prisma.$transaction(async (tx) => {
     if (input.addTo) {
       const refused = addToRefusal(await lockBill(tx, input.addTo), context.place)
@@ -61,6 +68,7 @@ export async function storeOrder(input: OrderInput, context: StoreContext): Prom
         table: input.table,
         phone: input.phone ?? '',
         placedById: context.staffId,
+        guestTokenHash: tracking?.hash ?? null,
         parentId: input.addTo ?? null,
         note: input.note || null,
         subtotal: sumPrices(context.lines.map((line) => ({ price: line.unitPrice, quantity: line.quantity }))),
@@ -72,6 +80,6 @@ export async function storeOrder(input: OrderInput, context: StoreContext): Prom
     // The POS and the kitchen's printers hear of the ticket in the same transaction, or not at all.
     await enqueuePos(tx, { restaurantId: input.restaurantId, orderId: order.id, billId: input.addTo ?? order.id, kind: 'TICKET' })
     await enqueueTicketPrint(tx, input.restaurantId, order.id, 'ARRIVAL')
-    return { order }
+    return { order, token: tracking?.token }
   })
 }

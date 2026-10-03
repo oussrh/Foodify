@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["testing", "coverage", "vitest"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 source_truth: ["vitest.config.ts", "vitest.integration.config.ts", "package.json"]
-last_verified: "2026-09-28"
+last_verified: "2026-09-29"
 ---
 
 # Testing
@@ -85,7 +85,7 @@ that fails on any serious or critical violation (TEST.3, A11Y.1):
 | Spec | Journey |
 |---|---|
 | `menu.spec.ts`, `ar-viewer.spec.ts` | The guest's menu: load, language, dish sheet, 3D view, category bar |
-| `ordering.spec.ts` | A guest's order from a row to "sent", with the table from the QR link |
+| `ordering.spec.ts` | A guest's order from a row to "sent", with the table from the QR link; then followed on its own page (the status moving on a poll, axe on the page) and from the menu's pill until it is served |
 | `order-life.spec.ts` | That order across the devices: started and called up on the kitchen board, carried out from the waiter's phone, every stamp on the row; and a tablet kept out of the portals |
 | `waiter-order.spec.ts` | A waiter taking an order at a table: search, notes on the dish and the order, sent and listed; adding to the table's bill; asking the kitchen to take a dish off a ticket being cooked (accepted on the card, struck, the total down) and closing the table, with axe on each new sheet |
 | `sold-out.spec.ts` | A dish marked sold out on the tablet: shown but not orderable, refused by the endpoint (409), then back |

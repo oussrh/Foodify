@@ -7,6 +7,7 @@ import { ThemeToggle } from '@/components/theme-toggle'
 import { cn } from '@/lib/utils'
 import { type Locale, type MenuRestaurant } from '@/lib/menu'
 import { MENU_TEXT } from '@/lib/menu-text'
+import LanguageSwitch from '../language-switch'
 import type { MenuFilters } from './use-menu-filters'
 
 interface MenuBarProps {
@@ -108,24 +109,7 @@ export default function MenuBar({ restaurant, locale, onLocale, filters, collaps
           )}
         </label>
 
-        <div role="group" aria-label="Language / Langue" className="flex h-10 shrink-0 rounded-md border border-input bg-card p-0.5">
-          {(['en', 'fr'] as Locale[]).map((l) => (
-            <button
-              key={l}
-              type="button"
-              lang={l}
-              onClick={() => onLocale(l)}
-              aria-pressed={locale === l}
-              aria-label={l === 'en' ? 'English' : 'Français'}
-              className={cn(
-                'rounded-[4px] px-2.5 text-xs font-semibold uppercase transition-colors',
-                locale === l ? 'bg-foreground text-background' : 'text-muted-foreground hover:text-foreground',
-              )}
-            >
-              {l}
-            </button>
-          ))}
-        </div>
+        <LanguageSwitch locale={locale} onLocale={onLocale} />
 
         <button
           type="button"

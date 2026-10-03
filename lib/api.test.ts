@@ -6,6 +6,12 @@ describe('the response envelope', () => {
     await expect(ok([1]).json()).resolves.toEqual({ data: [1] })
     await expect(ok([1], { meta: { next: 'x' } }).json()).resolves.toEqual({ data: [1], meta: { next: 'x' } })
     expect(ok(null, { status: 201 }).status).toBe(201)
+    expect(ok(null).status).toBe(200)
+  })
+
+  it('forbids caching only when asked', () => {
+    expect(ok(1, { noStore: true }).headers.get('Cache-Control')).toBe('no-store')
+    expect(ok(1).headers.get('Cache-Control')).toBeNull()
   })
 
   it('names a failure by code and status, with details only when given', async () => {

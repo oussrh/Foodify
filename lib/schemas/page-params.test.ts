@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { dishSegments, grainParam, idSegment, listSearch, menuDishSegments, menuQuery, menuSegment, restaurantSegment, routeParams } from './page-params'
+import { dishSegments, grainParam, idSegment, listSearch, menuDishSegments, menuOrderSegments, menuQuery, menuSegment, restaurantSegment, routeParams } from './page-params'
 
 const id = '54d3dcf7-5297-4b2e-99ac-ae4197735f29'
 
@@ -8,6 +8,7 @@ describe('routeParams', () => {
     expect(routeParams(idSegment, { id })).toEqual({ id })
     expect(routeParams(dishSegments, { id, dishId: id })).toEqual({ id, dishId: id })
     expect(routeParams(menuSegment, { slug: 'chez-test' })).toEqual({ slug: 'chez-test' })
+    expect(routeParams(menuOrderSegments, { slug: 'chez-test', token: 'a'.repeat(32) })).toEqual({ slug: 'chez-test', token: 'a'.repeat(32) })
   })
 
   it("is the route's 404 for a segment that does not parse, before anything reads it", () => {
@@ -15,6 +16,7 @@ describe('routeParams', () => {
     expect(() => routeParams(idSegment, { id: 'not-an-id' })).toThrow(notFound)
     expect(() => routeParams(menuSegment, { slug: 'Chez Test' })).toThrow(notFound)
     expect(() => routeParams(menuDishSegments, { slug: 'chez-test', dishId: '1' })).toThrow(notFound)
+    expect(() => routeParams(menuOrderSegments, { slug: 'chez-test', token: id })).toThrow(notFound)
   })
 })
 

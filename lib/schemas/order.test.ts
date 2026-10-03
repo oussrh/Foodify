@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { MAX_LINES, MAX_NOTE, MAX_QUANTITY } from '@/lib/cart'
-import { orderInput, tableTabQuery } from './order'
+import { orderInput, placedOrder, tableTabQuery } from './order'
 
 const id = '11111111-1111-4111-8111-111111111111'
 const other = '22222222-2222-4222-8222-222222222222'
@@ -118,5 +118,19 @@ describe('tableTabQuery', () => {
     expect(tableTabQuery.parse({ restaurantId: id, table: ' 4 ' })).toEqual({ restaurantId: id, table: '4' })
     expect(tableTabQuery.safeParse({ restaurantId: id, table: '' }).success).toBe(false)
     expect(tableTabQuery.safeParse({ restaurantId: 'r1', table: '4' }).success).toBe(false)
+  })
+})
+
+describe('placedOrder', () => {
+  const placed = { id: 'o1', number: 12, table: '4', subtotal: '22.40' }
+  const token = 'A'.repeat(32)
+
+  it('reads a guest order with its tracking secret, and a staff order without one', () => {
+    expect(placedOrder.parse({ ...placed, token })).toEqual({ ...placed, token })
+    expect(placedOrder.parse(placed).token).toBeUndefined()
+  })
+
+  it('keeps the number when the secret is not one, so the guest still sees their order', () => {
+    expect(placedOrder.parse({ ...placed, token: 'short' })).toEqual({ ...placed, token: undefined })
   })
 })
