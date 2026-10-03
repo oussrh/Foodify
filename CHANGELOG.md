@@ -52,7 +52,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 ### Changed
 
 - **One helper makes the secrets the server hands out, and one schema reads them.** A printer's address secret and a guest's order-tracking secret are both made by `server/secret.ts` (`newSecret`, 24 random bytes as 32 URL-safe characters, stored as the SHA-256 from `hashSecret`), where `server/print/token.ts` used to make the printer's alone; both are read at the boundary by `secretToken` in `lib/schemas/common.ts`, which replaces `printerToken`. A printer's existing address keeps working: the format and the hash are the same.
-
+- **Harness on abatty 0.8.0-rc.2** (from 0.7.0-rc.4). `abatty update` brought over the protect and self-test hooks, the pre-push hook and the adoption skill, and rewrote the floors of the five redefined metrics (`types.escapes`, `valid.utcDay`, `docs.citations`, `docs.behindCode`, `docs.danglingRefs`), all still at 0. `change.testTamper` is opt-in from 0.8.0, so it is named in `ratchet.enable` to keep it enforced; `update` does not migrate a range-based probe's floor, so `abatty baseline` rewrote it, promoting `change.testTamper`, `docs.danglingRefs` and `docs.frontMatterSyntax` (all at 0) to HARD. No floor rose; ratchet green on 32 metrics.
 - **Harness on abatty 0.7.0-rc.4** (from rc.2). The gate now warns when the installed abatty is older than the pinned one (a checkout sat on 0.5.2 for days and read a false `docs.behindCode` red), the ratchet names untracked files it leaves out, a coverage step that measured nothing says so, and `doctor --controls` keeps a log per step. No floor, config key or exit code moved.
 - **The environment example is `env.example`, not `.env.example`,** so the agent's read deny can be the wildcard `Read(./.env.*)` again without an exception for the example; `.gitignore` now ignores `.env.*` too, so no real environment file can be committed by accident. README and DEPLOYMENT point at the new name.
 
@@ -219,6 +219,7 @@ Keep a Changelog, SemVer. Every commit that touches source, tests, scripts, CI, 
 
 ### Security
 
+- **Next.js 16.3.8** (from 16.3.5), with `eslint-config-next` beside it: 16.3.5 carries a critical advisory, remote code execution in `next/og`'s `ImageResponse` (affected `>=16.2.0 <16.3.6`), which the gate's audit step refuses.
 - Setting a manager's password is no longer setting it to a password everyone knows. The reset control on the admin portal's manager list and user page sent the same hard-coded literal for every account and then announced it in an alert box, so every manager reset that way shared one password, readable by anyone who had ever seen the box or the source. It is typed now, in a dialog, and reported to the person who set it rather than to the page (`manager-password-dialog.tsx`; `reset-password-button.tsx` is gone).
 - A password alone never opens a session: the credentials callback used to sign a user in when no emailed code was pending and the account had no authenticator, so the code was effectively optional. `completeSecondFactor` now refuses unless a pending emailed code matches or a TOTP secret verifies (`lib/sign-in-checks.ts`); `sendMail` reports the provider's refusal (an unverified domain, a bad key) as "nothing sent" instead of claiming a send.
 
