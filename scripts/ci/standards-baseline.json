@@ -1,5 +1,5 @@
 {
-  "measuredAt": "2026-09-29",
+  "measuredAt": "2026-10-03",
   "note": "Written by `abatty baseline`. A number here may only fall; raising one needs a reason in docs/STANDARDS_PROGRESS.md and `--reason` on the command.",
   "score": 98,
   "hard": [
@@ -10,13 +10,16 @@
     "auth.unguardedAdminPage",
     "cache.serverCacheUse",
     "change.changelogMissing",
+    "change.testTamper",
     "code.barrels",
     "context.overCap",
     "context.unsourcedGrowth",
     "docs.behindCode",
     "docs.citations",
+    "docs.danglingRefs",
     "docs.danglingSource",
     "docs.frontMatter",
+    "docs.frontMatterSyntax",
     "docs.indexDrift",
     "fn.shapeExemptions",
     "size.excessCode",
@@ -36,7 +39,7 @@
     "auth.unguardedAdminPage": 0,
     "cache.serverCacheUse": 0,
     "change.changelogMissing": 0,
-    "change.testTamper": 2,
+    "change.testTamper": 0,
     "code.barrels": 0,
     "context.overCap": 0,
     "context.unsourcedGrowth": 0,
@@ -80,7 +83,7 @@
     "dup.clones": 968,
     "size.excessCode": 652,
     "size.overBudget": 652,
-    "size.overRaw": 681,
+    "size.overRaw": 682,
     "types.escapes": 652,
     "valid.rawEnv": 649,
     "valid.unparsedBoundary": 37,
@@ -88,10 +91,6 @@
     "valid.wholeEnv": 649
   },
   "debt": {
-    "change.testTamper": {
-      "lib/schemas/pos.test.ts": 1,
-      "tests/integration/pos-setup.test.ts": 1
-    },
     "dup.clonedLines": {
       "app/actions/admin-user-actions.ts": 9,
       "app/admin/(auth)/login/layout.tsx": 14,
@@ -176,13 +175,13 @@
     "auth.unguardedAdminPage": 1,
     "cache.serverCacheUse": 1,
     "change.changelogMissing": 1,
-    "change.testTamper": 1,
+    "change.testTamper": 3,
     "code.barrels": 1,
     "context.overCap": 1,
     "context.unsourcedGrowth": 1,
-    "docs.behindCode": 4,
-    "docs.citations": 1,
-    "docs.danglingRefs": 1,
+    "docs.behindCode": 5,
+    "docs.citations": 2,
+    "docs.danglingRefs": 4,
     "docs.danglingSource": 1,
     "docs.frontMatter": 1,
     "docs.frontMatterSyntax": 1,
@@ -194,12 +193,13 @@
     "size.overBudget": 1,
     "size.overRaw": 1,
     "test.coverageExclusions": 1,
-    "types.escapes": 1,
+    "types.escapes": 2,
     "types.nonNull": 1,
     "valid.rawEnv": 1,
     "valid.unparsedBoundary": 1,
-    "valid.utcDay": 1,
+    "valid.utcDay": 2,
     "valid.wholeEnv": 1
   },
-  "entries": {}
+  "entries": {},
+  "held": []
 }
