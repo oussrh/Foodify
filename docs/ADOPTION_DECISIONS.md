@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["standards", "adoption", "decisions"]
 related: ["./README.md", "./STANDARDS_PROGRESS.md"]
 source_truth: ["abatty.config.json", "docs/ADOPTION_STATE.json", "eslint.config.mjs"]
-last_verified: "2026-09-24"
+last_verified: "2026-10-03"
 ---
 
 # Adoption decisions
@@ -279,3 +279,10 @@ last_verified: "2026-09-24"
 - **Alternative set aside**: the whole of `components/**` in one change (404 blocks, too many to write each as a true sentence in one review); props types included (the rot the phase-11 entry named); `app/` pages at the same time (a separate pass: their blocks describe routes and guards, and a page is a composition root whose job is already in its path).
 - **Re-read when**: `app/` pages are taken on, or a block is found restating a signature.
 - **Completed 2026-09-23**: every directory documented the same day; the list became `components/**`.
+
+## 2026-10-03 · after the programme · the test-tamper check kept when abatty made it opt-in
+
+- **Situation**: abatty 0.8.0-rc.1 made `change.testTamper` opt-in (a policy, not every repository's default); its floor here had been 0 since 0.7.0. Left alone, the upgrade would have quietly stopped judging lost test cases, new skip/only markers and lowered coverage thresholds. `abatty update` does not migrate a range-based probe's floor, so after enabling it the gate read REDEFINED until `abatty baseline` rewrote it (0 → 0, no rise; `docs.danglingRefs` and `docs.frontMatterSyntax`, also at 0, became HARD in the same write).
+- **Default taken**: named in `ratchet.enable` beside `types.nonNull` and `test.coverageExclusions`, held HARD at 0.
+- **Alternative set aside**: letting it lapse with the upgrade (a check removed by a version bump is a check nobody decided to remove).
+- **Re-read when**: its proxy flags a legitimate test move it cannot net out, or abatty ships it on by default again.
