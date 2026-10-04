@@ -16,6 +16,21 @@ What we learned the hard way, one entry per lesson, newest first. A line added t
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
 
+## 2026-10-03 · A large file goes around the server, not through it
+
+A dish video is hundreds of megabytes, and a Vercel function takes 4.5 MB of request body. The
+capture engine (a separate service with a GPU) therefore receives the video straight from the
+browser, on an address our server signs: HMAC-SHA256 of "METHOD path expiry" with the secret the
+two share, so the address is good for one method on one job, for two hours, and never carries the
+secret. Our server only creates the job, tells the engine to start, and asks how it is going; the
+engine never calls us, which is also what lets the whole loop run with the engine in Docker on a
+laptop. The model's preview loads from the engine the same way (a signed GET), and only an accepted
+model is copied, server side, into Cloudinary.
+
+Generalise it as: when a payload is bigger than the platform's request limit, sign a narrow,
+expiring permission for the browser to hand it to whoever does the work, and keep the server on
+the small messages.
+
 ## 2026-09-29 · A poll's answers arrive in any order, and "finished" has more than one door
 
 The guest's tracker polled on a timer and again on `visibilitychange`, so two requests could be

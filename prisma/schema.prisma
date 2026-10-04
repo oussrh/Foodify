@@ -100,6 +100,7 @@ model Restaurant {
   posConnection     PosConnection?
   posOutbox         PosOutbox[]
   printers          Printer[]
+  captureJobs       CaptureJob[]
 }
 
 model User {
@@ -188,6 +189,7 @@ model Dish {
   cartAdds        CartAdd[]
   orderLines      OrderLine[]
   posItems        PosItemMap[]
+  captureJobs     CaptureJob[]
 }
 
 model Ingredient {

@@ -68,6 +68,12 @@ public origin (`NEXT_PUBLIC_APP_URL`), so that is the host its address is built 
 existing order has no tracking link. Placing a guest order writes it, so deploy it before the
 build that ships the guest's order tracking, or every guest order fails.
 
+`20261003090000_dish_capture` (the `CaptureJob` table of `prisma/capture.prisma`) is additive: no
+dish has a capture until someone films one. The code reads the table only when the capture engine
+is configured (`CAPTURE_ENGINE_URL` + `CAPTURE_ENGINE_SECRET`; unset, the dish form shows no
+capture card and nothing is queried), so the build can ship before it; apply it before those two
+variables are set on the project, or opening a dish's edit page fails.
+
 Write migrations the running version survives (add a column before the code reads it, stop
 reading it before it is dropped): for a moment, the old deploy runs on the new schema.
 
@@ -90,9 +96,9 @@ required variable, or half of a pair, fails at its first request rather than at 
 | `POS_ENCRYPTION_KEY_ID` | optional | The name stored beside each sealed credential; `k1` unless set. Change it only together with a new key, as part of a rotation. |
 | `CRON_SECRET` | for the POS cron | The bearer token Vercel's cron sends to `/api/pos/outbox` (at least 16 characters; Vercel sends it by itself once the variable is set on the project). Unset, the route refuses every call and the outbox is swept only after a send and when a board polls. |
 | `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME` + `NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET` | optional | Unsigned uploads straight from the browser; unset, uploads go through a server action. |
+| `CAPTURE_ENGINE_URL` + `CAPTURE_ENGINE_SECRET` | together or neither | "Create the 3D model from a video" (`server/capture/`): the capture engine's address (`services/capture-engine/`, on a GPU: Modal's `https://…modal.run`, or `http://localhost:8787` for Docker on this machine) and the secret it shares with us, at least 32 characters, the same value as the engine's own `CAPTURE_ENGINE_SECRET`. On production the address must be https (http is refused except for localhost): the secret is a bearer token on every call. The engine's `CAPTURE_ALLOWED_ORIGINS` must name the dashboards' origin, since the browser sends the video to it directly. Unset, no dish shows the capture card. Apply `20261003090000_dish_capture` first. |
 
-`env.example` lists them with placeholders, except the three POS variables (`POS_ENCRYPTION_KEY`,
-`POS_ENCRYPTION_KEY_ID`, `CRON_SECRET`), which have to be added to it by hand. Off Vercel (a production build on another host or
+`env.example` lists them with placeholders. Off Vercel (a production build on another host or
 port), Auth.js also needs `AUTH_TRUST_HOST=true`, or every page reads as signed out.
 
 ## The POS outbox cron

@@ -164,6 +164,14 @@ export async function requireDishAccess(dishId: string) {
   return { restaurantId: dish.restaurantId }
 }
 
+/** Access through the capture job's restaurant, which it answers; an unknown job id is a 403 like a foreign one, so ids cannot be enumerated. */
+export async function requireCaptureJobAccess(jobId: string) {
+  const job = await prisma.captureJob.findUnique({ where: { id: jobId }, select: { restaurantId: true } })
+  if (!job) throw new AuthError('Forbidden', 403)
+  await requireRestaurantAccess({ id: job.restaurantId })
+  return { restaurantId: job.restaurantId }
+}
+
 /** Access through the ingredient's dish's restaurant; an unknown ingredient id is a 403 like a foreign one, so ids cannot be enumerated. */
 export async function requireIngredientAccess(ingredientId: string) {
   const ingredient = await prisma.ingredient.findUnique({
