@@ -3,3 +3,5 @@
 # Build artefacts only; pnpm-lock.yaml must ship so Vercel installs are reproducible
 node_modules
 .next
+# The capture engine runs on a GPU (Docker or Modal), never on Vercel
+services

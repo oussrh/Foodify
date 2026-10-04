@@ -66,8 +66,12 @@ export default function EditDishForm({
   // New defaults (after a save the page re-renders with fresh data): the asset fields follow
   // them during this render, the form resets after it.
   const [prevDefaults, setPrevDefaults] = useState(defaultValues)
+  // A model accepted from a video is already saved on the dish, but the defaults predate it (the
+  // page is not refreshed, to keep unsaved edits): Discard must keep it, not put the old one back.
+  const [accepted, setAccepted] = useState<{ glbUrl: string; usdzUrl: string } | null>(null)
   if (prevDefaults !== defaultValues) {
     setPrevDefaults(defaultValues)
+    setAccepted(null)
     resetAssets(defaultValues)
   }
   useEffect(() => {
@@ -122,10 +126,10 @@ export default function EditDishForm({
       if (confirm('You have unsaved changes. Are you sure you want to discard them?')) {
         reset(defaultValues)
         setSaveStatus('idle')
-        resetAssets(defaultValues)
+        resetAssets({ ...defaultValues, ...accepted })
       }
     }
-  }, [hasUnsavedChanges, reset, defaultValues, resetAssets])
+  }, [hasUnsavedChanges, reset, defaultValues, resetAssets, accepted])
 
   // A refused save says so in the save bar rather than leaving "You have unsaved changes" up, as
   // if nothing had been tried: the calories bug failed exactly that silently.
@@ -166,7 +170,13 @@ export default function EditDishForm({
           </CardContent>
         </Card>
 
-        <DishMediaUploads restaurantName={restaurantName} assets={assets} onImageUrl={(url) => setValue('imageUrl', url, { shouldDirty: true })} />
+        <DishMediaUploads
+          dishId={id}
+          restaurantName={restaurantName}
+          assets={assets}
+          onImageUrl={(url) => setValue('imageUrl', url, { shouldDirty: true })}
+          onModelAccepted={(glbUrl, usdzUrl) => setAccepted({ glbUrl, usdzUrl })}
+        />
 
         {/* Save bar: only when there is something to save */}
         <SaveBar saveStatus={saveStatus} hasUnsavedChanges={hasUnsavedChanges} isSubmitting={isSubmitting} onDiscard={handleCancel} onSave={submitForm} />

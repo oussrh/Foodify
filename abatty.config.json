@@ -42,6 +42,7 @@
     "lib/",
     "server/",
     "prisma/",
+    "services/",
     "auth.ts",
     "proxy.ts",
     "instrumentation.ts",

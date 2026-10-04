@@ -2,132 +2,69 @@
 import crypto from "crypto";
 import { serverEnv } from "@/lib/env";
 
+type Endpoint = "auto" | "image" | "raw";
+
+/**
+ * One signed upload: `params` (without the timestamp, added here) are signed sorted by name as
+ * Cloudinary requires, sent with the file to `<endpoint>/upload`, and the file's address answered.
+ * Throws on unset variables or any non-2xx answer.
+ */
+async function signedUpload(endpoint: Endpoint, file: Blob | string, params: Record<string, string>, fileName?: string): Promise<string> {
+  const cloudinary = serverEnv.cloudinary;
+  if (!cloudinary) {
+    throw new Error("Cloudinary environment variables are not set");
+  }
+  const signed: Record<string, string> = { ...params, timestamp: String(Math.floor(Date.now() / 1000)) };
+  const toSign = Object.keys(signed).sort().map((key) => `${key}=${signed[key]}`).join("&");
+
+  const formData = new FormData();
+  if (typeof file === "string") formData.append("file", file); // a remote URL or a base64 string
+  else formData.append("file", file, fileName);
+  for (const [key, value] of Object.entries(signed)) formData.append(key, value);
+  formData.append("api_key", cloudinary.apiKey);
+  formData.append("signature", crypto.createHash("sha1").update(toSign + cloudinary.apiSecret).digest("hex"));
+
+  const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudinary.cloudName}/${endpoint}/upload`, { method: "POST", body: formData });
+  if (!response.ok) {
+    throw new Error(`❌ Cloudinary upload failed: ${response.status} - ${await response.text()}`);
+  }
+  const data = await response.json();
+  return data.secure_url as string;
+}
+
 /**
  * Signed upload of a USDZ/GLB (a remote URL or a base64 string; Cloudinary fetches it) into
  * `restaurants/<second argument>`; the dish action passes the restaurant id, so AR files sit under
  * the id while branding sits under the slug. Throws on unset variables or any non-2xx answer.
  */
 export async function uploadArAsset(fileUrl: string, restaurantSlug: string) {
-  const cloudinary = serverEnv.cloudinary;
-  if (!cloudinary) {
-    throw new Error("Cloudinary environment variables are not set");
-  }
-  const { cloudName: CLOUDINARY_CLOUD_NAME, apiKey: CLOUDINARY_API_KEY, apiSecret: CLOUDINARY_API_SECRET } = cloudinary;
+  return signedUpload("auto", fileUrl, { folder: `restaurants/${restaurantSlug}` });
+}
 
-  const timestamp = Math.floor(Date.now() / 1000);
-  const folder = `restaurants/${restaurantSlug}`;
-
-  const paramsToSign = `folder=${folder}&timestamp=${timestamp}`;
-  const signature = crypto
-    .createHash("sha1")
-    .update(paramsToSign + CLOUDINARY_API_SECRET)
-    .digest("hex");
-
-  const formData = new FormData();
-  formData.append("file", fileUrl); // Can be a remote URL or base64 string
-  formData.append("api_key", CLOUDINARY_API_KEY);
-  formData.append("timestamp", String(timestamp));
-  formData.append("folder", folder);
-  formData.append("signature", signature);
-
-  const response = await fetch(
-    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`,
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `❌ Cloudinary upload failed: ${response.status} - ${errorText}`
-    );
-  }
-
-  const data = await response.json();
-  return data.secure_url as string;
+/**
+ * Signed upload of a model's bytes (a captured dish's GLB or USDZ) as a raw file to
+ * `restaurants/<restaurantId>/ar`, named `<kind>_<time>.<kind>`: the extension stays in the address,
+ * which AR Quick Look needs. Answers the file's address; throws on unset variables or a refusal.
+ */
+export async function uploadArFile(bytes: Uint8Array<ArrayBuffer>, kind: "glb" | "usdz", restaurantId: string) {
+  const params = { folder: `restaurants/${restaurantId}/ar`, public_id: `${kind}_${Date.now()}.${kind}` };
+  return signedUpload("raw", new Blob([bytes]), params, `dish.${kind}`);
 }
 
 /**
  * Signed upload of a logo or cover to `restaurants/<slug>/branding/<assetType>`: the fixed public
- * id makes a new upload replace the previous file. The signature is computed over `params`, so
- * the form fields and that map are kept in step. An SVG goes to the raw endpoint, not image.
+ * id makes a new upload replace the previous file. An SVG goes to the raw endpoint, not image,
+ * and says so in its signed `resource_type`.
  */
 export async function uploadRestaurantAsset(
-  file: File, 
-  restaurantSlug: string, 
+  file: File,
+  restaurantSlug: string,
   assetType: 'logo' | 'cover'
 ) {
-  const cloudinary = serverEnv.cloudinary;
-  if (!cloudinary) {
-    throw new Error("Cloudinary environment variables are not set");
-  }
-  const { cloudName: CLOUDINARY_CLOUD_NAME, apiKey: CLOUDINARY_API_KEY, apiSecret: CLOUDINARY_API_SECRET } = cloudinary;
-
-  const timestamp = Math.floor(Date.now() / 1000);
-  const folder = `restaurants/${restaurantSlug}/branding`;
-  
-  // Use fixed public ID for restaurant asset (will replace existing)
-  const publicId = assetType;
-  
-  // Determine resource type
-  const resourceType = file.type === 'image/svg+xml' ? 'raw' : 'image';
-  
-  // Build parameters object for signature (only include parameters that will be sent)
-  const params: Record<string, string> = {
-    folder,
-    public_id: publicId,
-    timestamp: timestamp.toString()
-  };
-  
-  // Add resource_type only if not 'image' (since 'image' is the default)
-  if (resourceType !== 'image') {
-    params.resource_type = resourceType;
-  }
-  
-  // Sort parameters alphabetically and create signature string
-  const sortedParams = Object.keys(params)
-    .sort()
-    .map(key => `${key}=${params[key]}`)
-    .join('&');
-  
-  const signature = crypto
-    .createHash("sha1")
-    .update(sortedParams + CLOUDINARY_API_SECRET)
-    .digest("hex");
-
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("api_key", CLOUDINARY_API_KEY);
-  formData.append("timestamp", String(timestamp));
-  formData.append("folder", folder);
-  formData.append("public_id", publicId);
-  formData.append("signature", signature);
-  
-  // Only add resource_type if not 'image'
-  if (resourceType !== 'image') {
-    formData.append("resource_type", resourceType);
-  }
-
-  const uploadUrl = resourceType === 'raw' 
-    ? `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/raw/upload`
-    : `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
-
-  const response = await fetch(uploadUrl, {
-    method: "POST",
-    body: formData,
-  });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `❌ Cloudinary upload failed: ${response.status} - ${errorText}`
-    );
-  }
-
-  const data = await response.json();
-  return data.secure_url as string;
+  const raw = file.type === 'image/svg+xml';
+  const params: Record<string, string> = { folder: `restaurants/${restaurantSlug}/branding`, public_id: assetType };
+  if (raw) params.resource_type = 'raw';
+  return signedUpload(raw ? 'raw' : 'image', file, params);
 }
 
 // Convenience functions

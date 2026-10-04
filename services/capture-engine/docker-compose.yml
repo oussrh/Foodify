@@ -1,0 +1,24 @@
+# Local engine for Foodify, on this machine's NVIDIA GPU, at no cost.
+#   copy env.example to .env and set CAPTURE_ENGINE_SECRET (the same value as in Foodify's .env)
+#   docker compose up --build
+# Foodify then points CAPTURE_ENGINE_URL at http://localhost:8787. Jobs are kept in ./jobs.
+services:
+  engine:
+    build: .
+    image: foodify-capture-engine:dev
+    ports:
+      # This machine only: the secret travels in clear over plain http, so not across the network.
+      - "127.0.0.1:8787:8787"
+    environment:
+      CAPTURE_ENGINE_SECRET: ${CAPTURE_ENGINE_SECRET:?set CAPTURE_ENGINE_SECRET in .env}
+      CAPTURE_ALLOWED_ORIGINS: ${CAPTURE_ALLOWED_ORIGINS:-http://localhost:3000}
+    volumes:
+      - ./jobs:/jobs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
