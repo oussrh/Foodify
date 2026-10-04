@@ -65,6 +65,11 @@ whose heartbeat stopped (a crash, a Modal timeout) reads as failed after ten min
 
 ## Run it in the cloud (Modal)
 
+Files arrive in 32 MB pieces (`part`, `parts`): a web request on Modal ends at 150 s, and a
+cross-origin upload cannot follow the redirect Modal answers past it. The API runs on one
+container so a file's pieces land together; a daily `prune_jobs` deletes finished jobs after 14
+days. The volume is `foodify-capture-jobs` (version 2).
+
 ```powershell
 pip install modal; modal setup
 modal secret create foodify-capture CAPTURE_ENGINE_SECRET=... CAPTURE_ALLOWED_ORIGINS=https://myfoodify.vercel.app

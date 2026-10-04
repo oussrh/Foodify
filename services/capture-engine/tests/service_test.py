@@ -76,7 +76,7 @@ def uploads(api: TestClient, tmp: Path, source: str) -> None:
     check("a job id that is not a uuid", api.get("/jobs/..%2Fetc", headers=BEARER).status_code, 404)
     check("start before any upload", api.post(f"/jobs/{JOB}/start", headers=BEARER, json={"plate_cm": 27}).status_code, 409)
     r = api.put(put(source, "dish.MOV"), content=b"x" * 1000)
-    check("signed upload", (r.status_code, r.json()), (200, {"bytes": 1000, "stored": "capture.mov"}))
+    check("signed upload", (r.status_code, r.json()), (200, {"bytes": 1000, "stored": "capture.mov", "whole": True}))
     check("a second video", api.put(put(source, "a.mp4"), content=b"v").status_code, 409)
     r = api.put(put(source, "still_1.JPG"), content=b"p" * 10)
     check("a photo beside the video", (r.status_code, r.json()["stored"]), (200, "still_1.jpg"))
@@ -86,9 +86,28 @@ def uploads(api: TestClient, tmp: Path, source: str) -> None:
     check("start while a file is half sent", api.post(f"/jobs/{JOB}/start", headers=BEARER, json={"plate_cm": 27}).status_code, 409)
     check("a second sender of a file being sent", api.put(put(source, "still_2.jpg"), content=b"p").status_code, 409)
     (tmp / JOB / "input" / "still_2.jpg.part").unlink()
+    pieces(api, tmp, source)
     photos_only = "7e1f2a3b-4c5d-4e6f-8a9b-0c1d2e3f4a5b"
     api.put(put(f"/jobs/{photos_only}/source", "still_1.jpg"), content=b"p")
     check("start with photos but no video", api.post(f"/jobs/{photos_only}/start", headers=BEARER, json={"plate_cm": 27}).status_code, 409)
+
+
+def pieces(api: TestClient, tmp: Path, source: str) -> None:
+    """A photo in three pieces, out of order, one sent twice: whole once the last arrives."""
+    url = put(source, "still_3.jpg")
+    inputs = tmp / JOB / "input"
+    for n, body in [(2, b"cc"), (0, b"aa")]:
+        r = api.put(f"{url}&part={n}&parts=3", content=body)
+        check(f"piece {n} of 3", (r.status_code, r.json()["whole"]), (200, False))
+    check("start while pieces are missing", api.post(f"/jobs/{JOB}/start", headers=BEARER, json={"plate_cm": 27}).status_code, 409)
+    check("a piece sent again replaces the first", api.put(f"{url}&part=0&parts=3", content=b"AA").status_code, 200)
+    r = api.put(f"{url}&part=1&parts=3", content=b"bb")
+    check("the last piece makes the file whole", (r.json()["whole"], (inputs / "still_3.jpg").read_bytes()), (True, b"AAbbcc"))
+    check("no pieces are left behind", list((inputs / ".parts").rglob("*")), [])
+    check("a whole file takes no more pieces", api.put(f"{url}&part=0&parts=3", content=b"x").status_code, 409)
+    for query, label in [("&part=3&parts=3", "past the last"), ("&part=-1&parts=3", "negative"), ("&part=a&parts=3", "not a number"),
+                         ("&part=0", "without the count"), ("&part=0&parts=5000", "too many")]:
+        check(f"a piece numbered {label}", api.put(f"{put(source, 'still_4.jpg')}{query}", content=b"x").status_code, 400)
 
 
 def starting(api: TestClient, tmp: Path, backend: FakeBackend, source: str) -> None:

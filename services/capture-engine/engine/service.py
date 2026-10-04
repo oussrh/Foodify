@@ -9,6 +9,9 @@ Authentication, one shared secret (CAPTURE_ENGINE_SECRET), two forms:
 
     PUT  /jobs/{id}/source?name=capture.mp4&exp&sig   browser: the video as the raw body; then
          /jobs/{id}/source?name=still_1.jpg&exp&sig   each photo the same way (up to 12), before start
+         ...&part=<n>&parts=<count>                   or a file in pieces, sent in any order and
+                                                      joined when the last arrives: a web request on
+                                                      Modal ends at 150 s, a whole video can take longer
     POST /jobs/{id}/start                             server: JSON params, starts processing
     GET  /jobs/{id}                                   server: {state, stage, report}
     GET  /jobs/{id}/files/{name}                      server, or a signed URL (the preview)
@@ -23,6 +26,7 @@ import hashlib
 import hmac
 import os
 import re
+import shutil
 import time
 from collections import defaultdict
 from pathlib import Path
@@ -43,6 +47,8 @@ LOGO_URL = re.compile(r"^https://res\.cloudinary\.com/[\w-]+/image/upload/[^\s?#
 FILES = {"dish.glb": "model/gltf-binary", "dish.usdz": "model/vnd.usdz+zip", "texture.jpg": "image/jpeg", "base.jpg": "image/jpeg"}
 MAX_UPLOAD_BYTES = 2 * 1024 ** 3  # the video and the photos together
 MAX_URL_LIFETIME_S = 24 * 3600
+MAX_PARTS = 1000
+PARTS_DIR = ".parts"  # input/.parts/<name>/<n>, until the file is whole
 
 
 class StartParams(BaseModel):
@@ -133,23 +139,59 @@ def _has_video(inputs: Path) -> bool:
 
 
 async def _receive(request: Request, target: Path, allowed: int) -> int:
-    """Stream the request body to disk, refusing more than `allowed` bytes."""
+    """Stream the request body to disk, refusing more than `allowed` bytes. A send cut off midway
+    leaves nothing behind, so it can be sent again."""
     size = 0
     partial = target.with_name(target.name + ".part")
     try:
-        fh = open(partial, "xb")  # one sender per file, ever
+        fh = open(partial, "xb")  # one sender at a time per file
     except FileExistsError:
         raise HTTPException(409, f"{target.name} is already being sent") from None
-    with fh:
-        async for chunk in request.stream():
-            size += len(chunk)
-            if size > allowed:
-                fh.close()
-                partial.unlink(missing_ok=True)
-                raise HTTPException(413, "the video and photos come to more than 2 GB")
-            fh.write(chunk)
+    try:
+        with fh:
+            async for chunk in request.stream():
+                size += len(chunk)
+                if size > allowed:
+                    raise HTTPException(413, "the video and photos come to more than 2 GB")
+                fh.write(chunk)
+    except BaseException:  # too large, or the connection dropped
+        partial.unlink(missing_ok=True)
+        raise
     partial.replace(target)
     return size
+
+
+def _piece(request: Request) -> tuple[int, int] | None:
+    """`(part, parts)` for a file sent in pieces, None for a whole file."""
+    part, parts = request.query_params.get("part"), request.query_params.get("parts")
+    if part is None and parts is None:
+        return None
+    try:
+        n, count = int(part or ""), int(parts or "")
+    except ValueError:
+        raise HTTPException(400, "part and parts must be numbers") from None
+    if not 0 <= n < count <= MAX_PARTS:
+        raise HTTPException(400, f"part must be 0 to parts - 1, and parts at most {MAX_PARTS}")
+    return n, count
+
+
+def _join(pieces: Path, count: int, target: Path) -> bool:
+    """The file whole, once every piece is there; False while some are missing."""
+    names = [f"{n:05d}" for n in range(count)]
+    if not all((pieces / name).exists() for name in names):
+        return False
+    joined = target.with_name(target.name + ".part")
+    with open(joined, "wb") as out:
+        for name in names:
+            with open(pieces / name, "rb") as fh:
+                shutil.copyfileobj(fh, out, 8 * 1024 * 1024)
+    joined.replace(target)
+    shutil.rmtree(pieces)
+    return True
+
+
+def _sent(inputs: Path) -> int:
+    return sum(f.stat().st_size for f in inputs.rglob("*") if f.is_file())
 
 
 async def _upload(backend: Backend, job_dir: Path, request: Request) -> dict:
@@ -162,11 +204,19 @@ async def _upload(backend: Backend, job_dir: Path, request: Request) -> dict:
     inputs.mkdir(parents=True, exist_ok=True)
     if (inputs / target).exists() or (target.startswith("capture.") and _has_video(inputs)):
         raise HTTPException(409, f"this job already has {target}")
-    received = sum(f.stat().st_size for f in inputs.iterdir())
-    size = await _receive(request, inputs / target, MAX_UPLOAD_BYTES - received)
+    allowed = MAX_UPLOAD_BYTES - _sent(inputs)
+    piece = _piece(request)
+    if piece is None:
+        size, whole = await _receive(request, inputs / target, allowed), True
+    else:
+        pieces = inputs / PARTS_DIR / target
+        pieces.mkdir(parents=True, exist_ok=True)
+        again = pieces / f"{piece[0]:05d}"  # a piece sent twice replaces the first
+        size = await _receive(request, again, allowed + (again.stat().st_size if again.exists() else 0))
+        whole = _join(pieces, piece[1], inputs / target)
     write_status(job_dir, "uploaded")
     backend.persist()
-    return {"bytes": size, "stored": target}
+    return {"bytes": size, "stored": target, "whole": whole}
 
 
 async def _start(backend: Backend, job_dir: Path, request: Request) -> dict:
@@ -175,7 +225,7 @@ async def _start(backend: Backend, job_dir: Path, request: Request) -> dict:
     if not status or status["state"] != "uploaded":
         raise HTTPException(409, f"cannot start a job that is {status['state'] if status else 'not uploaded'}")
     inputs = job_dir / "input"
-    if any(f.suffix == ".part" for f in inputs.iterdir()):
+    if any(f.suffix == ".part" for f in inputs.iterdir()) or any((inputs / PARTS_DIR).glob("*")):
         raise HTTPException(409, "a file is still being sent")
     if not _has_video(inputs):
         raise HTTPException(409, "the video has not been sent yet")
