@@ -7,7 +7,7 @@ audience: ["developer", "agent"]
 tags: ["lessons", "context"]
 related: ["./README.md", "../CLAUDE.md"]
 source_truth: ["CLAUDE.md", ".claude/rules/size-limits.md"]
-last_verified: "2026-09-29"
+last_verified: "2026-10-04"
 ---
 
 # Lessons
@@ -15,6 +15,21 @@ last_verified: "2026-09-29"
 What we learned the hard way, one entry per lesson, newest first. A line added to `CLAUDE.md`
 should trace back to an entry here (the ratchet checks that a push which grows the context file
 also touches this catalogue).
+
+## 2026-10-04 · A pipeline's assumption about its input is checked where it can first be measured
+
+The engine assumed the phone walked round a still plate. The first real dish was filmed on a
+turntable with the phone still: the room, not the dish, was what stayed put between frames, so
+COLMAP placed every camera in one spot, and the job ran its full 54 minutes and returned a model
+that looked like nothing, with no warning. Every stage had done its job on an input that broke the
+first one's premise. The fix was two things: let the person say how they filmed (the sheet's mode,
+`CaptureJob.mode`, and a turntable reconstruction that masks the room out), and measure the
+premise as soon as it is measurable: right after the cameras are placed, a capture whose views
+span under 45° fails in minutes with what to film differently (`engine/orbit.py`).
+
+Generalise it as: write down what a long pipeline assumes about its input, and turn each
+assumption into a check at the earliest stage that can see it, worded for the person who can fix
+the input, not for us.
 
 ## 2026-10-03 · A large file goes around the server, not through it
 
