@@ -1,0 +1,6 @@
+jobs/
+out/
+tests/
+.venv/
+**/__pycache__/
+.env

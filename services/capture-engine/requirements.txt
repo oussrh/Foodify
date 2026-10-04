@@ -1,0 +1,9 @@
+numpy==2.5.3
+scipy==1.18.1
+opencv-python-headless==5.0.0.93
+open3d==0.20.0
+xatlas==0.0.11
+usd-core==26.8
+pillow==12.3.0
+fastapi==0.142.2
+uvicorn==0.54.0

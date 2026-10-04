@@ -50,8 +50,8 @@
     "docs.frontMatter": 0,
     "docs.frontMatterSyntax": 0,
     "docs.indexDrift": 0,
-    "dup.clonedLines": 714,
-    "dup.clones": 56,
+    "dup.clonedLines": 686,
+    "dup.clones": 54,
     "fn.shapeExemptions": 0,
     "size.excessCode": 0,
     "size.overBudget": 0,
@@ -65,30 +65,30 @@
     "valid.wholeEnv": 0
   },
   "scanned": {
-    "api.bareResponse": 14,
-    "api.floatMoney": 661,
-    "api.rowReturn": 22,
-    "api.unboundedList": 14,
+    "api.bareResponse": 15,
+    "api.floatMoney": 697,
+    "api.rowReturn": 24,
+    "api.unboundedList": 15,
     "auth.unguardedAdminPage": 21,
-    "cache.serverCacheUse": 661,
+    "cache.serverCacheUse": 697,
     "code.barrels": 0,
     "context.overCap": 1,
     "docs.behindCode": 6,
-    "docs.citations": 177,
+    "docs.citations": 179,
     "docs.danglingSource": 19,
     "docs.frontMatter": 10,
     "docs.frontMatterSyntax": 10,
     "docs.indexDrift": 9,
-    "dup.clonedLines": 968,
-    "dup.clones": 968,
-    "size.excessCode": 652,
-    "size.overBudget": 652,
-    "size.overRaw": 682,
-    "types.escapes": 652,
-    "valid.rawEnv": 649,
-    "valid.unparsedBoundary": 37,
-    "valid.utcDay": 652,
-    "valid.wholeEnv": 649
+    "dup.clonedLines": 1019,
+    "dup.clones": 1019,
+    "size.excessCode": 688,
+    "size.overBudget": 688,
+    "size.overRaw": 718,
+    "types.escapes": 688,
+    "valid.rawEnv": 685,
+    "valid.unparsedBoundary": 40,
+    "valid.utcDay": 688,
+    "valid.wholeEnv": 685
   },
   "debt": {
     "dup.clonedLines": {
@@ -120,12 +120,11 @@
       "components/auth/code-step.tsx": 11,
       "components/client-form/create-account-fields.tsx": 10,
       "components/create-admin-form.tsx": 101,
-      "components/create-dish-form.tsx": 11,
+      "components/create-dish-form.tsx": 9,
       "components/edit-admin-form.tsx": 11,
       "components/restaurant-cover-upload.tsx": 21,
       "components/restaurant-form/create-basic-card.tsx": 81,
-      "components/ui/dialog.tsx": 28,
-      "lib/cloudinary.ts": 26
+      "components/ui/dialog.tsx": 28
     },
     "dup.clones": {
       "app/actions/admin-user-actions.ts": 1,
@@ -160,8 +159,7 @@
       "components/edit-admin-form.tsx": 1,
       "components/restaurant-cover-upload.tsx": 2,
       "components/restaurant-form/create-basic-card.tsx": 7,
-      "components/ui/dialog.tsx": 3,
-      "lib/cloudinary.ts": 2
+      "components/ui/dialog.tsx": 3
     },
     "test.coverageExclusions": {
       "vitest.config.ts": 34

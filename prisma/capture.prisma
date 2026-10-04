@@ -1,0 +1,53 @@
+// prisma/capture.prisma
+// A dish filmed on a phone and turned into its AR models by the capture engine, a separate service
+// with a GPU (services/capture-engine/: Docker on a workstation, or Modal). Foodify keeps the job and
+// what it came to; the engine keeps the video and the work. The browser sends the video straight
+// to the engine on an address Foodify signed, because a Vercel function takes 4.5 MB at most.
+
+enum CaptureStatus {
+  // Created; the browser is sending the video to the engine.
+  UPLOADING
+  // The engine is working on it; `stage` says where.
+  PROCESSING
+  // A model is waiting for someone to look at it and accept it.
+  READY
+  // The engine could not make a model; `error` says why, `warnings` how to film it again.
+  FAILED
+  // Its models were copied to the dish's glbUrl and usdzUrl.
+  ACCEPTED
+  // Put aside: a reshoot, or a model nobody wanted.
+  DISCARDED
+}
+
+// What goes on the underside of the model, which the camera never sees.
+enum CaptureBase {
+  LOGO
+  NAME
+  PLAIN
+}
+
+model CaptureJob {
+  // Also the job's id at the engine.
+  id           String        @id @default(uuid())
+  restaurantId String
+  restaurant   Restaurant    @relation(fields: [restaurantId], references: [id], onDelete: Cascade)
+  dishId       String
+  dish         Dish          @relation(fields: [dishId], references: [id], onDelete: Cascade)
+  status       CaptureStatus @default(UPLOADING)
+  // The engine's stage while PROCESSING (lib/capture.ts names them).
+  stage        String?
+  // The plate's diameter, which sets the model's real size; the next capture starts from it.
+  plateCm      Decimal       @db.Decimal(4, 1)
+  base         CaptureBase
+  // What a reviewer should look at, in the engine's words.
+  warnings     String[]      @default([])
+  error        String?
+  // Size, triangles and timings from the engine's report.
+  summary      Json?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  finishedAt   DateTime?
+
+  @@index([dishId, createdAt])
+  @@index([restaurantId, createdAt])
+}

@@ -55,6 +55,10 @@ const serverSchema = z
     POS_ENCRYPTION_KEY_ID: z.preprocess(unset, z.string().regex(/^[\w-]{1,32}$/, 'POS_ENCRYPTION_KEY_ID is a short name').default('k1')),
     // What Vercel's cron sends as a bearer token to /api/pos/outbox; unset, the route refuses every call.
     CRON_SECRET: z.preprocess(unset, z.string().min(16, 'CRON_SECRET is at least 16 characters').optional()),
+    // The capture engine that turns a dish video into AR models (server/capture/engine.ts): its
+    // address and the secret it shares with us, the engine's own CAPTURE_ENGINE_SECRET.
+    CAPTURE_ENGINE_URL: z.preprocess(unset, z.url({ protocol: /^https?$/, error: 'CAPTURE_ENGINE_URL is an http(s) address' }).optional()),
+    CAPTURE_ENGINE_SECRET: z.preprocess(unset, z.string().min(32, 'CAPTURE_ENGINE_SECRET is at least 32 characters').optional()),
     NODE_ENV: z.preprocess(unset, z.enum(['development', 'test', 'production']).default('development')),
   })
   .refine((e) => Boolean(e.RESEND_API_KEY) === Boolean(e.RESEND_FROM), {
@@ -68,6 +72,13 @@ const serverSchema = z
   })
   .refine((e) => [e.NEXT_PUBLIC_VAPID_PUBLIC_KEY, e.VAPID_PRIVATE_KEY, e.VAPID_SUBJECT].filter(Boolean).length % 3 === 0, {
     message: 'NEXT_PUBLIC_VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY and VAPID_SUBJECT are set together or not at all',
+  })
+  .refine((e) => Boolean(e.CAPTURE_ENGINE_URL) === Boolean(e.CAPTURE_ENGINE_SECRET), {
+    message: 'CAPTURE_ENGINE_URL and CAPTURE_ENGINE_SECRET are set together or not at all',
+  })
+  // The secret travels as a bearer token on every call: in clear only to an engine on this machine.
+  .refine((e) => !e.CAPTURE_ENGINE_URL || e.NODE_ENV !== 'production' || /^(https:\/\/|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?(\/|$))/.test(e.CAPTURE_ENGINE_URL), {
+    message: 'CAPTURE_ENGINE_URL must be https in production (http only for localhost)',
   })
 
 let parsed: z.infer<typeof serverSchema> | undefined
@@ -133,6 +144,15 @@ export const serverEnv = {
   /** The bearer token the POS outbox cron must present; null refuses every call to it. */
   get cronSecret() {
     return server().CRON_SECRET ?? null
+  },
+  /**
+   * The capture engine (server/capture/engine.ts): its address without a trailing slash, and the
+   * secret it shares with us. Both or neither, and null until they are set: a dish then offers no
+   * "Create from a video", the way an unset VAPID pair subscribes nothing.
+   */
+  get captureEngine() {
+    const { CAPTURE_ENGINE_URL: url, CAPTURE_ENGINE_SECRET: secret } = server()
+    return url && secret ? { url: url.replace(/\/+$/, ''), secret } : null
   },
   get isDevelopment() {
     return server().NODE_ENV === 'development'

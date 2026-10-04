@@ -1,0 +1,36 @@
+# The capture engine (services/capture-engine/): Python, not part of the Next.js gate, so its own
+# job, run only when the engine or this file changes. No GPU here: the API contract and the job rules
+# (tests/service_test.py) and everything after COLMAP on a synthetic dish (tests/smoke_test.py). The
+# GPU path (COLMAP, the Docker image) is exercised by a real capture, see the engine's README.
+name: capture-engine
+on:
+  push:
+    paths: ["services/capture-engine/**", ".github/workflows/capture-engine.yml"]
+  pull_request:
+    paths: ["services/capture-engine/**", ".github/workflows/capture-engine.yml"]
+concurrency:
+  group: capture-engine-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+permissions:
+  contents: read
+jobs:
+  engine:
+    # Pinned like checks.yml: a moving runner label changes the image on a date nobody chose.
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: services/capture-engine
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          # The version requirements.txt is tested on, and the Docker image's (Ubuntu 24.04).
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: services/capture-engine/requirements.txt
+      # Open3D's wheel loads these on import.
+      - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libegl1 libgomp1 libusb-1.0-0
+      - run: pip install -r requirements.txt httpx
+      - run: python tests/service_test.py
+      - run: python tests/smoke_test.py

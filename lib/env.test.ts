@@ -123,6 +123,33 @@ describe('serverEnv', () => {
     expect(() => short.serverEnv.cronSecret).toThrow(/CRON_SECRET/)
   })
 
+  it('gives the capture engine as one value without a trailing slash, or nothing, and refuses half of it', async () => {
+    const secret = 'c'.repeat(40)
+    const both = await load({ DATABASE_URL: 'postgresql://x', CAPTURE_ENGINE_URL: 'http://localhost:8787/', CAPTURE_ENGINE_SECRET: secret })
+    expect(both.serverEnv.captureEngine).toEqual({ url: 'http://localhost:8787', secret })
+    expect((await load({ DATABASE_URL: 'postgresql://x', CAPTURE_ENGINE_URL: '', CAPTURE_ENGINE_SECRET: '' })).serverEnv.captureEngine).toBeNull()
+    const half = await load({ DATABASE_URL: 'postgresql://x', CAPTURE_ENGINE_URL: 'https://engine.example', CAPTURE_ENGINE_SECRET: '' })
+    expect(() => half.serverEnv.captureEngine).toThrow(/CAPTURE_ENGINE_URL and CAPTURE_ENGINE_SECRET/)
+    const short = await load({ DATABASE_URL: 'postgresql://x', CAPTURE_ENGINE_URL: 'https://engine.example', CAPTURE_ENGINE_SECRET: 'short' })
+    expect(() => short.serverEnv.captureEngine).toThrow(/CAPTURE_ENGINE_SECRET/)
+    const ftp = await load({ DATABASE_URL: 'postgresql://x', CAPTURE_ENGINE_URL: 'ftp://engine.example', CAPTURE_ENGINE_SECRET: secret })
+    expect(() => ftp.serverEnv.captureEngine).toThrow(/CAPTURE_ENGINE_URL/)
+  })
+
+  it('takes a plain-http engine in production only on this machine, so the secret never crosses a network in clear', async () => {
+    const secret = 'c'.repeat(40)
+    const engine = (url: string) => load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'production', CAPTURE_ENGINE_URL: url, CAPTURE_ENGINE_SECRET: secret })
+    expect((await engine('https://x--foodify-capture.modal.run')).serverEnv.captureEngine?.url).toBe('https://x--foodify-capture.modal.run')
+    expect((await engine('http://localhost:8787')).serverEnv.captureEngine?.url).toBe('http://localhost:8787')
+    expect((await engine('http://127.0.0.1:8787/')).serverEnv.captureEngine?.url).toBe('http://127.0.0.1:8787')
+    const lan = await engine('http://192.168.1.20:8787')
+    expect(() => lan.serverEnv.captureEngine).toThrow(/https in production/)
+    const sneaky = await engine('http://localhost.evil.example')
+    expect(() => sneaky.serverEnv.captureEngine).toThrow(/https in production/)
+    const dev = await load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'development', CAPTURE_ENGINE_URL: 'http://192.168.1.20:8787', CAPTURE_ENGINE_SECRET: secret })
+    expect(dev.serverEnv.captureEngine?.url).toBe('http://192.168.1.20:8787')
+  })
+
   it('reads NODE_ENV once: development only when it says so', async () => {
     expect((await load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'development' })).serverEnv.isDevelopment).toBe(true)
     expect((await load({ DATABASE_URL: 'postgresql://x', NODE_ENV: 'test' })).serverEnv.isDevelopment).toBe(false)
