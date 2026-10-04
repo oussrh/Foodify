@@ -16,8 +16,10 @@ import modal
 HERE = Path(__file__).parent
 COLMAP_IMAGE = "colmap/colmap:20260929.8468"  # COLMAP 4.2.1, CUDA 12.9.1, Ubuntu 24.04
 
-app = modal.App("foodify-capture-test")
-volume = modal.Volume.from_name("foodify-captures", create_if_missing=True)
+app = modal.App("foodify-capture")
+# Version 2: the API and each dish's GPU container write distinct files of the same jobs at once.
+volume = modal.Volume.from_name("foodify-capture-jobs", create_if_missing=True, version=2)
+KEEP_DAYS = 14  # as serve.py: finished jobs are deleted after two weeks
 VOLUME_PATH = Path("/captures")
 
 image = (
@@ -56,8 +58,8 @@ def process(job: str, source_name: str, params: dict) -> dict:
 
 # The HTTP API Foodify calls (engine/service.py), the same one Docker serves. Deploy with
 # `modal deploy app.py` after `modal secret create foodify-capture CAPTURE_ENGINE_SECRET=...
-# CAPTURE_ALLOWED_ORIGINS=https://myfoodify.vercel.app`; Foodify's CAPTURE_ENGINE_URL is then the
-# printed https://<workspace>--foodify-capture-test-api.modal.run.
+# CAPTURE_ALLOWED_ORIGINS=https://<the dashboards' origin>`; Foodify's CAPTURE_ENGINE_URL is then
+# the printed https://<workspace>--foodify-capture-api.modal.run.
 secret = modal.Secret.from_name("foodify-capture")
 
 
@@ -78,7 +80,13 @@ class ModalBackend:
     root = VOLUME_PATH
 
     def sync(self) -> None:
-        volume.reload()
+        # A reload waits for no open file: while another request is still writing a piece, skip it
+        # and read what this container has; the next status poll reloads.
+        try:
+            volume.reload()
+        except RuntimeError as error:  # what Modal raises for it (modal/volume.py, reload)
+            if "open files" not in str(error):
+                raise
 
     def persist(self) -> None:
         volume.commit()
@@ -87,13 +95,27 @@ class ModalBackend:
         process_job.spawn(job)
 
 
-@app.function(image=image, volumes={VOLUME_PATH: volume}, secrets=[secret], timeout=30 * 60)
+# One container: a file's pieces land where the others are, without waiting for a commit. A web
+# request on Modal ends at 150 s, which is why the browser sends files in pieces (service.py).
+@app.function(image=image, volumes={VOLUME_PATH: volume}, secrets=[secret], timeout=30 * 60,
+              max_containers=1, scaledown_window=5 * 60)
 @modal.concurrent(max_inputs=20)
 @modal.asgi_app()
 def api():
     from engine.service import create_app
 
     return create_app(ModalBackend())
+
+
+@app.function(image=image, volumes={VOLUME_PATH: volume}, schedule=modal.Period(days=1))
+def prune_jobs() -> None:
+    """Delete finished jobs after KEEP_DAYS: the videos are the volume's bulk, and it is billed."""
+    from engine.jobs import prune
+
+    volume.reload()
+    removed = prune(VOLUME_PATH, KEEP_DAYS)
+    volume.commit()
+    print(f"pruned {len(removed)} job(s)")
 
 
 @app.local_entrypoint()
