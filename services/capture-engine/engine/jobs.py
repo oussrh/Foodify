@@ -81,7 +81,8 @@ def run_job(root: Path, job: str, on_change=lambda: None) -> None:
         beat.start()
         report = run(job_dir / "input", job_dir, Params(**params), on_stage=on_stage)
         if report["status"] == "ok":
-            shutil.rmtree(job_dir / "work", ignore_errors=True)  # gigabytes of depth maps
+            if not params.get("debug"):  # a debug run keeps it, to re-run the late stages from it
+                shutil.rmtree(job_dir / "work", ignore_errors=True)  # gigabytes of depth maps
             write_status(job_dir, "done")
         else:
             write_status(job_dir, "failed")

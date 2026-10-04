@@ -23,7 +23,7 @@ describe('captureView', () => {
     expect(captureView(row())).toEqual({
       id: 'job-1',
       status: 'PROCESSING',
-      progress: { step: 3, of: 5, label: 'Measuring the dish in depth' },
+      progress: { step: 4, of: 6, label: 'Measuring the dish in depth' },
       warnings: [],
       error: null,
       plateCm: '27.0',

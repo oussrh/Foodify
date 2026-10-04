@@ -45,14 +45,15 @@ describe('captureUpdate', () => {
 
 describe('captureProgress', () => {
   it('numbers each engine stage from 1 and names it in plain words', () => {
-    expect(captureProgress('frames')).toEqual({ step: 1, of: 5, label: 'Choosing the sharpest frames' })
-    expect(captureProgress('mesh_texture_export')).toEqual({ step: 5, of: 5, label: 'Building the model and its colours' })
-    expect(CAPTURE_STAGES.map((s) => captureProgress(s.key).step)).toEqual([1, 2, 3, 4, 5])
+    expect(captureProgress('check')).toEqual({ step: 1, of: 6, label: 'Checking the video' })
+    expect(captureProgress('frames')).toEqual({ step: 2, of: 6, label: 'Choosing the sharpest frames' })
+    expect(captureProgress('mesh_texture_export')).toEqual({ step: 6, of: 6, label: 'Building the model and its colours' })
+    expect(CAPTURE_STAGES.map((s) => captureProgress(s.key).step)).toEqual([1, 2, 3, 4, 5, 6])
   })
 
   it('reads no stage, or one it does not know, as waiting for the engine', () => {
-    expect(captureProgress(null)).toEqual({ step: 0, of: 5, label: 'Waiting for the engine' })
-    expect(captureProgress('something-new')).toEqual({ step: 0, of: 5, label: 'Waiting for the engine' })
+    expect(captureProgress(null)).toEqual({ step: 0, of: 6, label: 'Waiting for the engine' })
+    expect(captureProgress('something-new')).toEqual({ step: 0, of: 6, label: 'Waiting for the engine' })
   })
 })
 

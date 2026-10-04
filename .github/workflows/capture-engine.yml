@@ -34,4 +34,6 @@ jobs:
       - run: pip install -r requirements.txt httpx
       - run: python -m tests.service_test
       - run: python -m tests.turntable_test
+      - run: python -m tests.plate_test
+      - run: python -m tests.checks_test
       - run: python -m tests.smoke_test

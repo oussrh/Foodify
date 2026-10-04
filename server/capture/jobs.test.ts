@@ -166,7 +166,7 @@ describe('refreshCapture', () => {
     db.captureJob.findFirst.mockResolvedValueOnce(row({ status: 'PROCESSING' }))
     engine.engineJobStatus.mockResolvedValue({ state: 'running', stage: 'align', report: null })
     readBack({ status: 'PROCESSING', stage: 'align' })
-    expect(await refreshCapture('r1', 'job-1')).toMatchObject({ ok: true, offline: false, job: { progress: { step: 4 } } })
+    expect(await refreshCapture('r1', 'job-1')).toMatchObject({ ok: true, offline: false, job: { progress: { step: 5 } } })
     expect(db.captureJob.updateMany).toHaveBeenCalledWith({ where: { id: 'job-1', restaurantId: 'r1', status: 'PROCESSING' }, data: { status: 'PROCESSING', stage: 'align' } })
   })
 
@@ -183,7 +183,7 @@ describe('refreshCapture', () => {
   it('keeps the capture as it was, offline, when the engine does not answer, and lets any other failure through', async () => {
     db.captureJob.findFirst.mockResolvedValue(row({ status: 'PROCESSING', stage: 'dense', createdAt: new Date() }))
     engine.engineJobStatus.mockRejectedValueOnce(new engine.CaptureEngineError('down'))
-    expect(await refreshCapture('r1', 'job-1')).toMatchObject({ ok: true, offline: true, job: { progress: { step: 3 } } })
+    expect(await refreshCapture('r1', 'job-1')).toMatchObject({ ok: true, offline: true, job: { progress: { step: 4 } } })
     expect(log.warn).toHaveBeenCalledOnce()
     expect(db.captureJob.updateMany).not.toHaveBeenCalled()
     engine.engineJobStatus.mockRejectedValueOnce(new TypeError('bug'))

@@ -128,7 +128,8 @@ def align_and_scale(pcd: o3d.geometry.PointCloud, centres: np.ndarray, dirs: np.
     info = {"points_in": len(pts), "points_kept": int(keep.sum()), "scale": scale,
             "table_noise_mm": round(noise * scale * 1000, 2), "elevation_threshold_mm": round(threshold * scale * 1000, 2),
             "dish_radius_m": plate_m / 2, "crop_radius_m": radius * margin * scale,
-            "camera_height_m": cam_height * scale, "camera_distance_m": cam_dist * scale}
+            "camera_height_m": cam_height * scale, "camera_distance_m": cam_dist * scale,
+            "transform": _transform(rot, -rot @ focus, scale)}
     return out, info
 
 
@@ -153,8 +154,15 @@ def align_turntable(pcd: o3d.geometry.PointCloud, centres: np.ndarray, up: np.nd
     info = {"points_in": len(pts), "points_kept": int(keep.sum()), "scale": scale,
             "dish_radius_m": plate_m / 2, "crop_radius_m": radius * margin * scale,
             "camera_height_m": float(np.median(cams[:, 1])),
-            "camera_distance_m": float(np.median(np.linalg.norm(cams, axis=1)))}
+            "camera_distance_m": float(np.median(np.linalg.norm(cams, axis=1))),
+            "transform": _transform(rot, -origin, scale)}
     return _kept(pcd, local, rot, keep, scale), info
+
+
+def _transform(rot: np.ndarray, offset: np.ndarray, scale: float) -> dict:
+    """COLMAP's frame to the dish's: local = scale * (rotation @ x + offset). Kept in the report, so
+    the cameras can be brought into the dish's frame to colour it from the photos (views.py)."""
+    return {"rotation": rot.tolist(), "offset": [float(v) for v in offset], "scale": float(scale)}
 
 
 def _kept(pcd: o3d.geometry.PointCloud, local: np.ndarray, rot: np.ndarray, keep: np.ndarray,

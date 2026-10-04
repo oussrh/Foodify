@@ -96,6 +96,8 @@ def main():
     assert abs(info["scale"] / true_scale - 1) < 0.05, f"scale off by {info['scale'] / true_scale - 1:.0%}"
     assert 5.0 <= height <= 6.2, f"dish should be ~5.7 cm tall (0.42 units x 13.5 cm), got {height}"
     assert asset["triangles"] <= 20_000
+    assert asset["plate"]["fitted"], "a round plate should be fitted as a known shape"
+    assert 2.0 <= asset["plate"]["floor_mm"] <= 3.4, f"plate floor should be ~2.7 mm, got {asset['plate']['floor_mm']}"
     assert not asset["usdz_issues"], asset["usdz_issues"]
     assert asset["base"] and asset["base"]["shows"] == "text", asset["base"]
     assert asset["base"]["faces"] > 100, "the underside should be its own branded part"
