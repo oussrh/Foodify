@@ -3,22 +3,20 @@
 A table, a 27 cm plate with a raised rim and a dome of 'food', a glass beside the plate and a
 wall behind, seen by cameras on three rings, then rotated, scaled and moved arbitrarily as COLMAP
 would leave it. The pipeline must find up, the centre and the size again, leave out the glass,
-the wall and the tablecloth, and write a valid GLB and USDZ.
+the wall and the tablecloth, and write a valid GLB and USDZ. From the engine's folder, as a module:
 
-    python tests/smoke_test.py
+    python -m tests.smoke_test
 """
 
 import json
-import sys
 import tempfile
 from pathlib import Path
 
 import numpy as np
 import open3d as o3d
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from engine import mesh  # noqa: E402
-from engine.pipeline import Params, build_asset  # noqa: E402
+from engine import mesh
+from engine.pipeline import Params, build_asset
 
 rng = np.random.default_rng(7)
 

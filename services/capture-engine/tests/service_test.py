@@ -1,27 +1,24 @@
 """The HTTP API's contract with Foodify, and the job rules behind it (engine/jobs.py): who may call
 what, a job's states, the files it serves, and what happens to a job cut off or stalled.
 
-No GPU: the backend's `start` writes a finished job instead of processing one.
+No GPU: the backend's `start` writes a finished job instead of processing one. From the engine's
+folder, as a module, so `engine` is importable without touching sys.path:
 
-    python tests/service_test.py
+    python -m tests.service_test
 """
 
 import json
 import os
-import sys
 import tempfile
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-SECRET = "s" * 40
-os.environ["CAPTURE_ENGINE_SECRET"] = SECRET
+from fastapi.testclient import TestClient
 
-from fastapi.testclient import TestClient  # noqa: E402
+from engine.jobs import INTERRUPTED, STALLED, prune, read_json, recover, write_status
+from engine.service import create_app, sign
 
-from engine.jobs import INTERRUPTED, STALLED, prune, read_json, recover, write_status  # noqa: E402
-from engine.service import create_app, sign  # noqa: E402
-
+SECRET = "s" * 40  # create_app reads CAPTURE_ENGINE_SECRET when it is called, in main()
 JOB = "0b3c6f1e-6a7d-4d2f-9a51-2f8e1c4b7a90"
 BEARER = {"Authorization": f"Bearer {SECRET}"}
 LOGO = "https://res.cloudinary.com/demo/image/upload/f_png/v1/logo.svg"
@@ -147,6 +144,7 @@ def cors(api: TestClient, source: str) -> None:
 
 
 def main() -> None:
+    os.environ["CAPTURE_ENGINE_SECRET"] = SECRET
     with tempfile.TemporaryDirectory() as tmp_name:
         tmp = Path(tmp_name)
         backend = FakeBackend(tmp)

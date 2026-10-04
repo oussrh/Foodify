@@ -71,8 +71,8 @@ in `out/<job>/output/`.
 ## Tests
 
 ```powershell
-python tests/service_test.py        # the API's contract and the job rules, no GPU, seconds
-python tests/smoke_test.py          # everything after COLMAP on a synthetic dish, no GPU
+python -m tests.service_test        # the API's contract and the job rules, no GPU, seconds
+python -m tests.smoke_test          # everything after COLMAP on a synthetic dish, no GPU
 python tests/render_capture.py out/synthetic    # a synthetic dish video with known size, for a full run
 ```
 

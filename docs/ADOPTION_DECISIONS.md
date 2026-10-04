@@ -286,3 +286,10 @@ last_verified: "2026-10-03"
 - **Default taken**: named in `ratchet.enable` beside `types.nonNull` and `test.coverageExclusions`, held HARD at 0.
 - **Alternative set aside**: letting it lapse with the upgrade (a check removed by a version bump is a check nobody decided to remove).
 - **Re-read when**: its proxy flags a legitimate test move it cannot net out, or abatty ships it on by default again.
+
+## 2026-10-04 · after the programme · a Python service in the repository, outside the Next.js gate
+
+- **Situation**: the capture engine (`services/capture-engine/`: Python, COLMAP, a GPU; Docker locally, Modal in the cloud) started as a separate folder and moved into this repository so that its HTTP contract with `server/capture/` (the signed upload addresses, the start parameters, the status shape) changes in one pull request on both sides. None of the gate's tools reads it: lint, dead code, the duplication probe and the unit runner read JS/TS only, and `sourceGlobs` and knip's `project` name their folders.
+- **Default taken**: no exclusion added anywhere (none was needed, and the full gate is green with it in place); `services/` added to `changelogRequiredFor`, so an engine change carries a changelog line like any other source; its own workflow, `.github/workflows/capture-engine.yml`, runs its API-contract and smoke tests when it changes; `.vercelignore` keeps it out of the deploy. Its tests run as modules (`python -m tests.service_test`) so they need no path insert and no linter suppression, which `change.testTamper` counts.
+- **Alternative set aside**: a separate repository (the contract would live in two places and drift silently; the signature change of 2026-10-04 had to land on both sides at once); adding `services/` to `sourceGlobs` (the probes measure TypeScript shapes and would read Python wrongly).
+- **Re-read when**: a second service joins `services/`, or the engine gains JS/TS that the gate should hold.
