@@ -10,12 +10,13 @@ import cv2
 import numpy as np
 import open3d as o3d
 
-from . import base, export, frames, mesh, sfm, texture
+from . import base, export, frames, masks, mesh, orbit, sfm, texture
 
 
 @dataclass
 class Params:
     plate_cm: float = 27.0         # diameter of the plate; sets the real-world size
+    mode: str = "walkaround"       # walkaround (the phone circles a still plate) | turntable (the plate turns)
     frames: int = 150              # frames kept for reconstruction
     mapper: str = "incremental"    # incremental | global (faster, try it in the bake-off)
     dense_views: int = 75          # frames dense stereo runs on (the slowest stage), evenly spaced
@@ -123,21 +124,46 @@ def _warnings(report: dict, p: Params) -> list[str]:
     return found
 
 
-def _reconstruct(source: Path, work: Path, out: Path, p: Params, report: dict, timed) -> None:
-    log = out / "colmap.log"
-    report["colmap_version"] = sfm.colmap_version()
-    report["frames"] = timed("frames", lambda: frames.prepare_images(
-        source, work / "images", work / "candidates", p.frames))
-    poses = timed("sparse", lambda: sfm.sparse(work / "images", work / "colmap", p.mapper, log))
+def _prepare(source: Path, work: Path, p: Params, report: dict):
+    """The frames, and in turntable mode the dish cut out of each; returns the model that cuts."""
+    report["frames"] = frames.prepare_images(source, work / "images", work / "candidates", p.frames)
+    if p.mode != "turntable":
+        return None
+    predict = masks.load()
+    share = masks.write_masks(work / "images", masks.image_names(work / "images"), work / "masks", predict)
+    report["masks"] = {"dish_share": round(share, 3)}
+    if share < 0.01:
+        raise orbit.CaptureError("The dish could not be told apart from the room; film it on a plain, uncluttered table")
+    return predict
+
+
+def _poses(work: Path, p: Params, report: dict, log: Path, masked: bool) -> dict:
+    poses = sfm.sparse(work / "images", work / "colmap", p.mapper, log, work / "masks" if masked else None)
     report["colmap"] = {"models": poses["models"], "registered": poses["registered"],
                         "registered_ratio": round(poses["registered"] / report["frames"]["kept"], 3),
                         "stills_registered": sum(n.startswith("stills/") for n in poses["names"])}
-    fused = timed("dense", lambda: sfm.dense(work / "images", poses, work / "colmap", p.dense_size,
-                                             p.dense_views, log))
+    report["colmap"]["view_spread_deg"] = round(orbit.check_motion(poses["dirs"], p.mode), 1)
+    return poses
 
+
+def _align(fused: Path, poses: dict, p: Params):
     dense = o3d.io.read_point_cloud(str(fused))
-    cloud, report["alignment"] = timed("align", lambda: mesh.align_and_scale(
-        dense, poses["centres"], poses["dirs"], p.plate_cm / 100, p.crop_margin))
+    if p.mode == "turntable":
+        up = orbit.turn_axis(poses["centres"], poses["dirs"], poses["names"])
+        return mesh.align_turntable(dense, poses["centres"], up, p.plate_cm / 100, p.crop_margin)
+    return mesh.align_and_scale(dense, poses["centres"], poses["dirs"], p.plate_cm / 100, p.crop_margin)
+
+
+def _reconstruct(source: Path, work: Path, out: Path, p: Params, report: dict, timed) -> None:
+    log = out / "colmap.log"
+    report["colmap_version"] = sfm.colmap_version()
+    predict = timed("frames", lambda: _prepare(source, work, p, report))
+    poses = timed("sparse", lambda: _poses(work, p, report, log, predict is not None))
+    # Fusion keeps the dish's own edge: a grown one bakes the turntable onto the plate's rim.
+    cut = (lambda images, names, target: masks.write_masks(images, names, target, predict, grow=0)) if predict else None
+    fused = timed("dense", lambda: sfm.dense(work / "images", poses, work / "colmap", p.dense_size,
+                                             p.dense_views, log, cut))
+    cloud, report["alignment"] = timed("align", lambda: _align(fused, poses, p))
     if p.debug:
         o3d.io.write_point_cloud(str(out / "dense_cropped.ply"), cloud)
     report["asset"] = timed("mesh_texture_export", lambda: build_asset(cloud, report["alignment"], out, p))
@@ -165,7 +191,8 @@ def run(source: Path, job_dir: Path, p: Params, on_stage=None) -> dict:
         report["status"] = "ok"
     except Exception as exc:  # the report is the product of a failed job too
         report["status"] = "failed"
-        report["error"] = f"{type(exc).__name__}: {exc}"
+        # What to film differently is said as it is; anything else names its kind, for us.
+        report["error"] = str(exc) if isinstance(exc, orbit.CaptureError) else f"{type(exc).__name__}: {exc}"
         (out / "traceback.txt").write_text(traceback.format_exc())  # for us; the report is for the manager
 
     report["warnings"] = _warnings(report, p)

@@ -36,9 +36,9 @@ import { createCapture, dishCaptureState, refreshCapture, startCapture } from '.
 const LOGO = 'https://res.cloudinary.com/demo/image/upload/v1/logo.svg'
 const row = (over: object = {}) => ({
   id: 'job-1', status: 'UPLOADING', stage: null, warnings: [], error: null, plateCm: new Prisma.Decimal('24'),
-  base: 'LOGO', summary: null, createdAt: new Date('2026-10-03T20:00:00Z'), restaurant: { name: 'Chez Test', logoUrl: LOGO }, ...over,
+  base: 'LOGO', mode: 'WALKAROUND', summary: null, createdAt: new Date('2026-10-03T20:00:00Z'), restaurant: { name: 'Chez Test', logoUrl: LOGO }, ...over,
 })
-const request = { dishId: 'dish-1', plateCm: 24, base: 'LOGO' as const, video: { name: 'IMG_1.MOV', size: 10 }, photos: [{ name: 'IMG_2.JPG', size: 5 }, { name: 'top.png', size: 5 }] }
+const request = { dishId: 'dish-1', plateCm: 24, base: 'LOGO' as const, mode: 'TURNTABLE' as const, video: { name: 'IMG_1.MOV', size: 10 }, photos: [{ name: 'IMG_2.JPG', size: 5 }, { name: 'top.png', size: 5 }] }
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -53,16 +53,16 @@ describe('dishCaptureState', () => {
     expect(db.captureJob.findFirst).not.toHaveBeenCalled()
   })
 
-  it("gives the restaurant's name, whether its logo is usable, the last plate size and the open capture", async () => {
+  it("gives the restaurant's name, whether its logo is usable, the last plate size and filming mode, and the open capture", async () => {
     db.restaurant.findUniqueOrThrow.mockResolvedValue({ name: 'Chez Test', logoUrl: LOGO })
-    db.captureJob.findFirst.mockResolvedValueOnce(row({ status: 'PROCESSING', stage: 'frames' })).mockResolvedValueOnce({ plateCm: new Prisma.Decimal('24.5') })
-    expect(await dishCaptureState('r1', 'dish-1')).toMatchObject({ enabled: true, restaurantName: 'Chez Test', hasLogo: true, lastPlateCm: 24.5, job: { status: 'PROCESSING' } })
+    db.captureJob.findFirst.mockResolvedValueOnce(row({ status: 'PROCESSING', stage: 'frames' })).mockResolvedValueOnce({ plateCm: new Prisma.Decimal('24.5'), mode: 'TURNTABLE' })
+    expect(await dishCaptureState('r1', 'dish-1')).toMatchObject({ enabled: true, restaurantName: 'Chez Test', hasLogo: true, lastPlateCm: 24.5, lastMode: 'TURNTABLE', job: { status: 'PROCESSING' } })
   })
 
   it('has no plate size and no capture for a first time, and no logo for one it cannot read', async () => {
     db.restaurant.findUniqueOrThrow.mockResolvedValue({ name: 'Chez Test', logoUrl: 'https://x.example/logo.svg' })
     db.captureJob.findFirst.mockResolvedValue(null)
-    expect(await dishCaptureState('r1', 'dish-1')).toEqual({ enabled: true, restaurantName: 'Chez Test', hasLogo: false, lastPlateCm: null, job: null })
+    expect(await dishCaptureState('r1', 'dish-1')).toEqual({ enabled: true, restaurantName: 'Chez Test', hasLogo: false, lastPlateCm: null, lastMode: null, job: null })
   })
 })
 
@@ -86,6 +86,13 @@ describe('createCapture', () => {
     expect(db.captureJob.updateMany).toHaveBeenCalledWith({ where: { restaurantId: 'r1', dishId: 'dish-1', status: { in: ['UPLOADING', 'READY', 'FAILED'] } }, data: { status: 'DISCARDED' } })
     expect(engine.signedEngineUrl).toHaveBeenCalledWith('PUT', '/jobs/job-2/source', 7200, { name: 'still_2.png' })
   })
+
+  it('records how the dish was filmed', async () => {
+    db.captureJob.count.mockResolvedValue(0)
+    db.captureJob.create.mockResolvedValue({ id: 'job-2' })
+    await createCapture('r1', request)
+    expect(db.captureJob.create).toHaveBeenCalledWith({ data: { restaurantId: 'r1', dishId: 'dish-1', plateCm: 24, base: 'LOGO', mode: 'TURNTABLE' }, select: { id: true } })
+  })
 })
 
 /** The row as the test's conditional write left it, read back by `current`. */
@@ -97,12 +104,12 @@ describe('startCapture', () => {
     expect(await startCapture('r1', 'job-1')).toEqual({ ok: false, error: 'That capture is no longer here. Refresh the page.' })
   })
 
-  it('tells the engine the plate, the name and the logo as a PNG, then marks it processing if it is still uploading', async () => {
+  it('tells the engine the plate, how it was filmed, the name and the logo as a PNG, then marks it processing if it is still uploading', async () => {
     db.captureJob.findFirst.mockResolvedValueOnce(row())
     db.captureJob.updateMany.mockResolvedValue({ count: 1 })
     readBack({ status: 'PROCESSING' })
     expect(await startCapture('r1', 'job-1')).toMatchObject({ ok: true, job: { status: 'PROCESSING' } })
-    expect(engine.startEngineJob).toHaveBeenCalledWith('job-1', { plate_cm: 24, base_text: 'Chez Test', base_logo: 'https://res.cloudinary.com/demo/image/upload/f_png/v1/logo.svg' })
+    expect(engine.startEngineJob).toHaveBeenCalledWith('job-1', { plate_cm: 24, mode: 'walkaround', base_text: 'Chez Test', base_logo: 'https://res.cloudinary.com/demo/image/upload/f_png/v1/logo.svg' })
     expect(db.captureJob.updateMany).toHaveBeenCalledWith({ where: { id: 'job-1', restaurantId: 'r1', status: 'UPLOADING' }, data: { status: 'PROCESSING' } })
   })
 
@@ -112,7 +119,7 @@ describe('startCapture', () => {
     expect(await startCapture('r1', 'job-1')).toEqual({ ok: false, error: expect.stringContaining('changed meanwhile') })
   })
 
-  it('sends the name alone when the logo cannot be read or the name was chosen, and nothing for a plain base', async () => {
+  it('sends the name alone when the logo cannot be read or the name was chosen, nothing for a plain base, and a turntable as such', async () => {
     db.captureJob.updateMany.mockResolvedValue({ count: 1 })
     db.captureJob.findFirst.mockResolvedValueOnce(row({ restaurant: { name: 'Chez Test', logoUrl: null } }))
     readBack({ status: 'PROCESSING' })
@@ -120,13 +127,13 @@ describe('startCapture', () => {
     db.captureJob.findFirst.mockResolvedValueOnce(row({ base: 'NAME' }))
     readBack({ status: 'PROCESSING' })
     await startCapture('r1', 'job-1')
-    db.captureJob.findFirst.mockResolvedValueOnce(row({ base: 'PLAIN' }))
+    db.captureJob.findFirst.mockResolvedValueOnce(row({ base: 'PLAIN', mode: 'TURNTABLE' }))
     readBack({ status: 'PROCESSING' })
     await startCapture('r1', 'job-1')
     expect(engine.startEngineJob.mock.calls.map((call) => call[1])).toEqual([
-      { plate_cm: 24, base_text: 'Chez Test' },
-      { plate_cm: 24, base_text: 'Chez Test' },
-      { plate_cm: 24 },
+      { plate_cm: 24, mode: 'walkaround', base_text: 'Chez Test' },
+      { plate_cm: 24, mode: 'walkaround', base_text: 'Chez Test' },
+      { plate_cm: 24, mode: 'turntable' },
     ])
   })
 

@@ -26,7 +26,7 @@ import re
 import time
 from collections import defaultdict
 from pathlib import Path
-from typing import Protocol
+from typing import Literal, Protocol
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -50,6 +50,7 @@ class StartParams(BaseModel):
 
     model_config = {"extra": "ignore"}
     plate_cm: float = Field(ge=5, le=80)
+    mode: Literal["walkaround", "turntable"] = "walkaround"
     base_text: str = Field(default="", max_length=60)
     base_logo: str = ""
     base_color: str = ""

@@ -3,7 +3,7 @@ import { firstIssue } from './common'
 import { captureRequest, engineStatus, MAX_VIDEO_BYTES } from './capture'
 
 const dishId = '0b3c6f1e-6a7d-4d2f-9a51-2f8e1c4b7a90'
-const ok = { dishId, plateCm: 27, base: 'LOGO', video: { name: 'IMG_0042.MOV', size: 480_000_000 }, photos: [{ name: 'IMG_0043.JPG', size: 3_000_000 }] }
+const ok = { dishId, plateCm: 27, base: 'LOGO', mode: 'TURNTABLE', video: { name: 'IMG_0042.MOV', size: 480_000_000 }, photos: [{ name: 'IMG_0043.JPG', size: 3_000_000 }] }
 
 /** The message the form would show for `value`, or null when it is accepted. */
 function issue(value: unknown) {
@@ -12,7 +12,7 @@ function issue(value: unknown) {
 }
 
 describe('captureRequest', () => {
-  it('takes a dish, a plate diameter, what goes underneath and a video', () => {
+  it('takes a dish, a plate diameter, what goes underneath, how it was filmed and a video', () => {
     expect(captureRequest.parse(ok)).toEqual(ok)
     expect(captureRequest.parse({ ...ok, base: 'PLAIN', video: { name: 'dish.mp4', size: 1 } }).base).toBe('PLAIN')
   })
@@ -50,6 +50,11 @@ describe('captureRequest', () => {
   it('refuses a dish id that is not a uuid, and an underside it does not know', () => {
     expect(captureRequest.safeParse({ ...ok, dishId: '42' }).success).toBe(false)
     expect(captureRequest.safeParse({ ...ok, base: 'SKETCH' }).success).toBe(false)
+  })
+
+  it('refuses a capture that does not say how it was filmed, or names a way it does not know', () => {
+    expect(captureRequest.safeParse({ ...ok, mode: undefined }).success).toBe(false)
+    expect(captureRequest.safeParse({ ...ok, mode: 'DRONE' }).success).toBe(false)
   })
 })
 

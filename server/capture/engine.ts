@@ -16,7 +16,7 @@ export class CaptureEngineError extends Error {}
 export type EngineFile = 'dish.glb' | 'dish.usdz'
 
 /** What the engine is told to make, in its own parameter names. */
-export type EngineParams = { plate_cm: number; base_logo?: string; base_text?: string }
+export type EngineParams = { plate_cm: number; mode: 'walkaround' | 'turntable'; base_logo?: string; base_text?: string }
 
 function engine() {
   const configured = serverEnv.captureEngine

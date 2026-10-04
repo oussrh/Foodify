@@ -124,6 +124,41 @@ def align_and_scale(pcd: o3d.geometry.PointCloud, centres: np.ndarray, dirs: np.
     # onto the plate's side as a coloured fringe, so table-level points near the edge go too.
     tablecloth = (r > 0.95 * radius) & (h < threshold)
     keep = (r < radius * margin) & (h > -0.02 * cam_height) & ~tablecloth
+    out = _kept(pcd, local, rot, keep, scale)
+    info = {"points_in": len(pts), "points_kept": int(keep.sum()), "scale": scale,
+            "table_noise_mm": round(noise * scale * 1000, 2), "elevation_threshold_mm": round(threshold * scale * 1000, 2),
+            "dish_radius_m": plate_m / 2, "crop_radius_m": radius * margin * scale,
+            "camera_height_m": cam_height * scale, "camera_distance_m": cam_dist * scale}
+    return out, info
+
+
+def align_turntable(pcd: o3d.geometry.PointCloud, centres: np.ndarray, up: np.ndarray,
+                    plate_m: float, margin: float) -> tuple[o3d.geometry.PointCloud, dict]:
+    """The same frame as align_and_scale for a masked turntable capture, where the cloud is the
+    dish alone: up is the turning axis (orbit.turn_axis), the base is the plate's lowest points,
+    and the plate's width is the cloud's width round its own centre."""
+    pts = np.asarray(pcd.points)
+    if len(pts) < 1000:
+        raise RuntimeError("too few points on the dish; the masks may have cut it away")
+    rot = _rotation_to_y(up / np.linalg.norm(up))
+    local = pts @ rot.T
+    lo, hi = np.percentile(local, [0.5, 99.5], axis=0)
+    origin = np.array([(lo[0] + hi[0]) / 2, lo[1], (lo[2] + hi[2]) / 2])
+    local = local - origin
+    r = np.hypot(local[:, 0], local[:, 2])
+    radius = float(np.percentile(r, 99))
+    scale = plate_m / (2 * radius)
+    keep = (r < radius * margin) & (local[:, 1] > -0.02 * radius)
+    cams = (centres @ rot.T - origin) * scale
+    info = {"points_in": len(pts), "points_kept": int(keep.sum()), "scale": scale,
+            "dish_radius_m": plate_m / 2, "crop_radius_m": radius * margin * scale,
+            "camera_height_m": float(np.median(cams[:, 1])),
+            "camera_distance_m": float(np.median(np.linalg.norm(cams, axis=1)))}
+    return _kept(pcd, local, rot, keep, scale), info
+
+
+def _kept(pcd: o3d.geometry.PointCloud, local: np.ndarray, rot: np.ndarray, keep: np.ndarray,
+          scale: float) -> o3d.geometry.PointCloud:
     out = o3d.geometry.PointCloud()
     out.points = o3d.utility.Vector3dVector(local[keep] * scale)
     out.colors = o3d.utility.Vector3dVector(np.asarray(pcd.colors)[keep])
@@ -132,12 +167,7 @@ def align_and_scale(pcd: o3d.geometry.PointCloud, centres: np.ndarray, dirs: np.
     else:
         out.estimate_normals()
         out.orient_normals_towards_camera_location(np.array([0.0, 10.0, 0.0]))
-
-    info = {"points_in": len(pts), "points_kept": int(keep.sum()), "scale": scale,
-            "table_noise_mm": round(noise * scale * 1000, 2), "elevation_threshold_mm": round(threshold * scale * 1000, 2),
-            "dish_radius_m": plate_m / 2, "crop_radius_m": radius * margin * scale,
-            "camera_height_m": cam_height * scale, "camera_distance_m": cam_dist * scale}
-    return out, info
+    return out
 
 
 def _base(radius_m: float, spacing_m: float = 0.002) -> o3d.geometry.PointCloud:

@@ -15,6 +15,23 @@ video + photos -> sharpest frames, photos kept -> COLMAP poses + dense stereo (G
   -> underside branded with the logo or name -> GLB + USDZ + report.json
 ```
 
+Two ways to film, chosen in Foodify (`mode` in the start parameters):
+
+- **walkaround** (the default): the phone circles a still plate on a patterned placemat; the table
+  is what scale and "up" are found from.
+- **turntable**: the plate turns in front of a still phone. The room stands still while the dish
+  turns, so COLMAP would follow the room and place every camera in the same spot. Each frame's
+  dish is cut out first (`engine/masks.py`: IS-Net through onnxruntime on the CPU, about 0.8 s a
+  frame; largest region, holes filled, grown 1%), features are found inside the masks only, and
+  fusion keeps only what is inside masks made again on the undistorted images. Up is the turning
+  axis (every step of the phone seen from the dish is at right angles to it), the base is the
+  plate's lowest points, the scale the plate's width.
+
+Either way, straight after the cameras are placed, a capture whose views span less than 45° fails
+with what to film differently (`engine/orbit.py`): the usual cause is a turntable video sent as a
+walk-around, or the other way round. HDR video (HLG, PQ) is tone-mapped to ordinary colours as the
+frames are read.
+
 ## Run it for Foodify, locally (Docker Desktop, NVIDIA GPU)
 
 ```powershell
@@ -64,6 +81,9 @@ pip install -r requirements.txt
 python run_local.py --source dish.mp4 --plate-cm 27 --colmap C:\tools\colmap\COLMAP.bat
 ```
 
+`--mode turntable` for a plate that turned; it needs the segmentation model at
+`CAPTURE_SEGMENT_MODEL` (the URL and hash are in the Dockerfile).
+
 Needs ffmpeg and COLMAP's CUDA build (4.2.1 or later). `--debug` also writes the cropped dense
 cloud and the full-resolution mesh. Results and `report.json` (warnings, timings, size, scale) land
 in `out/<job>/output/`.
@@ -72,6 +92,7 @@ in `out/<job>/output/`.
 
 ```powershell
 python -m tests.service_test        # the API's contract and the job rules, no GPU, seconds
+python -m tests.turntable_test      # the movement check, the turning axis, turntable alignment, masks
 python -m tests.smoke_test          # everything after COLMAP on a synthetic dish, no GPU
 python tests/render_capture.py out/synthetic    # a synthetic dish video with known size, for a full run
 ```
@@ -86,7 +107,9 @@ python tests/render_capture.py out/synthetic    # a synthetic dish video with kn
 | `engine/jobs.py`, `engine/worker.py` | a job's life on disk; one job in a process |
 | `engine/frames.py` | video → frames (sharpest per time bucket), photos kept, capture warnings |
 | `engine/sfm.py` | COLMAP: poses, then dense stereo on the photos and a subset of the frames |
-| `engine/mesh.py` | up, centre, scale, crop, Poisson surface with a closed base, decimation |
+| `engine/masks.py` | turntable: the dish cut out of each image, as COLMAP's masks |
+| `engine/orbit.py` | the movement check; turntable: the turning axis |
+| `engine/mesh.py` | up, centre, scale, crop (walk-around from the table, turntable from the axis), Poisson surface with a closed base, decimation |
 | `engine/texture.py` | xatlas UV atlas (padded), colour bake |
 | `engine/base.py` | the underside: base faces, planar mapping, logo or name on the plate colour |
 | `engine/export.py` | GLB writer, USDZ via OpenUSD, USD validation |
@@ -95,4 +118,6 @@ python tests/render_capture.py out/synthetic    # a synthetic dish video with kn
 ## Licences
 
 COLMAP (BSD), Open3D (MIT), xatlas (MIT), OpenUSD (Apache-2.0 modified), OpenCV (Apache-2.0),
-SciPy/NumPy (BSD), FastAPI/uvicorn (MIT/BSD), ffmpeg (LGPL, run as a separate program).
+SciPy/NumPy (BSD), FastAPI/uvicorn (MIT/BSD), ffmpeg (LGPL, run as a separate program),
+onnxruntime (MIT), the IS-Net "isnet-general-use" weights (Apache-2.0, from DIS; the file is
+rembg's release asset, pinned by SHA-256).

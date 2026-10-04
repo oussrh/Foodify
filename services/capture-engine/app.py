@@ -24,9 +24,15 @@ image = (
     modal.Image.from_registry(COLMAP_IMAGE, add_python="3.12")  # requirements.txt is tested on 3.12
     # ffmpeg for video, a font for the name on the base; the rest are what Open3D's Linux wheel
     # loads on import.
-    .apt_install("ffmpeg", "fonts-dejavu-core", "libgl1", "libegl1", "libgomp1", "libusb-1.0-0", "libx11-6")
+    .apt_install("ffmpeg", "fonts-dejavu-core", "curl", "ca-certificates", "libgl1", "libegl1", "libgomp1", "libusb-1.0-0", "libx11-6")
     .pip_install_from_requirements(str(HERE / "requirements.txt"))
-    .env({"QT_QPA_PLATFORM": "offscreen"})
+    # The model that cuts the dish out of a turntable capture (IS-Net, Apache-2.0), as in the Dockerfile.
+    .run_commands(
+        "mkdir -p /models && curl -fsSL -o /models/isnet-general-use.onnx "
+        "https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx",
+        "echo '60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a  /models/isnet-general-use.onnx' | sha256sum -c -",
+    )
+    .env({"QT_QPA_PLATFORM": "offscreen", "CAPTURE_SEGMENT_MODEL": "/models/isnet-general-use.onnx"})
     # Fail while building the image, not after a 1 GB upload.
     .run_commands(
         "colmap help | head -n 3",

@@ -8,7 +8,7 @@
 import prisma from '@/lib/prisma'
 import { serverEnv } from '@/lib/env'
 import { captureUpdate, engineLogoUrl, type CaptureView } from '@/lib/capture'
-import type { CaptureRequest } from '@/lib/schemas/capture'
+import type { CaptureMode, CaptureRequest } from '@/lib/schemas/capture'
 import { log } from '@/server/log'
 import { CaptureEngineError, engineJobStatus, signedEngineUrl, startEngineJob, type EngineParams } from './engine'
 import { GONE, MOVED_ON, type CaptureOutcome } from './outcome'
@@ -20,19 +20,20 @@ const UPLOAD_SECONDS = 2 * 3600
 const SILENT_LIMIT_MS = 3 * 3600 * 1000
 const OFF = { ok: false, error: 'Creating models from a video is not set up on this server.' } as const
 
-/** What a dish's AR section needs: whether capture is on, the restaurant's mark, and the open job. */
+/** What a dish's AR section needs: whether capture is on, the restaurant's mark, the last plate and filming mode, and the open job. */
 export async function dishCaptureState(restaurantId: string, dishId: string) {
   if (!serverEnv.captureEngine) return { enabled: false as const }
   const [restaurant, open, last] = await Promise.all([
     prisma.restaurant.findUniqueOrThrow({ where: { id: restaurantId }, select: { name: true, logoUrl: true } }),
     prisma.captureJob.findFirst({ where: { restaurantId, dishId, status: { notIn: ['ACCEPTED', 'DISCARDED'] } }, orderBy: { createdAt: 'desc' }, select: captureSelect }),
-    prisma.captureJob.findFirst({ where: { restaurantId }, orderBy: { createdAt: 'desc' }, select: { plateCm: true } }),
+    prisma.captureJob.findFirst({ where: { restaurantId }, orderBy: { createdAt: 'desc' }, select: { plateCm: true, mode: true } }),
   ])
   return {
     enabled: true as const,
     restaurantName: restaurant.name,
     hasLogo: engineLogoUrl(restaurant.logoUrl) !== null,
     lastPlateCm: last ? last.plateCm.toNumber() : null,
+    lastMode: last ? last.mode : null,
     job: open ? captureView(open) : null,
   }
 }
@@ -54,16 +55,16 @@ export async function createCapture(restaurantId: string, request: CaptureReques
   }
   const job = await prisma.$transaction(async (tx) => {
     await tx.captureJob.updateMany({ where: { ...where, status: { in: ['UPLOADING', 'READY', 'FAILED'] } }, data: { status: 'DISCARDED' } })
-    return tx.captureJob.create({ data: { ...where, plateCm: request.plateCm, base: request.base }, select: { id: true } })
+    return tx.captureJob.create({ data: { ...where, plateCm: request.plateCm, base: request.base, mode: request.mode }, select: { id: true } })
   })
   const names = [`capture${extension(request.video.name)}`, ...request.photos.map((photo, i) => `still_${i + 1}${extension(photo.name)}`)]
   const uploads = names.map((name) => signedEngineUrl('PUT', `/jobs/${job.id}/source`, UPLOAD_SECONDS, { name }))
   return { ok: true, jobId: job.id, uploads }
 }
 
-/** What the engine is asked to draw underneath: the logo (if it can read it) or the name, or nothing. */
-function engineParams(job: { plateCm: { toNumber(): number }; base: string; restaurant: { name: string; logoUrl: string | null } }): EngineParams {
-  const params: EngineParams = { plate_cm: job.plateCm.toNumber() }
+/** How the dish was filmed, and what the engine is asked to draw underneath: the logo (if it can read it) or the name, or nothing. */
+function engineParams(job: { plateCm: { toNumber(): number }; base: string; mode: CaptureMode; restaurant: { name: string; logoUrl: string | null } }): EngineParams {
+  const params: EngineParams = { plate_cm: job.plateCm.toNumber(), mode: job.mode === 'TURNTABLE' ? 'turntable' : 'walkaround' }
   if (job.base === 'PLAIN') return params
   const logo = job.base === 'LOGO' ? engineLogoUrl(job.restaurant.logoUrl) : null
   return { ...params, base_text: job.restaurant.name, ...(logo ? { base_logo: logo } : {}) }
@@ -82,7 +83,7 @@ async function current(restaurantId: string, jobId: string): Promise<CaptureOutc
 export async function startCapture(restaurantId: string, jobId: string): Promise<CaptureOutcome<{ job: CaptureView }>> {
   const job = await prisma.captureJob.findFirst({
     where: { id: jobId, restaurantId },
-    select: { ...captureSelect, restaurant: { select: { name: true, logoUrl: true } } },
+    select: { ...captureSelect, mode: true, restaurant: { select: { name: true, logoUrl: true } } },
   })
   if (!job) return GONE
   if (job.status !== 'UPLOADING') return { ok: true, job: captureView(job) }

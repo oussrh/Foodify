@@ -26,6 +26,15 @@ enum CaptureBase {
   PLAIN
 }
 
+// How the dish was filmed; the engine reconstructs the two differently (turntable: the room is
+// masked out, because it stands still while the dish turns).
+enum CaptureMode {
+  // The phone walked round a still plate.
+  WALKAROUND
+  // The plate turned in front of a still phone.
+  TURNTABLE
+}
+
 model CaptureJob {
   // Also the job's id at the engine.
   id           String        @id @default(uuid())
@@ -39,6 +48,7 @@ model CaptureJob {
   // The plate's diameter, which sets the model's real size; the next capture starts from it.
   plateCm      Decimal       @db.Decimal(4, 1)
   base         CaptureBase
+  mode         CaptureMode   @default(WALKAROUND)
   // What a reviewer should look at, in the engine's words.
   warnings     String[]      @default([])
   error        String?

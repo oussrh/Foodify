@@ -12,7 +12,10 @@ import numpy as np
 
 VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".mkv"}
 PHOTO_EXTS = {".jpg", ".jpeg", ".png"}
-HDR_TRANSFERS = {"arib-std-b67", "smpte2084"}  # HLG (iPhone HDR video) and PQ
+HDR_TRANSFERS = {"arib-std-b67", "smpte2084"}  # HLG (iPhone and Samsung HDR video) and PQ
+# HDR frames read as plain 8-bit come out grey and washed out: map them to ordinary colours first.
+TONEMAP = ("zscale=t=linear:npl=203,format=gbrpf32le,zscale=p=bt709,tonemap=mobius:desat=0,"
+           "zscale=t=bt709:m=bt709:r=tv,format=yuv420p")
 
 
 def _sharpness(path: Path) -> float:
@@ -41,7 +44,7 @@ def _probe(video: Path) -> tuple[dict, float]:
 def _video_warnings(stream: dict, duration: float, video: Path) -> list[str]:
     warnings = []
     if stream.get("color_transfer") in HDR_TRANSFERS:
-        warnings.append(f"{video.name}: HDR video; colours will be washed out. Turn HDR video off.")
+        warnings.append(f"{video.name}: HDR video, converted to ordinary colours; turn HDR video off for truer colours.")
     if max(stream["width"], stream["height"]) < 1920:
         warnings.append(f"{video.name}: {stream['width']}x{stream['height']}; record in 4K.")
     if duration < 45:
@@ -49,11 +52,12 @@ def _video_warnings(stream: dict, duration: float, video: Path) -> list[str]:
     return warnings
 
 
-def _extract_video(video: Path, out_dir: Path, fps: float, long_edge: int) -> list[Path]:
+def _extract_video(video: Path, out_dir: Path, fps: float, long_edge: int, hdr: bool = False) -> list[Path]:
     out_dir.mkdir(parents=True, exist_ok=True)
     scale = f"scale=w={long_edge}:h={long_edge}:force_original_aspect_ratio=decrease:force_divisible_by=2"
+    chain = f"fps={fps},{TONEMAP + ',' if hdr else ''}{scale}"
     done = subprocess.run(
-        ["ffmpeg", "-v", "error", "-i", str(video), "-an", "-vf", f"fps={fps},{scale}", "-q:v", "2",
+        ["ffmpeg", "-v", "error", "-i", str(video), "-an", "-vf", chain, "-q:v", "2",
          str(out_dir / "c_%05d.jpg")],
         capture_output=True, text=True, timeout=30 * 60)
     if done.returncode != 0:
@@ -118,7 +122,8 @@ def prepare_images(source: Path, images_dir: Path, scratch_dir: Path, count: int
         stream, duration = _probe(video)
         warnings += _video_warnings(stream, duration, video)
         rate = min(fps, MAX_CANDIDATES / duration) if duration > 0 else fps
-        frames += _extract_video(video, scratch_dir / f"video_{i}", rate, long_edge)
+        hdr = stream.get("color_transfer") in HDR_TRANSFERS
+        frames += _extract_video(video, scratch_dir / f"video_{i}", rate, long_edge, hdr)
     stills = _resize_photos(photos, scratch_dir / "photos", long_edge, warnings) if photos else []
     if not videos:
         frames, stills = stills, []
