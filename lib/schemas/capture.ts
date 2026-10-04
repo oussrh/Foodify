@@ -14,6 +14,11 @@ export const plateCm = z.number('Enter the plate diameter in cm').min(10, 'A pla
 /** What goes on the model's underside, which the camera never sees. */
 export const captureBase = z.enum(['LOGO', 'NAME', 'PLAIN'])
 
+/** How the dish was filmed: the phone walked round a still plate, or the plate turned in front of a still phone. */
+export const captureMode = z.enum(['WALKAROUND', 'TURNTABLE'])
+/** How the dish was filmed. */
+export type CaptureMode = z.infer<typeof captureMode>
+
 /** The video chosen on the phone or computer, as the browser describes it. */
 export const captureVideo = z.object({
   name: z.string().regex(/\.(mp4|mov|m4v|mkv)$/i, 'Choose a video: MP4 or MOV'),
@@ -38,6 +43,7 @@ export const captureRequest = z
     dishId: uuid,
     plateCm,
     base: captureBase,
+    mode: captureMode,
     video: captureVideo,
     photos: z.array(capturePhoto).max(MAX_PHOTOS, `At most ${MAX_PHOTOS} photos`),
   })

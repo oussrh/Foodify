@@ -1,8 +1,9 @@
 // components/capture/capture-angles.tsx
 // The three circles, drawn: from the side, full width, where the phone is for each (about 15°, 40°
 // and 65° above the table, its lens facing the dish); from above, small, that each is a full circle
-// round the plate. Distances and durations are said in words under the drawings, where they stay
+// round the plate, walked, or a full turn of the plate in front of a still phone. Distances and durations are said in words under the drawings, where they stay
 // legible at a phone's width. The numbers a cook can film from, and the ones the engine's warnings use.
+import type { CaptureMode } from '@/lib/schemas/capture'
 
 const CIRCLES = [
   { n: 1, angle: 15, label: 'Low, about 15°', time: '20–30 s' },
@@ -50,7 +51,8 @@ function SideView() {
   )
 }
 
-function TopView() {
+function TopView({ mode }: { mode: CaptureMode }) {
+  if (mode === 'TURNTABLE') return <TurnView />
   return (
     <svg viewBox="0 0 100 100" className="h-20 w-20 shrink-0" role="img" aria-label="From above: a full circle round the plate">
       <circle cx="50" cy="50" r="40" className="fill-none stroke-primary" strokeWidth="2" strokeDasharray="6 5" />
@@ -61,21 +63,38 @@ function TopView() {
   )
 }
 
-/** The side view, the top view with what it means, then the three circles with their duration. */
-export function CaptureAngles() {
+function TurnView() {
+  return (
+    <svg viewBox="0 0 100 100" className="h-20 w-20 shrink-0" role="img" aria-label="From above: the phone stays put while the plate turns a full turn">
+      <path d="M 50 12 A 38 38 0 1 1 22 24" className="fill-none stroke-primary" strokeWidth="2" strokeDasharray="6 5" />
+      <path d="M 50 6 l 10 6 l -10 6 Z" className="fill-primary" />
+      <circle cx="56" cy="54" r="26" className="fill-muted stroke-muted-foreground" strokeWidth="1.5" />
+      <circle cx="56" cy="54" r="11" className="fill-primary/35 stroke-primary" strokeWidth="1.5" />
+      <rect x="4" y="44" width="10" height="20" rx="2.5" className="fill-card stroke-foreground" strokeWidth="1.5" />
+    </svg>
+  )
+}
+
+const WORDS: Record<CaptureMode, { above: string; each: string }> = {
+  WALKAROUND: { above: 'From above: each height is a full circle round the dish, walking slowly, the whole plate always in view.', each: 'a full circle' },
+  TURNTABLE: { above: 'From above: the phone stays put and the plate turns one full turn at each height, slowly, the whole plate always in view.', each: 'a full turn' },
+}
+
+/** The side view, the top view with what it means, then the three heights with their duration. */
+export function CaptureAngles({ mode }: { mode: CaptureMode }) {
   return (
     <div className="space-y-3 rounded-lg border p-3">
       <SideView />
       <p className="text-sm text-muted-foreground">From the side: the phone 30–50 cm from the plate, its lens on the dish.</p>
       <div className="flex items-center gap-3">
-        <TopView />
-        <p className="text-sm text-muted-foreground">From above: each height is a full circle round the dish, walking slowly, the whole plate always in view.</p>
+        <TopView mode={mode} />
+        <p className="text-sm text-muted-foreground">{WORDS[mode].above}</p>
       </div>
       <ol className="space-y-1 border-t pt-2 text-sm">
         {CIRCLES.map(({ n, label, time }) => (
           <li key={n} className="flex justify-between gap-3">
             <span>
-              <span className="font-medium">{n}.</span> {label}, a full circle
+              <span className="font-medium">{n}.</span> {label}, {WORDS[mode].each}
             </span>
             <span className="whitespace-nowrap text-muted-foreground">{time}</span>
           </li>

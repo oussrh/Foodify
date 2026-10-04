@@ -10,6 +10,7 @@ import os
 import re
 import subprocess
 from pathlib import Path
+from typing import Callable
 
 import numpy as np
 
@@ -72,11 +73,12 @@ def read_cameras(model_dir: Path, txt_dir: Path, log: Path) -> tuple[np.ndarray,
     return np.array(centres), np.array(dirs), names
 
 
-def sparse(images_dir: Path, workspace: Path, mapper: str, log: Path) -> dict:
+def sparse(images_dir: Path, workspace: Path, mapper: str, log: Path, masks_dir: Path | None = None) -> dict:
     """GPU SIFT, exhaustive matching (fine at ~150 frames), then the incremental or global mapper.
 
     Explicit steps rather than `automatic_reconstructor`: its `--quality high` turns on
     affine-shape SIFT, which only exists on the CPU (slow, and it crashes on Windows).
+    With `masks_dir` (masks.write_masks), features are found on the dish only.
     """
     root = workspace / "sparse"
     root.mkdir(parents=True, exist_ok=True)
@@ -84,7 +86,8 @@ def sparse(images_dir: Path, workspace: Path, mapper: str, log: Path) -> dict:
     _colmap(["feature_extractor", "--database_path", database, "--image_path", str(images_dir),
              # One camera per folder: video frames and photos (frames.py) have different lenses.
              "--ImageReader.single_camera_per_folder", "1", "--ImageReader.camera_model", "OPENCV",
-             "--FeatureExtraction.use_gpu", "1", "--SiftExtraction.max_num_features", "8192"], log)
+             "--FeatureExtraction.use_gpu", "1", "--SiftExtraction.max_num_features", "8192",
+             *(["--ImageReader.mask_path", str(masks_dir)] if masks_dir else [])], log)
     _colmap(["exhaustive_matcher", "--database_path", database,
              "--FeatureMatching.use_gpu", "1", "--FeatureMatching.guided_matching", "1"], log)
     _colmap(["global_mapper" if mapper == "global" else "mapper", "--database_path", database,
@@ -104,9 +107,11 @@ def sparse(images_dir: Path, workspace: Path, mapper: str, log: Path) -> dict:
             "centres": centres, "dirs": dirs, "names": names}
 
 
-def dense(images_dir: Path, poses: dict, workspace: Path, max_size: int, views: int, log: Path) -> Path:
+def dense(images_dir: Path, poses: dict, workspace: Path, max_size: int, views: int, log: Path,
+          mask: Callable[[Path, list[str], Path], object] | None = None) -> Path:
     """Depth maps for every photo and an evenly spaced subset of the video frames, fused into one
-    coloured cloud.
+    coloured cloud. With `mask` (masks.write_masks with its model), only the dish is fused: the
+    masks are made on the undistorted images, so they line up with the depth maps.
 
     Depth estimation is the slowest stage by far (two passes per view); neighbouring video frames
     add little to a dish, so it runs on `views` images in all, with 10 source images each.
@@ -123,9 +128,13 @@ def dense(images_dir: Path, poses: dict, workspace: Path, max_size: int, views: 
              "--image_list_path", str(image_list), "--num_patch_match_src_images", "10"], log)
     _colmap(["patch_match_stereo", "--workspace_path", str(out), "--workspace_format", "COLMAP",
              "--PatchMatchStereo.geom_consistency", "1", "--PatchMatchStereo.allow_missing_files", "1"], log)
+    fusion_masks = []
+    if mask:
+        mask(out / "images", list(dict.fromkeys(subset)), out / "masks")
+        fusion_masks = ["--StereoFusion.mask_path", str(out / "masks")]
     fused = out / "fused.ply"
     _colmap(["stereo_fusion", "--workspace_path", str(out), "--workspace_format", "COLMAP",
-             "--input_type", "geometric", "--output_path", str(fused)], log)
+             "--input_type", "geometric", "--output_path", str(fused), *fusion_masks], log)
     if not fused.exists():
         raise RuntimeError("dense reconstruction produced no fused.ply; see colmap.log")
     return fused

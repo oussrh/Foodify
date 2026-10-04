@@ -33,4 +33,5 @@ jobs:
       - run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libegl1 libgomp1 libusb-1.0-0
       - run: pip install -r requirements.txt httpx
       - run: python -m tests.service_test
+      - run: python -m tests.turntable_test
       - run: python -m tests.smoke_test

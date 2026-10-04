@@ -96,13 +96,14 @@ def starting(api: TestClient, tmp: Path, backend: FakeBackend, source: str) -> N
     check("start needs the secret", api.post(start, json={"plate_cm": 27}).status_code, 401)
     for body, label in [({"plate_cm": -27}, "a negative plate"), ({"plate_cm": 27, "base_logo": "/etc/hosts"}, "a logo that is a path"),
                         ({"plate_cm": 27, "base_logo": "https://evil.example/x.png"}, "a logo on another host"),
-                        ({"plate_cm": 27, "base_color": "zzzzzz"}, "a colour that is not hex"), ({}, "no plate")]:
+                        ({"plate_cm": 27, "base_color": "zzzzzz"}, "a colour that is not hex"), ({}, "no plate"),
+                        ({"plate_cm": 27, "mode": "spin"}, "a filming mode it does not know")]:
         check(f"start refuses {label}", api.post(start, headers=BEARER, json=body).status_code, 422)
     check("start refuses a body that is not JSON", api.post(start, headers=BEARER, content=b"[[").status_code, 422)
-    r = api.post(start, headers=BEARER, json={"plate_cm": 24, "base_text": "Chez Foodify", "base_logo": LOGO, "frames": 9999, "debug": True})
+    r = api.post(start, headers=BEARER, json={"plate_cm": 24, "mode": "turntable", "base_text": "Chez Foodify", "base_logo": LOGO, "frames": 9999, "debug": True})
     check("start", (r.status_code, backend.started), (202, [JOB]))
     params = json.loads((tmp / JOB / "params.json").read_text())
-    check("only valid parameters Foodify may set are kept", params, {"plate_cm": 24.0, "base_text": "Chez Foodify", "base_logo": LOGO})
+    check("only valid parameters Foodify may set are kept", params, {"plate_cm": 24.0, "mode": "turntable", "base_text": "Chez Foodify", "base_logo": LOGO})
     check("start twice", api.post(start, headers=BEARER, json={"plate_cm": 27}).status_code, 409)
     check("a photo after the start", api.put(put(source, "still_2.jpg"), content=b"p").status_code, 409)
 

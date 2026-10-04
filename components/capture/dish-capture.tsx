@@ -63,7 +63,7 @@ export function DishCapture({ dishId, onPreview, onAccepted }: Props) {
           />
         )}
       </CardContent>
-      <CaptureSheet open={open} onOpenChange={setOpen} dishId={dishId} restaurantName={state.restaurantName} hasLogo={state.hasLogo} lastPlateCm={state.lastPlateCm} onStarted={setJob} />
+      <CaptureSheet open={open} onOpenChange={setOpen} dishId={dishId} restaurantName={state.restaurantName} hasLogo={state.hasLogo} lastPlateCm={state.lastPlateCm} lastMode={state.lastMode} onStarted={setJob} />
     </Card>
   )
 }

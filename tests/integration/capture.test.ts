@@ -41,7 +41,7 @@ async function kitchen(tx: Tx) {
 
 /** A capture created and started, as the dish form leaves it once the video is sent. */
 async function processing(dishId: string, plateCm = 24) {
-  const created = await createCapture({ dishId, plateCm, base: 'LOGO', video, photos: [] })
+  const created = await createCapture({ dishId, plateCm, base: 'LOGO', mode: 'TURNTABLE', video, photos: [] })
   if (!created.ok) throw new Error(created.error)
   await startCapture(created.jobId)
   return created.jobId
@@ -55,7 +55,7 @@ describe('the guards', () => {
       const other = await restaurant(tx)
       signInAs(await manager(tx, [other.id]))
       await expect(getDishCapture(plate.id)).rejects.toMatchObject(forbidden)
-      await expect(createCapture({ dishId: plate.id, plateCm: 27, base: 'NAME', video, photos: [] })).rejects.toMatchObject(forbidden)
+      await expect(createCapture({ dishId: plate.id, plateCm: 27, base: 'NAME', mode: 'WALKAROUND', video, photos: [] })).rejects.toMatchObject(forbidden)
       for (const action of [startCapture, refreshCapture, acceptCapture, discardCapture]) {
         await expect(action(jobId)).rejects.toMatchObject(forbidden)
       }
@@ -64,20 +64,20 @@ describe('the guards', () => {
 })
 
 describe('a capture from start to the dish', () => {
-  it('opens on a dish with the restaurant name, its logo usable, and the last plate size remembered', () =>
+  it('opens on a dish with the restaurant name, its logo usable, and the last plate size and filming mode remembered', () =>
     withRollback(async (tx) => {
       const { plate } = await kitchen(tx)
-      expect(await getDishCapture(plate.id)).toEqual({ enabled: true, restaurantName: 'Chez Test', hasLogo: true, lastPlateCm: null, job: null })
+      expect(await getDishCapture(plate.id)).toEqual({ enabled: true, restaurantName: 'Chez Test', hasLogo: true, lastPlateCm: null, lastMode: null, job: null })
       await processing(plate.id, 24.5)
-      expect(await getDishCapture(plate.id)).toMatchObject({ lastPlateCm: 24.5, job: { status: 'PROCESSING', plateCm: '24.5' } })
+      expect(await getDishCapture(plate.id)).toMatchObject({ lastPlateCm: 24.5, lastMode: 'TURNTABLE', job: { status: 'PROCESSING', plateCm: '24.5' } })
     }))
 
   it('signs an upload address per file for that job only, and puts earlier unfinished captures aside', () =>
     withRollback(async (tx) => {
       const { plate } = await kitchen(tx)
-      const first = await createCapture({ dishId: plate.id, plateCm: 27, base: 'NAME', video, photos: [] })
+      const first = await createCapture({ dishId: plate.id, plateCm: 27, base: 'NAME', mode: 'WALKAROUND', video, photos: [] })
       const photos = [{ name: 'IMG_7.JPG', size: 10 }, { name: 'top.png', size: 10 }]
-      const second = await createCapture({ dishId: plate.id, plateCm: 27, base: 'NAME', video: { name: 'clip.mp4', size: 10 }, photos })
+      const second = await createCapture({ dishId: plate.id, plateCm: 27, base: 'NAME', mode: 'WALKAROUND', video: { name: 'clip.mp4', size: 10 }, photos })
       if (!first.ok || !second.ok) throw new Error('not created')
       const urls = second.uploads.map((u) => new URL(u))
       expect(urls.map((u) => u.origin + u.pathname)).toEqual(Array(3).fill(`http://engine.test/jobs/${second.jobId}/source`))
@@ -87,25 +87,26 @@ describe('a capture from start to the dish', () => {
       expect((await tx.captureJob.findUniqueOrThrow({ where: { id: second.jobId } })).status).toBe('UPLOADING')
     }))
 
-  it('tells the engine the plate, the name and the logo as a PNG, once, and refuses a new capture meanwhile', () =>
+  it('tells the engine the plate, how it was filmed, the name and the logo as a PNG, once, and refuses a new capture meanwhile', () =>
     withRollback(async (tx) => {
       const { plate } = await kitchen(tx)
       const jobId = await processing(plate.id)
       expect(startEngineJob).toHaveBeenCalledExactlyOnceWith(jobId, {
         plate_cm: 24,
+        mode: 'turntable',
         base_text: 'Chez Test',
         base_logo: 'https://res.cloudinary.com/demo/image/upload/f_png/v1/restaurants/x/branding/logo.svg',
       })
       expect(await startCapture(jobId)).toMatchObject({ ok: true, job: { status: 'PROCESSING' } })
       expect(startEngineJob).toHaveBeenCalledOnce()
-      expect(await createCapture({ dishId: plate.id, plateCm: 27, base: 'PLAIN', video, photos: [] })).toMatchObject({ ok: false })
+      expect(await createCapture({ dishId: plate.id, plateCm: 27, base: 'PLAIN', mode: 'WALKAROUND', video, photos: [] })).toMatchObject({ ok: false })
     }))
 
   it('stays uploading, and says why, when the engine refuses to start', () =>
     withRollback(async (tx) => {
       const { plate } = await kitchen(tx)
       vi.mocked(startEngineJob).mockRejectedValueOnce(new CaptureEngineError('The capture engine did not answer (TimeoutError)'))
-      const created = await createCapture({ dishId: plate.id, plateCm: 27, base: 'PLAIN', video, photos: [] })
+      const created = await createCapture({ dishId: plate.id, plateCm: 27, base: 'PLAIN', mode: 'WALKAROUND', video, photos: [] })
       if (!created.ok) throw new Error(created.error)
       expect(await startCapture(created.jobId)).toEqual({ ok: false, error: 'The capture engine did not answer (TimeoutError). Try starting it again in a moment.' })
       expect((await tx.captureJob.findUniqueOrThrow({ where: { id: created.jobId } })).status).toBe('UPLOADING')
@@ -179,7 +180,7 @@ describe('a capture put aside while another call is in flight', () => {
   it('stays aside when it is put aside while the engine is being told to start', () =>
     withRollback(async (tx) => {
       const { plate } = await kitchen(tx)
-      const created = await createCapture({ dishId: plate.id, plateCm: 27, base: 'PLAIN', video, photos: [] })
+      const created = await createCapture({ dishId: plate.id, plateCm: 27, base: 'PLAIN', mode: 'WALKAROUND', video, photos: [] })
       if (!created.ok) throw new Error(created.error)
       vi.mocked(startEngineJob).mockImplementationOnce(async () => {
         await discardCapture(created.jobId)

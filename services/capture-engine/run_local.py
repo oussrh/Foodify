@@ -22,6 +22,8 @@ def main() -> None:
     parser.add_argument("--base-logo", default="", help="logo for the underside: PNG/JPEG file or URL")
     parser.add_argument("--base-text", default="", help="restaurant name for the underside, if no logo")
     parser.add_argument("--base-color", default="", help="underside colour #rrggbb (default: the plate's)")
+    parser.add_argument("--mode", choices=["walkaround", "turntable"], default="walkaround",
+                        help="turntable: the plate turned and the phone stood still")
     parser.add_argument("--debug", action="store_true")
     parser.add_argument("--colmap", help="COLMAP executable (default: COLMAP_BIN, then `colmap`)")
     parser.add_argument("--out", default="out")
@@ -35,7 +37,7 @@ def main() -> None:
     job_dir = Path(args.out) / f"{src.stem}-{time.strftime('%Y%m%d-%H%M%S')}"
     params = Params(plate_cm=args.plate_cm, frames=args.frames, mapper=args.mapper,
                     triangles=args.triangles, base_logo=args.base_logo, base_text=args.base_text,
-                    base_color=args.base_color, debug=args.debug)
+                    base_color=args.base_color, mode=args.mode, debug=args.debug)
     report = run(src, job_dir, params)
 
     keys = ("status", "error", "warnings", "colmap", "alignment", "asset", "seconds")

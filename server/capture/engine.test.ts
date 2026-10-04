@@ -69,10 +69,10 @@ describe('signedEngineUrl', () => {
 describe('calls to the engine', () => {
   it('starts a job with its parameters as JSON, with the secret as a bearer token', async () => {
     fetchMock.mockResolvedValue(new Response(JSON.stringify({ state: 'queued' }), { status: 202 }))
-    await startEngineJob(JOB, { plate_cm: 27, base_text: 'Chez Foodify' })
+    await startEngineJob(JOB, { plate_cm: 27, mode: 'walkaround', base_text: 'Chez Foodify' })
     const [url, init] = fetchMock.mock.calls[0] ?? []
     expect(url).toBe(`http://localhost:8787/jobs/${JOB}/start`)
-    expect(init).toMatchObject({ method: 'POST', body: '{"plate_cm":27,"base_text":"Chez Foodify"}' })
+    expect(init).toMatchObject({ method: 'POST', body: '{"plate_cm":27,"mode":"walkaround","base_text":"Chez Foodify"}' })
     expect(init?.headers).toEqual({ 'Content-Type': 'application/json', Authorization: `Bearer ${SECRET}` })
   })
 
@@ -97,7 +97,7 @@ describe('calls to the engine', () => {
 
   it('says which call the engine refused, and with what', async () => {
     fetchMock.mockResolvedValue(new Response('nope', { status: 409 }))
-    await expect(startEngineJob(JOB, { plate_cm: 27 })).rejects.toThrow(`The capture engine answered 409 to POST /jobs/${JOB}/start`)
+    await expect(startEngineJob(JOB, { plate_cm: 27, mode: 'walkaround' })).rejects.toThrow(`The capture engine answered 409 to POST /jobs/${JOB}/start`)
   })
 
   it('says the engine did not answer when it is down or too slow', async () => {
