@@ -99,10 +99,48 @@ def _rim_plane(points: np.ndarray, radius: float) -> np.ndarray | None:
     return coef
 
 
-def settle(cloud: o3d.geometry.PointCloud, radius: float) -> tuple[np.ndarray, np.ndarray] | None:
-    """(rotation, translation) that levels a round plate's rim and stands its foot on y = 0, or
-    None when the plate is not round or its rim was not seen. The axis the cameras gave (a turntable's
-    turn, a table's plane) can be a few degrees off the plate's; the rim is the plate's own level."""
+def _edge_circle(points: np.ndarray, radius: float) -> tuple[np.ndarray, float] | None:
+    """(centre (x, z), radius) of the plate's outer edge in a levelled cloud: per sector, the
+    outermost points at the rim's height, fitted with a circle (strays dropped, refitted). The
+    centre the alignment gave is the middle of all the points, which a few left on the turntable
+    pull aside: from there a round plate looks oval and measures the wrong size."""
+    r, theta, y = np.hypot(points[:, 0], points[:, 2]), np.arctan2(points[:, 2], points[:, 0]), points[:, 1]
+    # The rim's height from the lowest surface seen in each direction (food standing near the rim
+    # is above it), each sector's crest in the outer fifth, their median.
+    start = int(0.8 * radius / BIN_M)
+    outer = _envelope(r, theta, y, int(np.ceil(1.1 * radius / BIN_M)))[start:]
+    crests = np.nanmax(np.where(np.isfinite(outer), outer, np.nan), axis=0) if np.isfinite(outer).any() else None
+    if crests is None or np.isfinite(crests).mean() < 0.6:
+        return None
+    rim = float(np.nanmedian(crests))
+    band = (np.abs(y - rim) < 0.004) & (r > 0.7 * radius) & (r < 1.2 * radius)
+    sector = ((theta + np.pi) / (2 * np.pi) * SECTORS).astype(int) % SECTORS
+    edge = []
+    for s in range(SECTORS):
+        pick = band & (sector == s)
+        if pick.sum() >= 10:
+            far = points[pick][np.argsort(r[pick])[-max(3, pick.sum() // 50):]]
+            edge.append(far[:, [0, 2]].mean(axis=0))
+    if len(edge) < 0.6 * SECTORS:
+        return None
+    xz = np.array(edge)
+    keep = np.ones(len(xz), bool)
+    for _ in range(3):  # Kasa circle fit, then without the edge points far off it
+        a = np.column_stack([2 * xz[keep], np.ones(keep.sum())])
+        sol = np.linalg.lstsq(a, (xz[keep] ** 2).sum(axis=1), rcond=None)[0]
+        centre, rad = sol[:2], float(np.sqrt(sol[2] + sol[:2] @ sol[:2]))
+        keep = np.abs(np.linalg.norm(xz - centre, axis=1) - rad) < 0.04 * rad
+        if keep.sum() < 8:
+            return None
+    return centre, rad
+
+
+def settle(cloud: o3d.geometry.PointCloud, radius: float) -> tuple[np.ndarray, np.ndarray, float] | None:
+    """(rotation, centre, factor): local' = factor * (rotation @ local - centre) levels a round
+    plate on its rim, centres it on its own edge, scales that edge to `radius` (the plate's size as
+    given) and stands its foot on y = 0. None when the plate is not round or its rim was not seen.
+    The axis the cameras gave (a turntable's turn, a table's plane) can be a few degrees off the
+    plate's, and the centre and size a few millimetres; the rim is the plate's own."""
     pts = np.asarray(cloud.points)
     coef = _rim_plane(pts, radius)
     if coef is None:
@@ -114,14 +152,36 @@ def settle(cloud: o3d.geometry.PointCloud, radius: float) -> tuple[np.ndarray, n
     from .mesh import _rotation_to_y
 
     rot = _rotation_to_y(normal)
-    fitted = fit(pts @ rot.T, radius)
+    level = pts @ rot.T
+    circle = _edge_circle(level, radius)
+    if circle is None:
+        return None
+    (cx, cz), edge = circle
+    factor = radius / edge
+    if not 0.85 < factor < 1.15:
+        return None
+    fitted = fit((level - [cx, 0.0, cz]) * factor, radius)
     if fitted is None:
         return None
-    return rot, np.array([0.0, THICKNESS_M - float(fitted.h.min()), 0.0])
+    lift = THICKNESS_M - float(fitted.h.min())
+    return rot, np.array([cx, -lift / factor, cz]), factor
+
+
+def _without_table(points: np.ndarray, radius: float) -> np.ndarray:
+    """The points, less those at the height of what lies outside the plate's edge (a table or a
+    turntable seen round it, and through gaps under it): a plain white plate gives stereo almost
+    nothing, and its floor was read off the turntable beneath (the avocado: a 25 mm bowl)."""
+    r = np.hypot(points[:, 0], points[:, 2])
+    outside = (r > 1.03 * radius) & (r < 1.3 * radius)
+    if outside.sum() < 200:
+        return points
+    table = float(np.median(points[outside, 1]))
+    return points[(np.abs(points[:, 1] - table) > 0.0025) | (r < 0.3 * radius)]
 
 
 def fit(points: np.ndarray, radius: float) -> Plate | None:
     """The plate under the dish (aligned frame: +Y up, centred, metres), or None when it is not round."""
+    points = _without_table(points, radius)
     r, theta, y = np.hypot(points[:, 0], points[:, 2]), np.arctan2(points[:, 2], points[:, 0]), points[:, 1]
     sector = ((theta + np.pi) / (2 * np.pi) * SECTORS).astype(int) % SECTORS
     near = r < 1.1 * radius

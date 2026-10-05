@@ -112,8 +112,29 @@ def hulling() -> None:
     check("no views with outlines, no hull", len(hull.fill([], top, flat)[0]) == 0)
 
 
+def recentring() -> None:
+    """The plate 1 cm off the centre, the turntable's surface round it and seen beneath its edge, and
+    scaled 8% small, as a turntable alignment can leave it: levelled, recentred, rescaled, fitted."""
+    rng = np.random.default_rng(11)
+    pts = _plate_points()
+    t = rng.uniform(0, 2 * np.pi, 20_000)
+    r = rng.uniform(0.09, 0.16, 20_000)
+    table = np.column_stack([r * np.cos(t), np.full(20_000, -0.004), r * np.sin(t)])  # under the plate's foot
+    moved = (np.concatenate([pts, table]) + [0.01, 0.0, -0.004]) * 0.92
+    cloud = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(moved))
+    found = plate.settle(cloud, 0.12)
+    check("a plate off the centre and the wrong size is still found", found is not None)
+    rot, centre, factor = found
+    check("its centre is found", abs(centre[0] - 0.0092) < 0.0015 and abs(centre[2] + 0.0037) < 0.0015,
+          f"({centre[0] * 1000:.1f}, {centre[2] * 1000:.1f} mm)")
+    check("its size is restored", abs(factor - 1 / 0.92) < 0.02, f"(x{factor:.3f})")
+    fitted = plate.fit(factor * (moved @ rot.T - centre), 0.12)
+    check("the turntable is not read as its floor", fitted is not None and fitted.h[0] > 0.003, f"({fitted.h[0] * 1000:.1f} mm)")
+
+
 def main() -> None:
     fitting()
+    recentring()
     painting()
     hulling()
     print("plate: all checks passed")

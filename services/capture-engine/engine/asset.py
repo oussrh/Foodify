@@ -35,16 +35,19 @@ def settle(cloud: o3d.geometry.PointCloud, alignment: dict) -> tuple[o3d.geometr
     found = plate.settle(cloud, alignment["dish_radius_m"])
     if found is None:
         return cloud, alignment
-    rot, shift = found
-    out = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(np.asarray(cloud.points) @ rot.T + shift))
+    rot, centre, factor = found
+    out = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(factor * (np.asarray(cloud.points) @ rot.T - centre)))
     out.colors = cloud.colors
     if cloud.has_normals():
         out.normals = o3d.utility.Vector3dVector(np.asarray(cloud.normals) @ rot.T)
+    # local = s (R x + o)  ->  local' = factor (rot local - centre) = (factor s)(rot R x + rot o - centre / s)
     t = alignment["transform"]
-    rotation, offset = rot @ np.array(t["rotation"]), rot @ np.array(t["offset"]) + shift / t["scale"]
+    scale = factor * t["scale"]
+    rotation, offset = rot @ np.array(t["rotation"]), rot @ np.array(t["offset"]) - centre / t["scale"]
     tilt = float(np.degrees(np.arccos(np.clip(rot[1, 1], -1, 1))))
-    return out, {**alignment, "transform": {"rotation": rotation.tolist(), "offset": offset.tolist(), "scale": t["scale"]},
-                 "levelled_deg": round(tilt, 2), "raised_mm": round(float(shift[1]) * 1000, 1)}
+    return out, {**alignment, "transform": {"rotation": rotation.tolist(), "offset": offset.tolist(), "scale": scale},
+                 "scale": alignment.get("scale", t["scale"]) * factor, "levelled_deg": round(tilt, 2),
+                 "recentred_mm": round(float(np.hypot(centre[0], centre[2])) * 1000, 1), "rescaled": round(factor, 4)}
 
 
 def _shape(cloud: o3d.geometry.PointCloud, alignment: dict, p: Params, views: list[View]):
