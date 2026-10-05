@@ -75,6 +75,28 @@ def fill(views: list[View], food_points: np.ndarray, plate: Plate) -> tuple[np.n
 
     r = np.hypot(pts[:, 0], pts[:, 2])
     near, _ = cKDTree(food_points).query(pts, distance_upper_bound=0.005)
-    under = footprint(food_points, radius)(pts[:, [0, 2]])
+    under = footprint(food_points, radius)(pts[:, [0, 2]]) & _below_food(pts, food_points)
     keep = (pts[:, 1] > plate.height(r) + 0.002) & ~np.isfinite(near) & under & (r < 0.98 * radius)
-    return pts[keep], normals[keep]
+    return _denser(pts[keep], normals[keep])
+
+
+def _below_food(pts: np.ndarray, food_points: np.ndarray, cell: float = 0.004) -> np.ndarray:
+    """Points with measured food at least 5 mm above them (the highest food point in their 4 mm
+    column): the hull fills what is under the food, never above it. The top of food is what the
+    cameras see best; a hull, carved from outlines, stands a little proud of the real surface."""
+    key = lambda p: np.floor(p[:, [0, 2]] / cell).astype(np.int64) @ np.array([1, 1 << 20])
+    order = np.argsort(key(food_points))
+    keys, start = np.unique(key(food_points)[order], return_index=True)
+    top = np.maximum.reduceat(food_points[order, 1], start)
+    at = np.searchsorted(keys, key(pts))
+    found = (at < len(keys)) & (keys[np.minimum(at, len(keys) - 1)] == key(pts))
+    return found & (top[np.minimum(at, len(keys) - 1)] > pts[:, 1] + 0.005)
+
+
+def _denser(pts: np.ndarray, normals: np.ndarray, copies: int = 8) -> tuple[np.ndarray, np.ndarray]:
+    """Each hull point as `copies` points spread over its 2 mm cell: measured points are several
+    to the millimetre, and the surface-building step weighs sparse ones down to nothing."""
+    if not len(pts):
+        return pts, normals
+    jitter = np.random.default_rng(0).uniform(-STEP / 2, STEP / 2, (copies, *pts.shape))
+    return (pts[None] + jitter).reshape(-1, 3), np.tile(normals, (copies, 1))

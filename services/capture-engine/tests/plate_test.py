@@ -105,6 +105,8 @@ def hulling() -> None:
     side = np.abs(np.hypot(pts[:, 0], pts[:, 2]) - 0.03) < 0.006
     check("the hull gives the sides stereo missed", len(pts) > 200 and side.mean() > 0.6 and pts[:, 1].min() < 0.015,
           f"({len(pts)} points, {side.mean():.2f} on the side, lowest {pts[:, 1].min() * 1000:.0f} mm)")
+    check("it never stands above the measured food", pts[:, 1].max() < top[:, 1].min(),
+          f"(highest {pts[:, 1].max() * 1000:.0f} mm, food from {top[:, 1].min() * 1000:.0f} mm)")
     outward = (normals[:, [0, 2]] * pts[:, [0, 2]]).sum(axis=1) > 0
     check("its normals point outward", outward[side].mean() > 0.9, f"({outward[side].mean():.2f})")
     check("no views with outlines, no hull", len(hull.fill([], top, flat)[0]) == 0)
