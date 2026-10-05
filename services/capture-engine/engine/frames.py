@@ -103,18 +103,37 @@ def _sources(source: Path) -> tuple[list[Path], list[Path]]:
 VIDEO_DIR, STILLS_DIR = "video", "stills"
 
 
-def _place(paths: list[Path], folder: Path, stem: str) -> None:
+FULL_EDGE = 3840   # frames kept for painting the texture: a 4K video's own size
+STILL_EDGE = 4096  # photos kept for painting: 16 MP, enough for a texture, light enough for memory
+
+
+def _place(paths: list[Path], folder: Path, stem: str, long_edge: int, full: Path | None) -> None:
+    """Each image under its name, at `long_edge` for COLMAP; the full-size one into `full` (the same
+    sub-folder and name), when kept, for the texture."""
     folder.mkdir(parents=True, exist_ok=True)
+    if full is not None:
+        full.mkdir(parents=True, exist_ok=True)
     for i, path in enumerate(paths):
-        path.replace(folder / f"{stem}_{i:04d}.jpg")
+        name = f"{stem}_{i:04d}.jpg"
+        img = cv2.imread(str(path), cv2.IMREAD_COLOR)
+        factor = long_edge / max(img.shape[:2])
+        if factor < 1:
+            img = cv2.resize(img, None, fx=factor, fy=factor, interpolation=cv2.INTER_AREA)
+        cv2.imwrite(str(folder / name), img, [cv2.IMWRITE_JPEG_QUALITY, 95])
+        if full is not None:
+            path.replace(full / name)
 
 
 def prepare_images(source: Path, images_dir: Path, scratch_dir: Path, count: int,
-                   long_edge: int = 1920, fps: float = 5.0) -> dict:
+                   long_edge: int = 1920, fps: float = 5.0, full_dir: Path | None = None) -> dict:
     """`count` images in all, in two folders so COLMAP gives each its own camera (a phone's video and
     its photos do not share a lens model): every photo in `stills/`, always kept, and the sharpest
     video frames in `video/` for the rest. Photos without a video are the capture itself, and go
-    through the same selection as frames."""
+    through the same selection as frames.
+
+    COLMAP works on them at `long_edge`; with `full_dir`, the same images are also kept there at
+    full size (FULL_EDGE for frames, STILL_EDGE for photos), which the texture is painted from."""
+    edge, still_edge = (FULL_EDGE, STILL_EDGE) if full_dir is not None else (long_edge, long_edge)
     videos, photos = _sources(source)
     warnings: list[str] = []
     frames: list[Path] = []
@@ -123,15 +142,16 @@ def prepare_images(source: Path, images_dir: Path, scratch_dir: Path, count: int
         warnings += _video_warnings(stream, duration, video)
         rate = min(fps, MAX_CANDIDATES / duration) if duration > 0 else fps
         hdr = stream.get("color_transfer") in HDR_TRANSFERS
-        frames += _extract_video(video, scratch_dir / f"video_{i}", rate, long_edge, hdr)
-    stills = _resize_photos(photos, scratch_dir / "photos", long_edge, warnings) if photos else []
+        frames += _extract_video(video, scratch_dir / f"video_{i}", rate, edge, hdr)
+    stills = _resize_photos(photos, scratch_dir / "photos", still_edge, warnings) if photos else []
     if not videos:
         frames, stills = stills, []
     if len(frames) + len(stills) < 30:
         raise ValueError(f"only {len(frames) + len(stills)} usable images; a dish needs 60 or more")
 
     kept = _keep_sharpest(frames, max(count - len(stills), 1))
-    _place(kept, images_dir / VIDEO_DIR, "frame")
-    _place(stills, images_dir / STILLS_DIR, "still")
+    full = (lambda sub: full_dir / sub) if full_dir is not None else (lambda sub: None)
+    _place(kept, images_dir / VIDEO_DIR, "frame", long_edge, full(VIDEO_DIR))
+    _place(stills, images_dir / STILLS_DIR, "still", long_edge, full(STILLS_DIR))
     return {"videos": len(videos), "photos": len(photos), "candidates": len(frames),
             "kept": len(kept) + len(stills), "stills": len(stills), "warnings": warnings}

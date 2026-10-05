@@ -43,14 +43,14 @@ def _carve(views: list[View], plate: Plate, xs, ys, zs) -> np.ndarray:
         fx, fy, cx, cy = view.k
         cam = pts @ view.rotation.T + view.translation
         z = np.maximum(cam[:, 2], 1e-9)
-        u, v = (fx * cam[:, 0] / z + cx).astype(int), (fy * cam[:, 1] / z + cy).astype(int)
-        h, w = view.mask.shape
+        u, v = fx * cam[:, 0] / z + cx, fy * cam[:, 1] / z + cy
+        h, w = view.image.shape[:2]
         seen = (cam[:, 2] > 0) & (u >= 0) & (v >= 0) & (u < w) & (v < h)
         out = np.zeros(len(pts), bool)
-        out[seen] = ~view.mask[v[seen], u[seen]]
+        out[seen] = ~view.at(view.mask, u[seen], v[seen])
         if view.plate is not None:
             on_plate = np.zeros(len(pts), bool)
-            on_plate[seen] = view.plate[v[seen], u[seen]]
+            on_plate[seen] = view.at(view.plate, u[seen], v[seen])
             out |= on_plate & ~_behind_rim(view, pts, plate)
         against += out
     return (against < 2).reshape(gx.shape)

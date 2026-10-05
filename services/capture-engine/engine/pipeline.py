@@ -51,7 +51,8 @@ def _segmenter():
 
 def _prepare(source: Path, work: Path, p: Params, report: dict):
     """The frames, and in turntable mode the dish cut out of each; returns the model that cuts."""
-    report["frames"] = frames.prepare_images(source, work / "images", work / "candidates", p.frames)
+    report["frames"] = frames.prepare_images(source, work / "images", work / "candidates", p.frames,
+                                             full_dir=work / "full")
     if p.mode != "turntable":
         return None
     predict = masks.load()
@@ -84,8 +85,8 @@ def _views(work: Path, poses: dict, alignment: dict, predict, log: Path) -> list
     with the dish outlined in each (in either mode: the labels and the hull need it)."""
     predict = predict or _segmenter()
     names = (work / "colmap" / "dense_images.txt").read_text().splitlines()
-    loaded = views.load(work / "images", poses["model"], [n for n in names if n], work / "colmap",
-                        alignment["transform"], log)
+    full = work / "full" if (work / "full").exists() else work / "images"  # an older job kept none
+    loaded = views.load(full, poses["model"], [n for n in names if n], work / "colmap", alignment["transform"], log)
     if predict:
         views.add_masks(loaded, predict)
     return loaded

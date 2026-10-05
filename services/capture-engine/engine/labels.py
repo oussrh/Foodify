@@ -74,6 +74,9 @@ def prompts(view: View, plate: Plate, food: np.ndarray, rng: np.random.Generator
 def label(views: list[View], plate: Plate, food: np.ndarray, segment: Segment) -> None:
     """Set each view's `plate`: True where its pixels are the plate."""
     rng = np.random.default_rng(0)
+    from .views import _small
+
     for view in views:
         yes, no, box = prompts(view, plate, food, rng)
-        view.plate = segment(view.image, yes, no, box)
+        found = segment(view.image, yes, no, box)
+        view.plate = _small(found, view.mask.shape) if view.mask is not None else _small(found)

@@ -71,20 +71,25 @@ def _shape(cloud: o3d.geometry.PointCloud, alignment: dict, p: Params, views: li
     return solid + low, solid + food, info
 
 
-def _dish_part(v, n, f, cloud, views: list[View], out: Path, p: Params, plate_faces: np.ndarray):
+PLATE_TEXTURE = 1024  # the plate's own texture: a plate is mostly plain, the food gets the large one
+
+
+def _textured(name: str, file: str, size: int, v, n, f, on_plate: bool, whole, cloud, views: list[View],
+              out: Path, p: Params) -> tuple[export.Part, float, float]:
+    """One textured part (`f` of the mesh `v`, `n`), painted against the `whole` model (positions,
+    faces), so the parts still hide one another: (part, texture coverage, share painted from views)."""
     v, n, f = _compact(v, n, f)
-    vmap, faces, uvs = texture.unwrap(v, f, p.texture_size)  # xatlas keeps the faces' order
+    vmap, faces, uvs = texture.unwrap(v, f, size)
     positions, normals = v[vmap], _unit(n[vmap])
     if views:
-        image, coverage, painted = paint.paint(positions, normals, faces, uvs, p.texture_size, views, cloud,
-                                               plate_faces if plate_faces.any() else None)
+        flags = np.full(len(faces), on_plate) if on_plate or whole is not None else None
+        image, coverage, painted = paint.paint(positions, normals, faces, uvs, size, views, cloud, flags, whole)
     else:
-        image, coverage = texture.bake(positions, faces, uvs, np.asarray(cloud.points),
-                                       np.asarray(cloud.colors), p.texture_size)
+        image, coverage = texture.bake(positions, faces, uvs, np.asarray(cloud.points), np.asarray(cloud.colors), size)
         painted = 0.0
-    path = out / "texture.jpg"
+    path = out / file
     cv2.imwrite(str(path), cv2.cvtColor(image, cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 90])
-    return export.Part("Dish", positions, normals, uvs, faces, path, p.roughness), coverage, painted
+    return export.Part(name, positions, normals, uvs, faces, path, p.roughness), coverage, painted
 
 
 def _base_part(v, n, f, cloud, radius_m: float, out: Path, p: Params) -> tuple[export.Part, dict]:
@@ -101,7 +106,9 @@ def _base_part(v, n, f, cloud, radius_m: float, out: Path, p: Params) -> tuple[e
 
 def build_asset(cloud: o3d.geometry.PointCloud, alignment: dict, out: Path, p: Params,
                 views: list[View] | None = None) -> dict:
-    """Metric, cropped point cloud -> dish.glb + dish.usdz (+ texture.jpg, base.jpg)."""
+    """Metric, cropped point cloud -> dish.glb + dish.usdz (+ texture.jpg, and plate.jpg and
+    base.jpg when the plate is fitted and its foot found). With a fitted plate the food and the plate
+    are separate parts, each with its own texture: the food gets the whole of the large one."""
     low, high, plate_info = _shape(cloud, alignment, p, views or [])
     low.compute_vertex_normals()
     low.compute_triangle_normals()
@@ -109,8 +116,14 @@ def build_asset(cloud: o3d.geometry.PointCloud, alignment: dict, out: Path, p: P
     under = base.faces(v, f, np.asarray(low.triangle_normals))
 
     on_plate = np.arange(len(f)) < plate_info.pop("faces")
-    dish, coverage, painted = _dish_part(v, n, f[~under], cloud, views or [], out, p, on_plate[~under])
+    whole = (v, f) if on_plate.any() else None
+    dish, coverage, painted = _textured("Dish", "texture.jpg", p.texture_size, v, n, f[~under & ~on_plate],
+                                        False, whole, cloud, views or [], out, p)
     parts, base_info = [dish], None
+    if (on_plate & ~under).any():
+        plate_part, _, _ = _textured("Plate", "plate.jpg", PLATE_TEXTURE, v, n, f[on_plate & ~under],
+                                     True, whole, cloud, views or [], out, p)
+        parts.append(plate_part)
     if under.any():
         base_part, base_info = _base_part(v, n, f[under], cloud, alignment["dish_radius_m"], out, p)
         parts.append(base_part)
