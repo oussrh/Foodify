@@ -102,7 +102,7 @@ in `out/<job>/output/`.
 python -m tests.service_test        # the API's contract and the job rules, no GPU, seconds
 python -m tests.turntable_test      # the movement check, the turning axis, turntable alignment, masks
 python -m tests.plate_test          # the plate fitted (and a square one refused), the texture painted from views
-python -m tests.checks_test         # the upload check's judgement, the plate labels' prompts
+python -m tests.checks_test         # the upload check's judgement, the plate labels' prompts, the matched pairs
 python -m tests.smoke_test          # everything after COLMAP on a synthetic dish, no GPU
 python tests/render_capture.py out/synthetic    # a synthetic dish video with known size, for a full run
 ```

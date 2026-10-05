@@ -17,9 +17,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY requirements.txt .
-# PyTorch for SAM 2 (labels.py), the CPU build: the GPU is COLMAP's, and the CUDA build is gigabytes.
-RUN pip3 install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.14.1 torchvision==0.29.1
-RUN pip3 install --no-cache-dir -r requirements.txt
+# The AI models on the GPU, between COLMAP's steps: PyTorch's CUDA build for SAM 2 (labels.py,
+# 0.15 s a view against 2.7 s on the CPU) and onnxruntime's for IS-Net (masks.py, 70 ms against
+# 0.74 s), the same masks either way. onnxruntime loads the CUDA 13 libraries PyTorch brings.
+# requirements.txt keeps the CPU builds, for the tests in CI.
+RUN pip3 install --no-cache-dir --index-url https://download.pytorch.org/whl/cu130 torch==2.14.1 torchvision==0.29.1
+RUN pip3 install --no-cache-dir -r requirements.txt     && pip3 uninstall -y onnxruntime     && pip3 install --no-cache-dir onnxruntime-gpu==1.30.0
 
 # The model that cuts the dish out of a turntable capture (IS-Net, Apache-2.0), pinned by hash.
 ENV CAPTURE_SEGMENT_MODEL=/models/isnet-general-use.onnx

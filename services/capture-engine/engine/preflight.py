@@ -1,13 +1,16 @@
 """The upload check: a minute's look at the video before the long work, so a capture that cannot
 make a good model is sent back with what to film differently, not after half an hour.
 
-Twenty-four frames, spread over the video, at 640 pixels: sharp or not, light or not, the dish
+Twenty-four frames, spread over the video, at 640 pixels (taken from the video's keyframes, which
+decode on their own: one pass of seconds, where seeking to 24 points decoded a second of 4K video
+for each): sharp or not, light or not, the dish
 found in each (masks.py) and whole in the picture, and what moved between them. Walking round a
 still plate moves the room in the picture; turning the plate in front of a still phone moves only
 the dish. A video filmed one way and sent as the other is caught here.
 """
 
 import subprocess
+import tempfile
 from pathlib import Path
 
 import cv2
@@ -18,6 +21,31 @@ from .orbit import CaptureError
 
 SAMPLES = 24
 WIDTH = 640
+BLUR = 40.0            # Laplacian variance under which a 640-pixel frame is blurred
+KEYFRAME_SHARPNESS = 0.71  # a phone's keyframes measure this much of the frames around them (encoder
+                           # smoothing, not the filming: 53 against 75 on the first real video)
+
+
+def _keyframes(video: Path, hdr: bool) -> list[np.ndarray]:
+    """Every keyframe of the video, at WIDTH, in order (a phone puts one about every second)."""
+    chain = f"scale={WIDTH}:-2{',' + frames.TONEMAP if hdr else ''}"
+    with tempfile.TemporaryDirectory() as tmp:
+        done = subprocess.run(["ffmpeg", "-v", "error", "-skip_frame", "nokey", "-i", str(video), "-an", "-vf", chain,
+                               "-fps_mode", "vfr", "-q:v", "3", str(Path(tmp) / "k_%04d.jpg")],
+                              capture_output=True, timeout=300)
+        if done.returncode != 0:
+            return []
+        return [img for img in (cv2.imread(str(p)) for p in sorted(Path(tmp).glob("k_*.jpg"))) if img is not None]
+
+
+def _samples(video: Path, duration: float, hdr: bool) -> tuple[list[np.ndarray], float]:
+    """(SAMPLES frames spread over the video, the blur limit for them): from its keyframes when it
+    has enough, else one by one."""
+    keys = _keyframes(video, hdr)
+    if len(keys) >= SAMPLES:
+        return [keys[i] for i in np.linspace(0, len(keys) - 1, SAMPLES).round().astype(int)], BLUR * KEYFRAME_SHARPNESS
+    times = np.linspace(0.05, 0.95, SAMPLES) * max(duration, 1)
+    return [f for f in (_frame(video, t, hdr) for t in times) if f is not None], BLUR
 
 
 def _frame(video: Path, at: float, hdr: bool) -> np.ndarray | None:
@@ -53,10 +81,10 @@ def _measures(images: list[np.ndarray], predict) -> dict:
     return out
 
 
-def _judge(m: dict, mode: str) -> tuple[list[str], list[str]]:
+def _judge(m: dict, mode: str, blur: float = BLUR) -> tuple[list[str], list[str]]:
     """(problems that stop the job, warnings for the review), in the manager's words."""
     problems, warnings = [], []
-    blurry = float(np.mean(np.array(m["sharpness"]) < 40))
+    blurry = float(np.mean(np.array(m["sharpness"]) < blur))
     if blurry > 0.5:
         problems.append(f"{blurry:.0%} of the video is blurred: move more slowly and lock the focus on the dish")
     elif blurry > 0.2:
@@ -106,12 +134,11 @@ def check(source: Path, mode: str, predict) -> dict:
     video = videos[0]
     stream, duration = frames._probe(video)
     hdr = stream.get("color_transfer") in frames.HDR_TRANSFERS
-    times = np.linspace(0.05, 0.95, SAMPLES) * max(duration, 1)
-    images = [f for f in (_frame(video, t, hdr) for t in times) if f is not None]
+    images, blur = _samples(video, duration, hdr)
     if len(images) < SAMPLES // 2:
         raise CaptureError("The video could not be read: send it again, or film it again")
     measures = _measures(images, predict)
-    problems, warnings = _judge(measures, mode)
+    problems, warnings = _judge(measures, mode, blur)
     if duration < 20:
         problems.insert(0, f"the video is {duration:.0f} s long: three slow circles take about a minute")
     if problems:

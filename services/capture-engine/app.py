@@ -27,9 +27,10 @@ image = (
     # ffmpeg for video, a font for the name on the base; the rest are what Open3D's Linux wheel
     # loads on import.
     .apt_install("ffmpeg", "fonts-dejavu-core", "curl", "ca-certificates", "libgl1", "libegl1", "libgomp1", "libusb-1.0-0", "libx11-6")
-    # PyTorch for SAM 2 (labels.py), the CPU build, as in the Dockerfile.
-    .pip_install("torch==2.14.1", "torchvision==0.29.1", index_url="https://download.pytorch.org/whl/cpu")
+    # The AI models on the GPU, as in the Dockerfile: PyTorch's CUDA build for SAM 2, onnxruntime's for IS-Net.
+    .pip_install("torch==2.14.1", "torchvision==0.29.1", index_url="https://download.pytorch.org/whl/cu130")
     .pip_install_from_requirements(str(HERE / "requirements.txt"))
+    .run_commands("pip uninstall -y onnxruntime", "pip install onnxruntime-gpu==1.30.0")
     # The model that cuts the dish out of a turntable capture (IS-Net, Apache-2.0), as in the Dockerfile.
     .run_commands(
         "mkdir -p /models && curl -fsSL -o /models/isnet-general-use.onnx "

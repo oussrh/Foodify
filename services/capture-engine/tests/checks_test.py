@@ -6,7 +6,7 @@ camera, no video, no model. From the engine's folder, as a module:
 
 import numpy as np
 
-from engine import labels, plate, preflight
+from engine import labels, plate, preflight, sfm
 from engine.views import View
 
 
@@ -72,9 +72,22 @@ def prompting() -> None:
     check("each view gets its plate label from the segmenter", view.plate is not None and view.plate.all() and seen == [(len(yes), 8)])
 
 
+def pairing() -> None:
+    """144 frames and 6 photos: about a third of every pair, and the ones that matter all in."""
+    frames = [f"video/frame_{i:04d}.jpg" for i in range(144)]
+    stills = [f"stills/still_{i:04d}.jpg" for i in range(6)]
+    found = set(sfm.pairs(sorted(frames + stills)))
+    check("about a third of all pairs are matched", 0.2 < len(found) / (150 * 149 / 2) < 0.4, f"({len(found)})")
+    check("each frame meets its next ten", all((frames[i], frames[j]) in found for i in range(144) for j in range(i + 1, min(i + 11, 144))))
+    check("frames far apart in the video meet, every third with every third", (frames[0], frames[141]) in found)
+    check("every photo meets every frame", all((s, f) in found for s in stills for f in frames))
+    check("no pair twice, none with itself", all(a != b and (b, a) not in found for a, b in found))
+
+
 def main() -> None:
     judging()
     prompting()
+    pairing()
     print("checks: all passed")
 
 
