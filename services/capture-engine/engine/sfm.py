@@ -83,11 +83,20 @@ def sparse(images_dir: Path, workspace: Path, mapper: str, log: Path, masks_dir:
     root = workspace / "sparse"
     root.mkdir(parents=True, exist_ok=True)
     database = str(workspace / "database.db")
-    _colmap(["feature_extractor", "--database_path", database, "--image_path", str(images_dir),
-             # One camera per folder: video frames and photos (frames.py) have different lenses.
-             "--ImageReader.single_camera_per_folder", "1", "--ImageReader.camera_model", "OPENCV",
-             "--FeatureExtraction.use_gpu", "1", "--SiftExtraction.max_num_features", "8192",
-             *(["--ImageReader.mask_path", str(masks_dir)] if masks_dir else [])], log)
+    # One camera per folder: video frames and photos (frames.py) have different lenses. The video's
+    # 150 frames pin down a full lens model (OPENCV); a handful of photos cannot, and given one they
+    # came out so warped that painting dropped them, so photos get a single distortion term.
+    for folder, model in (("video", "OPENCV"), ("stills", "SIMPLE_RADIAL")):
+        listing = workspace / f"{folder}_images.txt"
+        names = sorted(p.relative_to(images_dir).as_posix() for p in (images_dir / folder).glob("*.jpg"))
+        if not names:
+            continue
+        listing.write_text("".join(f"{name}\n" for name in names))
+        _colmap(["feature_extractor", "--database_path", database, "--image_path", str(images_dir),
+                 "--image_list_path", str(listing),
+                 "--ImageReader.single_camera_per_folder", "1", "--ImageReader.camera_model", model,
+                 "--FeatureExtraction.use_gpu", "1", "--SiftExtraction.max_num_features", "8192",
+                 *(["--ImageReader.mask_path", str(masks_dir)] if masks_dir else [])], log)
     _colmap(["exhaustive_matcher", "--database_path", database,
              "--FeatureMatching.use_gpu", "1", "--FeatureMatching.guided_matching", "1"], log)
     _colmap(["global_mapper" if mapper == "global" else "mapper", "--database_path", database,
