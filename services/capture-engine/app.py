@@ -27,14 +27,21 @@ image = (
     # ffmpeg for video, a font for the name on the base; the rest are what Open3D's Linux wheel
     # loads on import.
     .apt_install("ffmpeg", "fonts-dejavu-core", "curl", "ca-certificates", "libgl1", "libegl1", "libgomp1", "libusb-1.0-0", "libx11-6")
+    # PyTorch for SAM 2 (labels.py), the CPU build, as in the Dockerfile.
+    .pip_install("torch==2.14.1", "torchvision==0.29.1", index_url="https://download.pytorch.org/whl/cpu")
     .pip_install_from_requirements(str(HERE / "requirements.txt"))
     # The model that cuts the dish out of a turntable capture (IS-Net, Apache-2.0), as in the Dockerfile.
     .run_commands(
         "mkdir -p /models && curl -fsSL -o /models/isnet-general-use.onnx "
         "https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx",
         "echo '60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a  /models/isnet-general-use.onnx' | sha256sum -c -",
+        "python -c \"from huggingface_hub import snapshot_download; snapshot_download('facebook/sam2.1-hiera-tiny', "
+        "revision='de431c4043854a71d8101e17995dfe596bf101a5', local_dir='/models/sam2.1-hiera-tiny', "
+        "allow_patterns=['config.json', 'model.safetensors', 'preprocessor_config.json', 'processor_config.json', "
+        "'video_preprocessor_config.json'])\"",
     )
-    .env({"QT_QPA_PLATFORM": "offscreen", "CAPTURE_SEGMENT_MODEL": "/models/isnet-general-use.onnx"})
+    .env({"QT_QPA_PLATFORM": "offscreen", "CAPTURE_SEGMENT_MODEL": "/models/isnet-general-use.onnx",
+          "CAPTURE_SAM_MODEL": "/models/sam2.1-hiera-tiny"})
     # Fail while building the image, not after a 1 GB upload.
     .run_commands(
         "colmap help | head -n 3",

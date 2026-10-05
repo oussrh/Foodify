@@ -1,8 +1,7 @@
 """UV unwrap (xatlas) and a colour bake from the dense points.
 
-Test quality: each texel takes the inverse-distance-weighted colour of the nearest dense points.
-The production bake (HD stills first, highlight rejection across views) replaces this later; the
-output format stays the same.
+`bake` colours each texel from the nearest dense points: the fallback, and what a dish gets with
+no views (the smoke test). paint.py colours it from the photos and frames themselves.
 
 UV convention here is OpenGL/USD: (0, 0) is the bottom-left of the image. The GLB writer flips v.
 """
@@ -42,11 +41,12 @@ def _barycentric(p: np.ndarray, a: np.ndarray, b: np.ndarray, c: np.ndarray) -> 
     return np.column_stack([1 - w1 - w2, w1, w2])
 
 
-def _texels(vertices: np.ndarray, faces: np.ndarray, uvs: np.ndarray, size: int):
-    """Every texel covered by a triangle, with the 3D point it maps to."""
+def texels(vertices: np.ndarray, faces: np.ndarray, uvs: np.ndarray, size: int):
+    """Every texel covered by a triangle: (pixel x/y, the 3D point it maps to, its triangle, the
+    point's barycentric weights in it)."""
     uv_px = np.column_stack([uvs[:, 0] * size, (1 - uvs[:, 1]) * size])
-    pixels, points = [], []
-    for tri in faces:
+    pixels, points, tris, weights = [], [], [], []
+    for index, tri in enumerate(faces):
         a, b, c = uv_px[tri]
         lo = np.clip(np.floor(np.minimum(np.minimum(a, b), c)).astype(int), 0, size - 1)
         hi = np.clip(np.ceil(np.maximum(np.maximum(a, b), c)).astype(int), 0, size - 1)
@@ -59,10 +59,12 @@ def _texels(vertices: np.ndarray, faces: np.ndarray, uvs: np.ndarray, size: int)
         if inside.any():
             pixels.append(np.column_stack([xs[inside], ys[inside]]))
             points.append(w[inside] @ vertices[tri])
-    return np.concatenate(pixels), np.concatenate(points)
+            tris.append(np.full(inside.sum(), index))
+            weights.append(w[inside])
+    return np.concatenate(pixels), np.concatenate(points), np.concatenate(tris), np.concatenate(weights)
 
 
-def _pad(img: np.ndarray, mask: np.ndarray, iterations: int) -> np.ndarray:
+def pad(img: np.ndarray, mask: np.ndarray, iterations: int) -> np.ndarray:
     """Grow colour outward from covered texels so mipmaps do not bleed black into the seams."""
     img = img.astype(np.float32)
     m = mask.astype(np.float32)
@@ -75,18 +77,23 @@ def _pad(img: np.ndarray, mask: np.ndarray, iterations: int) -> np.ndarray:
     return img
 
 
-def bake(vertices: np.ndarray, faces: np.ndarray, uvs: np.ndarray, src_points: np.ndarray,
-         src_colors: np.ndarray, size: int, k: int = 8) -> tuple[np.ndarray, float]:
-    """Returns (RGB uint8 image, fraction of the texture covered by triangles)."""
-    pixels, points = _texels(vertices, faces, uvs, size)
+def from_points(points: np.ndarray, src_points: np.ndarray, src_colors: np.ndarray, k: int = 8) -> np.ndarray:
+    """Each point's colour from the nearest dense points, inverse-distance weighted."""
     dist, idx = cKDTree(src_points).query(points, k=k, workers=-1)
     weight = 1.0 / np.maximum(dist, 1e-6)
     weight /= weight.sum(axis=1, keepdims=True)
-    colors = (src_colors[idx] * weight[..., None]).sum(axis=1)
+    return (src_colors[idx] * weight[..., None]).sum(axis=1)
+
+
+def bake(vertices: np.ndarray, faces: np.ndarray, uvs: np.ndarray, src_points: np.ndarray,
+         src_colors: np.ndarray, size: int, k: int = 8) -> tuple[np.ndarray, float]:
+    """Returns (RGB uint8 image, fraction of the texture covered by triangles)."""
+    pixels, points, _, _ = texels(vertices, faces, uvs, size)
+    colors = from_points(points, src_points, src_colors, k)
 
     img = np.zeros((size, size, 3), np.float32)
     mask = np.zeros((size, size), bool)
     img[pixels[:, 1], pixels[:, 0]] = colors
     mask[pixels[:, 1], pixels[:, 0]] = True
-    img = _pad(img, mask, iterations=8)
+    img = pad(img, mask, iterations=8)
     return (np.clip(img, 0, 1) * 255).round().astype(np.uint8), float(mask.mean())

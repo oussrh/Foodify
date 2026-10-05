@@ -117,9 +117,9 @@ describe('a capture from start to the dish', () => {
       const { plate } = await kitchen(tx)
       const jobId = await processing(plate.id)
       vi.mocked(engineJobStatus).mockResolvedValueOnce({ state: 'running', stage: 'dense', report: null })
-      expect(await refreshCapture(jobId)).toMatchObject({ ok: true, offline: false, job: { progress: { step: 3 } } })
+      expect(await refreshCapture(jobId)).toMatchObject({ ok: true, offline: false, job: { progress: { step: 4 } } })
       vi.mocked(engineJobStatus).mockRejectedValueOnce(new CaptureEngineError('down'))
-      expect(await refreshCapture(jobId)).toMatchObject({ ok: true, offline: true, job: { status: 'PROCESSING', progress: { step: 3 } } })
+      expect(await refreshCapture(jobId)).toMatchObject({ ok: true, offline: true, job: { status: 'PROCESSING', progress: { step: 4 } } })
       const asset = { size_cm: { width: 24.1, height: 5.6, depth: 24 }, triangles: 50_000, glb_mb: 3.2, usdz_mb: 3 }
       const report = engineReport.parse({ status: 'ok', warnings: ['short capture'], asset, seconds: { total: 700 } })
       vi.mocked(engineJobStatus).mockResolvedValueOnce({ state: 'done', stage: null, report })

@@ -1,0 +1,137 @@
+"""From the dish's metric, cropped point cloud to the files: dish.glb, dish.usdz, texture.jpg,
+base.jpg.
+
+The shape: on a round plate, the fitted plate (plate.py) with the food meshed on it; otherwise
+the whole dish meshed from the points (mesh.surface). The colour: painted from the photos and
+frames when there are views (paint.py), from the points when there are none (the smoke test).
+The flat foot facing down is its own part, branded (base.py).
+"""
+
+from pathlib import Path
+
+import cv2
+import numpy as np
+import open3d as o3d
+
+from . import base, export, hull, labels, mesh, paint, plate, texture
+from .params import Params
+from .views import View
+
+
+def _unit(normals: np.ndarray) -> np.ndarray:
+    length = np.linalg.norm(normals, axis=1, keepdims=True)
+    return np.where(length > 1e-8, normals / np.maximum(length, 1e-8), [0.0, 1.0, 0.0])
+
+
+def _compact(vertices: np.ndarray, normals: np.ndarray, faces: np.ndarray):
+    """The vertices a subset of faces uses, with the faces re-indexed onto them."""
+    used, inverse = np.unique(faces, return_inverse=True)
+    return vertices[used], normals[used], inverse.reshape(-1, 3)
+
+
+def settle(cloud: o3d.geometry.PointCloud, alignment: dict) -> tuple[o3d.geometry.PointCloud, dict]:
+    """A round plate levelled on its own rim and stood on y = 0 (plate.settle), the alignment's
+    transform updated to match so the views still line up; unchanged when there is no round plate."""
+    found = plate.settle(cloud, alignment["dish_radius_m"])
+    if found is None:
+        return cloud, alignment
+    rot, shift = found
+    out = o3d.geometry.PointCloud(o3d.utility.Vector3dVector(np.asarray(cloud.points) @ rot.T + shift))
+    out.colors = cloud.colors
+    if cloud.has_normals():
+        out.normals = o3d.utility.Vector3dVector(np.asarray(cloud.normals) @ rot.T)
+    t = alignment["transform"]
+    rotation, offset = rot @ np.array(t["rotation"]), rot @ np.array(t["offset"]) + shift / t["scale"]
+    tilt = float(np.degrees(np.arccos(np.clip(rot[1, 1], -1, 1))))
+    return out, {**alignment, "transform": {"rotation": rotation.tolist(), "offset": offset.tolist(), "scale": t["scale"]},
+                 "levelled_deg": round(tilt, 2), "raised_mm": round(float(shift[1]) * 1000, 1)}
+
+
+def _shape(cloud: o3d.geometry.PointCloud, alignment: dict, p: Params, views: list[View]):
+    """(low-poly mesh, full-resolution mesh for debugging, what the plate came to)."""
+    radius = alignment["dish_radius_m"]
+    fitted = plate.fit(np.asarray(cloud.points), radius)
+    if fitted is None:
+        high = mesh.surface(cloud, radius, alignment["crop_radius_m"])
+        return mesh.simplify(high, p.triangles), high, {"fitted": False, "faces": 0}
+    solid = plate.solid(fitted)
+    pts = np.asarray(cloud.points)
+    food_pts = pts[plate.food(pts, fitted)]
+    segment = labels.load() if views else None
+    if segment is not None:
+        labels.label(views, fitted, food_pts, segment)
+    filled = hull.fill(views, food_pts, fitted)
+    food = plate.food_surface(cloud, fitted, filled)
+    info = {"fitted": True, "floor_mm": round(float(fitted.h[0]) * 1000, 1),
+            "rim_mm": round(float(fitted.h.max()) * 1000, 1), "food": food is not None, "hull_points": len(filled[0]),
+            "labelled": segment is not None, "faces": len(solid.triangles)}  # the solid's faces come first in the merged mesh
+    if food is None:
+        return solid, solid, info
+    low = mesh.simplify(food, max(p.triangles - len(solid.triangles), 1000))
+    return solid + low, solid + food, info
+
+
+def _dish_part(v, n, f, cloud, views: list[View], out: Path, p: Params, plate_faces: np.ndarray):
+    v, n, f = _compact(v, n, f)
+    vmap, faces, uvs = texture.unwrap(v, f, p.texture_size)  # xatlas keeps the faces' order
+    positions, normals = v[vmap], _unit(n[vmap])
+    if views:
+        image, coverage, painted = paint.paint(positions, normals, faces, uvs, p.texture_size, views, cloud,
+                                               plate_faces if plate_faces.any() else None)
+    else:
+        image, coverage = texture.bake(positions, faces, uvs, np.asarray(cloud.points),
+                                       np.asarray(cloud.colors), p.texture_size)
+        painted = 0.0
+    path = out / "texture.jpg"
+    cv2.imwrite(str(path), cv2.cvtColor(image, cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 90])
+    return export.Part("Dish", positions, normals, uvs, faces, path, p.roughness), coverage, painted
+
+
+def _base_part(v, n, f, cloud, radius_m: float, out: Path, p: Params) -> tuple[export.Part, dict]:
+    v, _, f = _compact(v, n, f)
+    color = base.parse_color(p.base_color) or base.plate_color(
+        np.asarray(cloud.points), np.asarray(cloud.colors), radius_m)
+    img, shows, notes = base.image(1024, color, p.base_logo, p.base_text)
+    path = out / "base.jpg"
+    img.save(path, quality=92)
+    part = export.Part("Base", v, np.tile([0.0, -1.0, 0.0], (len(v), 1)), base.uvs(v, radius_m), f, path, 0.8)
+    return part, {"faces": int(len(f)), "shows": shows, "color": "#%02x%02x%02x" % tuple(
+        int(round(c * 255)) for c in color), "notes": notes}
+
+
+def build_asset(cloud: o3d.geometry.PointCloud, alignment: dict, out: Path, p: Params,
+                views: list[View] | None = None) -> dict:
+    """Metric, cropped point cloud -> dish.glb + dish.usdz (+ texture.jpg, base.jpg)."""
+    low, high, plate_info = _shape(cloud, alignment, p, views or [])
+    low.compute_vertex_normals()
+    low.compute_triangle_normals()
+    v, f, n = np.asarray(low.vertices), np.asarray(low.triangles), np.asarray(low.vertex_normals)
+    under = base.faces(v, f, np.asarray(low.triangle_normals))
+
+    on_plate = np.arange(len(f)) < plate_info.pop("faces")
+    dish, coverage, painted = _dish_part(v, n, f[~under], cloud, views or [], out, p, on_plate[~under])
+    parts, base_info = [dish], None
+    if under.any():
+        base_part, base_info = _base_part(v, n, f[under], cloud, alignment["dish_radius_m"], out, p)
+        parts.append(base_part)
+    export.write_glb(out / "dish.glb", parts)
+    export.write_usdz(out / "dish.usdz", parts)
+    if p.debug:
+        o3d.io.write_triangle_mesh(str(out / "mesh_highres.ply"), high)
+
+    positions = np.concatenate([part.positions for part in parts])
+    size = positions.max(axis=0) - positions.min(axis=0)
+    return {
+        "triangles": int(sum(len(part.faces) for part in parts)),
+        "vertices": int(sum(len(part.positions) for part in parts)),
+        "plate": plate_info,
+        "base": base_info,
+        "watertight": bool(low.is_watertight()),
+        "size_cm": {"width": round(size[0] * 100, 1), "height": round(size[1] * 100, 1),
+                    "depth": round(size[2] * 100, 1)},
+        "texture_coverage": round(coverage, 3),
+        "texture_painted": round(painted, 3),
+        "glb_mb": round((out / "dish.glb").stat().st_size / 1e6, 2),
+        "usdz_mb": round((out / "dish.usdz").stat().st_size / 1e6, 2),
+        "usdz_issues": export.check_usdz(out / "dish.usdz"),
+    }

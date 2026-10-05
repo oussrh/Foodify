@@ -9,9 +9,12 @@ Foodify's side is `server/capture/` (the client and the job rows) and `component
 screens). The two meet at the HTTP API below; change both sides in the same pull request.
 
 ```
+video -> the upload check (24 frames: blur, light, the dish in view, what moved) -> stop, or go on
 video + photos -> sharpest frames, photos kept -> COLMAP poses + dense stereo (GPU)
   -> table plane, orbit centre, plate edge = scale; tablecloth and clutter cut away
-  -> Poisson surface with a closed base -> 50k triangles -> UV atlas -> texture
+  -> a round plate fitted as a solid, the food meshed on it (else one Poisson surface)
+  -> the plate outlined in every view (SAM 2), the food carved from the outlines where unmeasured
+  -> 50k triangles -> UV atlas -> texture painted from the photos and frames, plate from plate pixels
   -> underside branded with the logo or name -> GLB + USDZ + report.json
 ```
 
@@ -98,6 +101,8 @@ in `out/<job>/output/`.
 ```powershell
 python -m tests.service_test        # the API's contract and the job rules, no GPU, seconds
 python -m tests.turntable_test      # the movement check, the turning axis, turntable alignment, masks
+python -m tests.plate_test          # the plate fitted (and a square one refused), the texture painted from views
+python -m tests.checks_test         # the upload check's judgement, the plate labels' prompts
 python -m tests.smoke_test          # everything after COLMAP on a synthetic dish, no GPU
 python tests/render_capture.py out/synthetic    # a synthetic dish video with known size, for a full run
 ```
@@ -115,7 +120,14 @@ python tests/render_capture.py out/synthetic    # a synthetic dish video with kn
 | `engine/masks.py` | turntable: the dish cut out of each image, as COLMAP's masks |
 | `engine/orbit.py` | the movement check; turntable: the turning axis |
 | `engine/mesh.py` | up, centre, scale, crop (walk-around from the table, turntable from the axis), Poisson surface with a closed base, decimation |
-| `engine/texture.py` | xatlas UV atlas (padded), colour bake |
+| `engine/preflight.py` | the upload check: 24 frames judged before the long work |
+| `engine/labels.py` | which pixels are plate in each view: SAM 2 prompted from the fitted plate and the food |
+| `engine/hull.py` | the food carved from the outlines where stereo measured nothing |
+| `engine/plate.py` | a round plate as a known shape: its profile fitted, a closed solid, the food meshed on it |
+| `engine/views.py` | the images undistorted at full size, as cameras in the dish's frame |
+| `engine/paint.py` | the texture painted from the views (ray-tested visibility, best three, highlights dropped) |
+| `engine/asset.py` | shape, parts and files: the GLB, USDZ, texture and base |
+| `engine/texture.py` | xatlas UV atlas (padded), the colour from the points (the fallback) |
 | `engine/base.py` | the underside: base faces, planar mapping, logo or name on the plate colour |
 | `engine/export.py` | GLB writer, USDZ via OpenUSD, USD validation |
 | `engine/pipeline.py` | the stages in order, warnings, `report.json` |
@@ -125,4 +137,5 @@ python tests/render_capture.py out/synthetic    # a synthetic dish video with kn
 COLMAP (BSD), Open3D (MIT), xatlas (MIT), OpenUSD (Apache-2.0 modified), OpenCV (Apache-2.0),
 SciPy/NumPy (BSD), FastAPI/uvicorn (MIT/BSD), ffmpeg (LGPL, run as a separate program),
 onnxruntime (MIT), the IS-Net "isnet-general-use" weights (Apache-2.0, from DIS; the file is
-rembg's release asset, pinned by SHA-256).
+rembg's release asset, pinned by SHA-256), PyTorch (BSD) and transformers (Apache-2.0) with SAM 2.1
+tiny ("facebook/sam2.1-hiera-tiny", Apache-2.0, pinned by revision).

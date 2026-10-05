@@ -103,8 +103,27 @@ def sparse(images_dir: Path, workspace: Path, mapper: str, log: Path, masks_dir:
         c, d, n = read_cameras(model, workspace / "txt" / model.name, log)
         if len(c) > len(centres):
             best, centres, dirs, names = model, c, d, n
+    total = sum(1 for _ in images_dir.rglob("*.jpg"))
+    if len(names) < total:
+        best, centres, dirs, names = _register_rest(database, best, workspace, log, (best, centres, dirs, names))
     return {"models": len(models), "model": best, "registered": len(centres),
             "centres": centres, "dirs": dirs, "names": names}
+
+
+def _register_rest(database: str, model: Path, workspace: Path, log: Path, current: tuple) -> tuple:
+    """The images the mapper left in other models (it is not deterministic: a run can put the
+    photos in a model of their own), registered into the kept one from their matches and refined
+    once. The kept model as it was when that places no more images."""
+    out = workspace / "registered"
+    out.mkdir(exist_ok=True)
+    try:
+        _colmap(["image_registrator", "--database_path", database, "--input_path", str(model),
+                 "--output_path", str(out)], log)
+        _colmap(["bundle_adjuster", "--input_path", str(out), "--output_path", str(out)], log)
+    except RuntimeError:
+        return current
+    c, d, n = read_cameras(out, workspace / "txt" / "registered", log)
+    return (out, c, d, n) if len(n) > len(current[3]) else current
 
 
 def dense(images_dir: Path, poses: dict, workspace: Path, max_size: int, views: int, log: Path,

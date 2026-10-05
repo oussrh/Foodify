@@ -6,6 +6,7 @@ import type { EngineReport, EngineStatus } from '@/lib/schemas/capture'
 
 /** The engine's stages, in order, as engine/pipeline.py names them. */
 export const CAPTURE_STAGES = [
+  { key: 'check', label: 'Checking the video' },
   { key: 'frames', label: 'Choosing the sharpest frames' },
   { key: 'sparse', label: 'Working out where each frame was filmed from' },
   { key: 'dense', label: 'Measuring the dish in depth' },

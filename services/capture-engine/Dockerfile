@@ -17,6 +17,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY requirements.txt .
+# PyTorch for SAM 2 (labels.py), the CPU build: the GPU is COLMAP's, and the CUDA build is gigabytes.
+RUN pip3 install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch==2.14.1 torchvision==0.29.1
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # The model that cuts the dish out of a turntable capture (IS-Net, Apache-2.0), pinned by hash.
@@ -24,10 +26,17 @@ ENV CAPTURE_SEGMENT_MODEL=/models/isnet-general-use.onnx
 ADD --checksum=sha256:60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a \
     https://github.com/danielgatis/rembg/releases/download/v0.0.0/isnet-general-use.onnx /models/isnet-general-use.onnx
 
+# SAM 2.1 tiny (Meta, Apache-2.0): which pixels are the plate (labels.py). Pinned to a revision.
+ENV CAPTURE_SAM_MODEL=/models/sam2.1-hiera-tiny
+RUN python3 -c "from huggingface_hub import snapshot_download; snapshot_download( \
+        'facebook/sam2.1-hiera-tiny', revision='de431c4043854a71d8101e17995dfe596bf101a5', \
+        local_dir='/models/sam2.1-hiera-tiny', allow_patterns=['config.json', 'model.safetensors', \
+        'preprocessor_config.json', 'processor_config.json', 'video_preprocessor_config.json'])"
+
 COPY engine ./engine
 COPY serve.py .
 # Fail while building, not on the first dish.
-RUN python3 -c "import open3d, xatlas, cv2, scipy, PIL, fastapi, uvicorn; from pxr import Usd, UsdValidation; from engine import masks; masks.load()" \
+RUN python3 -c "import open3d, xatlas, cv2, scipy, PIL, fastapi, uvicorn; from pxr import Usd, UsdValidation; from engine import labels, masks; masks.load(); assert labels.load()" \
     && colmap help | head -n 1 && ffmpeg -version | head -n 1
 
 EXPOSE 8787

@@ -3,105 +3,21 @@
 import json
 import time
 import traceback
-from dataclasses import asdict, dataclass
+from dataclasses import asdict
 from pathlib import Path
 
-import cv2
-import numpy as np
 import open3d as o3d
 
-from . import base, export, frames, masks, mesh, orbit, sfm, texture
+from . import frames, masks, mesh, orbit, preflight, sfm, views
+from .asset import build_asset, settle
+from .params import Params
 
-
-@dataclass
-class Params:
-    plate_cm: float = 27.0         # diameter of the plate; sets the real-world size
-    mode: str = "walkaround"       # walkaround (the phone circles a still plate) | turntable (the plate turns)
-    frames: int = 150              # frames kept for reconstruction
-    mapper: str = "incremental"    # incremental | global (faster, try it in the bake-off)
-    dense_views: int = 75          # frames dense stereo runs on (the slowest stage), evenly spaced
-    dense_size: int = 1200         # long edge of the images dense stereo works on
-    triangles: int = 50_000        # Scene Viewer's ideal is 30-50k
-    texture_size: int = 2048       # Scene Viewer's maximum
-    crop_margin: float = 1.06      # crop radius, as a multiple of the detected dish radius
-    roughness: float = 0.6
-    base_logo: str = ""            # underside: logo file or URL (PNG/JPEG), centred
-    base_text: str = ""            # underside: restaurant name, used when there is no logo
-    base_color: str = ""           # underside colour as #rrggbb; default: the plate's rim colour
-    debug: bool = False           # also write the cropped dense cloud and the full-resolution mesh
-
-
-def _unit(normals: np.ndarray) -> np.ndarray:
-    length = np.linalg.norm(normals, axis=1, keepdims=True)
-    return np.where(length > 1e-8, normals / np.maximum(length, 1e-8), [0.0, 1.0, 0.0])
-
-
-def _compact(vertices: np.ndarray, normals: np.ndarray, faces: np.ndarray):
-    """The vertices a subset of faces uses, with the faces re-indexed onto them."""
-    used, inverse = np.unique(faces, return_inverse=True)
-    return vertices[used], normals[used], inverse.reshape(-1, 3)
-
-
-def _dish_part(v, n, f, cloud, out: Path, p: Params) -> tuple[export.Part, float]:
-    v, n, f = _compact(v, n, f)
-    vmap, faces, uvs = texture.unwrap(v, f, p.texture_size)
-    positions = v[vmap]
-    image, coverage = texture.bake(positions, faces, uvs, np.asarray(cloud.points),
-                                   np.asarray(cloud.colors), p.texture_size)
-    path = out / "texture.jpg"
-    cv2.imwrite(str(path), cv2.cvtColor(image, cv2.COLOR_RGB2BGR), [cv2.IMWRITE_JPEG_QUALITY, 90])
-    return export.Part("Dish", positions, _unit(n[vmap]), uvs, faces, path, p.roughness), coverage
-
-
-def _base_part(v, n, f, cloud, radius_m: float, out: Path, p: Params) -> tuple[export.Part, dict]:
-    v, _, f = _compact(v, n, f)
-    color = base.parse_color(p.base_color) or base.plate_color(
-        np.asarray(cloud.points), np.asarray(cloud.colors), radius_m)
-    img, shows, notes = base.image(1024, color, p.base_logo, p.base_text)
-    path = out / "base.jpg"
-    img.save(path, quality=92)
-    part = export.Part("Base", v, np.tile([0.0, -1.0, 0.0], (len(v), 1)), base.uvs(v, radius_m), f, path, 0.8)
-    return part, {"faces": int(len(f)), "shows": shows, "color": "#%02x%02x%02x" % tuple(
-        int(round(c * 255)) for c in color), "notes": notes}
-
-
-def build_asset(cloud: o3d.geometry.PointCloud, alignment: dict, out: Path, p: Params) -> dict:
-    """Metric, cropped point cloud -> dish.glb + dish.usdz (+ texture.jpg, base.jpg)."""
-    high = mesh.surface(cloud, alignment["dish_radius_m"], alignment["crop_radius_m"])
-    low = mesh.simplify(high, p.triangles)
-    low.compute_triangle_normals()
-    v, f, n = np.asarray(low.vertices), np.asarray(low.triangles), np.asarray(low.vertex_normals)
-    under = base.faces(v, f, np.asarray(low.triangle_normals))
-
-    dish, coverage = _dish_part(v, n, f[~under], cloud, out, p)
-    parts, base_info = [dish], None
-    if under.any():
-        base_part, base_info = _base_part(v, n, f[under], cloud, alignment["dish_radius_m"], out, p)
-        parts.append(base_part)
-    export.write_glb(out / "dish.glb", parts)
-    export.write_usdz(out / "dish.usdz", parts)
-    if p.debug:
-        o3d.io.write_triangle_mesh(str(out / "mesh_highres.ply"), high)
-
-    positions = np.concatenate([part.positions for part in parts])
-    size = positions.max(axis=0) - positions.min(axis=0)
-    return {
-        "triangles": int(sum(len(part.faces) for part in parts)),
-        "vertices": int(sum(len(part.positions) for part in parts)),
-        "base": base_info,
-        "watertight": bool(low.is_watertight()),
-        "size_cm": {"width": round(size[0] * 100, 1), "height": round(size[1] * 100, 1),
-                    "depth": round(size[2] * 100, 1)},
-        "texture_coverage": round(coverage, 3),
-        "glb_mb": round((out / "dish.glb").stat().st_size / 1e6, 2),
-        "usdz_mb": round((out / "dish.usdz").stat().st_size / 1e6, 2),
-        "usdz_issues": export.check_usdz(out / "dish.usdz"),
-    }
+__all__ = ["Params", "STAGES", "build_asset", "run"]
 
 
 def _warnings(report: dict, p: Params) -> list[str]:
     """What a reviewer should look at before accepting the dish."""
-    found = list(report.get("frames", {}).get("warnings", []))
+    found = list(report.get("check", {}).get("warnings", [])) + list(report.get("frames", {}).get("warnings", []))
     ratio = report.get("colmap", {}).get("registered_ratio")
     if ratio is not None and ratio < 0.8:
         found.append(f"only {ratio:.0%} of the frames were placed; expect holes (blur, a plain table, or too fast)")
@@ -122,6 +38,15 @@ def _warnings(report: dict, p: Params) -> list[str]:
         else:
             found += asset["base"]["notes"]
     return found
+
+
+def _segmenter():
+    """The dish segmentation model, or None where it is not installed (a bare command-line run):
+    the upload check then judges sharpness and light only."""
+    try:
+        return masks.load()
+    except RuntimeError:
+        return None
 
 
 def _prepare(source: Path, work: Path, p: Params, report: dict):
@@ -154,22 +79,36 @@ def _align(fused: Path, poses: dict, p: Params):
     return mesh.align_and_scale(dense, poses["centres"], poses["dirs"], p.plate_cm / 100, p.crop_margin)
 
 
+def _views(work: Path, poses: dict, alignment: dict, predict, log: Path) -> list:
+    """The images dense stereo used, as cameras in the dish's frame, to paint the texture from,
+    with the dish outlined in each (in either mode: the labels and the hull need it)."""
+    predict = predict or _segmenter()
+    names = (work / "colmap" / "dense_images.txt").read_text().splitlines()
+    loaded = views.load(work / "images", poses["model"], [n for n in names if n], work / "colmap",
+                        alignment["transform"], log)
+    if predict:
+        views.add_masks(loaded, predict)
+    return loaded
+
+
 def _reconstruct(source: Path, work: Path, out: Path, p: Params, report: dict, timed) -> None:
     log = out / "colmap.log"
     report["colmap_version"] = sfm.colmap_version()
+    report["check"] = timed("check", lambda: preflight.check(source, p.mode, _segmenter()))
     predict = timed("frames", lambda: _prepare(source, work, p, report))
     poses = timed("sparse", lambda: _poses(work, p, report, log, predict is not None))
     # Fusion keeps the dish's own edge: a grown one bakes the turntable onto the plate's rim.
     cut = (lambda images, names, target: masks.write_masks(images, names, target, predict, grow=0)) if predict else None
     fused = timed("dense", lambda: sfm.dense(work / "images", poses, work / "colmap", p.dense_size,
                                              p.dense_views, log, cut))
-    cloud, report["alignment"] = timed("align", lambda: _align(fused, poses, p))
+    cloud, report["alignment"] = timed("align", lambda: settle(*_align(fused, poses, p)))
     if p.debug:
         o3d.io.write_point_cloud(str(out / "dense_cropped.ply"), cloud)
-    report["asset"] = timed("mesh_texture_export", lambda: build_asset(cloud, report["alignment"], out, p))
+    report["asset"] = timed("mesh_texture_export", lambda: build_asset(
+        cloud, report["alignment"], out, p, _views(work, poses, report["alignment"], predict, log)))
 
 
-STAGES = ["frames", "sparse", "dense", "align", "mesh_texture_export"]
+STAGES = ["check", "frames", "sparse", "dense", "align", "mesh_texture_export"]
 
 
 def run(source: Path, job_dir: Path, p: Params, on_stage=None) -> dict:
