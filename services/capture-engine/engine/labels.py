@@ -9,7 +9,7 @@ an overhang, a dim tray). Everything the dish's outline (masks.py) holds that is
 paint.py paints each from its own pixels, hull.py carves the food from the food's.
 
 `CAPTURE_SAM_MODEL` is the model's folder (the Docker image downloads it, pinned by revision).
-About a second per view on the CPU.
+On the GPU when PyTorch has CUDA, the CPU otherwise (about 1.4 s a view there).
 """
 
 import os
@@ -36,16 +36,17 @@ def load() -> Segment | None:
     from transformers import Sam2Model, Sam2Processor
 
     torch.set_num_threads(os.cpu_count() or 4)
-    processor, model = Sam2Processor.from_pretrained(folder), Sam2Model.from_pretrained(folder).eval()
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    processor, model = Sam2Processor.from_pretrained(folder), Sam2Model.from_pretrained(folder).eval().to(device)
 
     def segment(rgb: np.ndarray, yes: np.ndarray, no: np.ndarray, box: list) -> np.ndarray:
         points = np.concatenate([yes, no]).tolist()
         labels = [1] * len(yes) + [0] * len(no)
         inputs = processor(images=Image.fromarray(rgb), input_points=[[points]], input_labels=[[labels]],
-                           input_boxes=[[box]], return_tensors="pt")
+                           input_boxes=[[box]], return_tensors="pt").to(device)
         with torch.no_grad():
             out = model(**inputs, multimask_output=False)
-        return processor.post_process_masks(out.pred_masks.cpu(), inputs["original_sizes"])[0][0, 0].numpy() > 0
+        return processor.post_process_masks(out.pred_masks.cpu(), inputs["original_sizes"].cpu())[0][0, 0].numpy() > 0
 
     return segment
 

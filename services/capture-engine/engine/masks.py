@@ -5,8 +5,9 @@ and the dish turns, so without masks the room wins: the cameras come out not mov
 is a smear. With the room masked out only the dish is matched, and it looks to COLMAP exactly
 like a phone that walked round a still plate.
 
-The model is IS-Net (DIS, "isnet-general-use", Apache-2.0), run with onnxruntime on the CPU:
-about 0.75 s an image. `CAPTURE_SEGMENT_MODEL` is its path (the Docker image downloads it).
+The model is IS-Net (DIS, "isnet-general-use", Apache-2.0), run with onnxruntime on the GPU when
+the CUDA build is installed (about 70 ms an image on a laptop RTX 4070, against 0.75 s on its CPU,
+the masks the same), on the CPU otherwise. `CAPTURE_SEGMENT_MODEL` is its path (the Docker image downloads it).
 """
 
 import os
@@ -23,9 +24,16 @@ Predict = Callable[[np.ndarray], np.ndarray]  # RGB uint8 image -> foreground pr
 
 
 def _onnx(model: Path) -> Predict:
-    import onnxruntime as ort  # only turntable jobs pay for loading it
+    import onnxruntime as ort
 
-    session = ort.InferenceSession(str(model), providers=["CPUExecutionProvider"])
+    providers = ["CPUExecutionProvider"]
+    if "CUDAExecutionProvider" in ort.get_available_providers():
+        if hasattr(ort, "preload_dlls"):
+            ort.preload_dlls()  # the CUDA libraries the pip packages bring
+        # Capped, and freed as it goes: COLMAP's depth step needs the GPU's memory after it.
+        cuda = {"gpu_mem_limit": 1536 * 1024 ** 2, "arena_extend_strategy": "kSameAsRequested"}
+        providers = [("CUDAExecutionProvider", cuda), "CPUExecutionProvider"]
+    session = ort.InferenceSession(str(model), providers=providers)
     name = session.get_inputs()[0].name
 
     def predict(rgb: np.ndarray) -> np.ndarray:

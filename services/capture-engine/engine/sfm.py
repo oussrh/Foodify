@@ -73,8 +73,32 @@ def read_cameras(model_dir: Path, txt_dir: Path, log: Path) -> tuple[np.ndarray,
     return np.array(centres), np.array(dirs), names
 
 
+NEIGHBOURS = 10  # each video frame is matched with the next ten
+LOOP_EVERY = 3   # and every third frame with every other third frame, across the circles
+
+
+def _names(images_dir: Path) -> list[str]:
+    return sorted(p.relative_to(images_dir).as_posix() for p in images_dir.rglob("*.jpg"))
+
+
+def pairs(names: list[str]) -> list[tuple[str, str]]:
+    """The image pairs worth matching, a third of every pair for a 150-frame capture: each frame with
+    its next NEIGHBOURS (a video moves little between them), every LOOP_EVERY-th frame with every
+    other (a frame meets the same side of the dish filmed on another circle), and every photo with
+    every image (a photo can be from anywhere)."""
+    stills = [n for n in names if n.startswith("stills/")]
+    frames = [n for n in names if not n.startswith("stills/")]
+    found = set()
+    for i, a in enumerate(frames):
+        found.update((a, b) for b in frames[i + 1:i + 1 + NEIGHBOURS])
+    loop = frames[::LOOP_EVERY]
+    found.update((a, b) for i, a in enumerate(loop) for b in loop[i + 1:])
+    found.update((s, n) for i, s in enumerate(stills) for n in frames + stills[i + 1:])
+    return sorted(found)
+
+
 def sparse(images_dir: Path, workspace: Path, mapper: str, log: Path, masks_dir: Path | None = None) -> dict:
-    """GPU SIFT, exhaustive matching (fine at ~150 frames), then the incremental or global mapper.
+    """GPU SIFT, matching the pairs worth it (`pairs`), then the incremental or global mapper.
 
     Explicit steps rather than `automatic_reconstructor`: its `--quality high` turns on
     affine-shape SIFT, which only exists on the CPU (slow, and it crashes on Windows).
@@ -97,8 +121,10 @@ def sparse(images_dir: Path, workspace: Path, mapper: str, log: Path, masks_dir:
                  "--ImageReader.single_camera_per_folder", "1", "--ImageReader.camera_model", model,
                  "--FeatureExtraction.use_gpu", "1", "--SiftExtraction.max_num_features", "8192",
                  *(["--ImageReader.mask_path", str(masks_dir)] if masks_dir else [])], log)
-    _colmap(["exhaustive_matcher", "--database_path", database,
-             "--FeatureMatching.use_gpu", "1", "--FeatureMatching.guided_matching", "1"], log)
+    listing = workspace / "pairs.txt"
+    listing.write_text("".join(f"{a} {b}\n" for a, b in pairs(_names(images_dir))))
+    _colmap(["matches_importer", "--database_path", database, "--match_list_path", str(listing),
+             "--match_type", "pairs", "--FeatureMatching.use_gpu", "1", "--FeatureMatching.guided_matching", "1"], log)
     _colmap(["global_mapper" if mapper == "global" else "mapper", "--database_path", database,
              "--image_path", str(images_dir), "--output_path", str(root)], log)
 
@@ -114,9 +140,22 @@ def sparse(images_dir: Path, workspace: Path, mapper: str, log: Path, masks_dir:
             best, centres, dirs, names = model, c, d, n
     total = sum(1 for _ in images_dir.rglob("*.jpg"))
     if len(names) < total:
+        _match_left_out(database, images_dir, set(names), workspace, log)
         best, centres, dirs, names = _register_rest(database, best, workspace, log, (best, centres, dirs, names))
     return {"models": len(models), "model": best, "registered": len(centres),
             "centres": centres, "dirs": dirs, "names": names}
+
+
+def _match_left_out(database: str, images_dir: Path, placed: set[str], workspace: Path, log: Path) -> None:
+    """The images the kept model lacks, matched with every image: `pairs` leaves out the long
+    jumps, and the few frames that only a far one matches (a fast turn, a frame from another circle)
+    are found again here, at the cost of a full match for those few alone."""
+    names = _names(images_dir)
+    missing = [n for n in names if n not in placed]
+    listing = workspace / "pairs_left_out.txt"
+    listing.write_text("".join(f"{a} {b}\n" for a in missing for b in names if b != a))
+    _colmap(["matches_importer", "--database_path", database, "--match_list_path", str(listing),
+             "--match_type", "pairs", "--FeatureMatching.use_gpu", "1", "--FeatureMatching.guided_matching", "1"], log)
 
 
 def _register_rest(database: str, model: Path, workspace: Path, log: Path, current: tuple) -> tuple:
